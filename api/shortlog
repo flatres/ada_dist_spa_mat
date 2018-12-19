@@ -1,0 +1,222 @@
+MCDev (46):
+      API DB Dependency Setup
+      Api Login Route
+      Api Authorisation Middleware
+      Front End Login Setup
+      TASK: Basic Setup for Transport Module
+      !!WIP: TBS Change Bus Out and Return
+      !!WIP: TBS Auto Load Active Session
+      TASK: Tidting up Some Spacing
+      !!WIP TBS: Coach Summaries
+      !!WIP: TBS Bus Summaries
+      !!WIP: TBS Coach Details
+      GEN: Side Borders
+      GEN: Theme Colour Ability for a user to change their theme colour. Usefuly for figuring out a nice one. Doesnt change tool bar hightlight live or save.
+      SCRAP: Apache Restart Required
+      !!WIP: TBS Session Selection
+      !!WIP: TBS Coach Booking Datatable Toolbar Got rid of filter select box and moved cancel button to left so that close to check boxes.
+      !!WIP: TBS Coach Details Eye Icons
+      GEN: Installed Font-Awesome Pro
+      !!WIP: TBS Coach Details View Coach
+      !!WIP TBS: Coach Filters Complete
+      SCRAP
+      GEN: Ajax Bar Component
+      !!WIP TBS: Remove Cancelled Component Shadow
+      !!WIP: TBS Femoved Cancleled Table Fullscreen Button
+      !!WIP TBS: Setup of Admin Sync
+      !WIP: TBS Some Tab Styling
+      GEN: Created An Updater Socket
+      GEN: Vue Updater Socket Connection
+      !!WIP: TBS Admin Sync Table Formatting
+      !!WIP: TBS Initial Updater Socket Setup
+      GEN: Socket Server Refactor
+      !!WIP GEN: Refactoring Sockets
+      !!WIP: GEN Continued Socket Refactoring
+      !!WIP: GEN Progress Socket
+      GEN: Solarised Dark Icon Colours
+      GEN: Coloured Icon Text
+      GEN: Experiment With Changing Colours
+      GEN: Logo and Icons
+      GEN: Removed Side Bar Top Branding
+      !!WIP: Tag System
+      !!WIP: Tag Sytem DB
+      !!Access Page - Tree
+      !!Access Page
+      !!Access Page
+      !!Access Page
+      !!Student: Printing Tags
+
+S D Flatres (3):
+      FEATURE: LocalStorage and Authorisation Header Setup
+      FEATURE: WPermissions API and DB
+      !!WIP GCSE Stats - Fiddling
+
+SD Flatres (113):
+      first commit
+      Slim Api Initial Setup
+      Slim Folder Structure Setup
+      FEATURE: Database Driven Role Authentication of Routes
+      FEATURE: Return Permissions Object With Login
+      FEATURE: Roles Array Returned With Login Object
+      WP FEATURE: Display Dashboard Icons Depending on Appearing in Permission Object
+      FEATURE: Autologin
+      FEATURE: Logout
+      TASK: Clearup Console Logs
+      FEATURE: Basic Pages and Navigation
+      FEATURE: Router Plugin To Set A Global BeforeEach
+      TASK: Added Database Skeleton to Archive
+      Unknown
+      WIP FEATURE: Copied Over MSSQL Classes from Node
+      WIP FEATURE: Set up an Exams Module Including a Test Route
+      WIP FEATURE: Set Up Session List in Exams/GCSE
+      FEATURE: Field Aliases in SQL Select Statements
+      WIP FEATURE: Session Get Route for Returning Results
+      FEATURE: Setup Thruway Socket Server With Internal Client
+      FEATURE: Console Log Component & WAMP Store Integration
+      FEATURE: Sockets Class For Console Log
+      WIP FEATURE: GCSE Exams Data
+      TASK: GCSE.VUE Tidy Up
+      TASK: Installed MongoDB Extension and Package
+      FEATURE: Quasar Data Table For Exam Results
+      !WIP FEATURE: GCSE RESULTS
+      !WIP FEATURE: Refactored Results Class and Client for ALevel
+      FEATURE: Console Warnings, Indentation and Replace
+      TASK: Updated Subject Short Codes
+      !WIP FEATURE: Exam Statistics
+      !WIP FEATURE: Exam Statistics - Grid View
+      !WIP: FEATURE Exam Stats - Double Awards
+      !!WIP FEATURE: Exam Stats
+      !!WIP FEATURE: Exams Summary
+      !!WIP FEATURE: Exam Stats
+      TASK: Debugging Find Early Takers
+      !!WIP: Exam Stats - Bug Fixing
+      !!WIP: Exam Stats
+      !!WIP: Exam Statistics
+      !!WIP Exam Statistics - House Stats
+      !!WIP Exam Statistics - Subject Stats
+      !!WIP FEATURE: Exam Statistcs - Year Filtering
+      !!WIP FEATURE: Exam Stats - Exam Boards
+      TASK: PhpSpreadsheet Installation
+      !!WIP - ALevel Stats
+      !!WIP: GCSE Statistics - Setup Excel File
+      !!WIP : GCSE Stats - Spreadsheet Download
+      TASK: Remove 'bearer ' from Auth Key
+      !!WIP GCSE Stats - Working on Spreadsheet
+      !!WIP GCSE Stats - Spreadsheet Download
+      TASK: Updated Filtstore .gitignore
+      git add --allWIP FEATURE : Location Setup
+      !!WIP FEATURE: Chapel System Setup
+      !!WIP FEATURE: Chapel System Registered the module in composer.json and tested date picker
+      !!WIP: Active Directory Explorer
+      !!WIP: Active Directory Explorer
+      !!WIP: TBS Explorer Setup
+      !!WIP: TBS Explorer Session
+      !!WIP: TBS GetSession
+      !!WIP: TBS Pupil Entity
+      !!WIP: TBS Display Bookings
+      !!WIP: TBS Cancel Restore UI Set up basic layout and controls so that bookingd can be cancelled or restored.
+      !!WIP: TBS Basic Cancel Functions
+      !!WIP: TBS Table Loader
+      !!WIP: TBS Table Popup Plugin
+      !!WIP: TBS Change Coaches Popup
+      TAST: Tagged on Latest Database from Home Unix
+      TASK WTF
+      TASK: Fixed Button that Stopped Compilation
+      !!WIP TBS: Filter Select on Coaches
+      !!WIP TBS: Coach Details As Component
+      !!WIP: TBS Bookings Cancelled
+      !!WIP: TBS Admin Navigation
+      !!WIP TBS: Admin Sync Page Setup
+      !!WIP: TBS Admin Sync Setup
+      !!WIP TBS: MIS Students API Route
+      !!WIP TBS Admin Sync
+      GEN: Socket Refactor
+      GEN: Completion of Updater Socket
+      !!WIP: GEN Permissions Refactor
+      !!Gen: Permission Refactor Authorisation Update
+      !!GEN: Permissions Refactor - Moved Exams
+      !!TBS: Top Bar Icons
+      !!GEN: Permissions Refactor - Access Page
+      !!Access Page - Tree
+      GEN: Returned to Vue Green Colour Scheme
+      !!Access Page - Tree
+      !!Access Page
+      !!Access Page
+      GEN: Refactor to Modules
+      GEN: Basic Module Boilerplate
+      GEN: Basic Module Boilerplate
+      GEN: Modules Refactor - Transport
+      GEN: Composer Update
+      GEN: Refactored Router into Modules
+      Deleted Unused BK File
+      !!Access - Page Tabs
+      Gen: Color Picker Component
+      !!Access: Module Colour Save
+      Gen: Primary Color Set to Module Color
+      Gen: Transport Module Color Set
+      Gen: Dark Purple Primary Color
+      !!Tags: Tag Writer Class
+      Typo
+      GEN: Dark Blue Theme
+      GEN: Fullscreen Button
+      GEN: Playing With Colours
+      !!Sync: Student Sync
+      GEN: Attempt to Style Scrollbard
+      !!Sync: Tag Writer Debug
+      DB Update: Included New Student Details Table
+      !!Students: Full List & Tag Reader Set up API routes to pull a full list including tags. Implements a TagReader class in the process.
+
+Si (46):
+      Merge branch 'master' of github.com:flatres/ada
+      TASK: Added Exgarde Class file
+      TASK: Update
+      Merge branch 'transport' of github.com:flatres/ada into transport
+      Merge branch 'transport' of github.com:flatres/ada into transport
+      NPM Update
+      GEN: Layout Philosophy
+      GEN: User Options Component
+      GEN: FAB Component
+      GEN: UserOptions Icon
+      !!WIP: GEN Progress Socket
+      !!WIP: GEN Progress Socket
+      GEN: Progress Spinner
+      GEN: Side Menue Sliding Titles
+      !!WIP: GEN Permission Refactor
+      GEN: Playing With Purple Colour
+      GEN: Playing with Lighter Purple
+      !!WIP: GEN Premissions Refactor
+      GEN: DB Update
+      !!Access Page - Tree
+      !Access Page - Tree
+      !!Access Page
+      !!Access Page - Users
+      !!Access Page - Role Users
+      !!Access Page - Role Users
+      !!Access Page - CRUD
+      !!TBS Bebugging
+      !!Access Page
+      !!Access - Realtime Update
+      !!Access - Colours Started work on module colours.
+      GEN: Playing with Styling
+      !!SYNC: Fixed Tag Writer Debugging
+      !!Sync: Symmary Data Now reports number of users addes, updated and disabled.
+      GEN: Playing with Styling
+      !!Students: Initial Module Setup
+      !!Students: More Inital Setup
+      Composer Update - Added Student Module
+      !!Students: Student Dropdown List
+      !!Students: Continued Setup
+      GEN: Playing With Styles
+      !!Students: Render Basic Student List
+      !!AD: Setting up AD Explorer
+      !!AD: Ad Explorer Tabs
+      !!AD: Set up JSON View Plugin
+      !!AD: Completed Tab to View Details
+      !!AD: Fetch All Users and Compile a List of Groups
+
+sdf (4):
+      TASK: Composer Local Installation
+      TASK: Changes Dev MySql Address to LOCALHOST
+      FEATURE: CEM Results Spreadsheet
+      TASK: Added D3 Library Via NPM
+

@@ -1,0 +1,33 @@
+{
+    "require": {
+        "slim/slim": "^3.10",
+        "monolog/monolog": "^1.23",
+        "react/zmq": "^0.4.0",
+        "voryx/thruway": "^0.5.3",
+        "thruway/pawl-transport": "^0.5.0",
+        "cboden/ratchet": "^0.4.1",
+        "mongodb/mongodb": "^1.4",
+        "phpoffice/phpspreadsheet": "^1.4",
+        "mpdf/mpdf": "^7.1",
+        "dompdf/dompdf": "^0.8.2",
+        "tecnickcom/tcpdf": "^6.2",
+        "jpgraph/jpgraph": "^4.0"
+    },
+
+    "autoload":{
+        "psr-4" : {
+          "Auth\\":"v1/.routes/Auth",
+          "Students\\":"v1/.routes/Students",
+          "Data\\":"v1/.routes/Data",
+          "Transport\\":"v1/.routes/Transport",
+          "Admin\\":"v1/.routes/Admin",
+          "Sockets\\":"v1/sockets",
+          "Utility\\":"v1/utilities",
+          "Dependency\\":"v1/dependencies",
+          "Entity\\":"v1/entities",
+          "Middleware\\":"v1/middleware",
+          "SocketServer\\":"services/socketServer"
+        }
+
+    }
+}

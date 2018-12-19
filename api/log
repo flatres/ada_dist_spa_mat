@@ -1,0 +1,1606 @@
+commit 61104e27ffd72f8e351d374ed66e9856034f26f7
+Author: Si <flatres@gmail.com>
+Date:   Mon Dec 10 15:52:22 2018 +0000
+
+    !!AD: Fetch All Users and Compile a List of Groups
+
+commit d96da59c41da48db14e9eae77eb7e09b261fbded
+Author: Si <flatres@gmail.com>
+Date:   Mon Dec 10 14:27:17 2018 +0000
+
+    !!AD: Completed Tab to View Details
+
+commit 8b79a77087d8fbf94cc259940bdf56eef93377ce
+Author: Si <flatres@gmail.com>
+Date:   Mon Dec 10 13:52:15 2018 +0000
+
+    !!AD: Set up JSON View Plugin
+
+commit 7c57b27e2603f659fc0935431040a0fdebf0ef1e
+Author: Si <flatres@gmail.com>
+Date:   Mon Dec 10 13:05:24 2018 +0000
+
+    !!AD: Ad Explorer Tabs
+
+commit f039565451eb439f75212de527e2b97257df2aaf
+Author: Si <flatres@gmail.com>
+Date:   Mon Dec 10 12:56:31 2018 +0000
+
+    !!AD: Setting up AD Explorer
+
+commit 1b73b4f9291500c7c0d41ccbb054cb66c7dc22ee
+Author: MCDev <flatres@gmail.com>
+Date:   Thu Dec 6 14:30:05 2018 +0000
+
+    !!Student: Printing Tags
+
+commit 9708ad85d03476bccf0c5ea06e6e3d4ca2621e7f
+Author: Si <flatres@gmail.com>
+Date:   Wed Dec 5 09:52:43 2018 +0000
+
+    !!Students: Render Basic Student List
+
+commit 0cc9dc86eeb066e92a677a9558532f72496d9157
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Dec 4 18:15:49 2018 +0000
+
+    !!Students: Full List & Tag Reader
+    Set up API routes to pull a full list including tags. Implements a
+    TagReader class in the process.
+
+commit d8dc79f92032cd1fd7d470d076ee03c9020e6cc9
+Author: Si <flatres@gmail.com>
+Date:   Tue Dec 4 16:44:53 2018 +0000
+
+    GEN: Playing With Styles
+
+commit 7a71f1b68e8c33d307b027b601b44f7acb9face6
+Author: Si <flatres@gmail.com>
+Date:   Tue Dec 4 05:43:43 2018 +0000
+
+    !!Students: Continued Setup
+    
+    Playing really
+
+commit 4b6c5b9d9205bc7832ce2d627b12ac051bb29953
+Author: Si <flatres@gmail.com>
+Date:   Tue Dec 4 04:56:45 2018 +0000
+
+    !!Students: Student Dropdown List
+
+commit e2f1fd9562114b7fb0a9716a4527a1f88ba6206b
+Author: Si <flatres@gmail.com>
+Date:   Tue Dec 4 04:39:20 2018 +0000
+
+    Composer Update - Added Student Module
+
+commit 5b71af15bd3aa5de43d43e94cd26d8f728024e6f
+Author: Si <flatres@gmail.com>
+Date:   Tue Dec 4 04:37:08 2018 +0000
+
+    !!Students: More Inital Setup
+
+commit ae5c2805f34e4f8b653852718c7073618e8fffd6
+Author: Si <flatres@gmail.com>
+Date:   Tue Dec 4 04:21:06 2018 +0000
+
+    !!Students: Initial Module Setup
+
+commit 2e604b66735a221c710dba32c63cff55849aab07
+Author: Si <flatres@gmail.com>
+Date:   Tue Dec 4 04:19:55 2018 +0000
+
+    GEN: Playing with Styling
+
+commit 8625d2f822823ecbb45c291fd0f7e8595d6f919e
+Author: Si <flatres@gmail.com>
+Date:   Tue Dec 4 03:03:09 2018 +0000
+
+    !!Sync: Symmary Data
+    Now reports number of users addes, updated and disabled.
+
+commit 4cda3b5e7de42b4da3d90684d93f31c64d0b0990
+Author: Si <flatres@gmail.com>
+Date:   Tue Dec 4 02:38:09 2018 +0000
+
+    !!SYNC: Fixed Tag Writer Debugging
+
+commit d7dfc322ebc5426057f2c59c684c0a8a65e954c5
+Author: Si <flatres@gmail.com>
+Date:   Tue Dec 4 02:02:31 2018 +0000
+
+    GEN: Playing with Styling
+
+commit 144907ce87da5e0a2d7a930e1966dcd2fbc134fd
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Dec 3 21:12:12 2018 +0000
+
+    DB Update: Included New Student Details Table
+    
+    stu_details
+
+commit 233fefe7a8474d350a094242c0bbd380eec216a3
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Dec 3 21:11:06 2018 +0000
+
+    !!Sync: Tag Writer Debug
+    
+    Many typos. Not yet finished as not writing new tags for some reason.
+
+commit c687b59359be81c98941f5386e3b507a34e8db8c
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Dec 3 20:53:21 2018 +0000
+
+    GEN: Attempt to Style Scrollbard
+
+commit f3df9f89ad823806974d3a7e40e1d233b981733c
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Dec 3 20:46:13 2018 +0000
+
+    !!Sync: Student Sync
+    
+    Working but not including tags yet
+
+commit 1b8d35ebdf3d5bde5adc3dc970dbb437c1d20b0b
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Dec 3 19:08:12 2018 +0000
+
+    GEN: Playing With Colours
+
+commit a5610a038c4cbdaf3d85398c3de558173409ac88
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Dec 3 17:09:53 2018 +0000
+
+    GEN: Fullscreen Button
+
+commit 653e92dcc46efd57b903da84cd2cc32413a4d694
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Dec 3 16:55:58 2018 +0000
+
+    GEN: Dark Blue Theme
+
+commit 72b9172ea95469d359f711da6b30b00c949f017d
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sat Dec 1 18:29:39 2018 +0000
+
+    Typo
+
+commit 3677a7773cbd6ca518cadf9a104280dfa7f7e43c
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sat Dec 1 18:28:58 2018 +0000
+
+    !!Tags: Tag Writer Class
+    
+    Decided on a big refactor of tag classes so taht there is a separate
+    write class that automatically adds classes and tags if they don't
+    exists. If there is no initial owner id set then it is assumed that the
+    tag / cat is global to the school
+
+commit 5e3bfd3600dde14ace8cb32510e8cc3152122a1a
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sat Dec 1 16:04:02 2018 +0000
+
+    Gen: Dark Purple Primary Color
+
+commit aa9cb328ab1ca068cb7c28e5ca8c5b7e114ccaad
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Nov 29 18:17:49 2018 +0000
+
+    Gen: Transport Module Color Set
+
+commit fed8aadf6e1038ad0d5e72b662adfea9a98f5ba1
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Nov 29 17:26:21 2018 +0000
+
+    Gen: Primary Color Set to Module Color
+
+commit f378a5242c1480bde9658c038fa9dbc271133493
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Nov 29 16:32:14 2018 +0000
+
+    !!Access: Module Colour Save
+
+commit 9bfb305c6516e4607f3c61d2dfec09fd67334906
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Nov 29 16:01:58 2018 +0000
+
+    Gen: Color Picker Component
+
+commit 8fbf659fa0928c4adfbaff27dd1089a422aa5c88
+Author: Si <flatres@gmail.com>
+Date:   Thu Nov 29 13:49:11 2018 +0000
+
+    !!Access - Colours
+    Started work on module colours.
+
+commit e2b937ff05f14b29c76972bcc3cb3e9d5ffa2e4f
+Author: Si <flatres@gmail.com>
+Date:   Wed Nov 28 14:54:50 2018 +0000
+
+    !!Access - Realtime Update
+    
+    Fixed bug that was preventing access being updated at the live level.
+
+commit 909bdbf10595b1d03b8d4ebff60180ff60ad7f6d
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Nov 28 08:01:11 2018 +0000
+
+    !!Access - Page Tabs
+    
+    Now tied to permissions
+
+commit 119ee87c55d0f95a9b60944e2a247e289877f9a5
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 27 16:00:51 2018 +0000
+
+    Deleted Unused BK File
+
+commit 38d665332c231d495ffb723dcc6d43305f67b236
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 27 15:52:20 2018 +0000
+
+    GEN: Refactored Router into Modules
+
+commit 785e20b9f63cb94967e16b341af0e3823c526939
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 27 15:17:25 2018 +0000
+
+    GEN: Composer Update
+
+commit 1e43609d056c0e98b364b57a1efb7a5535877749
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 27 15:12:03 2018 +0000
+
+    GEN: Modules Refactor - Transport
+
+commit d05a20835d585fe5ad228356574cebcfa34bf730
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 27 14:51:44 2018 +0000
+
+    GEN: Basic Module Boilerplate
+    
+    Cleared out some files.
+
+commit 8e6006f7ab16575a615974e9957f10011613b595
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 27 14:49:07 2018 +0000
+
+    GEN: Basic Module Boilerplate
+
+commit d562f59449754a58ec30fdde2074aaf92d9c8d26
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 27 14:44:48 2018 +0000
+
+    GEN: Refactor to Modules
+    
+    Have got sick of working on a modules and having to move around between
+    low down pages / components / api folders so have started refactoring
+    into a module folder system. Much better.
+
+commit fcaa72d66b07dfa8edc429bf7d35949b97cdd254
+Author: Si <flatres@gmail.com>
+Date:   Tue Nov 27 07:09:57 2018 +0000
+
+    !!Access Page
+    
+    Implemented role update socket
+
+commit c94a6784db34a5dd84141dd5d446938ea4f4f8ac
+Author: Si <flatres@gmail.com>
+Date:   Mon Nov 26 15:23:26 2018 +0000
+
+    !!TBS Bebugging
+    
+    Strange behaviour when clicking on coach booking student check box.
+
+commit a5b8d106fae9d1e33eac95c48a24383b95a516bf
+Author: Si <flatres@gmail.com>
+Date:   Mon Nov 26 15:16:04 2018 +0000
+
+    !!Access Page - CRUD
+    
+    Completion of crud operations for user roles
+
+commit 1aac82df913e23e61202be6448fb6435fc06557a
+Author: Si <flatres@gmail.com>
+Date:   Mon Nov 26 14:38:09 2018 +0000
+
+    !!Access Page - Role Users
+    
+    Search bar styling
+
+commit 48374d7f53dd33aea2a04a4ca6e10376a3c3c0e9
+Author: Si <flatres@gmail.com>
+Date:   Mon Nov 26 11:04:43 2018 +0000
+
+    !!Access Page - Role Users
+    
+    Set up a Role users component and corresponding datatable
+
+commit b66fcf891b10d13f276db9fe873ba316e893d57f
+Author: Si <flatres@gmail.com>
+Date:   Fri Nov 23 21:08:20 2018 +0000
+
+    !!Access Page - Users
+    
+    Set up API route to get users in a role.
+
+commit e3a8e6880197841ee8f76993c025d272b0a00155
+Author: Si <flatres@gmail.com>
+Date:   Fri Nov 23 20:34:36 2018 +0000
+
+    !!Access Page
+    
+    Refactored Role admin page to have roles as a list.
+
+commit 1f09295a91be8cb249f1ef546c3b8308e8aa9a8a
+Author: MCDev <flatres@gmail.com>
+Date:   Fri Nov 23 16:09:00 2018 +0000
+
+    !!Access Page
+    
+    Role CRUD Complete
+
+commit 51b1cfc9d24f0c63513dcde5bc912ed193beb5cf
+Author: MCDev <flatres@gmail.com>
+Date:   Fri Nov 23 11:56:31 2018 +0000
+
+    !!Access Page
+    
+    Started work on a role socket that will live update a role.
+
+commit ef82a915139a34cede492686777ffbce91796745
+Author: MCDev <flatres@gmail.com>
+Date:   Fri Nov 23 09:23:09 2018 +0000
+
+    !!Access Page
+    
+    Icon blank in case it is set to a nonexistent icon
+
+commit 2921d84d993b0dc880402eebe623fbf73131e69f
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Nov 22 20:06:20 2018 +0000
+
+    !!Access Page
+    
+    Added New modules to Structure Tab
+
+commit 4a19a2de46b8efb0a95b28ad95b80a35536dbef5
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Nov 22 19:51:52 2018 +0000
+
+    !!Access Page
+    
+    Structure tab CRUD operations complete
+
+commit cb9463e2fc59f63f34260327e28dfdb37e0f7170
+Author: Si <flatres@gmail.com>
+Date:   Thu Nov 22 16:09:27 2018 +0000
+
+    !Access Page - Tree
+    
+    Continued..
+
+commit a5265977cb9b3de59ebb52b293c1944c39ee4caa
+Author: Si <flatres@gmail.com>
+Date:   Thu Nov 22 12:32:45 2018 +0000
+
+    !!Access Page - Tree
+    
+    Trying to get popup edit to work. No luck
+
+commit 6028def20a3970365fa34794a1628a6c430eed05
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Nov 21 16:48:35 2018 +0000
+
+    !!Access Page - Tree
+    
+    Set up a structure tab that will allow ui manipulation of module and
+    page registers
+
+commit 466cc6e235b51e4c06c751104fcde2107d37c834
+Author: Si <flatres@gmail.com>
+Date:   Wed Nov 21 14:25:08 2018 +0000
+
+    GEN: DB Update
+
+commit 54fb88a4d227a6d83aac645683b7fa6855f35e28
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 20 21:11:26 2018 +0000
+
+    !!Access Page - Tree
+    
+    Had interference when selecting bacause module id matched with a page
+    id. Have set module ids with a 'm_' prefix
+
+commit 2d546a9a4280ded6d7b89c0c7b29433900010b89
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 20 21:08:26 2018 +0000
+
+    GEN: Returned to Vue Green Colour Scheme
+    
+    Ultra Violet was just too dark. Green really stands out on a tree etc
+
+commit 8cc4b515d237313b81c50c5442fed5047211bed8
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 20 21:05:35 2018 +0000
+
+    !!Access Page - Tree
+    
+    Dynamically creates module tree from API
+
+commit d5fac3d99b6d79a8424d40f36570731378ff2380
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 20 16:47:52 2018 +0000
+
+    !!GEN: Permissions Refactor - Access Page
+    
+    Basic Setup for the admin access page
+
+commit 88a068badf3594b28a62436b9e5bb0e37d6f204c
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 20 16:34:06 2018 +0000
+
+    !!TBS: Top Bar Icons
+
+commit 5ecabd9141719e81721e68693f1bb363a1409792
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 20 16:09:04 2018 +0000
+
+    !!GEN: Permissions Refactor - Moved Exams
+    
+    Moves the Exams sections under the Data namespace to mirror the front
+    end structure. Data is a module defined under permisisons.
+
+commit 54e76c6914e37c3c26663c5b25a1de0c8d51fdcc
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 20 15:52:11 2018 +0000
+
+    !!Gen: Permission Refactor Authorisation Update
+    
+    Updated the authorisation middleware to look for page authorisation
+    rather than module
+
+commit 0ce1bd38e4fb87d18420cb05b0e26094186c5fd0
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 20 15:43:36 2018 +0000
+
+    !!WIP: GEN Permissions Refactor
+    
+    Updated DB upload
+
+commit 534fbb003f50a45c1a9164950a4adfcbc05e7c94
+Author: Si <flatres@gmail.com>
+Date:   Tue Nov 20 13:15:54 2018 +0000
+
+    !!WIP: GEN Premissions Refactor
+    
+    Set up module and page access getters
+
+commit d71681613f6b45355d6eb9c5bca9114fe5440fac
+Author: Si <flatres@gmail.com>
+Date:   Tue Nov 20 11:42:45 2018 +0000
+
+    GEN: Playing with Lighter Purple
+
+commit 1e085adb322d0545f05d436c3d041cf7da36b143
+Author: Si <flatres@gmail.com>
+Date:   Tue Nov 20 10:53:24 2018 +0000
+
+    GEN: Playing With Purple Colour
+
+commit 7eacc235a1c166d0af7bec31d89b1a85792e71f9
+Author: Si <flatres@gmail.com>
+Date:   Tue Nov 20 09:01:00 2018 +0000
+
+    !!WIP: GEN Permission Refactor
+    
+    Refactored the back and and DB so that permissions can be set on a page
+    level
+
+commit b8c83ce610bd57375258c8cc537135e8fb50ec7e
+Author: MCDev <flatres@gmail.com>
+Date:   Mon Nov 19 17:14:38 2018 +0000
+
+    !!WIP: Tag Sytem DB
+    
+    Added a tag library table.
+
+commit 7b709ddb5b276bfa348fde11a6f5f6de7891e4d2
+Author: MCDev <flatres@gmail.com>
+Date:   Mon Nov 19 17:09:23 2018 +0000
+
+    !!WIP: Tag System
+    
+    Basic setup of a new Entity (tags)
+
+commit 6a3f6b559be72ec4cedb5ee7c1c522640d6ff9ca
+Author: MCDev <flatres@gmail.com>
+Date:   Mon Nov 19 16:36:35 2018 +0000
+
+    GEN: Removed Side Bar Top Branding
+    
+    Looked too cluttered
+
+commit 03db7781ce736e500c11ce97d5899730575a8f0e
+Author: MCDev <flatres@gmail.com>
+Date:   Mon Nov 19 16:23:11 2018 +0000
+
+    GEN: Logo and Icons
+
+commit 5d46678535e93f9556d80ba744121de961764618
+Author: MCDev <flatres@gmail.com>
+Date:   Mon Nov 19 15:09:42 2018 +0000
+
+    GEN: Experiment With Changing Colours
+
+commit fb58c6e05b80d0328bf3341ffa0345023c699b14
+Author: MCDev <flatres@gmail.com>
+Date:   Mon Nov 19 14:54:56 2018 +0000
+
+    GEN: Coloured Icon Text
+    
+    On main menu, text now matches icon colour.
+
+commit 5ffa193b08cfe6067eeb3de85bfb6367ed98baf6
+Author: MCDev <flatres@gmail.com>
+Date:   Mon Nov 19 14:48:50 2018 +0000
+
+    GEN: Solarised Dark Icon Colours
+    
+    Just so that I have them on record, I set the main icons to this colour
+    pallette
+
+commit 7bb79a395ad5c0c8f61adce0a22e13280cdba89e
+Author: Si <flatres@gmail.com>
+Date:   Mon Nov 19 09:49:00 2018 +0000
+
+    GEN: Side Menue Sliding Titles
+    
+    When hovering over the side menu, you now get the title of the icon
+    sliding in from the left.
+
+commit 5af897d7fad058a580936a5007c15200d9dd5ed6
+Author: Si <flatres@gmail.com>
+Date:   Sat Nov 17 10:15:27 2018 +0000
+
+    GEN: Progress Spinner
+    
+    Completed. Send via socket an integer between 0 and 100 no more than
+    every second.
+
+commit 483e2a08aada18804233f34d35719c916a2d086e
+Author: Si <flatres@gmail.com>
+Date:   Sat Nov 17 09:55:29 2018 +0000
+
+    !!WIP: GEN Progress Socket
+    
+    Unset the Auth variable too early and nothing was being published.
+
+commit b90671ca3ac91cac29157da7940f1785900996af
+Author: Si <flatres@gmail.com>
+Date:   Sat Nov 17 09:41:19 2018 +0000
+
+    !!WIP: GEN Progress Socket
+    
+    Somehow stopped it working!!
+
+commit 27e258e12740dff18d2b6d8ddeb39e98db873a0c
+Author: MCDev <flatres@gmail.com>
+Date:   Fri Nov 16 12:12:27 2018 +0000
+
+    !!WIP: GEN Progress Socket
+
+commit 90b0015b3e4cd1da64ab9bea2eabb5829421d91d
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Nov 15 18:44:29 2018 +0000
+
+    GEN: Completion of Updater Socket
+
+commit 52904d5c89b77bc3999e270a0817bf53c531f654
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Nov 15 16:13:34 2018 +0000
+
+    GEN: Socket Refactor
+    
+    Decided on multiple subscriptions on the client as only one conection is
+    required.
+
+commit a100859cfbbc76df8cf39cc413de4e953618dcf4
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Nov 14 17:07:49 2018 +0000
+
+    !!WIP: GEN Continued Socket Refactoring
+
+commit 6a0cb8d318db4be6ce20342368dcfee387f10433
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Nov 14 16:55:45 2018 +0000
+
+    !!WIP GEN: Refactoring Sockets
+    
+    Refactoring so only one socket per application instance. Put's the load
+    on the client.
+
+commit db58a7402b9a6e98730e4e7169edb2bc1b99d695
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Nov 14 13:59:53 2018 +0000
+
+    GEN: Socket Server Refactor
+    
+    I had a misunderstanding as to how the internal client of the Thruway
+    socket server works. Instead of a separate client for each channel
+    there is only one internal client which must deal with deciding
+    which channel to send it on.
+    
+    So there is now one client in /services/socketserver and I have
+    refactored the folder structure in .routes to be simpler and have only
+    one  directory level in sockets. This now just contains the classes for
+    sending messages to the internal client.
+    
+    A lot simpler overall now that I understand it.
+
+commit 0f9e7bea3d45432989a39aa24111982dbe87d3ca
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Nov 14 10:56:41 2018 +0000
+
+    !!WIP: TBS Initial Updater Socket Setup
+
+commit 04b8ef27708b35a551120aa2a2cb6002e9acaf03
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Nov 14 10:20:58 2018 +0000
+
+    !!WIP: TBS Admin Sync Table Formatting
+    
+    Removed ID column
+
+commit 167eadae48960af05e89f3f86a4cbf95a48ab054
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Nov 14 09:37:21 2018 +0000
+
+    GEN: Vue Updater Socket Connection
+
+commit d8c44373af69ea47b9616669fb0c73ee4a1c4d8c
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Nov 14 09:09:05 2018 +0000
+
+    GEN: Created An Updater Socket
+    
+    Provided a means to update an array of data when running a long job.
+    Takes arguments:
+    
+    name: typically the route
+    key: the primary key of the data
+    data: the new data for the row
+    progress: a int between 0 and 100
+    isError: has there been an error.
+    
+    Not yet tested.
+
+commit 86159718a3e008e2c8ab7ba5e31ef55127706c17
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Nov 12 20:02:25 2018 +0000
+
+    !!WIP TBS Admin Sync
+    
+    Basic Styling and Display of isams student list
+
+commit 0c328d72ded58ed05d9e618013574dd6d5ebf467
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Nov 12 17:02:05 2018 +0000
+
+    !!WIP TBS: MIS Students API Route
+    
+    Set up class Admin/Sync/Students and a function that returns all active
+    students from isams
+
+commit 4c68bc9b5b993f8adb18ebc6627a1644e3c72fbe
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Nov 12 14:48:51 2018 +0000
+
+    !!WIP: TBS Admin Sync Setup
+    
+    Just basic front end page / component setup
+
+commit b9d79624f874795674fbe7aa9faacb2ffe904d10
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Nov 12 14:20:42 2018 +0000
+
+    !!WIP TBS: Admin Sync Page Setup
+
+commit cf6cdb2e8f6954eba7bc358639e8cb32c3eb5fad
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Nov 12 14:07:53 2018 +0000
+
+    !!WIP: TBS Admin Navigation
+
+commit 27fab0d56432a1c8fec5b6f9d99bd8bec11429b2
+Author: MCDev <flatres@gmail.com>
+Date:   Sun Nov 11 12:32:15 2018 +0000
+
+    !WIP: TBS Some Tab Styling
+
+commit e606af6df47a47876fcf79a75edbc1c91a29165d
+Author: MCDev <flatres@gmail.com>
+Date:   Sun Nov 11 12:25:39 2018 +0000
+
+    !!WIP TBS: Setup of Admin Sync
+
+commit 237c1efe10c4ca75f5ce52be13879a385c8c125b
+Author: MCDev <flatres@gmail.com>
+Date:   Sun Nov 11 12:16:23 2018 +0000
+
+    !!WIP: TBS Femoved Cancleled Table Fullscreen Button
+
+commit c8702662467fd6b460ac65c9a94c591c6133d38e
+Author: MCDev <flatres@gmail.com>
+Date:   Sun Nov 11 12:15:25 2018 +0000
+
+    !!WIP TBS: Remove Cancelled Component Shadow
+
+commit d529c6acef5de0bf77fe21419dd7188d8e2cad86
+Author: MCDev <flatres@gmail.com>
+Date:   Sun Nov 11 12:00:37 2018 +0000
+
+    GEN: Ajax Bar Component
+    
+    Put at the top for loading. May too much to have table loading bars to.
+
+commit f158ca0e73cb9fb6da4400b218341c88e318d665
+Author: MCDev <flatres@gmail.com>
+Date:   Sat Nov 10 13:30:15 2018 +0000
+
+    SCRAP
+
+commit 70c4617ec9f0440d465ffdde45b546804cac72cc
+Author: MCDev <flatres@gmail.com>
+Date:   Sat Nov 10 13:16:58 2018 +0000
+
+    !!WIP TBS: Coach Filters Complete
+
+commit 2f428cfc4a0c754cfe62485ca4838b1c3d7e0e28
+Author: MCDev <flatres@gmail.com>
+Date:   Sat Nov 10 12:32:52 2018 +0000
+
+    !!WIP: TBS Coach Details View Coach
+    
+    Set up filter arrays for seeing individual coach bookings using
+    checkboxes.
+
+commit bc7eb36c61e240ab4edc282cdc9971ff741b015d
+Author: MCDev <flatres@gmail.com>
+Date:   Sat Nov 10 10:33:52 2018 +0000
+
+    GEN: Installed Font-Awesome Pro
+
+commit b992c362a20e5e3390b718657fe2cce111b7e44c
+Author: MCDev <flatres@gmail.com>
+Date:   Sat Nov 10 10:26:54 2018 +0000
+
+    !!WIP: TBS Coach Details Eye Icons
+
+commit 059c5a25da69773ee2b3e93a489f2a7f64010d87
+Author: MCDev <flatres@gmail.com>
+Date:   Sat Nov 10 10:02:01 2018 +0000
+
+    !!WIP: TBS Coach Booking Datatable Toolbar
+    Got rid of filter select box and moved cancel button to left so that
+    close to check boxes.
+
+commit f9a0123cad80e9ef5c3b1cfa93bd9e31bf6f8ab2
+Author: MCDev <flatres@gmail.com>
+Date:   Fri Nov 9 17:11:42 2018 +0000
+
+    !!WIP: TBS Session Selection
+    
+    The session selection is now part of the transport index page toolbar as
+    this saves a lot of space.
+    
+    The index page sets a store variable (activeSession) and the bookings
+    page uses a vuex watcher to react to changed.
+    
+    I could have make coach booking a component and just passed props but I
+    want users to be able to bookmark the page
+
+commit 45f17fd89f4e7e9a450a71c76c5a608866c4ff87
+Author: MCDev <flatres@gmail.com>
+Date:   Fri Nov 9 15:45:26 2018 +0000
+
+    SCRAP: Apache Restart Required
+
+commit ec385061b0e1aefd0d4d5ee5caf1c06c1522ae52
+Author: MCDev <flatres@gmail.com>
+Date:   Fri Nov 9 15:33:24 2018 +0000
+
+    GEN: Theme Colour
+    Ability for a user to change their theme colour. Usefuly for figuring
+    out a nice one. Doesnt change tool bar hightlight live or save.
+
+commit 8b2dd70cc85142a03a6de31e1ee7bb7880e54a62
+Author: MCDev <flatres@gmail.com>
+Date:   Fri Nov 9 14:56:01 2018 +0000
+
+    GEN: Side Borders
+    
+    Looked nice on node so have primary colour left right borders on the
+    primary layout
+
+commit e32286d2ec9b2fa6e28a187ed808d57fac414e86
+Author: Si <flatres@gmail.com>
+Date:   Wed Nov 7 11:50:42 2018 +0000
+
+    GEN: UserOptions Icon
+    
+    Changed to cogs
+
+commit 8552e9a1ec31d6724074ec4b0d219d78d98cdb22
+Author: Si <flatres@gmail.com>
+Date:   Wed Nov 7 11:47:31 2018 +0000
+
+    GEN: FAB Component
+    
+    Experimented with FAB component, including setting the left layout
+    drawer to have overflow-y visible in preparation for making a custom
+    slide out menu instead.
+
+commit 769f50074688f195c9c9b55dcde501d81623dddb
+Author: Si <flatres@gmail.com>
+Date:   Wed Nov 7 11:10:21 2018 +0000
+
+    GEN: User Options Component
+    
+    Starting from the burger bar, this is now set up as a component and will
+    deal with logging out / user settings etc
+
+commit a60d8586e000e0b8822e472d711993ac07f6e99a
+Author: Si <flatres@gmail.com>
+Date:   Wed Nov 7 11:02:30 2018 +0000
+
+    GEN: Layout Philosophy
+    
+    To free up screen space, I removed the layout toolbar. It is now
+    replaced by the tabs of a modules index page. The logout functionality
+    will need to be restored by making the user burger bar a component.
+
+commit a9f4ff2a47378fe9571a19cbab02499e1a7c1b25
+Author: Si <flatres@gmail.com>
+Date:   Wed Nov 7 09:06:52 2018 +0000
+
+    NPM Update
+
+commit 52c7e9adc4451dbccf5249400063cad4f2f96dfa
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 6 19:03:58 2018 +0000
+
+    !!WIP: TBS Bookings Cancelled
+    
+    Coach booking cancellations now as component
+
+commit d962b285ac3772ead5e19ce3110f0dc0e1e88d4d
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 6 17:16:29 2018 +0000
+
+    !!WIP TBS: Coach Details As Component
+
+commit d4c4bd56ec9efcd357f2a54e8ec50b65a1ef7e5c
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 6 15:59:29 2018 +0000
+
+    !!WIP TBS: Filter Select on Coaches
+    
+    Just a place holder at the moment as have decided to break down into
+    components first.
+
+commit 209481feac0016b204dba149b6872628fba8a34b
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Nov 6 15:39:02 2018 +0000
+
+    TASK: Fixed Button that Stopped Compilation
+
+commit 06c545e6e9b60fb97a83019c9d76c6ec0fb480e5
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Nov 5 20:56:28 2018 +0000
+
+    TASK WTF
+
+commit 8a460b7c7ebbeff2585132fba83ae67052c3d929
+Author: MCDev <flatres@gmail.com>
+Date:   Fri Nov 2 16:21:54 2018 +0000
+
+    !!WIP: TBS Coach Details
+    
+    Experimented with an expandable row containing a tab structure for out /
+    in lists. Looks crap and think I'm going to create a separate coaches
+    page.
+
+commit 312d314b4f70bd21f295c86a23296029ba8959fd
+Author: MCDev <flatres@gmail.com>
+Date:   Fri Nov 2 15:25:59 2018 +0000
+
+    !!WIP: TBS Bus Summaries
+    
+    Can now see summaries of bus loads which update on change
+
+commit 6e33ca028ca5afa53c57fe7b942b61ca6a05dcf7
+Author: MCDev <flatres@gmail.com>
+Date:   Thu Nov 1 16:12:50 2018 +0000
+
+    !!WIP TBS: Coach Summaries
+    
+    Front and back end set up to get a summary of coach bookings for a given
+    session. Currently only load on initial session load.
+
+commit 315acb974093822f93934fb1288b8e3968f23b57
+Author: Si <flatres@gmail.com>
+Date:   Thu Nov 1 13:19:52 2018 +0000
+
+    Merge branch 'transport' of github.com:flatres/ada into transport
+
+commit ca7373fe5a938a95bcf16598d2a81fe28ae98343
+Merge: 779a8ec 1e4b945
+Author: Si <flatres@gmail.com>
+Date:   Thu Nov 1 10:46:35 2018 +0000
+
+    Merge branch 'transport' of github.com:flatres/ada into transport
+
+commit 779a8ec9f1ae39928f86f23dbd0caadf8b706a22
+Author: Si <flatres@gmail.com>
+Date:   Thu Nov 1 10:46:30 2018 +0000
+
+    TASK: Update
+
+commit 1e4b945dd2ed4c801c9e0103d389cbd15ca529de
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Oct 31 17:10:49 2018 +0000
+
+    TASK: Tidting up Some Spacing
+
+commit b4395af9f7923bcec116cf089d3d084eabc09cfc
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Oct 31 16:57:55 2018 +0000
+
+    !!WIP: TBS Auto Load Active Session
+
+commit b2bb70cbe235c0eacf154621c212faf4bf7b62b4
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Oct 31 16:47:33 2018 +0000
+
+    !!WIP: TBS Change Bus Out and Return
+    
+    UI and API methods set up. Currently no confirmation or error messages.
+
+commit dc0c83110b2fec8370db218c944b973644812e75
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Oct 31 12:14:02 2018 +0000
+
+    TAST: Tagged on Latest Database from Home Unix
+
+commit a02a1e52404ab5435f9ddba0c3a725ce51fc6f9c
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Oct 31 12:12:33 2018 +0000
+
+    !!WIP: TBS Change Coaches Popup
+
+commit f33fa845dbb68aa505b2ba95d9d62ef4bdc257f7
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Oct 31 11:34:24 2018 +0000
+
+    !!WIP: TBS Table Popup Plugin
+    
+    Got it working. Had to upgrade quasar CLI
+
+commit 476f795e3ba6435685aaf00909d87f91411892a6
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Oct 31 10:58:46 2018 +0000
+
+    !!WIP: TBS Table Loader
+
+commit 1bdbcf40c74e266ff627af60d94c234920e9a769
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Oct 31 10:27:15 2018 +0000
+
+    !!WIP: TBS Basic Cancel Functions
+    
+    Added the ability to be able to cancel a booking. boolCancelled set in
+    the DB and UI tables update accordingly.
+
+commit f5b6a262f684ccca07e398591cc0b201a371cc6b
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Oct 30 19:00:42 2018 +0000
+
+    !!WIP: TBS Cancel Restore UI
+    Set up basic layout and controls so that bookingd can be cancelled or
+    restored.
+
+commit 8e72a3ed694805a202e95501a032dad9747526e9
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Oct 23 13:14:16 2018 +0100
+
+    !!WIP: TBS Display Bookings
+    
+    Display bookings for a session in the usual datatable setup
+
+commit aaf0d8da8407b5af7358b9314d40ad6145a1eb3a
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Oct 23 12:55:36 2018 +0100
+
+    !!WIP: TBS Pupil Entity
+    
+    Added an Entity class of helper under the ENTITY namespace. Created a
+    Pupil class that gathers basic student information from txtSchoolID via
+    isams.
+
+commit 4b7544d363a1211d9bc5afdb03188554b0463f63
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Oct 23 12:21:24 2018 +0100
+
+    !!WIP: TBS GetSession
+    
+    Api Call to get session bookings from id
+
+commit 8bd5f8cfd77f6126d5c1603c9ea2cb5656162df6
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Oct 23 11:26:56 2018 +0100
+
+    !!WIP: TBS Explorer Session
+    
+    Get sessions from MC Custom TblCoachesExears and populate a selection
+    box
+
+commit 1c9f258e1328803a324169a5f1df977ad31e9369
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Oct 23 10:11:59 2018 +0100
+
+    !!WIP: TBS Explorer Setup
+    
+    Set up basic api structure both FE and BE for the TBS explorer
+
+commit 6166bf8e102457a303dbf466274e0391424f9f07
+Author: MCDev <flatres@gmail.com>
+Date:   Mon Oct 22 14:54:35 2018 +0100
+
+    TASK: Basic Setup for Transport Module
+
+commit 716a397d63d9e70437ee92b39cd11151d3c0bbca
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Oct 11 20:29:00 2018 +0100
+
+    !!WIP: Active Directory Explorer
+    
+    Can't seem to get anything but my own details so think this one is a
+    dead end. Better to infer information from iSams as best as I can.
+
+commit f56e4496bdf8cf4cc8057ac65f75576f008a42f7
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Oct 11 19:35:05 2018 +0100
+
+    !!WIP: Active Directory Explorer
+    
+    Set up basic front end pages and api route in preparation for
+    implementing an activedirectory explorer.
+
+commit 2d3e4d57a2b3fad6f1d7d4ed6b716d4051257361
+Author: Si <flatres@gmail.com>
+Date:   Mon Oct 8 15:48:26 2018 +0100
+
+    TASK: Added Exgarde Class file
+
+commit 9ad0148a96f3a1fd3339ea7027a46fd7f4f723cd
+Merge: 94e5c9a 824af48
+Author: Si <flatres@gmail.com>
+Date:   Mon Oct 8 15:47:32 2018 +0100
+
+    Merge branch 'master' of github.com:flatres/ada
+
+commit 94e5c9ae38280932daee04cb799041b4e17362df
+Author: sdf <sdf@HW-MTH-MCB-01.local>
+Date:   Sun Sep 16 12:20:58 2018 +0100
+
+    TASK: Added D3 Library Via NPM
+    
+    https://wuruoyun.github.io/d3-vue/#/pie-chart
+
+commit 824af48e0bf6b394118453f77991ca5170ffeb17
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Sep 12 10:12:37 2018 +0100
+
+    !!WIP FEATURE: Chapel System
+    Registered the module in composer.json and tested date picker
+
+commit cd44b1c88a9f553b37c8d98211d6e53a6e08c7ef
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Sep 12 08:59:14 2018 +0100
+
+    !!WIP FEATURE: Chapel System Setup
+    
+    Set up basic back and front end folder structure / interface for a
+    location system on the way to porting over the chapel system from Node.
+
+commit ccd8aa33fb9aac823016636e51763a82e9b3b43a
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Sep 11 19:52:44 2018 +0100
+
+    git add --allWIP FEATURE : Location Setup
+
+commit 8597e17ff0a092b90eb2fd01d540be1a62d890ac
+Author: sdf <sdf@HW-MTH-MCB-01.local>
+Date:   Tue Sep 11 15:12:00 2018 +0100
+
+    FEATURE: CEM Results Spreadsheet
+
+commit fa416633152a9bebe33161e6cd310118ca977b43
+Author: sdf <sdf@DSCX506433.home>
+Date:   Tue Sep 11 07:03:21 2018 +0100
+
+    TASK: Changes Dev MySql Address to LOCALHOST
+
+commit 14bd335f1c4f009e791f63178ab626c0af08c0da
+Author: sdf <sdf@DSCX506433.home>
+Date:   Mon Sep 10 06:58:12 2018 +0100
+
+    TASK: Composer Local Installation
+
+commit f7cfa3d661d4af3b0f34d7e92bbb63377a48e0f9
+Author: S D Flatres <flatres@gmail.com>
+Date:   Wed Aug 22 15:25:31 2018 +0100
+
+    !!WIP GCSE Stats - Fiddling
+
+commit 897426405d748dc1160fc69dbc5b03e7f2a0f2f4
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Aug 21 12:21:41 2018 +0100
+
+    TASK: Updated Filtstore .gitignore
+    
+    Was accidently excluding folders.
+
+commit 4637fa69c0dfc2cd7d32f2bc459fdf8187208bb8
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sun Aug 19 18:31:21 2018 +0100
+
+    !!WIP GCSE Stats - Spreadsheet Download
+    
+    I have now distilled the data displayed in Vue into a downloadable
+    spreadsheet. Some styling work still to be done though but largely
+    complete.
+
+commit e3bf6a9c7e8e385a1ec2e5a6c314a7a0111acd47
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sun Aug 19 07:50:55 2018 +0100
+
+    !!WIP GCSE Stats - Working on Spreadsheet
+    
+    Set up a basic spreadsheet where the default sheet is deleted and a new
+    one put in place with a custom name
+
+commit abe9b42c10ab2533ddf46e48faf3ac98385fa97b
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sat Aug 18 15:49:23 2018 +0100
+
+    TASK: Remove 'bearer ' from Auth Key
+    
+    This allows Postman to filter down authorisation headers as it only supports adding bearer to before the key. Rather stupid.
+
+commit 2ad99286e2add61e8f3f4453767a87f24bfd9dc9
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sat Aug 18 14:05:43 2018 +0100
+
+    !!WIP : GCSE Stats - Spreadsheet Download
+    
+    Added a Q-tab to allow the excel file to be downloaded via axios
+
+commit ec43ad03d84d80cf890bb6e1463a258936031cb6
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sat Aug 18 12:53:07 2018 +0100
+
+    !!WIP: GCSE Statistics - Setup Excel File
+    
+    Setup a filestore in /public/filestore with a gitignore set so that only the read.me files are retained, otherwise git will not save an empty folder.
+    Creating statistics now generates a hello world excel file with a filename corresponding to the exam type (gcse) as well as session date
+
+commit 0f24e284cd6637c33f447575e79686b5bb81d6b2
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sat Aug 18 10:53:29 2018 +0100
+
+    !!WIP - ALevel Stats
+    
+    Added Turkish and Compi Subject Codes
+
+commit 3444d73497110796357cd1b599786d90a296ce85
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sat Aug 18 10:15:53 2018 +0100
+
+    TASK: PhpSpreadsheet Installation
+    
+    Installed via composer the PhpSpreadsheet package and the depenedencies for rendering to pdf. This package replaces PHP Excel used in Oodles which was last updated in 2015
+
+commit 4af695217b418116095b65b36b752fd169b61df9
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Aug 8 15:19:01 2018 +0100
+
+    !!WIP FEATURE: Exam Stats - Exam Boards
+    
+    Extract exam boards from isams and display in subject table
+
+commit 10a1a6ffdbaf7550e7ed95ef9ccbad86e77ac696
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Aug 8 14:37:26 2018 +0100
+
+    !!WIP FEATURE: Exam Statistcs - Year Filtering
+    
+    Added a StatisticsGateway class to look at which years are included in a set of results
+    and to then create a statistics object for each.
+    
+    This then allows the user to filter the results by year via a dropdown.
+
+commit 8d516d793b58e67e603a05eeeddb944acdcec912
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Aug 8 13:25:23 2018 +0100
+
+    !!WIP Exam Statistics - Subject Stats
+    
+    Now calculate and display stats for each subject eg. pass rate
+
+commit ec7d39f021bdf25a181b3e2d74d93b200eb42a7c
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Aug 8 12:45:47 2018 +0100
+
+    !!WIP Exam Statistics - House Stats
+    
+    Now display house stats and positioning in House table
+
+commit 5104bc418c43990672869337cb5fa0d0b45c2e14
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Aug 8 11:45:37 2018 +0100
+
+    !!WIP: Exam Statistics
+    
+    Upgraded the datatables to filter for year / house
+
+commit d6135608ec44a5fb93df409a6dd673e2cac676af
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Aug 7 16:35:27 2018 +0100
+
+    !!WIP: Exam Stats
+    
+    Refactored statistics into separate gcse and alevel namespaces. Plus some general debugging and including of more summary stats
+
+commit da21587eeafc0c66e495ded7b074cc83983590c3
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Aug 6 17:10:20 2018 +0100
+
+    !!WIP: Exam Stats - Bug Fixing
+    
+    Finding out why exams taken early are not showing
+
+commit a55e3b3420d97c22875d9b84369f1c33ef059a00
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sat Aug 4 16:47:57 2018 +0100
+
+    TASK: Debugging Find Early Takers
+
+commit e041683ba38e0e2e7b236045103e3adf4452f77f
+Author: SD Flatres <flatres@gmail.com>
+Date:   Sat Aug 4 08:54:25 2018 +0100
+
+    !!WIP FEATURE: Exam Stats
+    
+    Some debugging on the statistics module. Wasn't using the correct record count.
+
+commit d28340e555dde5b1654cdf8e5700fc9930bfebf4
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Aug 2 21:57:34 2018 +0100
+
+    !!WIP FEATURE: Exams Summary
+    
+    Included functions and views to calculate and display summary data as seen in the master's report
+
+commit 9276a28cfb498a7c6905809ef683cd8966f58236
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Aug 2 20:16:09 2018 +0100
+
+    !!WIP FEATURE: Exam Stats
+    
+    Continued to develeop and refine the stats package, by for example searching for exams taken early by students
+
+commit 3f43a64eccee78cf967832eb656ce5a239504adc
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Aug 2 12:33:23 2018 +0100
+
+    !WIP: FEATURE Exam Stats - Double Awards
+    
+    When collecting stats, it now divides up a double award. This is used only for science where SC becomes S1 and S2
+
+commit 7dc74f8b3b8d67eefe705eef8f316e2dfa071545
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Aug 1 16:16:05 2018 +0100
+
+    !WIP FEATURE: Exam Statistics - Grid View
+    
+    Added a new datatble to view each student on their own row with the subjects listed as columns
+
+commit 35f1354c5d4f65efd080358ab7ecba98a6d2650a
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Aug 1 14:51:23 2018 +0100
+
+    !WIP FEATURE: Exam Statistics
+    
+    Setup up a class structure for statistics and populated the statistics class arrays with the appropriate results
+
+commit df58387cfb5033707fea50d1730f5981c96799c2
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Aug 1 12:06:29 2018 +0100
+
+    TASK: Updated Subject Short Codes
+
+commit dc963febd915421028d335aaff5163a604e5216c
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Aug 1 11:54:25 2018 +0100
+
+    FEATURE: Console Warnings, Indentation and Replace
+    
+    Added the ability to send format information with the console socket
+    
+    bool isError
+    int indent - has a max value of 3
+    bool replace - replaces the previous value
+
+commit 37b5562bab1445d8e2e6b3e28210189d0b101e06
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Aug 1 11:05:51 2018 +0100
+
+    !WIP FEATURE: Refactored Results Class and Client for ALevel
+    
+    There is now a single class for results with a getter for both a level and gcse. The same structure is reflected in the client page / component layout
+    and is controlled on both sides by and isGcse boolean
+
+commit 7ca0a8f43c3385fbedd367e31df3eeb89f5b5341
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 31 16:13:09 2018 +0100
+
+    !WIP FEATURE: GCSE RESULTS
+    
+    Added a subject class \EXAMS\TOOLS\SUBJECT to attempt to convert an exam title into a subject code.
+    If it is no able to do so then it emits an error and prints the titles
+    that it can't convert to the client console
+
+commit be8b43b4bc837a0044b0bd48301a0aa3ee655bfd
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 31 11:54:03 2018 +0100
+
+    FEATURE: Quasar Data Table For Exam Results
+    
+    Added as a component in components/exams. Not much more to say
+
+commit 8e25e4e6842534a94b81a3ae1cd1cf997342114d
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 31 05:38:46 2018 +0100
+
+    TASK: Installed MongoDB Extension and Package
+
+commit a5f0db505b57ee1b70218f1e8acdb10e407b14ad
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 31 05:23:42 2018 +0100
+
+    TASK: GCSE.VUE Tidy Up
+
+commit 736bcf1c66a54f77368eaab0ebd199bf067dcc4e
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Jul 30 15:58:10 2018 +0100
+
+    WIP FEATURE: GCSE Exams Data
+    
+    Now returns the data and prints a simple list of results. Also displays the console log for the loading process
+
+commit 4971eaf3e7294ece88982a7fd37f90e4c278a1f0
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Jul 30 14:49:49 2018 +0100
+
+    FEATURE: Sockets Class For Console Log
+    
+    Set up a new structure under api/v1/sockets and namespace SOCKETS to provide a console
+    class to send back progress on long running scripts.
+    
+    The sockets directory contains Interfaces for calling within a program and a pusher to push to the WAMP server
+    
+    The console class pushes to a channel labeled as console_{authkey} so it only goes to the single session
+
+commit 15abf7bd89817428b9087ecbaac255d4b2088f7f
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Jul 30 13:42:04 2018 +0100
+
+    FEATURE: Console Log Component & WAMP Store Integration
+    
+    Added a Console component to recieve messages from a websocket connection.
+    This automatically connects on login and autologin. The component auto updates a new line every time a new console line is recieved.
+
+commit 58a7d18d2d682c4312811dd066ce9b9b054c917e
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Jul 30 11:37:43 2018 +0100
+
+    FEATURE: Setup Thruway Socket Server With Internal Client
+    
+    A real bitch to set up this one, as wanted to use ZeroMQ to publish from an API call.
+
+commit 959e185af3d0ee2f0c44e7482e44a9d75408c535
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Jul 26 11:57:58 2018 +0100
+
+    WIP FEATURE: Session Get Route for Returning Results
+    
+    Given a session (exam session) id, \Exams\GCSE\getResults returns a list of all
+    results for the session (GCSE only). It then append student data to each result
+    such as name, year and house.
+    
+    As the MSSQL connection is quite slow, student data is cached in memory to reduce DB calls
+
+commit e8c14f8112a2346ea2a9ce5c4ad342b6e91c253b
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Jul 26 11:03:01 2018 +0100
+
+    FEATURE: Field Aliases in SQL Select Statements
+    
+    The field string manipulation was changed to allow field aliasing in both Mysql and MsSql select statements
+
+commit 6e767a30aeffbb97d8daaa8665cf0cf2def3fa8e
+Author: SD Flatres <flatres@gmail.com>
+Date:   Thu Jul 26 10:59:12 2018 +0100
+
+    WIP FEATURE: Set Up Session List in Exams/GCSE
+    
+    The list of sessions avaliable is shown and an active class set on click.
+    This will then be used to show all of the results from this session (GCSE)
+
+commit b2d0e23cb2b7fb7f80d286fb9f1a7a1aee94cdd6
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Jul 25 17:08:15 2018 +0100
+
+    WIP FEATURE: Set up an Exams Module Including a Test Route
+    
+    Nothing to say
+
+commit fbaf00c6afed03abd31025c1284c0761364b36a7
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Jul 25 16:59:04 2018 +0100
+
+    WIP FEATURE: Copied Over MSSQL Classes from Node
+    
+    Completely untested as it stands
+
+commit 866f456a6e77cdce8a0e26b534b7fac52879d6d4
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Jul 25 08:55:36 2018 +0100
+
+    Unknown
+
+commit 6e95f159cf98b06c54d6a6de60d4081a9cfbc935
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 24 15:04:32 2018 +0100
+
+    TASK: Added Database Skeleton to Archive
+    
+    Have now added tables for access control.
+
+commit 4efdd58ffac080d889de1e9fa61b9a48b6c29436
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 24 15:02:07 2018 +0100
+
+    FEATURE: Router Plugin To Set A Global BeforeEach
+    
+    Blank for now but could be used in the future for authorisation.
+
+commit 0f27b247b64289d684140aa3234dc77ec9240652
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 24 14:48:54 2018 +0100
+
+    FEATURE: Basic Pages and Navigation
+    
+    Added a new module (exams) with some internal pages controlled by a tab. Also
+    added a home button to the default view and used router-links to get working as expected.
+
+commit cd40ac7e1e156b62932f10a6fce8f8cabe9f7f60
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 24 13:02:26 2018 +0100
+
+    TASK: Clearup Console Logs
+
+commit 99b785c4fe76aff5feb2f2c7693d97d08fad10eb
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 24 12:59:28 2018 +0100
+
+    FEATURE: Logout
+    
+    Added a Logout button to the top of the default view. This dispatches a logout action that clears the localstorage, store
+    and the redirects the user to the login page
+
+commit 049c14cce9f280ff7870ea685ca35b8ee5f91d89
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 24 12:08:13 2018 +0100
+
+    FEATURE: Autologin
+    
+    Added an action to check whether or not auth is held in local storage. If it is then it sets the store. If it is not then it
+    directs the user to the login page. It is called from the created lifecycle hook in App.Vue
+
+commit 3ebd520443edd55e504c31534224da1733d88c1e
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 24 10:52:07 2018 +0100
+
+    WP FEATURE: Display Dashboard Icons Depending on Appearing in Permission Object
+    
+    Added getter for permissions. The default.vue layout uses this to decide on whether or not an icon is displayed.
+    In future, this needs to be refactors as with lots of possibilities / users this file will likely grow large.
+
+commit b90c27d5e03e6071b44f86409fd5e14d9081e26e
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 24 09:53:21 2018 +0100
+
+    FEATURE: Roles Array Returned With Login Object
+    
+    Added a method in \Auth\Modules reriever to create an array of the users
+    roles. This will be sent with the login object and used to determine the UI layout
+
+commit 23bbba7cb1bf2fc87acdfbd2322729562372c17d
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Jul 23 15:12:32 2018 +0100
+
+    FEATURE: Return Permissions Object With Login
+
+commit ac62eaa1080d0c0204e88157f34fcd8d0006803c
+Author: SD Flatres <flatres@gmail.com>
+Date:   Mon Jul 23 14:15:48 2018 +0100
+
+    FEATURE: Database Driven Role Authentication of Routes
+
+commit 696280cae9ec7431e56959e01179211700692e44
+Author: S D Flatres <flatres@gmail.com>
+Date:   Mon Jul 23 10:48:17 2018 +0100
+
+    FEATURE: WPermissions API and DB
+
+commit f599603d058cf78cd82c7f99040d3d884b5b1c2b
+Author: S D Flatres <flatres@gmail.com>
+Date:   Thu Jul 19 21:50:52 2018 +0100
+
+    FEATURE: LocalStorage and Authorisation Header Setup
+
+commit 4d942d0648b80562fe6b14f450aef2212a0b4d83
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Jul 18 16:00:28 2018 +0100
+
+    Front End Login Setup
+
+commit 972ad7d0d5deeee85ef3d89b12f4ec6606b456a2
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Jul 18 14:51:06 2018 +0100
+
+    Api Authorisation Middleware
+
+commit dbd4af922534bfbf0946ccad4e4c051379c1ca80
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Jul 18 12:49:29 2018 +0100
+
+    Api Login Route
+
+commit 817e0b315c5e1b4f1f5f70baeccc89134e925b52
+Author: MCDev <flatres@gmail.com>
+Date:   Wed Jul 18 11:22:52 2018 +0100
+
+    API DB Dependency Setup
+
+commit 2b3dbb75d81d74610dfcb04105048aafc6377e56
+Author: SD Flatres <flatres@gmail.com>
+Date:   Wed Jul 18 07:46:13 2018 +0100
+
+    Slim Folder Structure Setup
+
+commit 833d1bf03fd8106e8acb729f5d705deca2ed1354
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 17 14:01:10 2018 +0100
+
+    Slim Api Initial Setup
+
+commit faf723fac9fa2c7dd8667710fe1ce366cb769d8c
+Author: SD Flatres <flatres@gmail.com>
+Date:   Tue Jul 17 12:10:36 2018 +0100
+
+    first commit
