@@ -8,7 +8,7 @@
  */
 namespace Admin\Sync;
 
-class Students
+class Students 
 {
     protected $container;
     private $disabledCount = 0;

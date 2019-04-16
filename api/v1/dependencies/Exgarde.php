@@ -1,10 +1,10 @@
 <?php
 namespace Dependency;
-use PDO;
+use \PDO;
 
 class Exgarde {
 
-	public function __construct(\Dependency\Mysql $mysql)
+	public function __construct(\Dependency\Mysql $mysql = null)
 	{
     date_default_timezone_set("Europe/London");
     $this->ary_doorNamesByReader = array();
@@ -27,6 +27,22 @@ class Exgarde {
    $query = "SELECT [id], [name] FROM dbo.AREA_View";
    return $this->query($query, $binding);
   }
+
+	public function getArea(int $id)
+  {
+    $readerAry = $this->getReadersByArea($id);
+		$events = $this->getEventsByReaders($readerAry);
+    foreach($events as &$item){
+		 $unix = strtotime($item['LOCAL_TIME']);
+		 $item['entry_timestamp'] = date('d.m.y, g:i a', $unix);
+		 $item['entry_time'] = date('G:i', $unix);
+		 $item['entry_unix'] = $unix;
+		 $item['name'] = $this->makeName($item);
+		 $item['location'] = $this->getDoorNameByReader($item['ID_1']);
+	 }
+
+	 return $events;
+	}
 
   public function getLocation(int $id)
   {
@@ -115,22 +131,22 @@ class Exgarde {
 		if($item) $item['lastName'] = $lastname;
 
     $bind = array($firstname.'%', $firstname.'%', '%'.$lastname);
-		$d = $sql->select('u_details', "userid, is_student", "(firstname_plain LIKE ? OR prename LIKE ?) AND lastname_plain LIKE ?", $bind);
+		$d = $sql->select('stu_details', "id, is_student", "(firstname LIKE ? OR prename LIKE ?) AND lastname LIKE ?", $bind);
 
 		if(!isset($d[0])){
       //only look for students as less chance of double match
 			$bind = array($firstname[0].'%', $firstname[0].'%', $lastname);  //check for J Smith
-			$d = $sql->select('u_details', "userid, is_student", "is_student =1 AND (firstname_plain LIKE ? OR prename LIKE ?) AND lastname_plain LIKE ?", $bind);
+			$d = $sql->select('stu_details', "id, is_student", "(firstname LIKE ? OR prename LIKE ?) AND lastname LIKE ?", $bind);
 
       if(!isset($d[0])){
 				return '-';
 			}else{
 				if(count($d)>1) return 'Ambiguous';
-				$userID = $d[0]['userid'];
+				$userID = $d[0]['id'];
 				return $d[0]['is_student']==1 ? $this->getBoardingFromID($userID, $item) : 'Staff';
 			}
 		}else{
-			$userID = $d[0]['userid'];
+			$userID = $d[0]['id'];
 
 			return $d[0]['is_student']==1 ? $this->getBoardingFromID($userID, $item) : 'Staff';
 		}
@@ -141,7 +157,7 @@ class Exgarde {
     $sql = $this->sql;
 		global $user_school;
 		$bind = array($pin . "@marlboroughcollege.org");
-		$d = $sql->select('u_details', "*firstname, *lastname, userid", "email = *?", $bind);
+		$d = $sql->select('stu_details', "*firstname, *lastname, userid", "email = *?", $bind);
 
 		if(!isset($d[0])){
 			$item['style'] = 'error';
@@ -189,21 +205,7 @@ class Exgarde {
 		return $item['name'];
 	}
 
-	public function getArea(int $id)
-  {
-    $readerAry = $this->getReadersByArea($id);
-		$events = $this->getEventsByReaders($readerAry);
-    foreach($events as &$item){
-		 $unix = strtotime($item['LOCAL_TIME']);
-		 $item['entry_timestamp'] = date('d.m.y, g:i a', $unix);
-		 $item['entry_time'] = date('G:i', $unix);
-		 $item['entry_unix'] = $unix;
-		 $item['name'] = $this->makeName($item);
-		 $item['location'] = $this->getDoorNameByReader($item['ID_1']);
-	 }
 
-	 return $events;
-	}
 
   public function log(string $message, bool $error = false)
   {

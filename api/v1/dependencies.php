@@ -22,9 +22,22 @@ $container['logger'] = function($c)
 // monolog
 $container['mysql'] = function($c)
 {
-    $mysql = new Dependency\Mysql();
+    $mysql = new Dependency\Databases\Ada();
     return $mysql;
 };
+
+$container['ada'] = function($c)
+{
+    $ada = new Dependency\Databases\Ada();
+    return $ada;
+};
+
+$container['adaModules'] = function($c)
+{
+    $ada = new Dependency\Databases\AdaModules();
+    return $ada;
+};
+
 
 $container['isams'] = function($c)
 {
@@ -54,6 +67,12 @@ $container['ad'] = function($c)
 {
     $ad = new Dependency\ActiveDirectory();
     return $ad;
+};
+
+$container['exgarde'] = function($c)
+{
+    $exgarde = new Dependency\Exgarde($c['ada']);
+    return $exgarde;
 };
 
 //allows sql object to be passed to middleware via the constructor

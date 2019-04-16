@@ -8,5 +8,5 @@ $app->group('/auth', function(){
 
     $this->get('/test', '\Auth\TestClass:testGet');
 
-})->add("Authenticate")
+})->add("Authenticate");
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);

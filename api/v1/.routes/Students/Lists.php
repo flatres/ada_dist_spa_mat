@@ -36,11 +36,11 @@ class Lists
       return emit($response, $data);
     }
 
-    public function fullList_GET($request, $response, $args)
+    public function tags_GET($request, $response, $args)
     {
       $students = $this->sql->select(
         'stu_details',
-        'id, firstname, lastname',
+        'id',
         'disabled=0 ORDER BY lastname ASC',
         array());
       $data = array();

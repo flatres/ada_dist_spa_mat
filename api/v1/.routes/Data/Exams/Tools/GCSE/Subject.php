@@ -27,8 +27,6 @@
 
 namespace Data\Exams\Tools\GCSE;
 
-
-
 class Subject
 {
 

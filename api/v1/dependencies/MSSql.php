@@ -54,7 +54,24 @@ class MSSql {
 
    	}
 
+    public function updateObject($table, $object, $idField){
+      $fieldString = '';
+      $binding = array();
+      $id = $object[$idField];
+      unset($object[$idField]);
+      unset($object['__index']); //a vue variable
+      $comma = ' ';
 
+      foreach ($object as $key => $value) {
+        $fieldString .= $comma . $key . '=?';
+        $comma = ', ';
+        $binding[] = $value;
+      }
+      $condition = $idField . '=?';
+      $binding[] = $id;
+
+      return $this->update($table, $fieldString, $condition, $binding);
+    }
 
 		public function update($table, $fieldString, $condition = NULL, $binding = NULL){
 
@@ -153,7 +170,17 @@ class MSSql {
 
 		}
 
-
+    public function insertObject($table, $object){
+      $fieldString = '';
+      $binding = array();
+      $comma = '';
+      foreach ($object as $key => $value) {
+        $fieldString .= $comma . ' ' . $key;
+        $comma = ',';
+        $binding[] = $value;
+      }
+      return $this->insert($table, $fieldString, $binding);
+    }
 
 		public function insert($table, $fieldString, $binding = NULL){
 

@@ -9,7 +9,7 @@ class TagWriter {
   public function __construct(\Dependency\Mysql $mySql, int $ownerId = null)
   {
     $this->sql= $mySql;
-    $this->global = !isset($ownerId);
+    $this->global = $ownerId == null;
     $this->ownerId = $ownerId;
   }
 
@@ -33,7 +33,7 @@ class TagWriter {
   }
   private function categoryNameExists(string $categoryName)
   {
-    if (!$this->global)
+    if ($this->global)
     {
       return $this->sql->exists(
         'tag_categories',
@@ -42,6 +42,7 @@ class TagWriter {
         array($categoryName)
       );
     } else {
+
       return $this->sql->exists(
         'tag_categories',
         'id',

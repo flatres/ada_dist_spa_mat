@@ -5061,7 +5061,7 @@ function configSet(key, value, only_local)
 function configGet(key, cached)
 {
     cached = (typeof cached !== 'undefined') ? cached : true;
-    var value = localStorage.getItem(key);
+    var value = LocalStorage.getItem(key);
     if (cached && value !== undefined && value !== null) {
         return JSON.parse(value);
     }
@@ -5091,7 +5091,7 @@ function configGet(key, cached)
             // Eventually, call callback.
         }
     });
-    return JSON.parse(localStorage.getItem(key));
+    return JSON.parse(LocalStorage.getItem(key));
 }
 
 /**
