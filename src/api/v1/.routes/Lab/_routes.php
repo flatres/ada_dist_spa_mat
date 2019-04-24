@@ -11,6 +11,7 @@ $app->group('/lab', function(){
 
     $this->get('/sockets/zmq', '\Lab\Console:zmqGet');
     $this->post('/sockets/console', '\Lab\Console:consolePost');
+    $this->post('/sockets/notify', '\Lab\Console:notifyPost');
 
 })->add("Authenticate");
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);

@@ -27,6 +27,17 @@ class Console
       return emit($response, ZMQ_SERVER );
     }
 
+    public function notifyPost($request, $response)
+    {
+      $data = $request->getParsedBody();
+      $auth = $request->getAttribute('auth');
+
+      $notify = new \Sockets\Notify($auth);
+      $notify->publish($data['message']);
+      
+      return emit($response, $data);
+    }
+
     public function consolePost($request, $response)
     {
       $data = $request->getParsedBody();
@@ -36,6 +47,9 @@ class Console
       $console->publish('Let\'s Go');
 
       $progress = new \Sockets\Progress($auth, 'Lab.Sockets.Console');
+      $notify = new \Sockets\Notify($auth);
+
+      $notify->publish("Let's go");
 
       $p = 0;
       $l = 20;
@@ -64,6 +78,9 @@ class Console
       $progress->publish(1);
 
       $data['message'] = 'Complete';
+
+      $notify->publish("Finished!");
+
       return emit($response, $data);
     }
 
