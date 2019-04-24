@@ -11,6 +11,8 @@ namespace Sockets;
 use \ZMQContext;
 use \ZMQ;
 
+define('ZMQ_SERVER', getenv("ZMQ_SERVER"));
+
 class Progress
 {
     protected $container;
@@ -62,7 +64,7 @@ class Progress
        // $context = new \React\ZMQ\Context();
        try{
          $socket = $context->getSocket(\ZMQ::SOCKET_PUSH);
-         $socket->connect("tcp://127.0.0.1:5555");
+         $socket->connect(ZMQ_SERVER);
 
        }catch(\ZMQSocketException $e){
 

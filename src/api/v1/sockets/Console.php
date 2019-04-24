@@ -8,6 +8,8 @@
  */
 namespace Sockets;
 
+define('ZMQ_SERVER', getenv("ZMQ_SERVER"));
+
 use \ZMQContext;
 use \ZMQ;
 
@@ -57,7 +59,7 @@ class Console
        // $context = new \React\ZMQ\Context();
        try{
          $socket = $context->getSocket(\ZMQ::SOCKET_PUSH, 'console'); //,'console'
-         $socket->connect("tcp://127.0.0.1:5555");
+         $socket->connect(ZMQ_SERVER);
 
        }catch(\ZMQSocketException $e){
 

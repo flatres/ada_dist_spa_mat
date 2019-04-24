@@ -59,25 +59,23 @@ class Crud
     }
 
 
-
-
-    public function ROUTEPost($request, $response)
-    {
-      $data = $request->getParsedBody();
-      $data['id'] = $this->adaModules->insertObject('TABLE', $data);
-      return emit($response, $data);
-    }
-
-    public function ROUTELocationsPut($request, $response)
-    {
-      $data = $request->getParsedBody();
-      return emit($response, $this->adaModules->updateObject('TABLE', $data, 'id'));
-    }
-
-    public function ROUTEDelete($request, $response, $args)
-    {
-      return emit($response, $this->adaModules->delete('TABLE', 'id=?', array($args['id'])));
-    }
+    // public function ROUTEPost($request, $response)
+    // {
+    //   $data = $request->getParsedBody();
+    //   $data['id'] = $this->adaModules->insertObject('TABLE', $data);
+    //   return emit($response, $data);
+    // }
+    //
+    // public function ROUTELocationsPut($request, $response)
+    // {
+    //   $data = $request->getParsedBody();
+    //   return emit($response, $this->adaModules->updateObject('TABLE', $data, 'id'));
+    // }
+    //
+    // public function ROUTEDelete($request, $response, $args)
+    // {
+    //   return emit($response, $this->adaModules->delete('TABLE', 'id=?', array($args['id'])));
+    // }
 
     private function randomString($length = 6)
     {

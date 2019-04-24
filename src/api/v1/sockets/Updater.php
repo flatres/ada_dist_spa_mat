@@ -15,6 +15,8 @@ namespace Sockets;
 use \ZMQContext;
 use \ZMQ;
 
+define('ZMQ_SERVER', getenv("ZMQ_SERVER"));
+
 class Updater
 {
     private $socketId = 'updater';
@@ -60,7 +62,7 @@ class Updater
        // http://socketo.me/docs/push
        try{
          $socket = $context->getSocket(\ZMQ::SOCKET_PUSH);
-         $socket->connect("tcp://127.0.0.1:5555");
+         $socket->connect(ZMQ_SERVER);
 
        }catch(\ZMQSocketException $e){
 
