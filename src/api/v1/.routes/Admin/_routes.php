@@ -25,6 +25,7 @@ $app->group('/admin', function(){
     $this->delete('/access/roles/{id}', '\Admin\Access\Roles:role_DELETE');
     $this->delete('/access/roles/user/{roleId}/{userId}', '\Admin\Access\Roles:roleUser_DELETE');
     $this->post('/access/roles', '\Admin\Access\Roles:role_POST');
+    $this->put('/access/roles', '\Admin\Access\Roles:role_PUT');
     $this->post('/access/roles/user', '\Admin\Access\Roles:roleUser_POST');
     $this->get('/access/roles/pages/{id}', '\Admin\Access\Roles:rolePages_GET');
     $this->put('/access/roles/pages', '\Admin\Access\Roles:rolePages_PUT');

@@ -25,11 +25,9 @@ class Roles
       $roles = $sql->select('acs_roles', 'id, name', '1=1 ORDER BY name ASC', array());
       foreach($roles as &$role){
         $count = $sql->query("Select COUNT(*) as count FROM acs_roles_users WHERE role_id = ?", array($role['id']))[0]['count'];
-        $data[] = array(  'label' => $role['name'],
-                          'value' => $role['id'],
-                          'count' => $count );
+        $role['count'] = $count;
       }
-      return emit($response, $data);
+      return emit($response, $roles);
     }
 
     public function rolePages_GET($request, $response, $args)
@@ -85,9 +83,20 @@ class Roles
       $data = $request->getParsedBody();
       $name = strtolower($data['name']);
 
-      $id = $sql->insert('acs_roles', 'name', array($name));
+      $data['id'] = $sql->insert('acs_roles', 'name', array($name));
 
-      return emit($response, array('id'=>$id));
+      return emit($response, $data);
+    }
+
+    public function role_PUT($request, $response, $args)
+    {
+      $sql = $this->sql;
+      $data = $request->getParsedBody();
+      $name = strtolower($data['name']);
+
+      $data['id'] = $sql->update('acs_roles', 'name = ?', 'id = ?', array($name, $data['id']));
+
+      return emit($response, $data);
     }
 
     public function roleUser_POST($request, $response, $args)
