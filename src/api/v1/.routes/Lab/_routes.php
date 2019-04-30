@@ -17,6 +17,7 @@ $app->group('/lab', function(){
     $this->get('/sockets/table/{id}', '\Lab\Console:tableSingleGet');
     $this->post('/sockets/table', '\Lab\Console:tablePost');
     $this->put('/sockets/table', '\Lab\Console:tablePut');
+    $this->put('/sockets/favorite', '\Lab\Console:favoritePut');
     $this->delete('/sockets/table/{id}', '\Lab\Console:tableDelete');
 
 })->add("Authenticate");

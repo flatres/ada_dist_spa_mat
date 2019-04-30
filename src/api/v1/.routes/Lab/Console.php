@@ -55,9 +55,17 @@ class Console
       return emit($response, $data );
     }
 
+    public function favoritePut($request, $response, $args)
+    {
+      $data = $request->getParsedBody();
+      $this->adaModules->update('lab_sockets_data', 'isFavorite=0', 'id>?', array(0));
+      $this->adaModules->update('lab_sockets_data', 'isFavorite=1', 'id=?', array($data['id']));
+      return emit($response, $data );
+    }
+
     public function tableDelete($request, $response, $args)
     {
-      $data = $this->adaModules->delete('lab_sockets_data', 'id = ?', array(args['id']));
+      $data = $this->adaModules->delete('lab_sockets_data', 'id = ?', array($args['id']));
       return emit($response, $data );
     }
 
