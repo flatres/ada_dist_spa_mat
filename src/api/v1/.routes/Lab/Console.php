@@ -29,6 +29,12 @@ class Console
       return emit($response, $data);
     }
 
+    public function tableSingleGet($request, $response, $args)
+    {
+      $data = $this->adaModules->select('lab_sockets_data', '*', 'id = ?', array($args['id']));
+      return emit($response, $data);
+    }
+
     public function carsGet($request, $response, $args)
     {
       $data = $this->adaModules->select('lab_sockets_cars', '*', 'id > 0', array());
