@@ -1,5 +1,6 @@
 #!/bin/bash
-
+git checkout master
+git pull origin master
 quasar build
 echo "Syncing With Quasar Build Files"
 rsync -avr --delete-after ../../dist/spa/ src/ --exclude '.git' --exclude 'api' --exclude '.htaccess'
