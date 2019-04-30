@@ -22,11 +22,46 @@ class Console
 
 // ROUTE -----------------------------------------------------------------------------
 
+    // return data for the test table
+    public function tableGet($request, $response, $args)
+    {
+      $data = $this->adaModules->select('lab_sockets_data', '*', 'id > 0', array());
+      return emit($response, $data);
+    }
+
+    public function carsGet($request, $response, $args)
+    {
+      $data = $this->adaModules->select('lab_sockets_cars', '*', 'id > 0', array());
+      return emit($response, $data);
+    }
+
+    public function tablePost($request, $response, $args)
+    {
+      $data = $request->getParsedBody();
+      $data['id'] = $this->adaModules->insertObject('lab_sockets_data', $data);
+      return emit($response, $data);
+    }
+
+    public function tablePut($request, $response, $args)
+    {
+      $data = $request->getParsedBody();
+      $data = $this->adaModules->updateObject('lab_sockets_data', $data, 'id');
+      return emit($response, $data );
+    }
+
+    public function tableDelete($request, $response, $args)
+    {
+      $data = $this->adaModules->delete('lab_sockets_data', 'id = ?', array(args['id']));
+      return emit($response, $data );
+    }
+
+    // Get Address of ZMQ Server
     public function ZMQGet($request, $response, $args)
     {
       return emit($response, ZMQ_SERVER );
     }
 
+    // send a notification to self
     public function notifyPost($request, $response)
     {
       $data = $request->getParsedBody();
@@ -34,7 +69,7 @@ class Console
 
       $notify = new \Sockets\Notify($auth);
       $notify->publish($data['message']);
-      
+
       return emit($response, $data);
     }
 

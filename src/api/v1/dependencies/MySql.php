@@ -15,6 +15,7 @@ $globalDB;
  /* Handling database connection */
 
 /*Examples
+Object functions do not support encryption
 
 $sql = new SQL();
 
@@ -22,12 +23,15 @@ $sql = new SQL();
 
 //INSERT returns new insert id
 $id = $sql->insert('encrypt', '*name, *email ', array('ss', 'bob@gmail.com'));
+$id = $sql->insertObject($table, $object)
 
 //SELECT returns an array of results
 $result = $sql->query('encrypt', 'id, *name, *email', 'email=*?', array('bob@gmail.com'));
 
 //UPDATE : returns rowcount
 $sql->update('encrypt', 'name=*?, email = *?', 'email=*?', array('cuthy', 's@g.com', 'bob@gmail.com'));
+$sql->updateObject($table, $object, $idField){}
+
 
 //DELETE : returns rowcount
 $sql->delete('encrypt', 'email=*?', array('s@g.com'));
