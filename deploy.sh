@@ -1,4 +1,5 @@
 #!/bin/bash
+git stash
 git pull origin master
 echo "Updating Composer"
 cd src/api
