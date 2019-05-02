@@ -8,7 +8,7 @@
  */
 namespace Admin\Sync;
 
-class Students 
+class Students
 {
     protected $container;
     private $disabledCount = 0;
@@ -39,19 +39,28 @@ class Students
       return emit($response, $data);
     }
 
+    //ensure that ADA students are up to date with iSams
     public function studentSync_POST($request, $response, $args)
     {
       $data = array('id'=>2);
       $auth = $request->getAttribute('auth');
+
+      $console = new \Sockets\Console($auth);
       $this->progress = new \Sockets\Progress($auth, 'Admin/Sync/Students');
 
+      $console->publish('Pulling iSAMS students...');
       $misStudents = $this->isams->select(  'TblPupilManagementPupils',
                                             'txtSchoolID as id, txtForename, txtPreName, txtEmailAddress, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
                                             'intSystemStatus = 1', array());
+      $console->publish('Got ' . count($misStudents), 1);
 
-      //get ada students to get comparison for syncing
+      // get ada students to get comparison for syncing
+      $console->publish('Pulling ADA students');
       $adaStudents = $this->sql->select('stu_details', 'id, mis_id', 'usr_type=? ORDER BY lastname ASC', array(1));
+      $console->publish('Got ' . count($adaStudents), 1);
 
+
+      $console->publish('Syncing...');
       $allStudents = array();
       foreach($adaStudents as $student)
       {
@@ -96,6 +105,9 @@ class Students
         'updated' => $this->updatedCount,
         'disabled'=> $this->disabledCount
       );
+
+      $console->publish("Done - new($this->newCount) - updated($this->updatedCount) - disabled($this->disabledCount)");
+
       return emit($response, $data);
     }
 
@@ -134,7 +146,7 @@ class Students
         $d = $student['misData'];
         $this->sql->update(
           'stu_details',
-          'lastname=?, firstname=?, prename=?, initials=?, boardingHouse=?, email=?, mis_id=?, gender=?, dob=?, enrolmentNCYear=?, enrolmentSchoolYear=?',
+          'lastname=?, firstname=?, prename=?, initials=?, boardingHouse=?, email=?, mis_id=?, gender=?, dob=?, enrolmentNCYear=?, enrolmentSchoolYear=?, disabled=?',
           'id=?',
           array(
             $d['txtSurname'],
@@ -148,6 +160,7 @@ class Students
             $d['txtDOB'],
             $d['intEnrolmentNCYear'],
             $d['intEnrolmentSchoolYear'],
+            0,
             $student['adaId']
           )
         );

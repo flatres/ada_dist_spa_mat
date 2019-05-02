@@ -8,8 +8,6 @@
  */
 namespace Sockets;
 
-define('ZMQ_SERVER', getenv("ZMQ_SERVER"));
-
 use \ZMQContext;
 use \ZMQ;
 

@@ -1,6 +1,8 @@
 <?php
 // DIC configuration
 
+define('ZMQ_SERVER', getenv("ZMQ_SERVER"));
+
 $container = $app->getContainer();
 
 // view renderer

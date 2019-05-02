@@ -33,7 +33,6 @@ class Login
       // reading post params
       $login = $data['login']; $password = $data['password'];
 
-      $this->isNewUser = !$this->sql->exists('usr_details', 'id', 'login=?', array($login));
       if ($this->isADLogin($login) || $this->isNewUser)
       {
           $id = $this->checkLoginAd($login, $password);
@@ -52,38 +51,15 @@ class Login
 
     private function isADLogin($login)
     {
-      $usr = $this->sql->select('usr_details', 'usr_type', 'login=?', array($login));
-      if (isset($usr[0]))
-      {
-        //check if this user type uses ad login
-        $type = $usr[0]['usr_type'];
-        $isAdLogin = $this->sql->select('usr_types', 'ad_login', 'id=?', array($type))[0]['ad_login'];
-        $isAdLogin = $isAdLogin == 1 ? true : false;
-        return $isAdLogin;
-      } else {
-        //usr doesn't exist so see if it exists in AD and act accordingly.
-        return true;
-      }
-    }
+      $usr = $this->sql->select('usr_details', 'ad_login', 'login=?', array($login));
+      return isset($usr[0]) ? $usr[0]['ad_login'] : false;
 
-    private function newUser($login)
-    {
-      $isamsStaff = new \Entities\People\iSamsStaff($this->isams);
-      $isamsStaff->initials($login);
-      $adaUser = new \Entities\People\Staff($this->sql);
-      $success = $adaUser->new($isamsStaff);
-      return $success;
     }
 
     private function checkLoginAd($login, $password)
     {
       if ($this->ad->connect($login, $password))
       {
-        if ($this->isNewUser)
-        {
-          $success = $this->newUser($login);
-          if (!$success) return false;
-        }
         return $this->sql->select('usr_details', 'id', 'login=?', array($login))[0]['id'];
       } else {
         return false;
@@ -116,7 +92,7 @@ class Login
     {
       $sql = $this->sql;
 
-      $data = $sql->select('usr_details', 'firstname, lastname, account_type', 'id=?', array($id));
+      $data = $sql->select('usr_details', 'firstname, lastname, ad_login', 'id=?', array($id));
 
       if(!$data) return array();
 

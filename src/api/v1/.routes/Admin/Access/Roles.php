@@ -15,6 +15,7 @@ class Roles
     public function __construct(\Slim\Container $container)
     {
       $this->sql = $container->mysql;
+      $this->ada = $container->ada;
     }
 
     //retrives roles along with names of those with that role
@@ -22,7 +23,7 @@ class Roles
     {
       $sql = $this->sql;
       $data = array();
-      $roles = $sql->select('acs_roles', 'id, name', '1=1 ORDER BY name ASC', array());
+      $roles = $sql->select('acs_roles', 'id, name, isDefault', '1=1 ORDER BY name ASC', array());
       foreach($roles as &$role){
         $count = $sql->query("Select COUNT(*) as count FROM acs_roles_users WHERE role_id = ?", array($role['id']))[0]['count'];
         $role['count'] = $count;
@@ -47,9 +48,43 @@ class Roles
       $data = array();
       $users = $sql->select('acs_roles_users', 'user_id as id', 'role_id=?', array($args['id']));
       foreach($users as &$user){
-        $user = array_merge($sql->select('usr_details', 'firstName, lastName', 'id=?', array($user['id']))[0], $user);
+        $user = array_merge($sql->select('usr_details', 'firstname, lastname', 'id=?', array($user['id']))[0], $user);
       }
       return emit($response, $users);
+    }
+
+    //returns a list of all staff with a boolean exists set to true if they are already included in this role
+    public function roleNewUsers_GET($request, $response, $args)
+    {
+      $roleID = $args['roleID'];
+      $staff = $this->ada->select('usr_details', '*');
+      foreach($staff as &$s){
+        $s['exists'] = $this->ada->exists('acs_roles_users', 'user_id=? AND role_id=?', [$s['id'], $roleID]);
+      }
+      return emit($response, $staff);
+    }
+
+    public function roleNewUsers_POST($request, $response, $args)
+    {
+      $roleID = $args['roleID'];
+      $users = $request->getParsedBody();
+      foreach($users as &$user){
+        $exists = $this->ada->exists('acs_roles_users', 'user_id=? AND role_id=?', [$user['id'], $roleID]);
+        if (!$exists) {
+          $this->ada->insert('acs_roles_users', 'user_id, role_id', [$user['id'], $roleID]);
+        }
+        $user['exists'] = true;
+      }
+      return emit($response, $users);
+    }
+
+    public function roleUsers_DELETE($request, $response, $args)
+    {
+      $roleID = $args['roleID'];
+      $userID = $args['userID'];
+      $this->ada->delete('acs_roles_users', 'user_id=? AND role_id=?', [$userID, $roleID]);
+
+      return emit($response, true);
     }
 
     public function allUsers_GET($request, $response, $args)

@@ -15,8 +15,6 @@ namespace Sockets;
 use \ZMQContext;
 use \ZMQ;
 
-define('ZMQ_SERVER', getenv("ZMQ_SERVER"));
-
 class Notify
 {
     private $socketId = 'notify';

@@ -8,7 +8,7 @@
  */
 namespace Lab;
 
-define('ZMQ_SERVER', getenv("ZMQ_SERVER"));
+// define('ZMQ_SERVER', getenv("ZMQ_SERVER"));
 
 class Console
 {
@@ -98,11 +98,11 @@ class Console
       $progress = new \Sockets\Progress($auth, 'Lab.Sockets.Console');
       $notify = new \Sockets\Notify($auth);
 
-      $notify->publish("Let's go");
+      $notify->publish("Not really.. I don't know how to count.");
 
       $p = 0;
-      $l = 20;
-      for ($x = 0; $x <= 0.5 * $l; $x++) {
+      $l = 33;
+      for ($x = 0; $x <= 0.3333 * $l; $x++) {
         sleep(1);
         $p = $p + 1 / $l;
         $progress->publish($p);
@@ -110,12 +110,22 @@ class Console
         $console->publish($string);
       }
 
+      $notify->publish("Behold! Indentation");
+      $p = 0;
+      for ($x = 0; $x <= 0.33333 * $l; $x++) {
+        sleep(1);
+        $p = $p + 1 / $l;
+
+        $string = $this->randomString(4) . ' ' . $this->randomString(6);
+        $console->publish($string, $x);
+      }
+
       $console->error('This is what an error looks like');
 
       $console->publish('This is replace mode:');
       $console->publish('-');
 
-      for ($x = 0; $x <= 0.5 * $l; $x++) {
+      for ($x = 0; $x <= 0.33333 * $l; $x++) {
         sleep(1);
         $p = $p + 1 / $l;
         $progress->publish($p);

@@ -24,6 +24,7 @@
           "Admin\\":"v1/.routes/Admin",
           "Lab\\":"v1/.routes/Lab",
           "Location\\":"v1/.routes/Location",
+          "Lists\\":"v1/.routes/_Lists",
           "Sockets\\":"v1/sockets",
           "Utility\\":"v1/utilities",
           "Dependency\\":"v1/dependencies",

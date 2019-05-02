@@ -135,16 +135,18 @@ class Mysql {
  			return $this->execute();
 		}
 
-	 public function select1($table, $fieldString, $condition = NULL, $binding = NULL){
-
-		 $this->selectType = 'SINGLE';
-		 $this->select($table, $fieldString, $condition, $binding);
-
+	 public function single($table, $fieldString, $condition = NULL, $binding = NULL){
+		 $d = $this->select($table, $fieldString, $condition, $binding);
+     if (isset($d[0])) {
+       return $d[0];
+     } else {
+       return null;
+     }
 	 }
 
-    public function exists($table, $fieldString, $condition = NULL, $binding = NULL, $isCaseInsensitive = FALSE){
+    public function exists($table, $condition = NULL, $binding = NULL, $isCaseInsensitive = FALSE){
 
-      $d = $this->select($table, $fieldString, $condition, $binding, $isCaseInsensitive);
+      $d = $this->select($table, '*', $condition, $binding, $isCaseInsensitive);
       if (isset($d[0]))
       {
         return true;

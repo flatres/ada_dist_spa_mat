@@ -11,8 +11,6 @@ namespace Sockets;
 use \ZMQContext;
 use \ZMQ;
 
-define('ZMQ_SERVER', getenv("ZMQ_SERVER"));
-
 class Progress
 {
     protected $container;

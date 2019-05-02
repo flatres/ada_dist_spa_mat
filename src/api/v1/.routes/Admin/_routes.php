@@ -20,6 +20,9 @@ $app->group('/admin', function(){
     $this->get('/sync/misstudents', '\Admin\Sync\Students:misStudents_GET');
     $this->post('/sync/students', '\Admin\Sync\Students:StudentSync_POST');
 
+    $this->get('/sync/misstaff', '\Admin\Sync\Staff:misStaff_GET');
+    $this->post('/sync/staff', '\Admin\Sync\Staff:StaffSync_POST');
+
 // ACCESS --------
     $this->get('/access/roles', '\Admin\Access\Roles:roles_GET');
     $this->delete('/access/roles/{id}', '\Admin\Access\Roles:role_DELETE');
@@ -30,7 +33,13 @@ $app->group('/admin', function(){
     $this->get('/access/roles/pages/{id}', '\Admin\Access\Roles:rolePages_GET');
     $this->put('/access/roles/pages', '\Admin\Access\Roles:rolePages_PUT');
     $this->get('/access/roles/users/{id}', '\Admin\Access\Roles:roleUsers_GET');
+
+    $this->get('/access/roles/users/new/{roleID}', '\Admin\Access\Roles:roleNewUsers_GET');
+    $this->post('/access/roles/users/{roleID}', '\Admin\Access\Roles:roleNewUsers_POST');
+    $this->delete('/access/roles/users/{roleID}/{userID}', '\Admin\Access\Roles:roleUsers_DELETE');
+
     $this->get('/access/roles/allusers', '\Admin\Access\Roles:allUsers_GET');
+
     $this->get('/access/module/tree', '\Admin\Access\Roles:moduleTree_GET');
     $this->delete('/access/structure/module/{id}', '\Admin\Access\Structure:module_DELETE');
     $this->post('/access/structure/module/icon', '\Admin\Access\Structure:moduleIcon_POST');
