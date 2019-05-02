@@ -1,5 +1,5 @@
 <?php
-namespace Entity\Person;
+namespace Entities\People;
 
 class iSamsPupil
 {

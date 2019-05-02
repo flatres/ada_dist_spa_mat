@@ -27,7 +27,7 @@
           "Sockets\\":"v1/sockets",
           "Utility\\":"v1/utilities",
           "Dependency\\":"v1/dependencies",
-          "Entity\\":"v1/entities",
+          "Entities\\":"v1/entities",
           "Middleware\\":"v1/middleware",
           "SocketServer\\":"services/socketServer"
         }

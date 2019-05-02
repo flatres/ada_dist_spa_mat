@@ -1,5 +1,5 @@
 <?php
-namespace Entity\Person;
+namespace Entities\People;
 
 class iSamsStaff
 {
@@ -57,7 +57,7 @@ class iSamsStaff
     );
     foreach($tutees as $tutee)
     {
-      $this->tutees[] = new \Entity\Person\iSamsPupil($this->sql, $tutee['txtSchoolID']);
+      $this->tutees[] = new \Entities\People\iSamsPupil($this->sql, $tutee['txtSchoolID']);
     }
   }
 

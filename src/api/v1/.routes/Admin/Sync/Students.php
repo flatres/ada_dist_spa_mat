@@ -119,7 +119,7 @@ class Students
           $d['intEnrolmentSchoolYear']
         )
       );
-      $tag = new \Entity\Tags\TagWriter($this->sql);
+      $tag = new \Entities\Tags\TagWriter($this->sql);
       $tag->newByNames('House', $d['txtBoardingHouse'], $id);
       $this->newCount++;
     }
@@ -151,7 +151,7 @@ class Students
             $student['adaId']
           )
         );
-        $tag = new \Entity\Tags\TagWriter($this->sql);
+        $tag = new \Entities\Tags\TagWriter($this->sql);
         $tag->newByNames('House', $d['txtBoardingHouse'], $student['adaId']);
         $this->updatedCount++;
       }

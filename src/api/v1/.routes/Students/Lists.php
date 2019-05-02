@@ -46,7 +46,7 @@ class Lists
       $data = array();
       foreach($students as &$student)
       {
-        $tagReader = new \Entity\Tags\TagReader($this->sql);
+        $tagReader = new \Entities\Tags\TagReader($this->sql);
         $student['tags'] = $tagReader->studentTags($student['id']);
       }
       return emit($response, $students);

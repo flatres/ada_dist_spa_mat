@@ -34,7 +34,7 @@ class TbsExtCoaches
       foreach($bookings as &$booking)
       {
           $txtSchoolID = $booking['txtSchoolID'];
-          $pupil = new \Entity\Person\iSamsPupil($this->isams, $txtSchoolID);
+          $pupil = new \Entities\People\iSamsPupil($this->isams, $txtSchoolID);
 
           $txtBusOut = $booking['txtBusOut'];
           $txtBusRet = $booking['txtBusRet'];
@@ -105,7 +105,7 @@ class TbsExtCoaches
       foreach($data['bookings'] as &$booking)
       {
           $booking['id'] = (int)$booking['TblCoachesBookingsID'];
-          $pupil = new \Entity\Person\iSamsPupil($this->isams, $booking['txtSchoolID']);
+          $pupil = new \Entities\People\iSamsPupil($this->isams, $booking['txtSchoolID']);
           $booking['txtBusRet'] = is_null($booking['txtBusRet']) ? '' : $booking['txtBusRet'];
           $booking['txtBusOut'] = is_null($booking['txtBusOut']) ? '' : $booking['txtBusOut'];
           $booking = array_merge($booking, (array)$pupil);

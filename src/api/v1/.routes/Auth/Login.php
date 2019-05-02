@@ -68,9 +68,9 @@ class Login
 
     private function newUser($login)
     {
-      $isamsStaff = new \Entity\Person\iSamsStaff($this->isams);
+      $isamsStaff = new \Entities\People\iSamsStaff($this->isams);
       $isamsStaff->initials($login);
-      $adaUser = new \Entity\Person\adaStaff($this->sql);
+      $adaUser = new \Entities\People\Staff($this->sql);
       $success = $adaUser->new($isamsStaff);
       return $success;
     }

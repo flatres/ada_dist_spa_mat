@@ -1,5 +1,5 @@
 <?php
-namespace Entity\Person;
+namespace Entities\People;
 
 class AdaStaff
 {
@@ -13,7 +13,7 @@ class AdaStaff
     $this->sql= $mySql;
   }
 
-  public function new(\Entity\Person\iSamsStaff $s)
+  public function new(\Entities\People\iSamsStaff $s)
   {
     $d = $this->sql->select('usr_types', 'id', 'name=?', array('staff'));
     if(!isset($d[0])) return false;

@@ -45,7 +45,7 @@ class Explorer
     public function iSamsInfo_Get($request, $response, $args)
     {
       $initials = $args['initials'];
-      $staff = new \Entity\Person\iSamsStaff($this->isams);
+      $staff = new \Entities\People\iSamsStaff($this->isams);
       $staff->initials($initials);
       return emit($response, $staff);
     }
