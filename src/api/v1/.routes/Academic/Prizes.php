@@ -38,6 +38,8 @@ class Prizes
         $prize['firstName']= $pupil->firstName;
         $prize['lastName'] = $pupil->lastName;
         $prize['gender'] = $pupil->gender;
+        $prize = array_merge($prize, $pupil->family());
+
       }
       return emit($response, $prizes);
       // return emit($response, $this->adaModules->select('TABLE', '*'));

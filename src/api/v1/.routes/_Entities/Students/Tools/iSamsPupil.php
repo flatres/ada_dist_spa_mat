@@ -35,9 +35,16 @@ class iSamsPupil
     }
   }
 
-  public function getFamily()
+  public function family()
   {
-
+    $d = $this->sql->select('TblPupilManagementAddressLink', 'intAddressID', 'txtSchoolID=?', array($this->txtSchoolID));
+    if(isset($d[0])){
+      $address = $this->sql->select(  'TblPupilManagementAddresses',
+                                      'txtLabelSalutation, txtEmail1, txtEmail2',
+                                      'TblPupilManagementAddressesID=?',
+                                      [$d[0]['intAddressID']]);
+    }
+    return $address[0];
   }
 
 }
