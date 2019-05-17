@@ -35,7 +35,9 @@ class Prizes
         $prize = array_merge($prize, $prizeData[0]);
 
         $pupil = new \Entities\Students\Tools\iSamsPupil($this->isams, $pupilID);
-        $prize = array_merge($prize, (array)$pupil);
+        $prize['firstName']= $pupil->firstName;
+        $prize['lastName'] = $pupil->lastName;
+        $prize['gender'] = $pupil->gender;
       }
       return emit($response, $prizes);
       // return emit($response, $this->adaModules->select('TABLE', '*'));
