@@ -20,6 +20,7 @@
           "Auth\\":"v1/.routes/Auth",
           "Students\\":"v1/.routes/Students",
           "Data\\":"v1/.routes/Data",
+          "Exams\\":"v1/.routes/Exams",
           "Academic\\":"v1/.routes/Academic",
           "Transport\\":"v1/.routes/Transport",
           "Admin\\":"v1/.routes/Admin",
