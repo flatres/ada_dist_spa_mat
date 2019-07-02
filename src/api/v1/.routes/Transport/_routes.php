@@ -26,11 +26,13 @@ $app->group('/transport', function(){
 
 // TAXIS --------------------------------------------------------------------------------------------------------
 
-    $this->get('/taxis/bookings/{session}', '\Transport\TbsExtTaxisBookings:bookingsGet');
-    $this->get('/taxis/bookings/{session}/{id}', '\Transport\TbsExtTaxisBookings:bookingGet');
+    $this->get('/taxis/bookings/{session}/{type}', '\Transport\TbsExtTaxisBookings:bookingsGet');
+    $this->get('/taxis/companies/bookings/{session}', '\Transport\TbsExtTaxisBookings:bookingsByCompanyGet');
+    // $this->get('/taxis/bookings/{session}/{id}', '\Transport\TbsExtTaxisBookings:bookingGet');
     $this->post('/taxis/bookings', '\Transport\TbsExtTaxisBookings:bookingPost');
     $this->put('/taxis/bookings', '\Transport\TbsExtTaxisBookings:bookingPut');
-    $this->delete('/taxis/bookings', '\Transport\TbsExtTaxisBookings:bookingDelete');
+    $this->put('/taxis/assignment', '\Transport\TbsExtTaxisBookings:taxiAssigmentPut');
+    $this->delete('/taxis/bookings/{id}', '\Transport\TbsExtTaxisBookings:bookingDelete');
 
     // Pickup Locations
     $this->get('/taxis/locations/pickup', '\Transport\TbsExtTaxisAdmin:pickupLocationsGet');

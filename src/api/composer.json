@@ -24,6 +24,8 @@
           "Academic\\":"v1/.routes/Academic",
           "Transport\\":"v1/.routes/Transport",
           "Admin\\":"v1/.routes/Admin",
+          "Accounts\\":"v1/.routes/Accounts",
+          "HM\\":"v1/.routes/HM",
           "Lab\\":"v1/.routes/Lab",
           "Location\\":"v1/.routes/Location",
           "Entities\\":"v1/.routes/_Entities",

@@ -122,7 +122,7 @@ class Staff
         )
       );
       $this->setDefaultRole($id);
-      // $tag = new \Entities\Tags\ToolsTagWriter($this->sql);
+      // $tag = new \Entities\Tags\Tools\TagWriter($this->sql);
       // $tag->newByNames('House', $d['txtBoardingHouse'], $id);
       $this->newCount++;
     }
@@ -168,7 +168,7 @@ class Staff
           )
         );
         $this->setDefaultRole($staff['adaId']);
-        // $tag = new \Entities\Tags\ToolsTagWriter($this->sql);
+        // $tag = new \Entities\Tags\Tools\TagWriter($this->sql);
         // $tag->newByNames('House', $d['txtBoardingHouse'], $staff['adaId']);
         $this->updatedCount++;
       }

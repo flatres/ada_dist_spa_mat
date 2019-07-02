@@ -14,8 +14,19 @@ class Student
 
     public function __construct(\Slim\Container $container)
     {
-       $this->sql= $container->mysql;
+       $this->sql= $container->ada;
 
+    }
+
+    public function displayName($id)
+    {
+      $s = $this->sql->select(
+        'stu_details',
+        'id, firstname, lastname',
+        'id=?',
+        array($id));
+
+      return $s[0]['lastname'] . ', ' . $s[0]['firstname'] ?? '';      
     }
 
     public function details_GET($request, $response, $args)

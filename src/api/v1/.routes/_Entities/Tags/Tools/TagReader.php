@@ -1,5 +1,5 @@
 <?php
-namespace Entities\Tags;
+namespace Entities\Tags\Tools;
 
 class TagReader {
 

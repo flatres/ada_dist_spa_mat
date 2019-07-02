@@ -25,7 +25,10 @@ class Lists
         'id, firstname, lastname',
         'disabled=0 ORDER BY lastname ASC',
         array());
-      $data = array();
+      
+      foreach($students as &$student) {
+        $student['displayName'] = $student['lastname'] . ', ' . $student['firstname'];
+      }
 
       return emit($response, $students);
     }

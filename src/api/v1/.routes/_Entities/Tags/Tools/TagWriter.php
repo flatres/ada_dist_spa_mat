@@ -1,15 +1,15 @@
 <?php
-namespace Entities\Tags;
+namespace Entities\Tags\Tools;
 
 class TagWriter {
 
   private $sql;
 
   //if no userId then a global tag is assumed
-  public function __construct(\Dependency\Mysql $mySql, int $ownerId = null)
+  public function __construct(\Dependency\Mysql $mySql, int $ownerId = NULL)
   {
     $this->sql= $mySql;
-    $this->global = $ownerId == null;
+    $this->global = is_null($ownerId) ? true : false;
     $this->ownerId = $ownerId;
   }
 
@@ -19,14 +19,12 @@ class TagWriter {
     $tagId = $this->tagNameExists((int)$catId, $tagName) ? $this->tagByName((int)$catId, $tagName) : $this->newTag((int)$catId, $tagName);
 
     return $this->newTagEntry((int)$catId, (int)$tagId, $userId);
-
   }
 
   private function categoryIdExists(int $id)
   {
     return $this->sql->exists(
       'tag_categories',
-      'id',
       'id = ?',
       array($id)
     );
@@ -37,15 +35,12 @@ class TagWriter {
     {
       return $this->sql->exists(
         'tag_categories',
-        'id',
-        'name = ? AND user_id is NULL',
-        array($categoryName)
+        'name = ? AND user_id =?',
+        array($categoryName, 0)
       );
     } else {
-
       return $this->sql->exists(
         'tag_categories',
-        'id',
         'name = ? AND user_id = ?',
         array($categoryName, $this->ownerId)
       );
@@ -59,8 +54,8 @@ class TagWriter {
       $cat = $this->sql->select(
         'tag_categories',
         'id',
-        'name = ? AND user_id is NULL',
-        array($categoryName)
+        'name = ? AND user_id =?',
+        array($categoryName, 0)
       );
     } else {
       $cat = $this->sql->select(
@@ -87,7 +82,6 @@ class TagWriter {
   {
     return $this->sql->exists(
       'tag_tags',
-      'id',
       'name = ? AND cat_id = ?',
       array($tagName, $catId)
     );
