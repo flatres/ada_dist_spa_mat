@@ -23,6 +23,7 @@ class Results
        $this->results = array();
        $this->resultKeys = array(); //key r_{id}
        $this->lowestFileID = 9999999999;
+       $this->cache = new \Exams\Tools\Cache($container);
     }
 
     /**
@@ -39,10 +40,9 @@ class Results
     public function getSessions($request, $response, $args)
     {
       $data = array();
-
       $data = $this->sql->select(  'TblExamManagerCycles',
                                 'TblExamManagerCyclesID, TblExamManagerCyclesID as id, intYear, intActive, intResultsActive, intFormatMonth, intFormatYear',
-                                'TblExamManagerCyclesID > 0 AND intFormatMonth > 0 ORDER BY TblExamManagerCyclesID DESC',
+                                'TblExamManagerCyclesID > 0 AND intFormatMonth = 6 ORDER BY TblExamManagerCyclesID DESC',
                                 array()
                           );
       // convert numberical month to name
@@ -52,6 +52,22 @@ class Results
         $cycle['month'] = $monthName;
       }
       return emit($response, $data);
+    }
+
+    public function getCachedGCSEResults($request, $response, $args)
+    {
+      $isGCSE = true;
+      $sessionId = $args['sessionId'];
+
+      $auth = $request->getAttribute('auth');
+      $this->console = new \Sockets\Console($auth);
+
+      $data = $this->cache->read($sessionId, true);
+      if (!$data) {
+        $this->getGCSEResults($request, $response, $args);
+      } else {
+          return emit($response, $data);
+      }
     }
 
     public function getGCSEResults($request, $response, $args)
@@ -81,6 +97,7 @@ class Results
       $results = array();
       $sessionId = $args['sessionId'];
       $data['sessionId'] = (int)$sessionId;
+      $isGCSE = $args['isGCSE'];
 
       //get session date
       $d = $this->sql->select(  'TblExamManagerCycles',
@@ -103,6 +120,8 @@ class Results
       $this->sessionYear = $d[0]['intFormatYear'];
       $this->sessionMonth = $d[0]['intFormatMonth'];
       $this->sessionAcacdemicYear = $this->sessionMonth < 9 ? $this->sessionYear - 1 : $this->sessionYear;
+
+      // $this->getAllStudents(); MAY BE FREEZING ISAMS SERVER
 
       //find all uploaded results files for this session
       $resultFiles = $this->sql->select(  'TblExamManagerResults',
@@ -135,10 +154,14 @@ class Results
 
       $data['results'] = $this->results;
 
-      $statistics = $this->isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Exams\Tools\ALevel\Statistics($this->sql, $this->console) ;
-      $data['statistics'] = $statistics->makeStatistics($this->session, $this->results);
-
+      if ($fileIndex > 1) {
+        $statistics = $this->isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Exams\Tools\ALevel\Statistics($this->sql, $this->console) ;
+        $data['statistics'] = $statistics->makeStatistics($this->session, $this->results);
+      }        
       $this->error ? $console->error("Finished WITH ERRORS") : $console->publish("Finished");
+
+      $this->console->publish("Saving...", 1);
+      $this->cache->write($sessionId, $isGCSE, $data);
 
       return $this->error ? emitError($response,500, "Failure"): emit($response, $data);
 
@@ -173,6 +196,27 @@ class Results
 
       $numberFound = count($this->results) - $startResultsCount;
       $this->console->publish("$numberFound found.");
+    }
+
+    private function getAllStudents()
+    {
+      $this->console->publish('--Getting Students', 1);
+
+      $studentData = $this->sql->select(  'TblPupilManagementPupils',
+                                          'txtSchoolID, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
+                                          'intEnrolmentSchoolYear > ?', [2011]);
+
+      foreach($studentData as &$stuData) {
+        $stuData['txtInitialedName'] = $stuData['txtSurname'] . ', ' . $stuData['txtInitials'];
+        //some students that have left don't seem to have an entry for txtBoardingHouse
+        if(strlen($stuData['txtBoardingHouse']) == 0) $stuData['txtBoardingHouse'] = $stuData['txtLeavingBoardingHouse'];
+        $stuData['txtHouseCode'] = $this->getHouseCode($stuData['txtBoardingHouse']);
+        //work out what academic year there were in for this session
+        $stuData['NCYear'] = $stuData['intEnrolmentNCYear'] + ($this->sessionAcacdemicYear - $stuData['intEnrolmentSchoolYear']);
+        $stuData['isNewSixthForm'] = $stuData['intEnrolmentNCYear'] > 11 ? true : false;
+
+        $this->studentData["s_" . $stuData['txtSchoolID']] = $stuData;
+      }
     }
 
     public function processResults($resultsFileResults, $isEarlyTakers = null)
@@ -226,6 +270,8 @@ class Results
       }
       if(!$isEarlyTakers) $this->console->replace("--$i");
       $this->results = array_merge($this->results, $resultsFileResults);
+
+      return $i;
 
     }
 
