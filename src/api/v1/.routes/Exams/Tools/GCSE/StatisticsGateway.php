@@ -50,7 +50,7 @@ class StatisticsGateway
 
   }
 
-  public function makeStatistics(array $session, array $results)
+  public function makeStatistics(array $session, array $results, \Exams\Tools\Cache $cache)
   {
     // return $this;
     $this->allResults = $results;
@@ -66,14 +66,14 @@ class StatisticsGateway
     if(count($this->hundredResults) > 0){
       $this->console->publish('Hundred statistics', 1);
       $this->hundredStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
-      $this->hundredStats->makeStatistics($this->hundredResults);
+      $this->hundredStats->makeStatistics($session, $this->hundredResults, $cache);
       $this->years[] = array('label' => 'Hundred', 'value' => 11);
     }
     //make stats for each year with results
     if(count($this->removeResults) > 0){
       $this->console->publish('Remove statistics', 1);
       $this->removeStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
-      $this->removeStats->makeStatistics($this->removeResults);
+      $this->removeStats->makeStatistics($session, $this->removeResults, $cache);
       $this->years[] = array('label' => 'Remove', 'value' => 10);
     }else{
       $this->console->publish('No remove results found', 2);
@@ -81,8 +81,8 @@ class StatisticsGateway
     //make stats for each year with results
     if(count($this->shellResults) > 0){
       $this->console->publish('Shell statistics', 1);
-      $this->shellStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
-      $this->shellStats->makeStatistics($this->shellResults);
+      $this->shellStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console, $cache);
+      $this->shellStats->makeStatistics($session, $this->shellResults);
       $this->years[] = array('label' => 'Shell', 'value' => 9);
     } else {
       $this->console->publish('No shell results found', 2);

@@ -50,9 +50,11 @@ class Statistics
 
     }
 
-    public function makeStatistics(array $results)
+    public function makeStatistics(array $session, array $results, \Exams\Tools\Cache $cache)
     {
       $i = 0;
+
+      $this->cache = $cache;
 
       $results = $this->checkForDoubleAwards($results);
       $count = count($results);

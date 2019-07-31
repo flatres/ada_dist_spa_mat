@@ -63,10 +63,28 @@ class Results
       $this->console = new \Sockets\Console($auth);
 
       $data = $this->cache->read($sessionId, true);
+      // return $this->getGCSEResults($request, $response, $args);
+      // return;
       if (!$data) {
-        $this->getGCSEResults($request, $response, $args);
+        return $this->getGCSEResults($request, $response, $args);
       } else {
           return emit($response, $data);
+      }
+    }
+
+    public function getCachedALevelResults($request, $response, $args)
+    {
+      $isGCSE = false;
+      $sessionId = $args['sessionId'];
+
+      $auth = $request->getAttribute('auth');
+      $this->console = new \Sockets\Console($auth);
+
+      $data = $this->cache->read($sessionId, $isGCSE);
+      if (!$data) {
+        return $this->getALevelResults($request, $response, $args);
+      } else {
+        return emit($response, $data);
       }
     }
 
@@ -74,7 +92,6 @@ class Results
     {
       $args['isGCSE'] = true;
       $this->isGCSE = true;
-
       return $this->getResults($request, $response, $args);
     }
 
@@ -99,7 +116,7 @@ class Results
       $data['sessionId'] = (int)$sessionId;
       $isGCSE = $args['isGCSE'];
 
-      //get session date
+      //get session data
       $d = $this->sql->select(  'TblExamManagerCycles',
                                 'TblExamManagerCyclesID, TblExamManagerCyclesID as id, intYear, intActive, intResultsActive, intFormatMonth',
                                 'TblExamManagerCyclesID = ?',
@@ -142,7 +159,7 @@ class Results
         //gather all results from this file and append student data to each result
         //certification type 'C' ensures that individual subject units are not included and we only get final grade
         $resultsFileResults = $this->sql->select( 'TblExamManagerResultsStore',
-                                                  'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
+                                                  'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
                                                   "intResultsID = ? AND $s AND txtCertificationType='C'",
                                                   array($resultFile['id']));
 
@@ -155,9 +172,9 @@ class Results
       $data['results'] = $this->results;
 
       if ($fileIndex > 1) {
-        $statistics = $this->isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Exams\Tools\ALevel\Statistics($this->sql, $this->console) ;
-        $data['statistics'] = $statistics->makeStatistics($this->session, $this->results);
-      }        
+        $statistics = $this->isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Exams\Tools\ALevel\StatisticsGateway($this->sql, $this->console) ;
+        $data['statistics'] = $statistics->makeStatistics($this->session, $this->results, $this->cache);
+      }
       $this->error ? $console->error("Finished WITH ERRORS") : $console->publish("Finished");
 
       $this->console->publish("Saving...", 1);

@@ -141,7 +141,7 @@ class Students
       if ($student['disable'] == true)
       {
         $this->sql->update('usr_details', 'disabled=1', 'id=?', array($student['adaId']));
-        $this->deletedCount++;
+        $this->disabledCount++;
       } else {
         $d = $student['misData'];
         $this->sql->update(

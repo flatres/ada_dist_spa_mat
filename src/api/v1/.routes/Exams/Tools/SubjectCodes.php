@@ -127,7 +127,7 @@ class SubjectCodes
       if($this->contains('philosophy')) return array("PX", "Philosophy");
       if($this->contains('classic')) return array("CL", "Classics");
       if($this->contains('business')) return array("BE", "Business");
-      if($this->contains('psyc')) return array("PY", "Psycology");
+      if($this->contains('psyc')) return array("PY", "Psychology");
 
       if($this->contains('physics')) return array("PH", "Physics");
       if($this->contains('chemistry')) return array("CH", "Chemistry");

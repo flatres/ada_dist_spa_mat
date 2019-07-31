@@ -57,6 +57,10 @@ class Subject
     public $position = 0;
     public $summaryData = array();
     public $isNumeric = false;
+    public $isGCSE = true;
+    public $title;
+    public $unknown = false;
+    public $level;
 
     public function __construct(array $result)
     {
@@ -65,6 +69,10 @@ class Subject
       $this->boardName = $result['boardName'];
       $this->boardDesc = $result['boardDesc'];
       $this->intUABCode = $result['intUABCode'];
+      $this->title = $result['txtOptionTitle'];
+      $this->unknown = $result['subjectCode'] == '-' ? true : false;
+      $this->level = 'GCSE';
+      
     }
 
     public function setResult(\Exams\Tools\GCSE\Result &$result)

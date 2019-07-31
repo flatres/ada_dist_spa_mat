@@ -42,7 +42,7 @@ class Result
         $this->subjectCode = $result['subjectCode'];
         $this->moduleCode = $result['txtModuleCode'];
         $this->grade = $result['grade'];
-        $this->NCYear = $result['NCYear'];
+        $this->NCYear = $result['NCYear'] ?? 0;
 
         $points = 0;
         $pass = 1;
@@ -56,7 +56,9 @@ class Result
     {
       if(!$grade) return;
 
-
+      $points = 0;
+      $pass = 0;
+      $fail = 0;
       switch(strtoupper($grade))
       { //C is equivalent to a 4 in the system divergence
         //https://www.cgpbooks.co.uk/gcse_grades_9_1_explained
