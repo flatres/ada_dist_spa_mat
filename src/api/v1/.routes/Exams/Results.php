@@ -24,6 +24,7 @@ class Results
        $this->resultKeys = array(); //key r_{id}
        $this->lowestFileID = 9999999999;
        $this->cache = new \Exams\Tools\Cache($container);
+       $this->moduleResults = [];
     }
 
     /**
@@ -162,7 +163,15 @@ class Results
                                                   'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
                                                   "intResultsID = ? AND $s AND txtCertificationType='C'",
                                                   array($resultFile['id']));
-
+                                                  
+        if (!$args['isGCSE']) {
+          $moduleResults = $this->sql->select( 'TblExamManagerResultsStore',
+                                                    'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtUniformMarkScale as mark, txtMaxMark as total, txtUniformGrade as grade',
+                                                    "intResultsID = ? AND $s AND txtCertificationType <> 'C' ORDER BY txtLevel ASC",
+                                                    array($resultFile['id']));
+          $this->moduleResults = array_merge($this->moduleResults, $moduleResults);
+        }
+          
         if($this->lowestFileID > $resultFile['id']) $this->lowestFileID = $resultFile['id'];
 
         $this->processResults($resultsFileResults);
@@ -172,7 +181,7 @@ class Results
       $data['results'] = $this->results;
 
       if ($fileIndex > 1) {
-        $statistics = $this->isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Exams\Tools\ALevel\StatisticsGateway($this->sql, $this->console) ;
+        $statistics = $this->isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Exams\Tools\ALevel\StatisticsGateway($this->sql, $this->console, $this->moduleResults) ;
         $data['statistics'] = $statistics->makeStatistics($this->session, $this->results, $this->cache);
       }
       $this->error ? $console->error("Finished WITH ERRORS") : $console->publish("Finished");
@@ -195,18 +204,17 @@ class Results
 
       $i = 0;
       $this->console->publish('Students: 0 / ' . $studentsCount,1);
-
+      
       foreach($this->studentData as $student){
         $i++;
-        if($i % 10 == 0) $this->console->replace("Students: $i / $studentsCount");
-
-        $s = $isGCSE ? "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')" : ' txtQualification <> "FSMQ" AND txtQualification <> "GCSE"';
-
+        if($i % 10 == 0) $this->console->publish("Students: $i / $studentsCount");
+        
+        $s = $isGCSE ? "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')" : " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
         $resultsData = $this->sql->select(  'TblExamManagerResultsStore',
-                                            'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
+                                            'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtLevel, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
                                             "$s AND txtCertificationType='C' AND txtSchoolID = ? AND intResultsID < ?",
                                             array($student['txtSchoolID'], $this->lowestFileID));
-
+        
         $this->processResults($resultsData, true);
       }
       $this->console->replace("$studentsCount / $studentsCount");

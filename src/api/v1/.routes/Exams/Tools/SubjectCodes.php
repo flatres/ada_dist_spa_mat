@@ -94,7 +94,11 @@ class SubjectCodes
       // if($this->contains('math') && $this->contains('fur')) return 'MX';
       if($this->contains('math') && $this->contains('add')) return array('ADD', 'Additional Maths');
       if($this->contains('math')) return array('MA', 'Maths');
+      if($this->contains('mechanics')) return array('MA', 'Maths');
+      if($this->contains('statistics')) return array('MA', 'Maths');
+      if($this->contains('further pure')) return array('MA', 'Maths');
 
+      if($this->contains('classic')) return array("CL", "Classics");
       if($this->contains('art') )return array('AR', 'Art');
       if($this->contains('design')) return array("DT", 'Design Tech');
       if($this->contains('D&T')) return array("DT", 'Design Tech');
@@ -125,7 +129,6 @@ class SubjectCodes
       if($this->contains('politics')) return array("PO", "Politics");
       if($this->contains('religious')) return array("RE", "Religious Studies");
       if($this->contains('philosophy')) return array("PX", "Philosophy");
-      if($this->contains('classic')) return array("CL", "Classics");
       if($this->contains('business')) return array("BE", "Business");
       if($this->contains('psyc')) return array("PY", "Psychology");
 

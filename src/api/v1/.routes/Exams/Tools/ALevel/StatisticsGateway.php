@@ -33,24 +33,26 @@ class StatisticsGateway
   public $years = array();
   public $data;
   public $spreadsheet;
+  public $moduleResults;
 
   private $sql;
   private $console;
 
-  public function __construct(\Dependency\Databases\ISams $sql, \Sockets\Console $console)
+  public function __construct(\Dependency\Databases\ISams $sql, \Sockets\Console $console, array $moduleResults)
   {
      $this->sql= $sql;
      $this->console = $console; //for caching student data
      $this->console->publish("Building statistics");
+     $this->moduleResults = $moduleResults;
 
   }
 
   public function makeStatistics(array $session, array $results, \Exams\Tools\Cache $cache)
   {
     $this->results = $results;
-    $this->data = new \Exams\Tools\ALevel\Statistics($this->sql, $this->console);
+    $this->data = new \Exams\Tools\ALevel\Statistics($this->sql, $this->console, $this->moduleResults);
     $this->data->makeStatistics($session, $this->results, $cache);
-
+    unset($this->results);
     // $this->spreadsheet = new SpreadsheetRenderer($session, $this->console, $this);
     // $this->cemSpreadsheet = new CemSpreadsheetRenderer($session, $this->console, $this);
     return $this;

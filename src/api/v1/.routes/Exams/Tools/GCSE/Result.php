@@ -33,6 +33,12 @@ class Result
     public $points = 0;
     public $passes = 1;
     public $fails = 0;
+    public $NCYear;
+    public $txtGender;
+    public $txtForename;
+    public $txtSurname;
+    public $txtHouseCode;
+    public $txtLevel;
 
     public function __construct(array $result = null)
     {
@@ -43,6 +49,12 @@ class Result
         $this->moduleCode = $result['txtModuleCode'];
         $this->grade = $result['grade'];
         $this->NCYear = $result['NCYear'] ?? 0;
+        $this->txtGender = $result['txtGender'];
+        $this->txtInitialedName = $result['txtInitialedName'];
+        $this->txtForename = $result['txtForename'];
+        $this->txtSurname = $result['txtSurname'];
+        $this->txtHouseCode = $result['txtHouseCode'];
+        $this->txtLevel = $result['txtLevel'];
 
         $points = 0;
         $pass = 1;

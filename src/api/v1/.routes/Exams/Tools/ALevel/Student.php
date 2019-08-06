@@ -47,7 +47,8 @@ class Student
                             'M3'  => 0,
                             'P1'  => 0,
                             'P2'  => 0,
-                            'P3'  => 0
+                            'P3'  => 0,
+                            'PU'  => 0
                           ];
     public $points = 0;
     public $passes = 0;
@@ -70,10 +71,10 @@ class Student
 
     }
 
-    public function setResult(\Exams\Tools\ALevel\Result &$result)
+    public function setResult(\Exams\Tools\ALevel\Result $result)
     {
-      $this->results['r_' . $result->id] = &$result;
-      $this->subject[$result->subjectCode] = &$result;
+      $this->results['r_' . $result->id] = $result;
+      $this->subject[$result->subjectCode] = $result;
       $this->{$result->subjectCode} = $result->grade; //useful for constructing tables
 
       $this->passes += $result->passes;
@@ -86,6 +87,13 @@ class Student
       if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
       $this->gradeCounts[$grade]++;
     }
+    
+    public function setModuleResult(array $moduleResult)
+    {
+        $subjectCode = $moduleResult['subjectCode'];
+        if (!isset($this->modules[$subjectCode])) $this->modules[$subjectCode] = [];
+        $this->modules[$subjectCode][] = $moduleResult;
+    }
 
     public function makeSummaryData()
     {
@@ -97,7 +105,7 @@ class Student
 
       // $this->numericGradeAverage = $this->numericResultCount == 0 ? 0 : round($this->numericPoints / $this->numericResultCount, 2);
       // $this->letterGradeAverage = $this->letterResultCount == 0 ? 0 : round($this->letterPoints / $this->letterResultCount, 2);
-      
+
 
       //total candidates
       $summaryData[] = array('desc' => 'Total Candidates', 'val' => 1, 'type' => 'Absolute');

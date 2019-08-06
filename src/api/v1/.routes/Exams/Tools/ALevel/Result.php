@@ -33,14 +33,30 @@ class Result
     public $points = 0;
     public $passes = 1;
     public $fails = 0;
+    public $level;
+    public $NCYear;
+    public $txtGender;
+    public $txtForename;
+    public $txtSurname;
+    public $txtHouseCode;
+    public $txtLevel;
 
     public function __construct(array $result)
     {
         $this->id = $result['id'];
         $this->subjectCode = $result['subjectCode'];
         $this->moduleCode = $result['txtModuleCode'];
+        $this->gender = $result['txtGender'];
         $this->grade = $result['grade'];
+        $this->isNewSixthForm = $result['isNewSixthForm'];
         $this->NCYear = $result['NCYear'] ?? 0;
+        $this->txtGender = $result['txtGender'];
+        $this->txtInitialedName = $result['txtInitialedName'];
+        $this->txtForename = $result['txtForename'];
+        $this->txtSurname = $result['txtSurname'];
+        $this->txtHouseCode = $result['txtHouseCode'];
+        $this->txtLevel = $result['txtLevel'];
+        $this->txtSubjectName = $result['subjectName'];
 
         $points = 0;
         $ucasPoints = 0;
@@ -70,6 +86,15 @@ class Result
         $this->points = $points;
         $this->passes = $pass;
         $this->fails = $fail;
+        
+        switch($result['txtLevel']) {
+            case 'A'  : $level = 'A'; break;
+            case 'ASB': $level = 'AS'; break;
+            case 'FC': $level = 'PreU'; break;
+            case 'B' : $level = 'EPQ'; break;
+            default: $level = 'unknown';
+        }
+        $this->level = $level;
     }
 
 }

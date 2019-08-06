@@ -56,10 +56,11 @@ class Subject
     public $fails = 0;
     public $resultCount = 0;
     public $position = 0;
-    public $summaryData = array();
+    public $summaryData = [];
     public $isGCSE = false;
     public $level;
     public $title;
+    public $modules = [];
 
 
     public function __construct(array $result)
@@ -74,20 +75,30 @@ class Subject
 
       switch($result['txtLevel']) {
           case 'A'  : $level = 'A'; break;
-          case 'ASB': $level = 'AS'; break;
-          case 'FC': $level = 'Pre U'; break;
+          case 'ASB': $level = 'A'; break;
+          case 'FC': $level = 'PreU'; break;
           case 'B' : $level = 'EPQ'; break;
           default: $level = 'unknown';
       }
       $this->level = $level;
     }
 
-    public function setResult(\Exams\Tools\ALevel\Result &$result)
+    public function setModuleResult(array $moduleResult)
     {
-
+        $moduleCode = $moduleResult['txtModuleCode'];
+        if (!isset($this->modules['m_' . $moduleCode])) {
+          $this->modules['m_' . $moduleCode] = new \Exams\Tools\ALevel\Module($moduleResult);
+        } else {
+          $this->modules['m_' . $moduleCode]->setResult($moduleResult);
+        }
+    }
+    
+    public function setResult(\Exams\Tools\ALevel\Result $result)
+    {
+      if ($result->txtLevel === 'ASB') return;
       // if($result->NCYear < 11) return;
       $this->results['r_' . $result->id] = &$result;
-
+      
       $this->passes += $result->passes;
       $this->fails += $result->fails;
       $this->points += $result->points;
@@ -107,28 +118,49 @@ class Subject
       $this->students['s_' . $txtSchoolID] = &$student;
     }
 
+    public function sortResults()
+    {
+      if (count($this->results) > 0)  usort($this->results ,'self::sort');
+    }
+    
+    private static function sort($a, $b)
+    {
+      // if (!isset($a->txtSurname) || !isset($b->txtSurname)) return true;
+      return strcmp($a->txtSurname, $b->txtSurname);
+    }
+    
     public function makeSummaryData(int $year)
     {
       $sD = array();
+      
+      $this->sortResults();
 
       $gradeCounts = $this->gradeCounts;
-
+      
       $sD['year'] = $year;
-      $sD['gradeAverage'] = round($this->points / $this->resultCount, 2);
-      $sD['ucasAverage'] = round($this->ucasPoints / $this->resultCount, 2);
+      $sD['gradeAverage'] = $this->resultCount > 0 ? round($this->points / $this->resultCount, 2) : 0;
+      $sD['ucasAverage'] = $this->resultCount > 0 ? round($this->ucasPoints / $this->resultCount, 2) : 0;
       $sD['candidateCount'] = $this->resultCount;
 
       $As = $gradeCounts['A*'];
-      $sD['%Astar'] = round(100 * $As / $this->resultCount);
+      $sD['%Astar'] = $this->resultCount > 0 ? round(100 * $As / $this->resultCount) :0 ;
+      $sD['board'] = $this->boardName;
 
       $As = $gradeCounts['A*'] + $gradeCounts['A'];
-      $sD['%As'] = round(100 * $As / $this->resultCount);
+      $sD['%As'] = $this->resultCount > 0 ? round(100 * $As / $this->resultCount) : 0 ;
 
       $ABs = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'];
-      $sD['%ABs'] = round(100 * $ABs / $this->resultCount);
+      $sD['%ABs'] = $this->resultCount > 0 ? round(100 * $ABs / $this->resultCount) : 0;
 
-      $sD['%passRate'] = round(100 * $this->passes / $this->resultCount);
-      
+      $sD['%passRate'] = $this->resultCount > 0 ? round(100 * $this->passes / $this->resultCount) : 0;
+      if (count($this->results) > 0){
+        $sD['pointsAvg'] = round($this->points / count($this->results), 2);
+      } else {
+        $sD['pointsAvg'] = 0;
+      }
+
+      $sD['gradeCounts'] = $this->gradeCounts;
+
       //add this year to summary data for easy graphing
       $sD['history'] = [$sD];
 

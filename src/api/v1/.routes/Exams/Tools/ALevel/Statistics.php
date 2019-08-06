@@ -37,16 +37,24 @@ class Statistics
     public $maleStudents = array(); //key s_{txtSchoolID}
     public $femaleStudents = array();
     public $summaryData = array();
+    public $averages = [];
     public $earlyResults = array();
     public $year;
 
     private $error = false;
+    private $typeKey;
+    private $joinKey;
+    private $genderKey;
+    private $sql;
+    private $console;
+    public $moduleResults;
 
-    public function __construct(\Dependency\Databases\ISams $sql, \Sockets\Console $console)
+    public function __construct(\Dependency\Databases\ISams $sql, \Sockets\Console $console, $moduleResults)
     {
        $this->sql= $sql;
        $this->console = $console; //for caching student data
        $this->console->publish("Building Statistics");
+       $this->moduleResults = $moduleResults;
 
     }
 
@@ -61,7 +69,7 @@ class Statistics
       $this->console->publish("Sorting Results $i / $count", 1);
 
       foreach($results as $result){
-        if($result['NCYear'] != 13) continue;
+        // if($result['NCYear'] != 13) continue;
 
         $i++;
         if($i % 100 == 0) $this->console->replace("Sorting Results $i / $count");
@@ -86,9 +94,11 @@ class Statistics
       }
       $year = $session['year'];
       $this->year = $year;
+      $this->processModules();
       $this->makeSummaryData($results);
       $this->makeHouseSummaryData();
       $this->makeSubjectSummaryData($year);
+      $this->makeSchoolData($year);
       $this->makeHistoricalData($year);
 
       $this->console->replace("Sorting Results $count / $count");
@@ -97,7 +107,124 @@ class Statistics
 
       unset($this->console);
       unset($this->sql);
+      unset($this->results);
       return $this;
+    }
+    
+    private function processModules()
+    {
+      $count = count($this->moduleResults);
+      $this->console->publish("Processing $count Module Results...", 1);
+      foreach ($this->moduleResults as &$moduleResult){
+        //try to determine the subject code
+        $objSubject = new \Exams\Tools\SubjectCodes($moduleResult['txtModuleCode'], $moduleResult['txtOptionTitle'], $this->sql);
+        
+        if($objSubject->subjectCode == '-') {
+          $this->console->error('!!WARNING!! Couldnt match subject code to ' . $objSubject->txtOptionTitle);
+          $this->error = true;
+          continue;
+        }
+        if (!isset($this->subjectResults[$objSubject->subjectCode])){
+          $this->console->error('!!WARNING!! Could not find subject ' . $objSubject->txtOptionTitle . 'with code ' . $objSubject->subjectCode);
+          continue;
+        }
+        $moduleResult['subjectCode'] = $objSubject->subjectCode;
+        //merge in student data from the all sudents
+        if (isset($this->allStudents['s_' . $moduleResult['txtSchoolID']])){
+          $s = &$this->allStudents['s_' . $moduleResult['txtSchoolID']];
+          $moduleResult['txtGender'] = $s->txtGender;
+          $moduleResult['txtInitialedName'] = $s->txtInitialedName;
+          $moduleResult['txtForename'] = $s->txtForename;
+          $moduleResult['txtSurname'] = $s->txtSurname;
+          $moduleResult['txtHouseCode'] = $s->txtHouseCode;
+          $s->setModuleResult($moduleResult);
+        }
+        $this->subjectResults[$objSubject->subjectCode]->setModuleResult($moduleResult);
+      }
+      
+      //sort results
+      foreach($this->subjectResults as &$subject){
+        foreach($subject->modules as &$module){
+          $module->sortResults();
+        }
+      }
+      unset($this->moduleResults);
+    }
+    // https://stackoverflow.com/questions/6086267/how-to-merge-two-arrays-by-summing-the-merged-values
+    private function combineGradeCounts($gradeCounts, $student)
+    {
+      $a1 = $gradeCounts;
+      $a2 = $student->gradeCounts;
+      $sums = array();
+      foreach (array_keys($a1 + $a2) as $key) {
+          $sums[$key] = @($a1[$key] + $a2[$key]);
+      }
+      return $sums;
+    }
+
+    private function makeSchoolData()
+    {
+      $this->console->publish('Making School Summary Data');
+      $data = [];
+      $gradeCounts = [ 'A*'  => 0,
+                        'A'   => 0,
+                        'B'   => 0,
+                        'C'   => 0,
+                        'D'   => 0,
+                        'E'   => 0,
+                        'U'   => 0,
+                        'D1'  => 0,
+                        'D2'  => 0,
+                        'D3'  => 0,
+                        'M1'  => 0,
+                        'M2'  => 0,
+                        'M3'  => 0,
+                        'P1'  => 0,
+                        'P2'  => 0,
+                        'P3'  => 0
+                      ];
+      $boysAvg = $girlsAvg = $allAvg = $newAvg = 0;
+      $boysCount = $girlsCount = $allCount = $newCount = 0;
+      $boysGradeCounts = $gradeCounts;
+      $girlsGradeCounts = $gradeCounts;
+      $newGradeCounts = $gradeCounts;
+      $allGradeCounts = $gradeCounts;
+
+      foreach ($this->allStudents as $student) {
+        $avg = $student->points;
+        if ($student->txtGender === 'M') {
+          $boysAvg += $avg;
+          $boysCount++;
+          $boysGradeCounts = $this->combineGradeCounts($boysGradeCounts, $student);
+        } else {
+          $girlsAvg += $avg;
+          $girlsCount++;
+          $girlsGradeCounts = $this->combineGradeCounts($girlsGradeCounts, $student);
+        }
+        if ($student->isNewSixthForm === true) {
+          $newAvg += $avg;
+          $newCount++;
+          $newGradeCounts = $this->combineGradeCounts($newGradeCounts, $student);
+        }
+        $allAvg += $avg;
+        $allCount++;
+        $allGradeCounts = $this->combineGradeCounts($allGradeCounts, $student);
+      }
+      $data['year'] = $this->year;
+      $data['boysAvg'] = $boysCount > 0 ? round($boysAvg / $boysCount, 2) : 0;
+      $data['girlsAvg'] = $girlsCount > 0 ? round($girlsAvg / $girlsCount, 2) : 0;
+      $data['allAvg'] = $allCount > 0 ? round($allAvg / $allCount, 2) : 0;
+      $data['newAvg'] = $newCount > 0 ? round($newAvg / $newCount, 2) : 0;
+
+      $gradeCounts = [];
+      $gradeCounts['boys'] = $boysGradeCounts;
+      $gradeCounts['girls'] = $girlsGradeCounts;
+      $gradeCounts['new'] = $newGradeCounts;
+      $gradeCounts['all'] = $allGradeCounts;
+      $data['gradeCounts'] = $gradeCounts;
+
+      $this->averages = $data;
+      $this->history = [$data];
     }
 
     private function makeHistoricalData(int $year)
@@ -117,7 +244,8 @@ class Statistics
           }
           $this->console->publish('Cached data found for ' . $year);
           $statistics = $data['statistics']['data'];
-          
+
+          $this->history[] = $statistics['averages'] ?? null;
           //subject data
           $subjects = $statistics['subjectResults'];
           foreach ($subjects as $subject) {
@@ -125,10 +253,11 @@ class Statistics
             $summaryData = $subject['summaryData'];
             $summaryData['year'] = (int)$year;
             if (isset($this->subjectResults[$code])) {
+              unset($summaryData['history']);
               $this->subjectResults[$code]->summaryData['history'][] = $summaryData;
             }
           }
-          
+
           // house Data
           $houses= $statistics['houseResults'];
           foreach ($houses as $house) {
@@ -136,6 +265,7 @@ class Statistics
             $summaryData = $house['summaryData'];
             $summaryData['year'] = (int)$year;
             if (isset($this->houseResults[$code])) {
+              unset($summaryData['history']);
               $this->houseResults[$code]->summaryData['history'][] = $summaryData;
             }
           }
@@ -244,16 +374,47 @@ class Statistics
       foreach($this->houseResults as $house){
         $house->makeSummaryData($this->year);
       }
-      usort($this->houseResults ,'self::pointsSort');
-      $newHouseArray = array();
-      for ($i=0; $i < count($this->houseResults); $i++) {
-        $this->houseResults[$i]->position = $i + 1;
-        $newHouseArray[$this->houseResults[$i]->txtHouseCode] = $this->houseResults[$i];
+
+      //fetch one of the data arrays so that it's structure can be used
+      $data = $this->houseResults['C1']->data;
+      foreach($data as $typeKey => &$type){
+        foreach($type as $joinKey => &$joins){
+          foreach($joins as $genderKey => &$gender){
+              $this->typeKey = $typeKey;
+              $this->joinKey = $joinKey;
+              $this->genderKey = $genderKey;
+              foreach($this->houseResults as &$house){
+                $house->typeKey = $typeKey;
+                $house->joinKey = $joinKey;
+                $house->genderKey = $genderKey;
+              }
+
+              usort($this->houseResults ,'self::pointsSortHouse');
+              $newHouseArray = array();
+              for ($i=0; $i < count($this->houseResults); $i++) {
+                $this->houseResults[$i]->data[$typeKey][$joinKey][$genderKey]['position'] = $i + 1;
+                $newHouseArray[$this->houseResults[$i]->txtHouseCode] = $this->houseResults[$i];
+              }
+              $this->houseResults = $newHouseArray;
+          }
+        }
       }
-      $this->houseResults = $newHouseArray;
+
+      foreach($this->houseResults as &$house){
+        $house->summaryData['data'] = $house->data;
+      }
+
     }
 
     // https://stackoverflow.com/questions/6053994/using-usort-in-php-with-a-class-private-function
+    private static function pointsSortHouse($a, $b)
+    {
+     $typeKey = $a->typeKey;
+     $joinKey = $a->joinKey;
+     $genderKey = $a->genderKey;
+     return $a->data[$typeKey][$joinKey][$genderKey]['pointsAvg'] < $b->data[$typeKey][$joinKey][$genderKey]['pointsAvg'];
+    }
+
     private static function pointsSort($a, $b)
     {
      return $a->summaryData['gradeAverage'] < $b->summaryData['gradeAverage'];
