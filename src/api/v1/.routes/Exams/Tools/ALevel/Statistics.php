@@ -163,12 +163,12 @@ class Statistics
         $moduleResult['level'] = $level;
 
         if($objSubject->subjectCode == '-') {
-          $this->console->error('!!WARNING!! Couldnt match subject code to ' . $objSubject->txtOptionTitle);
+          // $this->console->error('!!WARNING!! Couldnt match subject code to ' . $objSubject->txtOptionTitle);
           // $this->error = true;
           continue;
         }
         if (!isset($this->subjectResults[$level][$objSubject->subjectCode])){
-          $this->console->error('!!WARNING!! Could not find subject ('.$level.')' . $objSubject->txtOptionTitle . 'with code ' . $objSubject->subjectCode);
+          // $this->console->error('!!WARNING!! Could not find subject ('.$level.')' . $objSubject->txtOptionTitle . 'with code ' . $objSubject->subjectCode);
           continue;
         }
         $i++;
