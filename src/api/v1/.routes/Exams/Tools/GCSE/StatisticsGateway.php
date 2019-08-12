@@ -66,22 +66,14 @@ class StatisticsGateway
     if(count($this->hundredResults) > 0){
       $this->console->publish('Hundred statistics', 1);
       $this->hundredStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
-<<<<<<< HEAD:src/api/v1/.routes/Data/Exams/Tools/GCSE/StatisticsGateway.php
-      $this->hundredStats->makeStatistics($this->hundredResults);
-=======
       $this->hundredStats->makeStatistics($session, $this->hundredResults, $cache);
->>>>>>> fdf0c77013b847f7dfed7d778b57905b58063f51:src/api/v1/.routes/Exams/Tools/GCSE/StatisticsGateway.php
       $this->years[] = array('label' => 'Hundred', 'value' => 11);
     }
     //make stats for each year with results
     if(count($this->removeResults) > 0){
       $this->console->publish('Remove statistics', 1);
       $this->removeStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
-<<<<<<< HEAD:src/api/v1/.routes/Data/Exams/Tools/GCSE/StatisticsGateway.php
-      $this->removeStats->makeStatistics($this->removeResults);
-=======
       $this->removeStats->makeStatistics($session, $this->removeResults, $cache);
->>>>>>> fdf0c77013b847f7dfed7d778b57905b58063f51:src/api/v1/.routes/Exams/Tools/GCSE/StatisticsGateway.php
       $this->years[] = array('label' => 'Remove', 'value' => 10);
     }else{
       $this->console->publish('No remove results found', 2);
@@ -89,13 +81,8 @@ class StatisticsGateway
     //make stats for each year with results
     if(count($this->shellResults) > 0){
       $this->console->publish('Shell statistics', 1);
-<<<<<<< HEAD:src/api/v1/.routes/Data/Exams/Tools/GCSE/StatisticsGateway.php
-      $this->shellStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
-      $this->shellStats->makeStatistics($this->shellResults);
-=======
       $this->shellStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console, $cache);
       $this->shellStats->makeStatistics($session, $this->shellResults);
->>>>>>> fdf0c77013b847f7dfed7d778b57905b58063f51:src/api/v1/.routes/Exams/Tools/GCSE/StatisticsGateway.php
       $this->years[] = array('label' => 'Shell', 'value' => 9);
     } else {
       $this->console->publish('No shell results found', 2);

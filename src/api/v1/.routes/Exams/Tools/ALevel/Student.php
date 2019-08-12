@@ -51,10 +51,12 @@ class Student
                             'PU'  => 0
                           ];
     public $points = 0;
+    public $ucasPoints = 0;
     public $passes = 0;
     public $fails = 0;
     public $resultCount = 0;
     public $summaryData = array();
+    public $gradeAverage = 0;
 
     public function __construct(array $result)
     {
@@ -74,12 +76,15 @@ class Student
     public function setResult(\Exams\Tools\ALevel\Result $result)
     {
       $this->results['r_' . $result->id] = $result;
+
+      if ($result->level === 'AS') return; //otherwise data doesn't dovetail well with new ucas points (no AS levels now)
       $this->subject[$result->subjectCode] = $result;
       $this->{$result->subjectCode} = $result->grade; //useful for constructing tables
 
       $this->passes += $result->passes;
       $this->fails += $result->fails;
       $this->points += $result->points;
+      $this->ucasPoints += $result->ucasPoints;
       $this->resultCount++;
 
       $grade = strtoupper($result->grade);
@@ -87,7 +92,7 @@ class Student
       if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
       $this->gradeCounts[$grade]++;
     }
-    
+
     public function setModuleResult(array $moduleResult)
     {
         $subjectCode = $moduleResult['subjectCode'];
@@ -100,80 +105,76 @@ class Student
       $summaryData = array();
 
       $gradeCounts = $this->gradeCounts;
+      $this->gradeAverage = 0;
+
+      if ($this->resultCount === 0) return;
 
       $this->gradeAverage = round($this->points / $this->resultCount, 2);
 
-      // $this->numericGradeAverage = $this->numericResultCount == 0 ? 0 : round($this->numericPoints / $this->numericResultCount, 2);
-      // $this->letterGradeAverage = $this->letterResultCount == 0 ? 0 : round($this->letterPoints / $this->letterResultCount, 2);
+      $gradeCounts = $this->gradeCounts;
 
+      //determine which type of exam the subject is primarily and use that count
+      $count = $this->resultCount;
 
-      //total candidates
-      $summaryData[] = array('desc' => 'Total Candidates', 'val' => 1, 'type' => 'Absolute');
+      // $sD['%Astar'] = 0;
+      // $sD['%As'] = 0;
+      // $sD['%ABs'] = 0;
+      // $sD['%ABCs'] = 0;
+      // $sD['%ABCDs'] = 0;
+      // $sD['%ABCDEs'] = 0;
+      // $sD['%passRate'] = 0;
+      // $sD['%D'] = 0;
+      // $sD['%M'] = 0;
+      // $sD['%P'] = 0;
+      //
+      // if (($this->level === 'A' || $this->level === 'AS') && $count > 0) {
+      //   $As = $gradeCounts['A*'];
+      //   $sD['%Astar'] = round(100 * $As / $count);
+      //
+      //   $As = $gradeCounts['A*'] + $gradeCounts['A'];
+      //   $sD['%As'] = round(100 * $As / $count);
+      //
+      //   $ABs = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'];
+      //   $sD['%ABs'] = round(100 * $ABs / $count);
+      //
+      //   $c = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'] + $gradeCounts['C'];
+      //   $sD['%ABCs'] = round(100 * $c / $count);
+      //
+      //   $c = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'] + $gradeCounts['C'] + $gradeCounts['D'];
+      //   $sD['%ABCDs'] = round(100 * $c / $count);
+      //
+      //   $c = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'] + $gradeCounts['C'] + $gradeCounts['D'] + $gradeCounts['E'];
+      //   $sD['%ABCDEs'] = round(100 * $c / $count);
+      // }
+      //
+      // if ($this->level === 'PreU' && $count > 0) {
+      //   $D = $gradeCounts['D1'] + $gradeCounts['D2'] + $gradeCounts['D3'];
+      //   $sD['%D'] = round(100 * $D / $count);
+      //
+      //   $M = $gradeCounts['M1'] + $gradeCounts['M2'] + $gradeCounts['M3'];
+      //   $sD['%M'] = round(100 * $M / $count);
+      //
+      //   $P = $gradeCounts['P1'] + $gradeCounts['P2'] + $gradeCounts['P3'];
+      //   $sD['%P'] = round(100 * $P / $count);
+      // }
 
-      $Astars =  $gradeCounts['A*'];
-      $As = $gradeCounts['A*'] + $gradeCounts['A'];
-      $ABs = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'];
-      $ABC = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'] + $gradeCounts['C'];
+      if ($count > 0){
+        $points = $this->points;
+        $ucas = $this->ucasPoints;
+        // $sD['%passRate'] = round(100 * $this->passes / $count);
+        $sD['gradeAverage'] = round($points / $count, 2);
+        $this->gradeAverage = $sD['gradeAverage'];
+        $sD['ucasAverage'] = round($ucas / $count, 2);
+        $sD['pointsAvg'] = round($points / $count, 2);
+      } else {
+        $sD['pointsAvg'] = 0;
+        // $sD['%passRate'] = 0;
+        $sD['gradeAverage'] = 0;
+        $this->gradeAverage = $sD['gradeAverage'];
+        $sD['ucasAverage'] = 0;
+      }
 
-      //percentages*
-      $summaryData[] = array('desc' => 'Has A*', 'val' => $Astars > 0 ? 1 : 0, 'type' => 'absolute');
-      $summaryData[] = array('desc' => 'Has A*A', 'val' => $As > 0 ? 1 : 0, 'type' => 'absolute');
-
-      $summaryData[] = array('desc' => 'A*', 'val' => $Astars, 'type' => 'Results%');
-      $summaryData[] = array('desc' => 'A* + A', 'val' => $As, 'type' => 'Results%');
-      $summaryData[] = array('desc' => 'A* + A + B', 'val' => $ABs , 'type' => 'Results%');
-
-      $summaryData[] = array('desc' => 'Failures', 'val' => $this->fails, 'type' => 'Results%');
-      // $summaryData[] =  array('desc' => 'Passes', 'val' => $this->passes, 'type' => 'Results%');
-
-      $summaryData[] =  array('desc' => 'No Grade Below B', 'val' => $ABs == $this->resultCount ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] =  array('desc' => 'No Grade Below C', 'val' => $ABC == $this->resultCount ? 1 : 0, 'type' => 'Students%');
-      // $summaryData[] =  array('desc' => 'Percentage Students with No Grade Below C', 'val' => $this->fails == 0 ? 1 : 0, 'type' => 'Students%');
-
-      $summaryData[] =  array('desc' => '3 or Fewer Passes', 'val' => $this->passes < 4 ? 1 : 0, 'type' => 'Students%');
-
-      $summaryData[] = array('desc' => '9 or more As', 'val' => $As > 8 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '6 or more As', 'val' => $As > 5 ? 1 : 0, 'type' => 'Students%');
-
-      $summaryData[] = array('desc' => 'Only 7 passes', 'val' => $this->passes == 7 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => 'Only 6 passes', 'val' => $this->passes == 6 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => 'Only 5 passes', 'val' => $this->passes == 5 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => 'Fewer than 4 passes', 'val' => $this->passes < 4 ? 1 : 0, 'type' => 'Students%');
-
-      $summaryData[] = array('desc' => '13 As', 'val' => $As == 13 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '12 As', 'val' => $As == 12 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '11 As', 'val' => $As == 11 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '10 As', 'val' => $As == 10 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '9 As', 'val' => $As == 9 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '8 As', 'val' => $As == 8 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '7 As', 'val' => $As == 7 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '6 As', 'val' => $As == 6 ? 1 : 0, 'type' => 'Students%');
-
-      /////LETTER GRADES ONLY
-      $Astars =  $gradeCounts['A*'];
-      $As = $gradeCounts['A*'] + $gradeCounts['A'];
-      $ABs = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'];
-      $ABC = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'] + $gradeCounts['C'];
-
-      //percentages*
-      $summaryData[] = array('desc' => 'A*', 'val' => $Astars, 'type' => 'Results%');
-      $summaryData[] = array('desc' => 'A* + A', 'val' => $As, 'type' => 'Results%');
-      $summaryData[] = array('desc' => 'A* + A + B', 'val' => $ABs , 'type' => 'Results%');
-
-      $summaryData[] =  array('desc' => 'No Grade Below B', 'val' => $ABs == $this->resultCount ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] =  array('desc' => 'No Grade Below C ', 'val' => $ABC == $this->resultCount ? 1 : 0, 'type' => 'Students%');
-
-      $summaryData[] = array('desc' => '9 or more As', 'val' => $As > 8 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '6 or more As', 'val' => $As > 5 ? 1 : 0, 'type' => 'Students%');
-
-      $summaryData[] = array('desc' => '13 As', 'val' => $As == 13 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '12 As', 'val' => $As == 12 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '11 As', 'val' => $As == 11 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '10 As', 'val' => $As == 10 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '9 As', 'val' => $As == 9 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '8 As', 'val' => $As == 8 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '7 As', 'val' => $As == 7 ? 1 : 0, 'type' => 'Students%');
-      $summaryData[] = array('desc' => '6 As', 'val' => $As == 6 ? 1 : 0, 'type' => 'Students%');
+      $sD['gradeCounts'] = $this->gradeCounts;
 
       $this->summaryData = $summaryData;
     }

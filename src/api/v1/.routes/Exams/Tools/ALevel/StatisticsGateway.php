@@ -47,13 +47,14 @@ class StatisticsGateway
 
   }
 
-  public function makeStatistics(array $session, array $results, \Exams\Tools\Cache $cache)
+  public function makeStatistics(array $session, array &$results, \Exams\Tools\Cache $cache)
   {
     $this->results = $results;
     $this->data = new \Exams\Tools\ALevel\Statistics($this->sql, $this->console, $this->moduleResults);
     $this->data->makeStatistics($session, $this->results, $cache);
     unset($this->results);
-    // $this->spreadsheet = new SpreadsheetRenderer($session, $this->console, $this);
+    unset($this->moduleResults);
+    $this->spreadsheet = new SpreadsheetRenderer($session, $this->console, $this);
     // $this->cemSpreadsheet = new CemSpreadsheetRenderer($session, $this->console, $this);
     return $this;
   }

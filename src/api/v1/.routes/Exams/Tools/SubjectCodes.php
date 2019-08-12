@@ -38,8 +38,13 @@ namespace Exams\Tools;
 class SubjectCodes
 {
     public $subjectCode;
+    public $level;
+    // public $boardName;
+    // public $boardDesc;
 
-    public function __construct(string $moduleCode, string $subjectTitle, $sql)
+    private static $boardInfo = [];
+
+    public function __construct(string $moduleCode, string $subjectTitle, $sql, $level = null, $supressBoard = false)
     {
        $this->sql= $sql;
        $this->txtModuleCode = $moduleCode;
@@ -47,12 +52,37 @@ class SubjectCodes
        $codes = $this->getCodes();
        $this->subjectCode = $codes[0];
        $this->subjectName = $codes[1];
-       $this->getBoardInformation();
+       if (!$supressBoard) {
+         $this->getBoardInformation() ;
+       } else {
+         $this->intUABCode = 0;
+         $this->boardDesc = '-';
+         $this->boardName = '-';
+       };
+
+       switch($level) {
+           case 'A'  : $level = 'A'; break;
+           case 'ASB': $level = 'AS'; break;
+           case 'FC': $level = 'PreU'; break;
+           case 'B' : $level = 'EPQ'; break;
+           default: $level = '';
+       }
+
+       $this->level = $level;
     }
 
     private function getBoardInformation(){
 
       $moduleCode = $this->txtModuleCode;
+
+      if (isset(self::$boardInfo[$moduleCode])){
+        var_dump(self::$boardInfo[$moduleCode]);
+        $board = self::$boardInfo['m_' . $moduleCode];
+        $this->intUABCode = self::$boardInfo['m_' . $moduleCode]['intUABCode'];
+        $this->boardDesc = self::$boardInfo['m_' . $moduleCode]['boardDesc'];
+        $this->boardName = self::$boardInfo['m_' . $moduleCode]['boardName'];
+        return;
+      }
       //find the first matching resul in exammanagerentries and extract the intUAB (board) code
       $d = $this->sql->select('TblExamManagerEntries', 'intUABCode', 'txtModuleCode = ?', array($moduleCode));
       if(!isset($d[0])) return;
@@ -74,15 +104,30 @@ class SubjectCodes
         default: $boardDesc = "Unknown"; $boardName = "Unknown"; break;
       }
 
+      $board = [
+        'intUABCode' => $intUABCode,
+        'boardDesc' => $boardDesc,
+        'boardName' => $boardName
+      ];
+
+      self::$boardInfo['m_' . $moduleCode] = $board;
       $this->intUABCode = $intUABCode;
       $this->boardDesc = $boardDesc;
       $this->boardName = $boardName;
 
     }
-
-    private function getCodes()
+    private function getCodes ()
     {
-      if($this->contains('history') && $this->contains('art')) return array('HX', 'History of Art');
+      $data = $this->getBasic();
+      // if($this->level === 'ASB') {
+      //   $data[1] = $data[1] . ' AS';
+      // }
+      return $data;
+    }
+    private function getBasic()
+    {
+
+      if($this->contains('history') && $this->contains('art')) return array('HX', 'Art History');
       if($this->contains('history')) return array("HI", 'History');
 
       if($this->contains('english') && $this->contains('language')) return array('EN', 'English Language');
@@ -93,7 +138,9 @@ class SubjectCodes
 
       // if($this->contains('math') && $this->contains('fur')) return 'MX';
       if($this->contains('math') && $this->contains('add')) return array('ADD', 'Additional Maths');
+      if($this->contains('math') && $this->contains('fur')) return array('FM', 'Further Maths');
       if($this->contains('math')) return array('MA', 'Maths');
+
       if($this->contains('mechanics')) return array('MA', 'Maths');
       if($this->contains('statistics')) return array('MA', 'Maths');
       if($this->contains('further pure')) return array('MA', 'Maths');
@@ -143,10 +190,14 @@ class SubjectCodes
       if($this->contains('drama')) return array("DR", "Drama");
       if($this->contains('extended')) return array("EPQ", "Extended Project");
       if($this->contains('physical')) return array("PE", "PE");
-
       return array("-", "-");
     }
 
+    public function refresh($txtOptionTitle)
+    {
+      $this->txtOptionTitle = $txtOptionTitle;
+      return $this->getCodes;
+    }
 
     function contains($needle)
     {

@@ -35,8 +35,7 @@ class Statistics
       'A'   => [],
       'AS'  => [],
       'PreU'=> [],
-      'EPQ' => [],
-      'unknown' => []
+      'EPQ' => []
     ]; //key s_{subjectCode}
     public $upperIntake = array(); //key s_{txtSchoolID}
     public $lowerIntake = array(); //key s_{txtSchoolID}
@@ -55,8 +54,6 @@ class Statistics
     private $sql;
     private $console;
     public $moduleResults;
-    public $subjectKeys = []; // used in construcing the chord plot in relationships
-    public $subjectNames = [];
 
     public function __construct(\Dependency\Databases\ISams $sql, \Sockets\Console $console, $moduleResults)
     {
@@ -67,7 +64,7 @@ class Statistics
 
     }
 
-    public function makeStatistics(array $session, array &$results, \Exams\Tools\Cache $cache)
+    public function makeStatistics(array $session, array $results, \Exams\Tools\Cache $cache)
     {
       $i = 0;
       $this->isGCSE = false;
@@ -77,21 +74,11 @@ class Statistics
       $count = count($results);
       $this->console->publish("Sorting Results $i / $count", 1);
 
-      foreach($results as &$result){
-        // if($result['NCYear'] > 13) continue;
+      foreach($results as $result){
+        // if($result['NCYear'] != 13) continue;
 
         $i++;
         if($i % 100 == 0) $this->console->replace("Sorting Results $i / $count");
-
-        switch($result['txtLevel']) {
-            case 'A'  : $level = 'A'; break;
-            case 'ASB': $level = 'AS'; break;
-            case 'FC': $level = 'PreU'; break;
-            case 'B' : $level = 'EPQ'; break;
-            default: $level = 'unknown';
-        }
-
-        $result['level'] = $level;
 
         $objResult = new \Exams\Tools\ALevel\Result($result);
 
@@ -102,12 +89,8 @@ class Statistics
         $this->houseResults[$txtHouseCode]->setResult($objResult);
 
         $subjectCode = $result['subjectCode'];
-        $subjectName = $result['subjectName'];
-        if (!isset($this->subjectKeys[$subjectCode])) $this->subjectKeys[$subjectCode] = $subjectCode;
-        if (!isset($this->subjectNames[$subjectCode])) $this->subjectNames[$subjectCode] = $subjectName;
-
-        if(!isset($this->subjectResults[$objResult->level][$subjectCode])) $this->newSubject($result);
-        $this->subjectResults[$objResult->level][$subjectCode]->setResult($objResult);
+        if(!isset($this->subjectResults[$subjectCode])) $this->newSubject($result);
+        $this->subjectResults[$subjectCode][$result->level]->setResult($objResult);
 
         //must go after subject and houses as new student will add the student to these arrays
         $txtSchoolID = $result['txtSchoolID'];
@@ -117,8 +100,8 @@ class Statistics
       }
       $year = $session['year'];
       $this->year = $year;
-      $this->processModules();
-      // $this->console->error("MODULES DISABLED", 1);
+      // $this->processModules();
+      $this->console->error("MODULES DISABLED", 1);
       $this->makeSummaryData($results);
       $this->makeHouseSummaryData();
       $this->makeSubjectSummaryData($year);
@@ -128,50 +111,31 @@ class Statistics
 
       $this->console->replace("Sorting Results $count / $count");
       ksort($this->houseResults);
-      ksort($this->subjectKeys);
-      ksort($this->subjectNames);
-      foreach($this->subjectResults as $level){
-          ksort($level);
-      }
+      ksort($this->subjectResults);
 
       unset($this->console);
       unset($this->sql);
       unset($this->results);
-      unset($this->moduleResults);
       return $this;
     }
 
     private function processModules()
     {
       $count = count($this->moduleResults);
-      $i = 0;
+      $this->console->publish("Processing $count Module Results...", 1);
       foreach ($this->moduleResults as &$moduleResult){
-
-
-        if($i % 100 == 0) $this->console->replace("Module results: $i / $count");
         //try to determine the subject code
-        $objSubject = new \Exams\Tools\SubjectCodes($moduleResult['txtModuleCode'], $moduleResult['txtOptionTitle'], $this->sql, $moduleResult['txtLevel'], true);
-
-        switch($moduleResult['txtLevel']) {
-            case 'A'  : $level = 'A'; break;
-            case 'ASB': $level = 'AS'; break;
-            case 'FC': $level = 'PreU'; break;
-            case 'B' : $level = 'EPQ'; break;
-            default: $level = 'unknown';
-        }
-        $level = $objSubject->subjectCode === 'EPQ' ? 'EPQ' : 'A';
-        $moduleResult['level'] = $level;
+        $objSubject = new \Exams\Tools\SubjectCodes($moduleResult['txtModuleCode'], $moduleResult['txtOptionTitle'], $this->sql, $moduleResult['txtLevel']);
 
         if($objSubject->subjectCode == '-') {
           $this->console->error('!!WARNING!! Couldnt match subject code to ' . $objSubject->txtOptionTitle);
-          // $this->error = true;
+          $this->error = true;
           continue;
         }
-        if (!isset($this->subjectResults[$level][$objSubject->subjectCode])){
-          $this->console->error('!!WARNING!! Could not find subject ('.$level.')' . $objSubject->txtOptionTitle . 'with code ' . $objSubject->subjectCode);
+        if (!isset($this->subjectResults[$objSubject->subjectCode])){
+          $this->console->error('!!WARNING!! Could not find subject ' . $objSubject->txtOptionTitle . 'with code ' . $objSubject->subjectCode);
           continue;
         }
-        $i++;
         $moduleResult['subjectCode'] = $objSubject->subjectCode;
         //merge in student data from the all sudents
         if (isset($this->allStudents['s_' . $moduleResult['txtSchoolID']])){
@@ -183,16 +147,13 @@ class Statistics
           $moduleResult['txtHouseCode'] = $s->txtHouseCode;
           $s->setModuleResult($moduleResult);
         }
-        $this->subjectResults[$level][$objSubject->subjectCode]->setModuleResult($moduleResult);
+        $this->subjectResults[$objSubject->subjectCode]->setModuleResult($moduleResult);
       }
-      $this->console->replace("Module results: $i / $count");
-      $this->console->publish("Sorting Module Results...", 1);
+
       //sort results
-      foreach($this->subjectResults as &$subjectLevel){
-        foreach($subjectLevel as &$subject){
-          foreach($subject->modules as &$module){
-            $module->sortResults();
-          }
+      foreach($this->subjectResults as &$subject){
+        foreach($subject->modules as &$module){
+          $module->sortResults();
         }
       }
       unset($this->moduleResults);
@@ -214,12 +175,12 @@ class Statistics
         $this->console->publish("Making relationship data...", 1);
         $data = [];
         //set up the initial object
-        foreach ($this->subjectKeys as $subjectFrom) {
-          foreach ($this->subjectKeys as $subjectTo) {
-            $key = $subjectFrom . '_' . $subjectTo;
+        foreach ($this->subjectResults as $subjectFrom) {
+          foreach ($this->subjectResults as $subjectTo) {
+            $key = $subjectFrom->subjectCode . '_' . $subjectTo->subjectCode;
             $data[$key] = [
-              'from'  => $subjectFrom,
-              'to'    => $subjectTo,
+              'from'  => $subjectFrom->subjectCode,
+              'to'    => $subjectTo->subjectCode,
               'value' => 0
             ];
           }
@@ -281,8 +242,6 @@ class Statistics
                       ];
       $boysAvg = $girlsAvg = $allAvg = $newAvg = 0;
       $boysCount = $girlsCount = $allCount = $newCount = 0;
-      $boysResultsCount = $girlsResultsCount = $allResultsCount = $newResultsCount = 0;
-
       $boysGradeCounts = $gradeCounts;
       $girlsGradeCounts = $gradeCounts;
       $newGradeCounts = $gradeCounts;
@@ -293,23 +252,19 @@ class Statistics
         if ($student->txtGender === 'M') {
           $boysAvg += $avg;
           $boysCount++;
-          $boysResultsCount += $student->resultCount;
           $boysGradeCounts = $this->combineGradeCounts($boysGradeCounts, $student);
         } else {
           $girlsAvg += $avg;
           $girlsCount++;
-          $girlsResultsCount += $student->resultCount;
           $girlsGradeCounts = $this->combineGradeCounts($girlsGradeCounts, $student);
         }
         if ($student->isNewSixthForm === true) {
           $newAvg += $avg;
           $newCount++;
-          $newResultsCount += $student->resultCount;
           $newGradeCounts = $this->combineGradeCounts($newGradeCounts, $student);
         }
         $allAvg += $avg;
         $allCount++;
-        $allResultsCount += $student->resultCount;
         $allGradeCounts = $this->combineGradeCounts($allGradeCounts, $student);
       }
       $data['year'] = $this->year;
@@ -317,12 +272,6 @@ class Statistics
       $data['girlsAvg'] = $girlsCount > 0 ? round($girlsAvg / $girlsCount, 2) : 0;
       $data['allAvg'] = $allCount > 0 ? round($allAvg / $allCount, 2) : 0;
       $data['newAvg'] = $newCount > 0 ? round($newAvg / $newCount, 2) : 0;
-
-      $data['boysAvgPerExam'] = $boysCount > 0 ? round($boysAvg / $boysResultsCount, 2) : 0;
-      $data['girlsAvgPerExam'] = $girlsCount > 0 ? round($girlsAvg / $girlsResultsCount, 2) : 0;
-      $data['allAvgPerExam'] = $allCount > 0 ? round($allAvg / $allResultsCount, 2) : 0;
-      $data['newAvgPerExam'] = $newCount > 0 ? round($newAvg / $newResultsCount, 2) : 0;
-
 
       $gradeCounts = [];
       $gradeCounts['boys'] = $boysGradeCounts;
@@ -356,16 +305,13 @@ class Statistics
           $this->history[] = $statistics['averages'] ?? null;
           //subject data
           $subjects = $statistics['subjectResults'];
-          foreach ($subjects as $key => $level) {
-            foreach ($level as $subject) {
-              $code = $subject['subjectCode'];
-              $summaryData = $subject['summaryData'];
-              $summaryData['year'] = (int)$year;
-
-              if (isset($this->subjectResults[$key][$code])) {
-                unset($summaryData['history']);
-                $this->subjectResults[$key][$code]->summaryData['history'][] = $summaryData;
-              }
+          foreach ($subjects as $subject) {
+            $code = $subject['subjectCode'];
+            $summaryData = $subject['summaryData'];
+            $summaryData['year'] = (int)$year;
+            if (isset($this->subjectResults[$code])) {
+              unset($summaryData['history']);
+              $this->subjectResults[$code]->summaryData['history'][] = $summaryData;
             }
           }
 
@@ -387,74 +333,97 @@ class Statistics
     {
       $this->console->replace("Generating Summary Data");
       $summaryData = array();
-      $gradeCounts = [        'A*'  => 0,
-                              'A'   => 0,
-                              'B'   => 0,
-                              'C'   => 0,
-                              'D'   => 0,
-                              'E'   => 0,
-                              'U'   => 0,
-                              'D1'  => 0,
-                              'D2'  => 0,
-                              'D3'  => 0,
-                              'M1'  => 0,
-                              'M2'  => 0,
-                              'M3'  => 0,
-                              'P1'  => 0,
-                              'P2'  => 0,
-                              'P3'  => 0
-                            ];
+      $resultCount = count($results);
+
+      $this->resultCount = $resultCount;
+      $maleResults = 0;
+      $femaleResults = 0;
+      $totalResults = 0;
+      $maleStudents = 0;
+      $femaleStudents = 0;
+      $totalStudents = 0;
+      $this->star = 0;
+
+      foreach($results as $result){
+        if($result['txtGender'] == 'M') $maleResults++;
+        if($result['txtGender'] == 'F') $femaleResults++;
+        $totalResults++;
+      }
+
+      foreach($this->allStudents as $student){
+        $student->txtGender == 'M' ? $maleStudents++ : $femaleStudents++;
+        $totalStudents++;
+      }
+
+      unset($student);
 
       foreach($this->allStudents as $student){
 
         $studentSummaryData = $student->makeSummaryData();
 
-      }
+        $gender = $student->txtGender;
+        $gender == "M" ? $this->maleStudents[] = &$student :  $this->femaleStudents[] = &$student;
 
-      foreach($gradeCounts as $grade => &$value){
-        $value = ['grade' => $grade, 'boys'=> 0, 'girls' => 0];
-      }
+        for ($i=0; $i < count($student->summaryData); $i++) {
+          if(!isset($this->summaryData[$i])) $this->summaryData[] = array('M_val' => 0, "F_val" => 0, "total_val" => 0);
 
-      foreach($this->subjectResults['A'] as $subject){
-        foreach($subject->results as $result){
-          $grade = $result->grade;
-          $gender = $result->txtGender === 'M' ? 'boys' : 'girls';
-          $gradeCounts[$grade][$gender]++;
+          $this->summaryData[$i]['desc'] = $student->summaryData[$i]['desc'];
+          $this->summaryData[$i][$gender . '_val'] += $student->summaryData[$i]['val'];
+          $this->summaryData[$i]['total_val'] += $student->summaryData[$i]['val'];
+          $this->summaryData[$i]['type'] = $student->summaryData[$i]['type'];
+
         }
       }
 
-      foreach($this->subjectResults['PreU'] as $subject){
-        foreach($subject->results as $result){
-          $grade = $result->grade;
-          $gender = $result->txtGender === 'M' ? 'boys' : 'girls';
-          $gradeCounts[$grade][$gender]++;
+      //round values and make percentages if needed
+      foreach($this->summaryData as &$data){
+
+        if($data['type'] == 'Results%'){
+            $data['M_val%'] = $maleResults == 0 ? 0 : 100 * $data['M_val'] / $maleResults;
+            $data['F_val%'] = $femaleResults == 0 ? 0 : 100 * $data['F_val'] / $femaleResults;
+            $data['total_val%'] = $totalResults == 0 ? 0 : 100 * $data['total_val'] / $totalResults;
         }
+
+        else if($data['type'] == 'Students%'){
+            $data['M_val%'] = $maleStudents == 0 ? 0 : 100 * $data['M_val'] / $maleStudents;
+            $data['F_val%'] = $femaleStudents == 0 ? 0 : 100 * $data['F_val'] / $femaleStudents;
+            $data['total_val%'] = $totalStudents == 0 ? 0 : 100 * $data['total_val'] / $totalStudents;
+        }
+        else {
+            // $data['M_val%'] = null;
+            // $data['F_val%'] = null;
+            // $data['total_val%'] = null;
+        }
+
+
+        $data['M_val'] = round($data['M_val']);
+        if(isset($data['M_val%'])) $data['M_val%'] = round($data['M_val%']);
+        $data['F_val'] = round($data['F_val']);
+        if(isset($data['F_val%'])) $data['F_val%'] = round($data['F_val%']);
+        $data['total_val'] = round($data['total_val']);
+        if(isset($data['total_val%'])) $data['total_val%'] = round($data['total_val%']);
+
       }
-      // ksort($gradeCounts);
-      $this->summaryData['gradeCounts'] = $gradeCounts;
+
+      $this->weightedAvgSubjectPoints = $this->makeWeightedAvgSubjectPoints();
 
       return $this->summaryData;
     }
 
     private function makeSubjectSummaryData()
     {
-      foreach($this->subjectResults as &$level){
-        foreach($level as &$subject){
-          $subject->makeSummaryData($this->year);
-        }
+      foreach($this->subjectResults as &$subject){
+        $subject->makeSummaryData($this->year);
       }
-
-      foreach($this->subjectResults as &$level){
-        //ua sort keeps keys so can later sort into alphabetical order
-        usort($level ,'self::pointsSort');
-        //usort got rid of the keys so put back : tried uasort but kept freezing
-        $newSubjectArray = array();
-        for ($i=0; $i < count($level); $i++) {
-          $level[$i]->position = $i + 1;
-          $newSubjectArray[$level[$i]->subjectCode] = $level[$i];
-        }
-        $level = $newSubjectArray;
+      //ua sort keeps keys so can later sort into alphabetical order
+      usort($this->subjectResults ,'self::pointsSort');
+      //usort got rid of the keys so put back : tried uasort but kept freezing
+      $newSubjectArray = array();
+      for ($i=0; $i < count($this->subjectResults); $i++) {
+        $this->subjectResults[$i]->position = $i + 1;
+        $newSubjectArray[$this->subjectResults[$i]->subjectCode] = $this->subjectResults[$i];
       }
+      $this->subjectResults = $newSubjectArray;
     }
 
     private function makeHouseSummaryData()
@@ -556,7 +525,7 @@ class Statistics
       $this->allStudents[$key] = &$student;
 
       $this->houseResults[$result['txtHouseCode']]->setStudent($student);
-      $this->subjectResults[$result['level']][$result['subjectCode']]->setStudent($student);
+      $this->subjectResults[$result['subjectCode']]->setStudent($student);
 
       return $student;
     }
@@ -573,7 +542,7 @@ class Statistics
     {
       $subject = new \Exams\Tools\ALevel\Subject($result);
       $key = $result['subjectCode'];
-      $this->subjectResults[$result['level']][$key] = $subject;
+      $this->subjectResults[$key] = $subject;
       return $subject;
     }
 

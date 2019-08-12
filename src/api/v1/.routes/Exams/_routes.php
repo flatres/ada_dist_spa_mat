@@ -18,6 +18,7 @@ $app->group('/exams', function(){
     $this->get('/admin/subjects', '\Exams\Admin:subjectsGet');
     $this->delete('/admin/caches', '\Exams\Admin:cachesDelete');
     $this->delete('/admin/cache/{id}', '\Exams\Admin:cacheDelete');
+    $this->get('/admin/alevelsheet/{sessionId}', '\Exams\Admin:spreadsheetGet');
 
 })->add("Authenticate");
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);

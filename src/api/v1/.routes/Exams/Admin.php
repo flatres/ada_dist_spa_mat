@@ -28,6 +28,13 @@ class Admin
       return emit($response, $resultFiles);
     }
 
+    public function spreadsheetGet($request, $response, $args)
+    {
+      $id = $args['sessionId'];
+      $data = $this->cache->read($id, false);
+      return emit($response, $data);
+    }
+
     public function sessionsGet($request, $response, $args)
     {
       $data = array();
@@ -97,24 +104,24 @@ class Admin
       $cycle['gcseCount'] = 0;
       $cycle['alevelCount'] = 0;
 
-      foreach($resultFiles as $resultFile){
-
-        $s = "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')";
-        $resultsFileResults = $this->isams->select( 'TblExamManagerResultsStore',
-                                                  'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
-                                                  "intResultsID = ? AND $s AND txtCertificationType='C'",
-                                                  array($resultFile['id']));
-
-        $cycle['gcseCount'] += count($resultsFileResults);
-
-        $s = " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
-        $resultsFileResults = $this->isams->select( 'TblExamManagerResultsStore',
-                                                  'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
-                                                  "intResultsID = ? AND $s AND txtCertificationType='C'",
-                                                  array($resultFile['id']));
-
-        $cycle['alevelCount'] += count($resultsFileResults);
-      }
+      // foreach($resultFiles as $resultFile){
+      //
+      //   $s = "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')";
+      //   $resultsFileResults = $this->isams->select( 'TblExamManagerResultsStore',
+      //                                             'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
+      //                                             "intResultsID = ? AND $s AND txtCertificationType='C'",
+      //                                             array($resultFile['id']));
+      //
+      //   $cycle['gcseCount'] += count($resultsFileResults);
+      //
+      //   $s = " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
+      //   $resultsFileResults = $this->isams->select( 'TblExamManagerResultsStore',
+      //                                             'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
+      //                                             "intResultsID = ? AND $s AND txtCertificationType='C'",
+      //                                             array($resultFile['id']));
+      //
+      //   $cycle['alevelCount'] += count($resultsFileResults);
+      // }
     }
 
     public function subjectsGet($request, $response, $args)

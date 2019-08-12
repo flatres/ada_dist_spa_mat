@@ -92,20 +92,20 @@ class Subject
           $this->modules['m_' . $moduleCode]->setResult($moduleResult);
         }
     }
-    
+
     public function setResult(\Exams\Tools\ALevel\Result $result)
     {
       if ($result->txtLevel === 'ASB') return;
       // if($result->NCYear < 11) return;
       $this->results['r_' . $result->id] = &$result;
-      
+
       $this->passes += $result->passes;
       $this->fails += $result->fails;
       $this->points += $result->points;
       $this->ucasPoints += $result->ucasPoints;
       $this->resultCount++;
 
-      $grade = is_numeric($result->grade) ? "#" . $result->grade : $result->grade;
+      $grade = $result->grade;
       if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
       $this->gradeCounts[$grade]++;
 
@@ -122,41 +122,82 @@ class Subject
     {
       if (count($this->results) > 0)  usort($this->results ,'self::sort');
     }
-    
+
     private static function sort($a, $b)
     {
       // if (!isset($a->txtSurname) || !isset($b->txtSurname)) return true;
       return strcmp($a->txtSurname, $b->txtSurname);
     }
-    
+
     public function makeSummaryData(int $year)
     {
       $sD = array();
-      
+
       $this->sortResults();
 
       $gradeCounts = $this->gradeCounts;
-      
+
+      //determine which type of exam the subject is primarily and use that count
+      $count = $this->resultCount;
+
       $sD['year'] = $year;
-      $sD['gradeAverage'] = $this->resultCount > 0 ? round($this->points / $this->resultCount, 2) : 0;
-      $sD['ucasAverage'] = $this->resultCount > 0 ? round($this->ucasPoints / $this->resultCount, 2) : 0;
-      $sD['candidateCount'] = $this->resultCount;
 
-      $As = $gradeCounts['A*'];
-      $sD['%Astar'] = $this->resultCount > 0 ? round(100 * $As / $this->resultCount) :0 ;
+      $sD['candidateCount'] = $count;
       $sD['board'] = $this->boardName;
+      $sD['%Astar'] = 0;
+      $sD['%As'] = 0;
+      $sD['%ABs'] = 0;
+      $sD['%ABCs'] = 0;
+      $sD['%ABCDs'] = 0;
+      $sD['%ABCDEs'] = 0;
+      $sD['%passRate'] = 0;
+      $sD['%D'] = 0;
+      $sD['%M'] = 0;
+      $sD['%P'] = 0;
 
-      $As = $gradeCounts['A*'] + $gradeCounts['A'];
-      $sD['%As'] = $this->resultCount > 0 ? round(100 * $As / $this->resultCount) : 0 ;
+      if (($this->level === 'A' || $this->level === 'AS') && $count > 0) {
+        $As = $gradeCounts['A*'];
+        $sD['%Astar'] = round(100 * $As / $count);
 
-      $ABs = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'];
-      $sD['%ABs'] = $this->resultCount > 0 ? round(100 * $ABs / $this->resultCount) : 0;
+        $As = $gradeCounts['A*'] + $gradeCounts['A'];
+        $sD['%As'] = round(100 * $As / $count);
 
-      $sD['%passRate'] = $this->resultCount > 0 ? round(100 * $this->passes / $this->resultCount) : 0;
-      if (count($this->results) > 0){
-        $sD['pointsAvg'] = round($this->points / count($this->results), 2);
+        $ABs = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'];
+        $sD['%ABs'] = round(100 * $ABs / $count);
+
+        $c = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'] + $gradeCounts['C'];
+        $sD['%ABCs'] = round(100 * $c / $count);
+
+        $c = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'] + $gradeCounts['C'] + $gradeCounts['D'];
+        $sD['%ABCDs'] = round(100 * $c / $count);
+
+        $c = $gradeCounts['A*'] + $gradeCounts['A'] + $gradeCounts['B'] + $gradeCounts['C'] + $gradeCounts['D'] + $gradeCounts['E'];
+        $sD['%ABCDEs'] = round(100 * $c / $count);
+      }
+
+      if ($this->level === 'PreU' && $count > 0) {
+        $D = $gradeCounts['D1'] + $gradeCounts['D2'] + $gradeCounts['D3'];
+        $sD['%D'] = round(100 * $D / $count);
+
+        $M = $gradeCounts['M1'] + $gradeCounts['M2'] + $gradeCounts['M3'];
+        $sD['%M'] = round(100 * $M / $count);
+
+        $P = $gradeCounts['P1'] + $gradeCounts['P2'] + $gradeCounts['P3'];
+        $sD['%P'] = round(100 * $P / $count);
+      }
+
+      if ($count > 0){
+        $points = $this->points;
+        $ucas = $this->ucasPoints;
+        $sD['%passRate'] = round(100 * $this->passes / $count);
+        $sD['gradeAverage'] = round($points / $count, 2);
+        $sD['ucasAverage'] = round($ucas / $count, 2);
+        $sD['pointsAvg'] = round($points / $count, 2);
       } else {
         $sD['pointsAvg'] = 0;
+        $sD['%passRate'] = 0;
+        $sD['gradeAverage'] = 0;
+        $sD['ucasAverage'] = 0;
       }
 
       $sD['gradeCounts'] = $this->gradeCounts;

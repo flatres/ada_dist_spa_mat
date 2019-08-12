@@ -57,6 +57,7 @@ class Result
         $this->txtHouseCode = $result['txtHouseCode'];
         $this->txtLevel = $result['txtLevel'];
         $this->txtSubjectName = $result['subjectName'];
+        $this->level = $result['level'];
 
         $points = 0;
         $ucasPoints = 0;
@@ -68,8 +69,8 @@ class Result
           case 'A'  : $points = 10; $ucasPoints = 48; $pass = 1; $fail = 0; break;
           case 'B'  : $points = 8; $ucasPoints = 40; $pass = 1; $fail = 0; break;
           case 'C'  : $points = 6; $ucasPoints = 32; $pass = 1; $fail = 0; break;
-          case 'D'  : $points = 4; $ucasPoints = 24; $pass = 0; $fail = 1; break;
-          case 'E'  : $points = 2; $ucasPoints = 16; $pass = 0; $fail = 1; break;
+          case 'D'  : $points = 4; $ucasPoints = 24; $pass = 1; $fail = 0; break;
+          case 'E'  : $points = 2; $ucasPoints = 16; $pass = 1; $fail = 0; break;
           case 'U'  : $points = 0; $ucasPoints = 0; $pass = 0; $fail = 1; break;
           case 'D1' : $points = 12; $ucasPoints = 56; $pass = 1; $fail = 0; break;
           case 'D2'  : $points = 12; $ucasPoints = 56; $pass = 1; $fail = 0; break;
@@ -82,19 +83,22 @@ class Result
           case 'P3'  : $points = 3; $ucasPoints = 20; $pass = 1; $fail = 0; break;
 
         }
+
+        if ($this->level === 'EPQ') {
+          $points = $points / 2;
+          $ucasPoints = $ucasPoints / 2;
+        }
+
+        if ($this->level === 'AS') {
+          $points = 0;
+          $ucasPoints = 0;
+          $pass = 0;
+          $fail = 0;
+        }
+
         $this->ucasPoints = $ucasPoints;
         $this->points = $points;
         $this->passes = $pass;
         $this->fails = $fail;
-        
-        switch($result['txtLevel']) {
-            case 'A'  : $level = 'A'; break;
-            case 'ASB': $level = 'AS'; break;
-            case 'FC': $level = 'PreU'; break;
-            case 'B' : $level = 'EPQ'; break;
-            default: $level = 'unknown';
-        }
-        $this->level = $level;
     }
-
 }

@@ -111,9 +111,6 @@ class Results
       $this->console->publish('Getting Results');
       $console = $this->console;
 
-      $this->console->publish('--Fetching All Students', 1);
-      $this->getAllStudents();
-
       $data= array();
       $results = array();
       $sessionId = $args['sessionId'];
@@ -166,7 +163,7 @@ class Results
                                                   'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
                                                   "intResultsID = ? AND $s AND txtCertificationType='C'",
                                                   array($resultFile['id']));
-                                                  
+
         if (!$args['isGCSE']) {
           $moduleResults = $this->sql->select( 'TblExamManagerResultsStore',
                                                     'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtUniformMarkScale as mark, txtMaxMark as total, txtUniformGrade as grade',
@@ -174,7 +171,7 @@ class Results
                                                     array($resultFile['id']));
           $this->moduleResults = array_merge($this->moduleResults, $moduleResults);
         }
-          
+
         if($this->lowestFileID > $resultFile['id']) $this->lowestFileID = $resultFile['id'];
 
         $this->processResults($resultsFileResults);
@@ -183,24 +180,48 @@ class Results
 
       $data['results'] = $this->results;
 
-<<<<<<< HEAD:src/api/v1/.routes/Data/Exams/Results.php
-      $statistics = $this->isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Exams\Tools\ALevel\Statistics($this->sql, $this->console) ;
-      $data['statistics'] = $statistics->makeStatistics($this->session, $this->results);
-
-=======
       if ($fileIndex > 1) {
         $statistics = $this->isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Exams\Tools\ALevel\StatisticsGateway($this->sql, $this->console, $this->moduleResults) ;
         $data['statistics'] = $statistics->makeStatistics($this->session, $this->results, $this->cache);
       }
->>>>>>> fdf0c77013b847f7dfed7d778b57905b58063f51:src/api/v1/.routes/Exams/Results.php
       $this->error ? $console->error("Finished WITH ERRORS") : $console->publish("Finished");
 
       $this->console->publish("Saving...", 1);
       $this->cache->write($sessionId, $isGCSE, $data);
-
-      return $this->error ? emitError($response,500, "Failure"): emit($response, $data);
+      return emit($response, $data);
+      // return $this->error ? emitError($response,500, "Failure"): emit($response, $data);
 
     }
+
+    // private function findEarlyTakerResults($isGCSE)
+    // {
+    //   $this->console->publish('Searching for results from early takers');
+    //   $studentsCount = count($this->studentData);
+    //   $startResultsCount = count($this->results);
+    //
+    //   $this->console->publish("Lowest File ID = " . $this->lowestFileID, 1);
+    //   $this->console->publish("ISGCSE = " . $isGCSE, 1);
+    //
+    //   $i = 0;
+    //   $this->console->publish('Students: 0 / ' . $studentsCount,1);
+    //
+    //   foreach($this->studentData as $student){
+    //     $i++;
+    //     if($i % 10 == 0) $this->console->replace("Students: $i / $studentsCount");
+    //
+    //     $s = $isGCSE ? "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')" : " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
+    //     $resultsData = $this->sql->select(  'TblExamManagerResultsStore',
+    //                                         'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtLevel, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
+    //                                         "$s AND txtCertificationType='C' AND txtSchoolID = ? AND intResultsID < ?",
+    //                                         array($student['txtSchoolID'], $this->lowestFileID));
+    //
+    //     $this->processResults($resultsData, true);
+    //   }
+    //   $this->console->replace("$studentsCount / $studentsCount");
+    //
+    //   $numberFound = count($this->results) - $startResultsCount;
+    //   $this->console->publish("$numberFound found.");
+    // }
 
     private function findEarlyTakerResults($isGCSE)
     {
@@ -213,34 +234,35 @@ class Results
 
       $i = 0;
       $this->console->publish('Students: 0 / ' . $studentsCount,1);
-      
+
+      $questionMarks = '?';
+      $ids = [];
       foreach($this->studentData as $student){
+
+        if($i % 10 == 0) $this->console->replace("Students: $i / $studentsCount");
+
+        $ids[] = $student['txtSchoolID'];
+        if ($i > 0) $questionMarks .= ', ?';
         $i++;
-        if($i % 10 == 0) $this->console->publish("Students: $i / $studentsCount");
-        
+
+      }
+
+        $data = [$this->lowestFileID];
+        $data = array_merge($data, $ids);
         $s = $isGCSE ? "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')" : " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
         $resultsData = $this->sql->select(  'TblExamManagerResultsStore',
                                             'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtLevel, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
-                                            "$s AND txtCertificationType='C' AND txtSchoolID = ? AND intResultsID < ?",
-                                            array($student['txtSchoolID'], $this->lowestFileID));
-        
-        $this->processResults($resultsData, true);
-      }
-      $this->console->replace("$studentsCount / $studentsCount");
+                                            "$s AND txtCertificationType='C' AND intResultsID < ? AND txtSchoolID IN ($questionMarks)",
+                                            $data);
+
+      $this->processResults($resultsData, true);
+      $this->console->publish(count($resultsData) . " early results found");
+      // $this->console->replace("$studentsCount / $studentsCount");
 
       $numberFound = count($this->results) - $startResultsCount;
       $this->console->publish("$numberFound found.");
     }
 
-<<<<<<< HEAD:src/api/v1/.routes/Data/Exams/Results.php
-    private function getAllStudents() {
-      $studentData = $this->sql->select(  'TblPupilManagementPupils',
-                                          'txtSchoolID, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
-                                          'txtSchoolID=?', array($resultsFileResult['txtSchoolID']));
-      foreach($studentData as $student)
-      {
-        $this->studentData["s_" . $student['txtSchoolID']] = $student;
-=======
     private function getAllStudents()
     {
       $this->console->publish('--Getting Students', 1);
@@ -259,7 +281,6 @@ class Results
         $stuData['isNewSixthForm'] = $stuData['intEnrolmentNCYear'] > 11 ? true : false;
 
         $this->studentData["s_" . $stuData['txtSchoolID']] = $stuData;
->>>>>>> fdf0c77013b847f7dfed7d778b57905b58063f51:src/api/v1/.routes/Exams/Results.php
       }
     }
 
@@ -267,7 +288,6 @@ class Results
     {
       $resultCount = count($resultsFileResults);
       $i=0;
-
       if(!$isEarlyTakers){
         $this->console->publish('--Processing Results (' . $resultCount . ' records)...', 1);
         $this->console->publish('--1', 2);
@@ -281,7 +301,12 @@ class Results
         $this->resultKeys['r_' . $resultsFileResult['id']] = true;
         //look for this module else make a new one
         if(!isset($this->subjectData['s_' . $resultsFileResult['txtModuleCode']])){
-          $objSubject = new \Exams\Tools\SubjectCodes($resultsFileResult['txtModuleCode'], $resultsFileResult['txtOptionTitle'], $this->sql);
+          $objSubject = new \Exams\Tools\SubjectCodes($resultsFileResult['txtModuleCode'], $resultsFileResult['txtOptionTitle'], $this->sql, $resultsFileResult['txtLevel']);
+          if($resultsFileResult['txtLevel'] === 'ASB') {
+              $resultsFileResult['txtOptionTitle'] .= ' (AS)';
+              $objSubject->txtOptionTitle = $resultsFileResult['txtOptionTitle'];
+              $objSubject->subjectName .= ' (AS)';
+          }
           $resultsFileResult = array_merge($resultsFileResult, (array)$objSubject);
           $this->subjectData['s_' . $resultsFileResult['txtModuleCode']] = $objSubject;
 
