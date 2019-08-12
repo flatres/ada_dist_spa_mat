@@ -25,7 +25,7 @@
 // txtSchoolID:"111234705547"
 // txtSurname:"Goodman"
 
-namespace Data\Exams\Tools\GCSE;
+namespace Exams\Tools\GCSE;
 
 class Result
 {

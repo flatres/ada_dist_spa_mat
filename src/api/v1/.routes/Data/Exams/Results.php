@@ -6,7 +6,7 @@
  * Usage:
 
  */
-namespace Data\Exams;
+namespace Exams;
 
 class Results
 {
@@ -72,6 +72,9 @@ class Results
       $this->console->publish('Getting Results');
       $console = $this->console;
 
+      $this->console->publish('--Fetching All Students', 1);
+      $this->getAllStudents();
+
       $data= array();
       $results = array();
       $sessionId = $args['sessionId'];
@@ -130,7 +133,7 @@ class Results
 
       $data['results'] = $this->results;
 
-      $statistics = $this->isGCSE ? new \Data\Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Data\Exams\Tools\ALevel\Statistics($this->sql, $this->console) ;
+      $statistics = $this->isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Exams\Tools\ALevel\Statistics($this->sql, $this->console) ;
       $data['statistics'] = $statistics->makeStatistics($this->session, $this->results);
 
       $this->error ? $console->error("Finished WITH ERRORS") : $console->publish("Finished");
@@ -170,10 +173,21 @@ class Results
       $this->console->publish("$numberFound found.");
     }
 
+    private function getAllStudents() {
+      $studentData = $this->sql->select(  'TblPupilManagementPupils',
+                                          'txtSchoolID, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
+                                          'txtSchoolID=?', array($resultsFileResult['txtSchoolID']));
+      foreach($studentData as $student)
+      {
+        $this->studentData["s_" . $student['txtSchoolID']] = $student;
+      }
+    }
+
     public function processResults($resultsFileResults, $isEarlyTakers = null)
     {
       $resultCount = count($resultsFileResults);
       $i=0;
+
       if(!$isEarlyTakers){
         $this->console->publish('--Processing Results (' . $resultCount . ' records)...', 1);
         $this->console->publish('--1', 2);
@@ -187,7 +201,7 @@ class Results
         $this->resultKeys['r_' . $resultsFileResult['id']] = true;
         //look for this module else make a new one
         if(!isset($this->subjectData['s_' . $resultsFileResult['txtModuleCode']])){
-          $objSubject = new \Data\Exams\Tools\SubjectCodes($resultsFileResult['txtModuleCode'], $resultsFileResult['txtOptionTitle'], $this->sql);
+          $objSubject = new \Exams\Tools\SubjectCodes($resultsFileResult['txtModuleCode'], $resultsFileResult['txtOptionTitle'], $this->sql);
           $resultsFileResult = array_merge($resultsFileResult, (array)$objSubject);
           $this->subjectData['s_' . $resultsFileResult['txtModuleCode']] = $objSubject;
 

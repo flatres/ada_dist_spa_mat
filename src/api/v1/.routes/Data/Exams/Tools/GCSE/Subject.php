@@ -25,7 +25,7 @@
 // txtSchoolID:"111234705547"
 // txtSurname:"Goodman"
 
-namespace Data\Exams\Tools\GCSE;
+namespace Exams\Tools\GCSE;
 
 class Subject
 {
@@ -67,7 +67,7 @@ class Subject
       $this->intUABCode = $result['intUABCode'];
     }
 
-    public function setResult(\Data\Exams\Tools\GCSE\Result &$result)
+    public function setResult(\Exams\Tools\GCSE\Result &$result)
     {
       $this->results['r_' . $result->id] = &$result;
 
@@ -83,7 +83,7 @@ class Subject
 
     }
 
-    public function setStudent(\Data\Exams\Tools\GCSE\Student &$student)
+    public function setStudent(\Exams\Tools\GCSE\Student &$student)
     {
       $txtSchoolID = $student->txtSchoolID;
       $this->students['s_' . $txtSchoolID] = &$student;

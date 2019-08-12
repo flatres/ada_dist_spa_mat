@@ -25,7 +25,7 @@
 // txtSchoolID:"111234705547"
 // txtSurname:"Goodman"
 
-namespace Data\Exams\Tools\GCSE;
+namespace Exams\Tools\GCSE;
 
 class StatisticsGateway
 {
@@ -64,14 +64,14 @@ class StatisticsGateway
     //make stats for each year with results
     if(count($this->hundredResults) > 0){
       $this->console->publish('Hundred statistics', 1);
-      $this->hundredStats = new \Data\Exams\Tools\GCSE\Statistics($this->sql, $this->console);
+      $this->hundredStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
       $this->hundredStats->makeStatistics($this->hundredResults);
       $this->years[] = array('label' => 'Hundred', 'value' => 11);
     }
     //make stats for each year with results
     if(count($this->removeResults) > 0){
       $this->console->publish('Remove statistics', 1);
-      $this->removeStats = new \Data\Exams\Tools\GCSE\Statistics($this->sql, $this->console);
+      $this->removeStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
       $this->removeStats->makeStatistics($this->removeResults);
       $this->years[] = array('label' => 'Remove', 'value' => 10);
     }else{
@@ -80,7 +80,7 @@ class StatisticsGateway
     //make stats for each year with results
     if(count($this->shellResults) > 0){
       $this->console->publish('Shell statistics', 1);
-      $this->shellStats = new \Data\Exams\Tools\GCSE\Statistics($this->sql, $this->console);
+      $this->shellStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
       $this->shellStats->makeStatistics($this->shellResults);
       $this->years[] = array('label' => 'Shell', 'value' => 9);
     } else {

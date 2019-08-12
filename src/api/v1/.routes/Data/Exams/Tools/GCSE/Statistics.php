@@ -25,7 +25,7 @@
 // txtSchoolID:"111234705547"
 // txtSurname:"Goodman"
 
-namespace Data\Exams\Tools\GCSE;
+namespace Exams\Tools\GCSE;
 
 class Statistics
 {
@@ -67,7 +67,7 @@ class Statistics
         $i++;
         if($i % 100 == 0) $this->console->replace("Sorting Results $i / $count");
 
-        $objResult = new \Data\Exams\Tools\GCSE\Result($result);
+        $objResult = new \Exams\Tools\GCSE\Result($result);
 
         if($result['early']) $this->earlyResults[] = $objResult;
 
@@ -259,7 +259,7 @@ class Statistics
 
     private function newStudent($result)
     {
-      $student = new \Data\Exams\Tools\GCSE\Student($result);
+      $student = new \Exams\Tools\GCSE\Student($result);
       $key = 's_' . $result['txtSchoolID'];
       $this->allStudents[$key] = &$student;
 
@@ -271,7 +271,7 @@ class Statistics
 
     private function newHouse($result)
     {
-      $house = new \Data\Exams\Tools\GCSE\House($result);
+      $house = new \Exams\Tools\GCSE\House($result);
       $key = $result['txtHouseCode'];
       $this->houseResults[$key] = $house;
       return $house;
@@ -279,7 +279,7 @@ class Statistics
 
     private function newSubject($result)
     {
-      $subject = new \Data\Exams\Tools\GCSE\Subject($result);
+      $subject = new \Exams\Tools\GCSE\Subject($result);
       $key = $result['subjectCode'];
       $this->subjectResults[$key] = $subject;
       return $subject;

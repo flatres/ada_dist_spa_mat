@@ -33,7 +33,7 @@
 // Science 2
 // Spanish
 
-namespace Data\Exams\Tools;
+namespace Exams\Tools;
 
 class SubjectCodes
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Data\Exams\Tools\GCSE;
+namespace Exams\Tools\GCSE;
 
 use \PhpOffice\PhpSpreadsheet\Spreadsheet;
 use \PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -13,7 +13,7 @@ class CemSpreadsheetRenderer
   private $session;
   private $writer;
 
-  public function __construct(array $session, \Sockets\Console $console, \Data\Exams\Tools\GCSE\StatisticsGateway $statistics)
+  public function __construct(array $session, \Sockets\Console $console, \Exams\Tools\GCSE\StatisticsGateway $statistics)
   {
     // return;
      // $this->sql= $sql;
@@ -120,7 +120,7 @@ class CemSpreadsheetRenderer
 
   private function getPointsFromGrade($grade)
   {
-    $result = new \Data\Exams\Tools\GCSE\Result();
+    $result = new \Exams\Tools\GCSE\Result();
     return $result->processGrade($grade);
   }
 
