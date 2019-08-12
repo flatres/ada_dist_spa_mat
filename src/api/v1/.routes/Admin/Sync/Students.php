@@ -131,7 +131,7 @@ class Students
           $d['intEnrolmentSchoolYear']
         )
       );
-      $tag = new \Entities\Tags\TagWriter($this->sql);
+      $tag = new \Entities\Tags\Tools\TagWriter($this->sql);
       $tag->newByNames('House', $d['txtBoardingHouse'], $id);
       $this->newCount++;
     }
@@ -141,7 +141,7 @@ class Students
       if ($student['disable'] == true)
       {
         $this->sql->update('usr_details', 'disabled=1', 'id=?', array($student['adaId']));
-        $this->deletedCount++;
+        $this->disabledCount++;
       } else {
         $d = $student['misData'];
         $this->sql->update(
@@ -164,7 +164,7 @@ class Students
             $student['adaId']
           )
         );
-        $tag = new \Entities\Tags\TagWriter($this->sql);
+        $tag = new \Entities\Tags\Tools\TagWriter($this->sql);
         $tag->newByNames('House', $d['txtBoardingHouse'], $student['adaId']);
         $this->updatedCount++;
       }

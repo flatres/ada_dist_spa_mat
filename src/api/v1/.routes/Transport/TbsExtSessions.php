@@ -16,24 +16,24 @@ class TbsExtSessions
     {
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
-       $this->mcCustom= $container->mcCustomTest;
-       $this->isams = $container->isamsTest;
+       // $this->mcCustom= $container->mcCustomTest;
+       // $this->isams = $container->isamsTest;
        // $userId = $request->getAttribute('userId');
     }
 
     public function sessionsGet($request, $response, $args)
     {
         return emit($response,
-                    $this->mcCustom->select('TblCoachesExeats', '*', '1=1 ORDER BY boolActive DESC, dteOutward DESC'));
+                    $this->adaModules->select('tbs_sessions', '*', '1=1 ORDER BY isActive DESC, dateOut DESC'));
     }
 
     public function sessionGet($request, $response, $args)
     {
         return emit($response,
-                    $this->mcCustom->select(
-                      'TblCoachesExeats',
+                    $this->adaModules->select(
+                      'tbs_sessions',
                       '*',
-                      'TblCoachesExeatsID=? ORDER BY boolActive DESC, dteOutward DESC',
+                      'id=? ORDER BY isActive DESC, dteOutward DESC',
                       array($args['id']))
                   );
     }
@@ -41,8 +41,8 @@ class TbsExtSessions
     public function sessionActivate($request, $response, $args)
     {
       $id = $args['id'];
-      $this->mcCustom->update('TblCoachesExeats', 'boolActive=?', '1=1', array(false));
-      $this->mcCustom->update('TblCoachesExeats', 'boolActive=?', 'TblCoachesExeatsID=?', array(true, $id));
+      $this->adaModules->update('tbs_sessions', 'isActive=?', '1=1', array(0));
+      $this->adaModules->update('tbs_sessions', 'isActive=?', 'id=?', array(1, $id));
 
       return emit($response, $id);
     }
@@ -50,19 +50,19 @@ class TbsExtSessions
     public function sessionPut($request, $response)
     {
      $data = $request->getParsedBody();
-     return emit($response, $this->mcCustom->updateObject('TblCoachesExeats', $data, 'TblCoachesExeatsID'));
+     return emit($response, $this->adaModules->updateObject('tbs_sessions', $data, 'id'));
     }
 
     public function sessionPost($request, $response)
     {
      $data = $request->getParsedBody();
-     $data['id'] = $this->mcCustom->insertObject('TblCoachesExeats', $data, 'TblCoachesExeatsID');
+     $data['id'] = $this->adaModules->insertObject('tbs_sessions', $data, 'id');
      return emit($response, $data);
     }
 
     public function sessionDelete($request, $response, $args)
     {
-      return emit($response, $this->mcCustom->delete('TblCoachesExeats', 'TblCoachesExeatsID=?', array($args['id'])));
+      return emit($response, $this->adaModules->delete('tbs_sessions', 'id=?', array($args['id'])));
     }
 
 //

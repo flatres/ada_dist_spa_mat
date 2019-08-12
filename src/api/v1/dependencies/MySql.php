@@ -78,7 +78,7 @@ class Mysql {
           $this->dbName = DB_NAME;
 
 					try {
-							$this->conn = new PDO("mysql:host=".DB_HOST.";dbname=".$db, DB_USERNAME, DB_PASSWORD, $options);
+							$this->conn = new PDO("mysql:host=".DB_HOST.";charset=utf8;dbname=".$db, DB_USERNAME, DB_PASSWORD, $options);
 						}
 
 						catch(PDOException $e) {

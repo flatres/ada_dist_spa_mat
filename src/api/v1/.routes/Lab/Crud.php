@@ -41,6 +41,8 @@ class Crud
         }
         $item['isActive'] = $x==2 ? true : false;
         $item['unread'] = rand(0,100) < 10 ? true : false;
+        $item['status'] = $cars[rand(0, count($cars) - 1)];
+        $item['badges'] = array('Good', 'Bad', 'Ugly');
         $data[] = $item;
       }
       return emit($response, $data);

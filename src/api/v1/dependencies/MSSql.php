@@ -38,6 +38,12 @@ class MSSql {
 		public $rowCount;
     public $dbName;
 
+    // https://dzone.com/articles/how-correctly-work-php
+    public function __sleep()
+    {
+       return array('dbName');
+    }
+
 		public function connect($ip, $db,  $user, $pwd) {
 
        try {
