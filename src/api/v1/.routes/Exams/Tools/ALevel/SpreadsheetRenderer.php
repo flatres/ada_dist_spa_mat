@@ -12,8 +12,9 @@ class SpreadsheetRenderer
   private $spreadsheet;
   private $session;
   private $writer;
+  private $year;
 
-  public function __construct(array $session, \Sockets\Console $console, \Exams\Tools\Alevel\StatisticsGateway $statistics)
+  public function __construct($filename, $title, $type,  array $session, \Sockets\Console $console, \Exams\Tools\Alevel\StatisticsGateway $statistics)
   {
     // return;
      // $this->sql= $sql;
@@ -21,7 +22,7 @@ class SpreadsheetRenderer
     $this->console->publish("Generating basic spreadsheet");
     $this->statistics = $statistics;
     $this->session = $session;
-
+    $this->filename = $filename;
 
     $this->spreadsheet = new Spreadsheet();
 
@@ -33,26 +34,89 @@ class SpreadsheetRenderer
     $this->spreadsheet->getProperties()
                       ->setCreator("SD Flatres")
                       ->setLastModifiedBy("SD Flatres")
-                      ->setTitle("A Level Results 20" . $session['year'])
-                      ->setSubject("A Level Results 20" . $session['year'])
-                      ->setDescription("A Level Results 20" . $session['year'])
-                      ->setKeywords("A Level Results 20" . $session['year'])
-                      ->setCategory("A Level Results 20" . $session['year']);
+                      ->setTitle("$title 20" . $session['year'])
+                      ->setSubject("$title 20" . $session['year'])
+                      ->setDescription("$title 20" . $session['year'])
+                      ->setKeywords("$title 20" . $session['year'])
+                      ->setCategory("$title 20" . $session['year']);
 
     //generate the data sheets
 
-    $this->makeStudentsSheet('Other Years', $this->statistics->data, false);
-    $this->makeStudentsSheet('U6 Results', $this->statistics->data);
-    $this->makePreUSubjects();
-    $this->makeALevelSubjects();
+    $this->year = (int)$session['year'];
+
+    switch($type){
+      case 'detailed':
+        $this->makeGenderComparison();
+        $this->makeHouseSummary('boys');
+        $this->makeHouseSummary('girls');
+        $this->makeHouseSummary('all');
+        $this->makeALevelRange('candidateCount', 'Candidates');
+        $this->makeALevelRange('ucasAverage', 'UCAS Points');
+        $this->makeALevelRange('pointsAvg', 'GA');
+        $this->makeALevelRange('%ABCDEs', '%Pass');
+        $this->makeALevelRange('%ABs', '$AB Grades');
+        $this->makeALevelRange('%Astar');
+        $this->makeEPQ(12);
+        $this->makeEPQ(13);
+        $this->makePreUSubjects();
+        $this->makeALevelSubjects();
+        $this->makeStudentsSheet('Other Years', $this->statistics->data, false);
+        $this->makeStudentsSheet('U6 Results SSS', $this->statistics->data, true, true);
+        $this->makeStudentsSheet('U6 Results', $this->statistics->data);
+        $this->makeOverview();
+
+        break;
+      case 'sss':
+        $this->makeStudentsSheet('U6 Results SSS', $this->statistics->data, true, true);
+        $this->makeStudentsSheet('U6 Results', $this->statistics->data);
+        break;
+      case 'results':
+        $this->makeEPQ(12);
+        $this->makeEPQ(13);
+        $this->makePreUSubjects();
+        $this->makeALevelSubjects();
+        $this->makeStudentsSheet('Other Years', $this->statistics->data, false);
+        // $this->makeStudentsSheet('U6 Results SSS', $this->statistics->data, true, true);
+        $this->makeStudentsSheet('U6 Results', $this->statistics->data);
+        $this->makeOverview();
+        break;
+      case 'houseresults':
+        $houses = $this->statistics->data->houseResults;
+        krsort($houses);
+        foreach($houses as $house){
+          $this->makeHouseCandidates($house);
+        };
+        break;
+      case 'subjectresults':
+        $subjects = [];
+        $subjectA = $this->statistics->data->subjectResults['A'];
+        foreach($subjectA as $key => $s){
+          $subjects[$key . ' (A)'] = $s;
+        }
+        $subjectP = $this->statistics->data->subjectResults['PreU'];
+        foreach($subjectP as $key => $s){
+          $subjects[$key . ' (PU)'] = $s;
+        }
+        $subjectE = $this->statistics->data->subjectResults['EPQ'];
+        foreach($subjectE as $key => $s){
+          $subjects['EPQ'] = $s;
+        }
+        krsort($subjects);
+        foreach($subjects as $key => $subject){
+          $this->makeSubjectCandidates($subject, $key);
+        };
+        break;
+
+    }
+
     // $this->makeHouseSheets();
     //
-    // $this->makeOverview();
+
 
 
     //generate file path and save sheet
 
-    $fileName = 'Alevel_Results_' . $session['month'] . $session['year'] . '_' . date('d-m-y-H-i-s',time()) . '.xlsx';
+    $fileName = $filename . '_' . $session['month'] . $session['year'] . '_' . date('d-m-y_H-i-s',time()) . '.xlsx';
     $filePath = FILESTORE_PATH . "exams/alevel/$fileName";
     $url = FILESTORE_URL . "exams/alevel/$fileName";
 
@@ -67,6 +131,271 @@ class SpreadsheetRenderer
     return $this;
   }
 
+  private function makeEPQ($year)
+  {
+    $spreadsheet = $this->spreadsheet;
+    $name = $year == '13' ? 'EPQ U6' : 'EPQ L6';
+    $worksheet = new Worksheet($spreadsheet, $name);
+    $color = '50C878';    
+    $worksheet->getTabColor()->setRGB($color);
+    $spreadsheet->addSheet($worksheet, 0);
+
+
+    //sheet title
+    $sheet = $spreadsheet->getSheetByName($name);
+
+    $sheet->setCellValue('A1', $name);
+    $sheet->mergeCells('A1:D1');
+    $sheet->getRowDimension('1')->setRowHeight(50);
+
+
+    //column widths
+    $sheet->getDefaultColumnDimension()->setWidth(4);
+    $sheet->getColumnDimension('A')->setAutoSize(true);
+
+    $worksheet->getStyle('A1:M1000')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+    $styleArray = [
+      'font' => [
+          'size' => 10
+      ]
+    ];
+    $sheet->getStyle('A1:M1000')->applyFromArray($styleArray);
+
+    //make columns
+    $subjectColumnIndex = array();
+    $fields = ['Name', 'Year', 'House', 'Result'];
+
+    $data = array();
+    $data[] = $fields;
+    $epq =  $this->statistics->data->subjectResults['EPQ']['EPQ']->results;
+    usort($epq, array($this, "compareNames"));
+
+    foreach($epq as $result){
+      if ($result->NCYear == $year){
+        $data[] = [
+          $result->txtInitialedName,
+          $result->NCYear,
+          $result->txtHouseCode,
+          $result->grade
+        ];
+      }
+    }
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'A3'         // Top left coordinate of the worksheet range where
+    );
+
+
+    $styleArray = [
+      'font' => [
+          'bold' => true
+      ]
+    ];
+    $sheet->getStyle('A1:Z1')->applyFromArray($styleArray);
+
+    foreach (range('A','D') as $col) {
+      $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+  }
+
+  private function makeSubjectCandidates($subject, $key)
+  {
+    $spreadsheet = $this->spreadsheet;
+    $worksheet = new Worksheet($spreadsheet, $key);
+    $color = '';
+    switch($subject->level) {
+      case 'A':
+        $color = '50C878'; break;
+      case 'EPQ':
+        $color = '0D98BA'; break;
+      case 'AS':
+        $color = 'FF6600'; break;
+    }
+    $worksheet->getTabColor()->setRGB($color);
+    $spreadsheet->addSheet($worksheet, 0);
+
+
+    //sheet title
+    $sheet = $spreadsheet->getSheetByName($key);
+
+    $sheet->setCellValue('A1', $subject->subjectName . ' (' . $subject->boardName . ')');
+    $sheet->mergeCells('A1:D1');
+    $sheet->getRowDimension('1')->setRowHeight(50);
+
+
+    //column widths
+    $sheet->getDefaultColumnDimension()->setWidth(4);
+    $sheet->getColumnDimension('A')->setAutoSize(true);
+
+    $worksheet->getStyle('A1:M1000')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+    $styleArray = [
+      'font' => [
+          'size' => 10
+      ]
+    ];
+    $sheet->getStyle('A1:M1000')->applyFromArray($styleArray);
+
+    //make columns
+    $subjectColumnIndex = array();
+    $fields = ['Number', 'Name', 'UCI', 'Title', 'Module', 'Result', 'Grade', 'Mark'];
+
+    $data = array();
+    $data[] = $fields;
+    usort($subject->results, array($this, "compareNames"));
+
+    foreach($subject->results as $result){
+      $space = $result->mark > 0 ? '/' : '';
+      $data[] = [
+        $result->txtCandidateNumber,
+        $result->txtInitialedName,
+        $result->txtCandidateCode,
+        $result->title,
+        $result->moduleCode,
+        $result->grade,
+        '',
+        ltrim($result->mark, '0') . $space . ltrim($result->total, '0')
+
+      ];
+    }
+
+    foreach($subject->modules as $module)
+    {
+      $data[] = [];
+      foreach($module->results as $result){
+        $space = $result['mark'] > 0 ? '/' : '';
+        $data[] = [
+          '',
+          $result['txtInitialedName'] ?? 'error',
+          '',
+          $result['txtOptionTitle'],
+          $result['txtModuleCode'],
+          '',
+          $result['grade'],
+          ltrim($result['mark'], '0') . $space . ltrim($result['total'], '0')
+
+        ];
+      }
+    }
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'A3'         // Top left coordinate of the worksheet range where
+    );
+
+
+    $styleArray = [
+      'font' => [
+          'bold' => true
+      ]
+    ];
+    $sheet->getStyle('A1:Z1')->applyFromArray($styleArray);
+
+    foreach (range('A','Z') as $col) {
+      $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+  }
+
+  private function makeHouseCandidates($house)
+  {
+    $spreadsheet = $this->spreadsheet;
+    $worksheet = new Worksheet($spreadsheet, $house->txtHouseCode);
+    $color = '';
+    switch($house->genderType) {
+      case 'mixed':
+        $color = '50C878'; break;
+      case 'boys':
+        $color = '0D98BA'; break;
+      case 'girls':
+        $color = 'FF6600'; break;
+    }
+    $worksheet->getTabColor()->setRGB($color);
+    $spreadsheet->addSheet($worksheet, 0);
+
+    //sheet title
+    $sheet = $spreadsheet->getSheetByName($house->txtHouseCode);
+
+    //column widths
+    $sheet->getDefaultColumnDimension()->setWidth(4);
+    $sheet->getColumnDimension('A')->setAutoSize(true);
+
+    $worksheet->getStyle('A1:M1000')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+    $styleArray = [
+      'font' => [
+          'size' => 10
+      ]
+    ];
+    $sheet->getStyle('A1:M1000')->applyFromArray($styleArray);
+
+    //make columns
+    $subjectColumnIndex = array();
+    $fields = ['Surname', 'Forenames', 'Candidate #', 'UCI', 'Level', 'Code', 'Title', 'Result', 'Mark', 'Grade'];
+
+    $data = array();
+    $data[] = $fields;
+    usort($house->students, array($this, "compareNames"));
+
+    foreach($house->students as $student){
+      $data[] = [
+        $student->txtSurname,
+        $student->txtForename,
+        $student->txtCandidateNumber,
+        $student->txtCandidateCode,
+      ];
+      foreach($student->results as $result){
+        $space = $result->mark > 0 ? '/' : '';
+        $data[] = [
+          '',
+          '',
+          '',
+          '',
+          $result->level,
+          $result->moduleCode,
+          $result->txtSubjectName,
+          $result->grade,
+          ltrim($result->mark, '0') . $space . ltrim($result->total, '0')
+        ];
+      }
+      foreach($student->modules as $subject){
+        foreach ($subject as $result){
+          $space = $result['mark'] > 0 ? '/' : '';
+          $data[] = [
+            '',
+            '',
+            '',
+            '',
+            $result['level'],
+            $result['txtModuleCode'],
+            $result['txtOptionTitle'],
+            '',
+            ltrim($result['mark'], '0') . $space . ltrim($result['total'], '0'),
+            $result['grade'],
+          ];
+        }
+      }
+    }
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'A1'         // Top left coordinate of the worksheet range where
+    );
+
+
+    $styleArray = [
+      'font' => [
+          'bold' => true
+      ]
+    ];
+    $sheet->getStyle('A1:Z1')->applyFromArray($styleArray);
+
+    foreach (range('A','Z') as $col) {
+      $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+  }
+
   private function makeOverview()
   {
     $spreadsheet = $this->spreadsheet;
@@ -77,7 +406,7 @@ class SpreadsheetRenderer
     //sheet title
     $sheet = $spreadsheet->getSheetByName('Overview');
 
-    $sheet->setCellValue('A1', 'GCSE Results Overview 20' . $this->session['year']);
+    $sheet->setCellValue('A1', 'U6 Results Overview 20' . $this->session['year']);
     $sheet->mergeCells('A1:F1');
     $sheet->getRowDimension('1')->setRowHeight(50);
 
@@ -87,22 +416,76 @@ class SpreadsheetRenderer
 
     //make columns
     $subjectColumnIndex = array();
-    $fields = ['', 'Boys', '%', 'Girls', '%', 'Total', '%'];
+    $fields = ['A Level', '%', 'Pre U', '%', 'Combined %'];
 
     $data = array();
     $data[] = $fields;
+    $data = array_merge($data, $this->statistics->data->summaryData['ranges'] );
 
-    foreach($this->statistics->hundredStats->summaryData as $e){
-      $d = [  $e['desc'],
-              $e['M_val'],
-              isset($e['M_val%']) ? $e['M_val%'] : null,
-              $e['F_val'],
-              isset($e['F_val%']) ? $e['F_val%'] : null,
-              $e['total_val'],
-              isset($e['total_val%']) ? $e['total_val%'] : null
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'A3'         // Top left coordinate of the worksheet range where
+    );
+
+    $fields = ['Grade', '#Boys', '#Girls', '#Total'];
+    $data = [$fields];
+
+    foreach($this->statistics->data->summaryData['gradeCounts'] as $key => $grade)
+    {
+      $data[] = [
+        $key,
+        $grade['boys'],
+        $grade['girls'],
+        $grade['all']
       ];
-      $data[] = $d;
     }
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'H3'         // Top left coordinate of the worksheet range where
+    );
+
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+          'size' => 18
+      ]
+    ];
+    $sheet->getStyle('A1')->applyFromArray($styleArray);
+
+    foreach (range('A','L') as $col) {
+      $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+  }
+  private function makeGenderComparison()
+  {
+    $spreadsheet = $this->spreadsheet;
+    $worksheet = new Worksheet($spreadsheet, 'Gender & Intake');
+    $worksheet->getTabColor()->setRGB('FFA500');
+    $spreadsheet->addSheet($worksheet, 0);
+
+    //sheet title
+    $sheet = $spreadsheet->getSheetByName('Gender & Intake');
+
+    $sheet->setCellValue('A1', 'Gender / Intake Comparison 20' . $this->session['year']);
+    $sheet->mergeCells('A1:L1');
+    $sheet->getRowDimension('1')->setRowHeight(50);
+    $sheet->getRowDimension('3')->setRowHeight(110);
+
+    //column widths
+    $sheet->getDefaultColumnDimension()->setWidth(6);
+    $sheet->getColumnDimension('A')->setAutoSize(true);
+
+    //make columns
+    $subjectColumnIndex = array();
+    $fields = ['', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', 'D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', '', '%A* equiv', '%AA* equiv', '%Pass equiv', 'Grade Avg', 'UCAS Avg'];
+
+    $data = array();
+    $data[] = $fields;
+    $data = array_merge($data, $this->statistics->data->summaryData['gender']);
+
     $sheet->fromArray(
         $data,  // The data to set
         NULL,        // Array values with this value will not be set
@@ -117,12 +500,32 @@ class SpreadsheetRenderer
     ];
     $sheet->getStyle('A1')->applyFromArray($styleArray);
 
-    foreach (range('A','G') as $col) {
-      $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
+    $styleArray = [
+      'font' => [
+          'bold' => true
+      ]
+    ];
+
+    $sheet->getStyle('A3:W3')->applyFromArray($styleArray);
+    $sheet->getStyle('A3:A12')->applyFromArray($styleArray);
+
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+      ],
+      'alignment' => [
+        'textRotation' => 90,
+        'shrinkToFit' => false
+      ]
+    ];
+    $sheet->getStyle('R3:W3')->applyFromArray($styleArray);
+
+    // foreach (range('A','L') as $col) {
+    //   $sheet->getColumnDimension($col)->setAutoSize(true);
+    // }
   }
 
-  private function makeStudentsSheet(string $title, $yearStats, $isYear13 = true)
+  private function makeStudentsSheet(string $title, $yearStats, $isYear13 = true, $isSSS = false)
   {
     if(!$yearStats) return;
 
@@ -138,6 +541,32 @@ class SpreadsheetRenderer
     //column widths
     $sheet->getDefaultColumnDimension()->setWidth(4);
     $sheet->getColumnDimension('A')->setAutoSize(true);
+
+    //can't get the dupication to work.
+    if ($isSSS) {  //set colour less than 0 to red
+      $conditional1 = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
+      $conditional1->setConditionType(\PhpOffice\PhpSpreadsheet\Style\Conditional::CONDITION_CELLIS);
+      $conditional1->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::OPERATOR_LESSTHAN);
+      $conditional1->addCondition('0');
+      $conditional1->getStyle()->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
+      $conditional1->getStyle()->getFont()->setBold(false);
+
+      $conditional2 = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
+      $conditional2->setConditionType(\PhpOffice\PhpSpreadsheet\Style\Conditional::CONDITION_CELLIS);
+      $conditional2->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::OPERATOR_GREATERTHANOREQUAL);
+      $conditional2->addCondition('0');
+      $conditional2->getStyle()->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_GREEN);
+      $conditional2->getStyle()->getFont()->setBold(false);
+
+      $conditionalStyles = $sheet->getStyle('G2')->getConditionalStyles();
+      $conditionalStyles[] = $conditional1;
+      $conditionalStyles[] = $conditional2;
+
+      $sheet->getStyle('G2')->setConditionalStyles($conditionalStyles);
+
+      $worksheet->duplicateStyle($sheet->getStyle('G2'),'H3');
+
+    }
 
     //make columns
     $subjectColumnIndex = array();
@@ -170,7 +599,7 @@ class SpreadsheetRenderer
             ];
       foreach($subjects as $key => $subject){
           if(isset($student->{$key})){
-            $d[] = $student->{$key};
+            $d[] = $isSSS ? $student->subjects[$key]->surplus : $student->{$key};
           } else {
             $d[] = null;
           }
@@ -203,10 +632,10 @@ class SpreadsheetRenderer
     ];
     $sheet->getStyle('B1:ZZ1')->applyFromArray($styleArray);
     $count = count($data) + 1;
-    $sheet->freezePane('F' . $count);
+    $sheet->freezePane('G' . $count);
 
     //set filters
-    $spreadsheet->getActiveSheet()->setAutoFilter('A1:' . $sheet->getHighestColumn() . $sheet->getHighestRow());
+    // $spreadsheet->getActiveSheet()->setAutoFilter('A1:' . $sheet->getHighestColumn() . $sheet->getHighestRow());
 
   }
 
@@ -215,60 +644,106 @@ class SpreadsheetRenderer
   }
 
   //create the sheet which lists the hundred stats for each subject
-  private function makeHouseSheets()
+  private function makeHouseSummary($gender)
   {
     $spreadsheet = $this->spreadsheet;
-    $worksheet = new Worksheet($spreadsheet, 'Houses');
+    $name = 'Houses - ' . $gender;
+    $worksheet = new Worksheet($spreadsheet, $name );
     $worksheet->getTabColor()->setRGB('FFCC00');
     $spreadsheet->addSheet($worksheet, 0);
 
     //sheet title
-    $sheet = $spreadsheet->getSheetByName('Houses');
-    $sheet->getDefaultColumnDimension()->setWidth(15);
+    $sheet = $spreadsheet->getSheetByName($name);
+    $sheet->getDefaultColumnDimension()->setWidth(4);
+
+    $sheet->setCellValue('A1', 'House Summary - ' . $gender);
+    $sheet->mergeCells('A1:I1');
+    $sheet->getRowDimension('1')->setRowHeight(50);
+    $sheet->getRowDimension('5')->setRowHeight(60);
+
+    $sheet->setCellValue('E4', 'A Level');
+    $sheet->mergeCells('E4:N4');
+
+    $sheet->setCellValue('O4', 'Pre U');
+    $sheet->mergeCells('O4:Z4');
 
     $data = array();
     //generate array to be placed in spreadsheet
-    $fields = ['House', 'Position', 'Grade Avg.', 'Passes', 'Fails' , '> 6 As (9-7)',  'A*', 'A', 'B', 'C', 'D', 'E', 'U', '9', '8', '7', '6', '5', '4', '3', '2', '1' ];
+    $fields = ['', '#', 'Rank', 'GA', 'Rank', 'GA', 'Passes', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', 'Rank', 'GA', 'Passes', 'D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3'];
     $data[] = $fields;
     $data[] = []; //blank row
-
-    foreach($this->statistics->hundredStats->houseResults as $s){
+    $count = 0;
+    foreach($this->statistics->data->houseResults as $s){
       $g = $s->gradeCounts;
       $sum = $s->summaryData;
+      $a = $sum['data']['A'];
+      $p = $sum['data']['PreU'];
+      $aGC = $a['all'][$gender]['gradeCounts'];
+      $pGC = $p['all'][$gender]['gradeCounts'];
 
+      if ($a['all'][$gender]['results'] + $p['all'][$gender]['results'] == 0) continue;
+      $count++;
       $values = [ $s->txtHouseCode,
-                  $s->position,
-                  $sum['gradeAverage'],
-                  $s->passes,
-                  $s->fails,
-                  $sum['sixOrMoreAs'],
-                  $g['A*'],
-                  $g['A'],
-                  $g['B'],
-                  $g['C'],
-                  $g['D'],
-                  $g['E'],
-                  $g['U'],
-                  $g['#9'],
-                  $g['#8'],
-                  $g['#7'],
-                  $g['#6'],
-                  $g['#5'],
-                  $g['#4'],
-                  $g['#3'],
-                  $g['#2'],
-                  $g['#1']
+                  $a['all'][$gender]['results'],
+                  $sum['data']['U6']['all'][$gender]['position'],
+                  $sum['data']['U6']['all'][$gender]['pointsAvg'],
+                  $a['all'][$gender]['position'],
+                  $a['all'][$gender]['pointsAvg'],
+                  // $a['NL6'][$gender]['pointsAvg'],
+                  $a['all'][$gender]['passes'],
+                  $aGC['A*'],
+                  $aGC['A'],
+                  $aGC['B'],
+                  $aGC['C'],
+                  $aGC['D'],
+                  $aGC['E'],
+                  $aGC['U'],
+                  $p['all'][$gender]['position'],
+                  $p['all'][$gender]['pointsAvg'],
+                  // $p['NL6'][$gender]['pointsAvg'],
+                  $p['all'][$gender]['passes'],
+                  $pGC['D1'],
+                  $pGC['D2'],
+                  $pGC['D3'],
+                  $pGC['M1'],
+                  $pGC['M2'],
+                  $pGC['M3'],
+                  $pGC['P1'],
+                  $pGC['P2'],
+                  $pGC['P3']
                 ];
       $data[] = $values;
     }
      $sheet->fromArray(
         $data,  // The data to set
         NULL,        // Array values with this value will not be set
-        'A1'         // Top left coordinate of the worksheet range where
+        'A5'         // Top left coordinate of the worksheet range where
     );
 
     //styling
-    $sheet->getColumnDimension('A')->setAutoSize(true);
+
+    $styleArray = [
+    'borders' => [
+        'outline' => [
+            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => '00000000'],
+            ],
+        ],
+    ];
+    $count = $count + 6;
+    //border
+    $worksheet->getStyle('E4:N4')->applyFromArray($styleArray);
+    $worksheet->getStyle('O4:Z4')->applyFromArray($styleArray);
+
+    $worksheet->getStyle('B5:D'. $count)->applyFromArray($styleArray);
+    $worksheet->getStyle('E5:N'. $count)->applyFromArray($styleArray);
+    $worksheet->getStyle('O5:Z'. $count)->applyFromArray($styleArray);
+
+    $worksheet->getStyle('E4:N4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+    $worksheet->getStyle('O4:Z4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+
+    $sheet->getColumnDimension('A')->setWidth(7);
     //the title
     $styleArray = [
       'font' => [
@@ -285,17 +760,43 @@ class SpreadsheetRenderer
     ];
     $sheet->getStyle('A1:A1000')->applyFromArray($styleArray);
     $sheet->getStyle('A3:AA3')->applyFromArray($styleArray);
+    $sheet->getStyle('A4:AA5')->applyFromArray($styleArray);
 
-    foreach (range('A','E') as $col) {
-      $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
-    foreach (range('F','Z') as $col) {
-      $sheet->getColumnDimension($col)->setWidth(4);
-    }
-    $sheet->getColumnDimension('AA')->setWidth(4);
+    // foreach (range('A','AA') as $col) {
+    //   $sheet->getColumnDimension($col)->setAutoSize(true);
+    // }
+
+    // foreach (range('B','G') as $col) {
+    //   $sheet->getColumnDimension($col)->setWidth(18);
+    // }
+    // foreach (range('O','R') as $col) {
+    //   $sheet->getColumnDimension($col)->setWidth(18);
+    // }
+    //
+    // //grades
+    // foreach (range('F','N') as $col) {
+    //   $sheet->getColumnDimension($col)->setWidth(3);
+    // }
+    // foreach (range('S','AA') as $col) {
+    //   $sheet->getColumnDimension($col)->setWidth(3);
+    // }
+    // $sheet->getColumnDimension('AA')->setWidth(4);
+
+    // rotate headers
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+      ],
+      'alignment' => [
+        'textRotation' => 90,
+        'shrinkToFit' => false
+      ]
+    ];
+    $sheet->getStyle('C5:G5')->applyFromArray($styleArray);
+    $sheet->getStyle('O5:Q5')->applyFromArray($styleArray);
 
     //put key at the bottom
-    $bottomRow = count($this->statistics->hundredStats->subjectResults) + 3;
+    // $bottomRow = count($this->statistics->hundredStats->subjectResults) + 3;
     $key = array();
 
 
@@ -317,12 +818,18 @@ class SpreadsheetRenderer
     $sheet->getRowDimension('1')->setRowHeight(50);
 
     $data = array();
+    $year = $this->year;
+    $lastYear =  $this->year - 1;
     //generate array to be placed in spreadsheet
-    $fields = ['Subject', 'Board', 'Entries', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', '%A*', '%A*A','%A*AB', '%Pass', 'Grd Avg', 'UCAS Avg'];
+    $fields = ['Subject', 'Board', 'Entries', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', '%A*', '%A*A','%A*AB', '%Pass', "Grd Avg ($year)", "Grd Avg ($lastYear)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls'];
     $data[] = $fields;
     $data[] = []; //blank row
 
+    ksort($this->statistics->data->subjectResults['A']);
+
+    $count = 4;
     foreach($this->statistics->data->subjectResults['A'] as $s){
+      $count++;
       $sum = $s->summaryData;
       $g = $s->gradeCounts;
       $values = [ $s->subjectName,
@@ -340,7 +847,15 @@ class SpreadsheetRenderer
                   $sum['%ABs'],
                   $sum['%passRate'],
                   $sum['gradeAverage'],
-                  $sum['ucasAverage']
+                  $sum['historyKeys']['y_' . $lastYear]['gradeAverage'] ?? '',
+                  $sum['ucasAverage'],
+                  $sum['historyKeys']['y_' . $lastYear]['ucasAverage'] ?? '',
+                  $sum['boysCount'],
+                  $sum['girlsCount'],
+                  $sum['pointsAvgBoys'],
+                  $sum['pointsAvgGirls'],
+                  $sum['ucasAvgBoys'],
+                  $sum['ucasAvgGirls']
                 ];
       $data[] = $values;
     }
@@ -349,6 +864,36 @@ class SpreadsheetRenderer
         NULL,        // Array values with this value will not be set
         'A3'         // Top left coordinate of the worksheet range where
     );
+
+    $styleArray = [
+    'borders' => [
+        'outline' => [
+            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => '00000000'],
+            ],
+        ],
+    ];
+    //border
+    $worksheet->getStyle('A3:C' .$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('K3:N'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('S3:T'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('W3:X'.$count)->applyFromArray($styleArray);
+
+    $styleArray['fill'] = [
+      'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+      'rotation' => 90,
+      'startColor' => [
+          'argb' => 'FFA0A0A0',
+      ],
+      'endColor' => [
+          'argb' => 'FFFFFFFF',
+      ],
+    ];
+
+
+    $worksheet->getStyle('D3:J'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('O3:R'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('U3:V'.$count)->applyFromArray($styleArray);
 
     //styling
     $sheet->getColumnDimension('A')->setAutoSize(true);
@@ -369,13 +914,46 @@ class SpreadsheetRenderer
     $sheet->getStyle('A1:A1000')->applyFromArray($styleArray);
     $sheet->getStyle('A3:AA3')->applyFromArray($styleArray);
 
-    foreach (range('A','L') as $col) {
+    foreach (range('A','Z') as $col) {
       $sheet->getColumnDimension($col)->setAutoSize(true);
     }
-    foreach (range('L','Z') as $col) {
-      $sheet->getColumnDimension($col)->setWidth(4);
-    }
+    // foreach (range('L','Z') as $col) {
+    //   $sheet->getColumnDimension($col)->setWidth(4);
+    // }
     $sheet->getColumnDimension('AA')->setWidth(4);
+
+    $sheet->getRowDimension('3')->setRowHeight(95);
+
+    // rotate headers
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+      ],
+      'alignment' => [
+        'textRotation' => 90,
+        'shrinkToFit' => true
+      ]
+    ];
+    $sheet->getStyle('K3:X3')->applyFromArray($styleArray);
+
+    // $styleArray = [
+    //   'fill' => [
+    //       'fillType' => Fill::FILL_GRADIENT_LINEAR,
+    //       'startColor' => [
+    //           'hex' => 'eeeeee',
+    //       ],
+    //       'endColor' => [
+    //           'hex' => 'eeeeee',
+    //       ],
+    //   ]
+    // ];
+    //
+    // $to = count($this->statistics->data->subjectResults['A']) + 4;
+    // $sheet->getStyle('D3:J3')->applyFromArray($styleArray);
+
+
+
+
 
     // //put key at the bottom
     // $bottomRow = count($this->statistics->hundredStats->subjectResults) + 6;
@@ -408,17 +986,20 @@ class SpreadsheetRenderer
     //sheet title
     $sheet = $spreadsheet->getSheetByName('U6 Headlines (Pre U)');
     $sheet->getDefaultColumnDimension()->setWidth(15);
-    $sheet->setCellValue('A1', 'A Level Results 20' . $this->session['year']);
+    $sheet->setCellValue('A1', 'Pre U Results 20' . $this->session['year']);
     $sheet->mergeCells('A1:D1');
     $sheet->getRowDimension('1')->setRowHeight(50);
 
     $data = array();
+    $year = $this->year;
+    $lastYear =  $this->year - 1;
     //generate array to be placed in spreadsheet
-    $fields = ['Subject', 'Board', 'Entries', 'D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U', 'Grd Avg', 'UCAS Avg'];
+    $fields = ['Subject', 'Board', 'Entries', 'D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U', '%D', '%M', '%P', "Grd Avg ($year)", "Grd Avg ($lastYear)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls'];
     $data[] = $fields;
     $data[] = []; //blank row
-
+    $count = 4;
     foreach($this->statistics->data->subjectResults['PreU'] as $s){
+      $count++;
       $sum = $s->summaryData;
       $g = $s->gradeCounts;
       $values = [ $s->subjectName,
@@ -434,9 +1015,181 @@ class SpreadsheetRenderer
                   $g['P2'],
                   $g['P3'],
                   $g['U'],
+                  $sum['%D'],
+                  $sum['%M'],
+                  $sum['%P'],
                   $sum['gradeAverage'],
-                  $sum['ucasAverage']
+                  $sum['historyKeys']['y_' . $lastYear]['gradeAverage'] ?? '',
+                  $sum['ucasAverage'],
+                  $sum['historyKeys']['y_' . $lastYear]['ucasAverage'] ?? '',
+                  $sum['boysCount'],
+                  $sum['girlsCount'],
+                  $sum['pointsAvgBoys'],
+                  $sum['pointsAvgGirls'],
+                  $sum['ucasAvgBoys'],
+                  $sum['ucasAvgGirls']
                 ];
+      $data[] = $values;
+    }
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'A3'         // Top left coordinate of the worksheet range where
+    );
+
+    //styling
+    $styleArray = [
+    'borders' => [
+        'outline' => [
+            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => '00000000'],
+            ],
+        ],
+    ];
+    //border
+    $worksheet->getStyle('A3:C' .$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('N3:P'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('U3:V'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('Y3:Z'.$count)->applyFromArray($styleArray);
+
+    $styleArray['fill'] = [
+      'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+      'rotation' => 90,
+      'startColor' => [
+          'argb' => 'FFA0A0A0',
+      ],
+      'endColor' => [
+          'argb' => 'FFFFFFFF',
+      ],
+    ];
+
+
+    $worksheet->getStyle('D3:M'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('Q3:T'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('W3:X'.$count)->applyFromArray($styleArray);
+
+
+
+    $sheet->getColumnDimension('A')->setAutoSize(true);
+    //the title
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+          'size' => 18
+      ]
+    ];
+    $sheet->getStyle('A1')->applyFromArray($styleArray);
+    //headers
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+        ]
+    ];
+    $sheet->getStyle('A1:A1000')->applyFromArray($styleArray);
+    $sheet->getStyle('A3:AA3')->applyFromArray($styleArray);
+
+    foreach (range('A','L') as $col) {
+      $sheet->getColumnDimension($col)->setAutoSize(true);
+    }
+    foreach (range('L','Z') as $col) {
+      $sheet->getColumnDimension($col)->setWidth(4);
+    }
+    $sheet->getColumnDimension('AA')->setWidth(4);
+
+    $sheet->getRowDimension('3')->setRowHeight(95);
+
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+      ],
+      'alignment' => [
+        'textRotation' => 90,
+        'shrinkToFit' => true
+      ]
+    ];
+    $sheet->getStyle('Q3:Z3')->applyFromArray($styleArray);
+
+    // //put key at the bottom
+    // $bottomRow = count($this->statistics->hundredStats->subjectResults) + 6;
+    // $keyString = '';
+    //
+    // $keyString .= 'A*' . ' = ' . $this->getPointsFromGrade('A*') . ', ';
+    // foreach (range('A','E') as $grade) {
+    //   $keyString .= $grade . ' = ' . $this->getPointsFromGrade($grade) . ', ';
+    // }
+    // foreach (range(9,1) as $grade) {
+    //   $keyString .= $grade . ' = ' . $this->getPointsFromGrade($grade) . ', ';
+    // }
+    //
+    // $sheet->mergeCells('A' . $bottomRow . ':XX' . $bottomRow);
+    // $sheet->setCellValue('A' . $bottomRow, $keyString);
+    // $bottomRow++;
+    // // $sheet->setCellValue('A' . $bottomRow, "X");
+    // $sheet->setCellValue('A' . $bottomRow, 'Average Subject Points = ' . $this->statistics->hundredStats->weightedAvgSubjectPoints);
+
+  }
+
+  private function getPointsFromGrade($grade)
+  {
+    $result = new \Exams\Tools\GCSE\Result();
+    return $result->processGrade($grade);
+  }
+
+  //create the sheet which lists the hundred stats for each subject
+  private function makeALevelRange($key, $title = null)
+  {
+
+    $title = $title ? $title : $key . ' Grades';
+    $spreadsheet = $this->spreadsheet;
+    $worksheet = new Worksheet($spreadsheet, "$title");
+    $worksheet->getTabColor()->setRGB('ffc6d0');
+    $spreadsheet->addSheet($worksheet, 0);
+
+    //sheet title
+    $sheet = $spreadsheet->getSheetByName("$title");
+    $sheet->getDefaultColumnDimension()->setWidth(15);
+    $sheet->setCellValue('A1', "$key (no Pre U)");
+    $sheet->mergeCells('A1:G1');
+    $sheet->getRowDimension('1')->setRowHeight(50);
+
+    $data = array();
+    $year = $this->year;
+    $lastYear =  $this->year - 1;
+    //generate array to be placed in spreadsheet
+    $fields = ['Subject', 'Board'];
+
+    //choose a random subject to get years availiable
+    foreach($this->statistics->data->subjectResults['A']['MA']->summaryData['history'] as $year) {
+      $fields[] = $year['year'];
+    }
+
+    $data[] = $fields;
+    $data[] = []; //blank row
+
+    ksort($this->statistics->data->subjectResults['A']);
+
+    foreach($this->statistics->data->subjectResults['A'] as $s){
+
+      $values = [ $s->subjectName,
+                  $s->boardName
+                ];
+      $i = 0;
+      foreach($s->summaryData['history'] as $year) {
+          if ($i === 0) {
+              $star = false;
+              $board = $year['board'];
+          }
+          //record with a start whether or not the board has changed.
+          if ($i > 1) {
+            if ($year['board'] !== $board){
+              $star = $star ? false : '*';
+              $board = $year['board'];
+            }
+          }
+          $i++;
+          $values[] = $year[$key] . $star;
+      }
+
       $data[] = $values;
     }
     $sheet->fromArray(
@@ -464,7 +1217,7 @@ class SpreadsheetRenderer
     $sheet->getStyle('A1:A1000')->applyFromArray($styleArray);
     $sheet->getStyle('A3:AA3')->applyFromArray($styleArray);
 
-    foreach (range('A','L') as $col) {
+    foreach (range('A','Z') as $col) {
       $sheet->getColumnDimension($col)->setAutoSize(true);
     }
     foreach (range('L','Z') as $col) {
@@ -472,29 +1225,20 @@ class SpreadsheetRenderer
     }
     $sheet->getColumnDimension('AA')->setWidth(4);
 
-    // //put key at the bottom
-    // $bottomRow = count($this->statistics->hundredStats->subjectResults) + 6;
-    // $keyString = '';
-    //
-    // $keyString .= 'A*' . ' = ' . $this->getPointsFromGrade('A*') . ', ';
-    // foreach (range('A','E') as $grade) {
-    //   $keyString .= $grade . ' = ' . $this->getPointsFromGrade($grade) . ', ';
-    // }
-    // foreach (range(9,1) as $grade) {
-    //   $keyString .= $grade . ' = ' . $this->getPointsFromGrade($grade) . ', ';
-    // }
-    //
-    // $sheet->mergeCells('A' . $bottomRow . ':XX' . $bottomRow);
-    // $sheet->setCellValue('A' . $bottomRow, $keyString);
-    // $bottomRow++;
-    // // $sheet->setCellValue('A' . $bottomRow, "X");
-    // $sheet->setCellValue('A' . $bottomRow, 'Average Subject Points = ' . $this->statistics->hundredStats->weightedAvgSubjectPoints);
+    $sheet->getRowDimension('3')->setRowHeight(95);
 
-  }
-  private function getPointsFromGrade($grade)
-  {
-    $result = new \Exams\Tools\GCSE\Result();
-    return $result->processGrade($grade);
+    // rotate headers
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+      ],
+      'alignment' => [
+        'textRotation' => 90,
+        'shrinkToFit' => true
+      ]
+    ];
+    $sheet->getStyle('K3:R3')->applyFromArray($styleArray);
+
   }
 
 }

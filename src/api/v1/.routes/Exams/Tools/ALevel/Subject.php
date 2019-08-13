@@ -51,16 +51,26 @@ class Subject
                             'P3'  => 0
                           ];
     public $points = 0;
+    public $pointsBoys = 0;
+    public $pointsGirls = 0;
     public $ucasPoints = 0;
+    public $ucasPointsBoys = 0;
+    public $ucasPointsGirls= 0;
     public $passes = 0;
     public $fails = 0;
     public $resultCount = 0;
+    public $resultCountBoys = 0;
+    public $resultCountGirls = 0;
     public $position = 0;
     public $summaryData = [];
     public $isGCSE = false;
     public $level;
     public $title;
     public $modules = [];
+    public $surplus = 0;
+    public $subjectName;
+    public $boardName;
+
 
 
     public function __construct(array $result)
@@ -75,7 +85,7 @@ class Subject
 
       switch($result['txtLevel']) {
           case 'A'  : $level = 'A'; break;
-          case 'ASB': $level = 'A'; break;
+          case 'ASB': $level = 'AS'; break;
           case 'FC': $level = 'PreU'; break;
           case 'B' : $level = 'EPQ'; break;
           default: $level = 'unknown';
@@ -109,6 +119,16 @@ class Subject
       if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
       $this->gradeCounts[$grade]++;
 
+      if ($result->txtGender === "M") {
+        $this->pointsBoys += $result->points;
+        $this->ucasPointsBoys += $result->ucasPoints;
+        $this->resultCountBoys++;
+      } else {
+        $this->pointsGirls += $result->points;
+        $this->ucasPointsGirls += $result->ucasPoints;
+        $this->resultCountGirls++;
+      }
+
     }
 
     public function setStudent(\Exams\Tools\ALevel\Student &$student)
@@ -141,6 +161,7 @@ class Subject
       $count = $this->resultCount;
 
       $sD['year'] = $year;
+      $sD['surplus'] = $this->surplus;
 
       $sD['candidateCount'] = $count;
       $sD['board'] = $this->boardName;
@@ -200,10 +221,21 @@ class Subject
         $sD['ucasAverage'] = 0;
       }
 
+      $sD['boysCount'] = $this->resultCountBoys;
+      $sD['girlsCount'] = $this->resultCountGirls;
+      $sD['ucasAvgBoys'] = $this->resultCountBoys == 0 ? 0 : round($this->ucasPointsBoys / $this->resultCountBoys,2);
+      $sD['ucasAvgGirls'] = $this->resultCountGirls == 0 ? 0 : round($this->ucasPointsGirls / $this->resultCountGirls,2);
+
+      $sD['pointsAvgBoys'] = $this->resultCountBoys == 0 ? 0 : round($this->pointsBoys / $this->resultCountBoys,2);
+      $sD['pointsAvgGirls'] = $this->resultCountGirls == 0 ? 0 : round($this->pointsGirls / $this->resultCountGirls,2);
+
+
+
       $sD['gradeCounts'] = $this->gradeCounts;
 
       //add this year to summary data for easy graphing
       $sD['history'] = [$sD];
+      $sD['historyKeys'] = ['y_' . $year => $sD];
 
       $this->summaryData = $sD;
 

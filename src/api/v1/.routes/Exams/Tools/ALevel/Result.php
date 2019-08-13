@@ -31,6 +31,7 @@ class Result
 {
     public $id, $subjectCode, $moduleCode, $grade;
     public $points = 0;
+    public $ucasPoints;
     public $passes = 1;
     public $fails = 0;
     public $level;
@@ -40,10 +41,18 @@ class Result
     public $txtSurname;
     public $txtHouseCode;
     public $txtLevel;
+    public $txtCandidateNumber;
+    public $txtCandidateCode;
+    public $txtInitialedName;
+    public $surplus;
+    public $mark;
+    public $total;
+    public $title;
 
     public function __construct(array $result)
     {
         $this->id = $result['id'];
+        $this->title = $result['txtOptionTitle'];
         $this->subjectCode = $result['subjectCode'];
         $this->moduleCode = $result['txtModuleCode'];
         $this->gender = $result['txtGender'];
@@ -58,6 +67,10 @@ class Result
         $this->txtLevel = $result['txtLevel'];
         $this->txtSubjectName = $result['subjectName'];
         $this->level = $result['level'];
+        $this->mark =  ltrim($result['mark'], '0');
+        $this->total = ltrim($result['total'], '0');
+        $this->txtCandidateCode = $result['txtCandidateCode'];
+        $this->txtCandidateNumber = $result['txtCandidateNumber'];
 
         $points = 0;
         $ucasPoints = 0;

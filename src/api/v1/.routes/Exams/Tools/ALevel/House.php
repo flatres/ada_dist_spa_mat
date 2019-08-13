@@ -32,6 +32,9 @@ class House
 {
 
     public $txtHouseCode;
+    public $boysCount = 0;
+    public $girlsCount = 0;
+    public $genderType;
     public $typeKey;
     public $joinKey;
     public $genderKey;
@@ -157,6 +160,23 @@ class House
             'boys' => [],
             'girls' => []
           ]
+        ],
+        'U6'  => [
+          'all' => [
+            'all' => [],
+            'boys' => [],
+            'girls' => []
+          ],
+          'NL6' => [
+            'all' => [],
+            'boys' => [],
+            'girls' => []
+          ],
+          'LS'  => [
+            'all' => [],
+            'boys' => [],
+            'girls' => []
+          ]
         ]
       ];
 
@@ -173,6 +193,8 @@ class House
               'results' => 0,
               'points' => 0,
               'pointsAvg' => 0,
+              'ucasPoints' => 0,
+              'ucasAvg' => 0,
               'passes' => 0,
               'fails' => 0,
               'gradeCounts' => $this->gradeCounts,
@@ -186,6 +208,9 @@ class House
     public function setResult(\Exams\Tools\ALevel\Result &$result)
     {
       $this->results['r_' . $result->id] = $result;
+
+      if ($result->txtGender === 'M') $this->boysCount++;
+      if ($result->txtGender === 'F') $this->girlsCount++;
 
       $gender = $result->gender === 'M' ? 'boys' : 'girls';
       $joined = $result->isNewSixthForm ? 'NL6' : 'LS';
@@ -215,6 +240,17 @@ class House
       $item = &$this->data[$level][$joined]['all'];
       $this->increment($item, $result);
 
+      if ($level === 'A' || $level === 'PreU') {
+        $item = &$this->data['U6'][$joined]['all'];
+        $this->increment($item, $result);
+        $item = &$this->data['U6'][$joined][$gender];
+        $this->increment($item, $result);
+        $item = &$this->data['U6']['all'][$gender];
+        $this->increment($item, $result);
+        $item = &$this->data['U6']['all']['all'];
+        $this->increment($item, $result);
+      }
+
 
     }
 
@@ -223,6 +259,7 @@ class House
       $item['passes'] += $result->passes;
       $item['fails'] += $result->fails;
       $item['points'] += $result->points;
+      $item['ucasPoints'] += $result->ucasPoints;
       $item['gradeCounts'][trim($result->grade)]++;
       $item['results']++;
     }
@@ -238,11 +275,16 @@ class House
       $sD = array();
       $sD['year'] = $year;
 
+      if ($this->girlsCount > 0) $this->genderType = 'girls';
+      if ($this->boysCount > 0) $this->genderType = 'boys';
+      if ($this->girlsCount > 0 && $this->boysCount > 0 ) $this->genderType = 'mixed';
+
       foreach($this->data as &$type){
         foreach($type as &$joins){
           foreach($joins as &$gender){
             if ($gender['results'] > 0){
               $gender['pointsAvg'] = round($gender['points'] / $gender['results'], 2);
+              $gender['ucasPointsAvg'] = round($gender['ucasPoints'] / $gender['results'], 2);
             }
           }
         }
@@ -252,6 +294,7 @@ class House
       $sD['candidateCount'] = count($this->students);
 
       $sD['history'] = [$sD];
+      $sD['historyKeys'] = ['y_' . $year => $sD];
 
       $this->summaryData = $sD;
 

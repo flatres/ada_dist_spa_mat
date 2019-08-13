@@ -32,6 +32,7 @@ class Student
     public $txtSchoolID, $txtGender, $txtInitialedName, $intEnrolementNCYear;
     public $results = array();
     public $subjects = array();
+    public $subject = array(); //typo! Should have been using subjects
     public $gradeCounts = [ 'A*'  => 0,
                             'A'   => 0,
                             'B'   => 0,
@@ -57,6 +58,10 @@ class Student
     public $resultCount = 0;
     public $summaryData = array();
     public $gradeAverage = 0;
+    public $ucasAverage = 0;
+    public $modules = [];
+    public $txtCandidateNumber;
+    public $txtCandidateCode;
 
     public function __construct(array $result)
     {
@@ -71,14 +76,18 @@ class Student
       $this->txtHouseCode = $result['txtHouseCode'];
       $this->txtDOB = $result['txtDOB'];
 
+
+
     }
 
     public function setResult(\Exams\Tools\ALevel\Result $result)
     {
       $this->results['r_' . $result->id] = $result;
+      $this->txtCandidateCode = $result->txtCandidateCode;
+      $this->txtCandidateNumber = $result->txtCandidateNumber;
 
       if ($result->level === 'AS') return; //otherwise data doesn't dovetail well with new ucas points (no AS levels now)
-      $this->subject[$result->subjectCode] = $result;
+      $this->subjects[$result->subjectCode] = $result;
       $this->{$result->subjectCode} = $result->grade; //useful for constructing tables
 
       $this->passes += $result->passes;
@@ -110,6 +119,7 @@ class Student
       if ($this->resultCount === 0) return;
 
       $this->gradeAverage = round($this->points / $this->resultCount, 2);
+      $this->ucasAverage = round($this->ucasPoints / $this->resultCount, 2);
 
       $gradeCounts = $this->gradeCounts;
 
