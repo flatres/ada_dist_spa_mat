@@ -160,7 +160,7 @@ class Results
         //gather all results from this file and append student data to each result
         //certification type 'C' ensures that individual subject units are not included and we only get final grade
         $resultsFileResults = $this->sql->select( 'TblExamManagerResultsStore',
-                                                  'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
+                                                  'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtFirstGrade as grade, txtUniformMarkScale as mark, txtMaxMark as total',
                                                   "intResultsID = ? AND $s AND txtCertificationType='C'",
                                                   array($resultFile['id']));
 
@@ -188,6 +188,7 @@ class Results
 
       $this->console->publish("Saving...", 1);
       $this->cache->write($sessionId, $isGCSE, $data);
+      $data['timestamp'] = date('Y-m-d H:i:s', time());
       return emit($response, $data);
       // return $this->error ? emitError($response,500, "Failure"): emit($response, $data);
 
@@ -251,9 +252,17 @@ class Results
         $data = array_merge($data, $ids);
         $s = $isGCSE ? "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')" : " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
         $resultsData = $this->sql->select(  'TblExamManagerResultsStore',
-                                            'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtLevel, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
+                                            'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtLevel, txtOptionTitle, txtModuleCode, txtFirstGrade as grade, txtUniformMarkScale as mark, txtMaxMark as total',
                                             "$s AND txtCertificationType='C' AND intResultsID < ? AND txtSchoolID IN ($questionMarks)",
                                             $data);
+
+        if (!$isGCSE) {
+          $moduleResults = $this->sql->select( 'TblExamManagerResultsStore',
+                                                    'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtUniformMarkScale as mark, txtMaxMark as total, txtUniformGrade as grade',
+                                                    "intResultsID < ? AND $s AND txtCertificationType <> 'C' AND txtSchoolID IN ($questionMarks) ORDER BY txtLevel ASC",
+                                                    $data);
+          $this->moduleResults = array_merge($this->moduleResults, $moduleResults);
+        }
 
       $this->processResults($resultsData, true);
       $this->console->publish(count($resultsData) . " early results found");
@@ -268,7 +277,7 @@ class Results
       $this->console->publish('--Getting Students', 1);
 
       $studentData = $this->sql->select(  'TblPupilManagementPupils',
-                                          'txtSchoolID, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
+                                          'txtSchoolID, txtCandidateNumber, txtCandidateCode, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
                                           'intEnrolmentSchoolYear > ?', [2011]);
 
       foreach($studentData as &$stuData) {
@@ -320,7 +329,7 @@ class Results
           $resultsFileResult = array_merge($resultsFileResult, $this->studentData["s_" . $resultsFileResult['txtSchoolID']]);
         }else{
           $studentData = $this->sql->select(  'TblPupilManagementPupils',
-                                              'txtSchoolID, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
+                                              'txtSchoolID, txtCandidateNumber, txtCandidateCode, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
                                               'txtSchoolID=?', array($resultsFileResult['txtSchoolID']));
           //format the data and merge into the result
           if(isset($studentData[0])) {

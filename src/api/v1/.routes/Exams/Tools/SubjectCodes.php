@@ -137,13 +137,17 @@ class SubjectCodes
       if($this->contains('music')) return array("MU", 'Music');
 
       // if($this->contains('math') && $this->contains('fur')) return 'MX';
+      if($this->contains('decision mathematics')) return array('FM', 'Further Maths');
+      if($this->contains('mechanics 1')) return array('MA', 'Maths');
+      if($this->contains('mechanics')) return array('FM', 'Further Maths');
+      if($this->contains('statistics 1')) return array('MA', 'Maths');
+      if($this->contains('statistics')) return array('FM', 'Further Maths');
+      if($this->contains('further pure')) return array('MA', 'Maths');
+
       if($this->contains('math') && $this->contains('add')) return array('ADD', 'Additional Maths');
       if($this->contains('math') && $this->contains('fur')) return array('FM', 'Further Maths');
       if($this->contains('math')) return array('MA', 'Maths');
 
-      if($this->contains('mechanics')) return array('MA', 'Maths');
-      if($this->contains('statistics')) return array('MA', 'Maths');
-      if($this->contains('further pure')) return array('MA', 'Maths');
 
       if($this->contains('classic')) return array("CL", "Classics");
       if($this->contains('art') )return array('AR', 'Art');
@@ -187,7 +191,7 @@ class SubjectCodes
       if($this->contains('science')) return array("SC", "Science");
       if($this->contains('astronomy')) return array("AS", "Astronomy");
 
-      if($this->contains('drama')) return array("DR", "Drama");
+      if($this->contains('drama')) return array("DR", "Theater Studies");
       if($this->contains('extended')) return array("EPQ", "Extended Project");
       if($this->contains('physical')) return array("PE", "PE");
       return array("-", "-");

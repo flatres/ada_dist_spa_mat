@@ -120,11 +120,16 @@ class Statistics
       $this->processModules();
       // $this->console->error("MODULES DISABLED", 1);
       $this->makeSummaryData($results);
+      $this->makeSurplusScores();
       $this->makeHouseSummaryData();
       $this->makeSubjectSummaryData($year);
       $this->makeSchoolData($year);
+      $this->processGender();
+
+
       $this->makeHistoricalData($year);
-      $this->makeRelationshipData();
+      // $this->makeRelationshipData()
+
 
       $this->console->replace("Sorting Results $count / $count");
       ksort($this->houseResults);
@@ -139,6 +144,70 @@ class Statistics
       unset($this->results);
       unset($this->moduleResults);
       return $this;
+    }
+
+    private function makeSurplusScores()
+    {
+      $this->console->publish("Marking surplus scores..");
+
+      //calculate the subject surplus for each student (the distance of each subject from that students mean points [not including the subject being studied])
+      foreach($this->allStudents as &$student){
+        $subjects = $student->subjects;
+        // $avg = $student->ucasAverage;
+        foreach($student->subjects as &$subject){
+          $cunt = 0;
+          $total = 0;
+          foreach($subjects as $subject2){
+            //when calculating for a non-epq subject, don't include the EPQ
+            if ($subject2->level === 'A' || $subject2->level === 'PreU' || $subject->level === 'EPQ') {
+              if ($subject->subjectCode !== $subject2->subjectCode)
+              {
+                $cunt++;
+                $total += ($subject->ucasPoints - $subject2->ucasPoints);
+              }
+            }
+          }
+          $avg = $cunt === 0 ? 0 : $total / $cunt;
+          $subject->surplus = $avg / 8; //8 points in a ucase grade
+        }
+      }
+
+      foreach($this->subjectResults['A'] as &$subject){
+        $code = $subject->subjectCode;
+        $count = 0;
+        $subject->surplus = 0;
+        foreach($this->allStudents as $student){
+          if (isset($student->subjects[$code])){
+            if ($student->subjects[$code]->level === 'A') {
+              $count++;
+              $subject->surplus += $student->subjects[$code]->surplus;
+            }
+          }
+        }
+        $subject->surplus = $count == 0 ? 0 : round($subject->surplus / $count, 2);
+      }
+
+      foreach($this->subjectResults['PreU'] as &$subject){
+        $code = $subject->subjectCode;
+        $count = 0;
+        $subject->surplus = 0;
+        foreach($this->allStudents as $student){
+          if (isset($student->subjects[$code])){
+            $count++;
+            $subject->surplus += $student->subjects[$code]->surplus;
+          }
+        }
+        $subject->surplus = $count == 0 ? 0 : round($subject->surplus / $count, 2);
+      }
+      unset($student);
+      unset($subject);
+      //round the student's individual surplus scores now that they have been xml_set_unparsed_entity_decl_handler
+      foreach($this->allStudents as &$student){
+        foreach($student->subjects as &$subject){
+          $subject->surplus = round($subject->surplus, 2);
+        }
+      }
+      $this->console->publish('Done');
     }
 
     private function processModules()
@@ -197,11 +266,80 @@ class Statistics
       }
       unset($this->moduleResults);
     }
+
+    private function processGender()
+    {
+      $data = [];
+      $data[] = $this->getGenderData('Boys Shell Entrants', 'LS', 'boys');
+      $data[] = $this->getGenderData('Boys L6 Entrants', 'NL6', 'boys');
+      $data[] = $this->getGenderData('Girls Shell Entrants', 'LS', 'girls');
+      $data[] = $this->getGenderData('Girls L6 Entrants', 'NL6', 'girls');
+      $data[] = $this->getGenderData('All Shell Entrants', 'LS', 'all');
+      $data[] = $this->getGenderData('All L6 Entrants', 'NL6', 'all');
+      $data[] = $this->getGenderData('All Boys', 'all', 'boys');
+      $data[] = $this->getGenderData('All Girls', 'all', 'girls');
+      $data[] = $this->getGenderData('All', 'all', 'all');
+      $this->summaryData['gender'] = $data;
+    }
+
+    private function getGenderData($title, $intake, $gender)
+    {
+      $data = ['title' => $title];
+      $gradeCounts = [ 'A*'  => 0,
+                      'A'   => 0,
+                      'B'   => 0,
+                      'C'   => 0,
+                      'D'   => 0,
+                      'E'   => 0,
+                      'U'   => 0,
+                      'D1'  => 0,
+                      'D2'  => 0,
+                      'D3'  => 0,
+                      'M1'  => 0,
+                      'M2'  => 0,
+                      'M3'  => 0,
+                      'P1'  => 0,
+                      'P2'  => 0,
+                      'P3'  => 0
+                    ];
+      $count = 0;
+      $points = 0;
+      $ucas = 0;
+      $passes = 0;
+      $Astar = 0;
+      $As = 0;
+      foreach ($this->houseResults as $house)
+      {
+        $stats = $house->summaryData['data']['U6'][$intake][$gender];
+        $gC = $stats['gradeCounts'];
+        $gradeCounts = $this->combineGradeCounts($gradeCounts, $gC);
+        $count += $stats['results'];
+        $points += $stats['points'];
+        $passes += $stats['passes'];
+        $ucas += $stats['ucasPoints'];
+        $Astar += $gC['A*'] + $gC['D1'] + $gC['D2'];
+        $As += $gC['A*'] + $gC['A']+ $gC['D1'] + $gC['D2'] + $gC['D3'];
+      }
+      $pointsAvg = $count == 0 ? 0 : round($points / $count, 1);
+      $ucasAvg = $count == 0 ? 0 : round($ucas / $count, 1);
+      $data = array_merge($data, $gradeCounts);
+      $data['%Astar'] = $count == 0 ? 0 : round(100 * $Astar / $count);
+      $data['%As'] = $count == 0 ? 0 : round(100 * $As / $count);
+
+      $data['%pass'] = $count == 0 ? 0 : round(100 * $passes / $count);
+      $data['gradeAvg'] = $pointsAvg;
+      $data['ucasAvg'] = $ucasAvg;
+
+
+      return $data;
+
+    }
+
     // https://stackoverflow.com/questions/6086267/how-to-merge-two-arrays-by-summing-the-merged-values
-    private function combineGradeCounts($gradeCounts, $student)
+    private function combineGradeCounts($gradeCounts, $donor)
     {
       $a1 = $gradeCounts;
-      $a2 = $student->gradeCounts;
+      $a2 = $donor->gradeCounts ?? $donor;
       $sums = array();
       foreach (array_keys($a1 + $a2) as $key) {
           $sums[$key] = @($a1[$key] + $a2[$key]);
@@ -333,6 +471,7 @@ class Statistics
 
       $this->averages = $data;
       $this->history = [$data];
+      $this->historyKeys = ['y_' . $this->year];
     }
 
     private function makeHistoricalData(int $year)
@@ -354,6 +493,7 @@ class Statistics
           $statistics = $data['statistics']['data'];
 
           $this->history[] = $statistics['averages'] ?? null;
+          $this->historyKeys['y_' . $year] = $statistics['averages'] ?? null;
           //subject data
           $subjects = $statistics['subjectResults'];
           foreach ($subjects as $key => $level) {
@@ -364,7 +504,9 @@ class Statistics
 
               if (isset($this->subjectResults[$key][$code])) {
                 unset($summaryData['history']);
+                unset($summaryData['historyKeys']);
                 $this->subjectResults[$key][$code]->summaryData['history'][] = $summaryData;
+                $this->subjectResults[$key][$code]->summaryData['historyKeys']['y_' . $year] = $summaryData;
               }
             }
           }
@@ -377,7 +519,9 @@ class Statistics
             $summaryData['year'] = (int)$year;
             if (isset($this->houseResults[$code])) {
               unset($summaryData['history']);
+              unset($summaryData['historyKeys']);
               $this->houseResults[$code]->summaryData['history'][] = $summaryData;
+              $this->houseResults[$code]->summaryData['historyKeys']['y_' . $year] = $summaryData;
             }
           }
       }
@@ -387,6 +531,8 @@ class Statistics
     {
       $this->console->replace("Generating Summary Data");
       $summaryData = array();
+      $countAL = $countPU = 0;
+
       $gradeCounts = [        'A*'  => 0,
                               'A'   => 0,
                               'B'   => 0,
@@ -412,7 +558,7 @@ class Statistics
       }
 
       foreach($gradeCounts as $grade => &$value){
-        $value = ['grade' => $grade, 'boys'=> 0, 'girls' => 0];
+        $value = ['grade' => $grade, 'boys'=> 0, 'girls' => 0, 'all' => 0];
       }
 
       foreach($this->subjectResults['A'] as $subject){
@@ -420,6 +566,8 @@ class Statistics
           $grade = $result->grade;
           $gender = $result->txtGender === 'M' ? 'boys' : 'girls';
           $gradeCounts[$grade][$gender]++;
+          $gradeCounts[$grade]['all']++;
+          $countAL++;
         }
       }
 
@@ -428,11 +576,73 @@ class Statistics
           $grade = $result->grade;
           $gender = $result->txtGender === 'M' ? 'boys' : 'girls';
           $gradeCounts[$grade][$gender]++;
+          $gradeCounts[$grade]['all']++;
+          $countPU++;
         }
       }
+
+      $sD = [];
+      $count = $countAL;
+      $Astar = $gradeCounts['A*']['all'];
+      $sD['countAL'] = $count;
+      $sD['%Astar'] = round(100 * $Astar / $count);
+
+      $As = $gradeCounts['A*']['all'] + $gradeCounts['A']['all'];
+      $sD['%As'] = round(100 * $As / $count);
+
+      $ABs = $gradeCounts['A*']['all'] + $gradeCounts['A']['all'] + $gradeCounts['B']['all'];
+      $sD['%ABs'] = round(100 * $ABs / $count);
+
+      $AC = $gradeCounts['A*']['all'] + $gradeCounts['A']['all'] + $gradeCounts['B']['all'] + $gradeCounts['C']['all'];
+      $sD['%ABCs'] = round(100 * $AC / $count);
+
+      $AD = $gradeCounts['A*']['all'] + $gradeCounts['A']['all'] + $gradeCounts['B']['all'] + $gradeCounts['C']['all'] + $gradeCounts['D']['all'];
+      $sD['%ABCDs'] = round(100 * $AD / $count);
+
+      $AE = $gradeCounts['A*']['all'] + $gradeCounts['A']['all'] + $gradeCounts['B']['all'] + $gradeCounts['C']['all'] + $gradeCounts['D']['all'] + $gradeCounts['E']['all'];
+      $sD['%ABCDEs'] = round(100 * $AE / $count);
+
+
+      $count = $countPU;
+      $D1D2 = $gradeCounts['D1']['all'] + $gradeCounts['D2']['all'];
+      $sD['countPU'] = $count;
+      $sD['%D1D2'] = round(100 * $D1D2 / $count);
+
+      $D1D3 = $D1D2 + $gradeCounts['D3']['all'];
+      $sD['%D1D3'] = round(100 * $D1D3 / $count);
+
+      $D1M2 = $D1D3 + $gradeCounts['M1']['all'] + $gradeCounts['M2']['all'];
+      $sD['%D1M2'] = round(100 * $D1M2 / $count);
+
+      $D1M3 = $D1M2 + $gradeCounts['M3']['all'];
+      $sD['%D1M3'] = round(100 * $D1M3 / $count);
+
+      $D1P2 = $D1M3 + $gradeCounts['P1']['all'] + $gradeCounts['P2']['all'];
+      $sD['%D1P2'] = round(100 * $D1P2 / $count);
+
+      $D1P3 = $D1P2 + $gradeCounts['P3']['all'];
+      $sD['%D1P3'] = round(100 * $D1P3 / $count);
+
+      // combined percentages
+      $count = $countPU + $countAL;
+      $sD['L1'] = round(100 * ($Astar + $D1D2) / $count );
+      $sD['L2'] = round(100 * ($As + $D1D3) / $count );
+      $sD['L3'] = round(100 * ($ABs + $D1M2) / $count );
+      $sD['L4'] = round(100 * ($AC + $D1M3) / $count );
+      $sD['L5'] = round(100 * ($AD + $D1P2) / $count );
+      $sD['L6'] = round(100 * ($AE + $D1P3) / $count );
+
+      $ranges = [];
+      $ranges['L1'] = ['A*', $sD['%Astar'], 'D1-D2', $sD['%D1D2'], $sD['L1']];
+      $ranges['L2'] = ['A*-A', $sD['%As'], 'D1-D3', $sD['%D1D3'], $sD['L2']];
+      $ranges['L3'] = ['A*-B', $sD['%ABs'], 'D1-M2', $sD['%D1M2'], $sD['L3']];
+      $ranges['L4'] = ['A*-D', $sD['%ABCs'], 'D1-M3', $sD['%D1M3'], $sD['L4']];
+      $ranges['L5'] = ['A*-D', $sD['%ABCDs'], 'D1-P2', $sD['%D1P2'], $sD['L5']];
+      $ranges['L6'] = ['A*-E', $sD['%ABCDEs'], 'D1-P3', $sD['%D1P3'], $sD['L6']];
+
       // ksort($gradeCounts);
       $this->summaryData['gradeCounts'] = $gradeCounts;
-
+      $this->summaryData['ranges'] = $ranges;
       return $this->summaryData;
     }
 
