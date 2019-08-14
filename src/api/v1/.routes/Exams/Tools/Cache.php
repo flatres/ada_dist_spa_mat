@@ -7,7 +7,7 @@ class Cache {
 		public function __construct(\Slim\Container $container)
     {
       $this->adaModules = $container->adaModules;
-			ini_set('memory_limit', '1G'); // or you could use 1G
+			ini_set('memory_limit', '2G'); // or you could use 1G
    	}
 
 		public function exists(int $sessionId, bool $isGCSE)
