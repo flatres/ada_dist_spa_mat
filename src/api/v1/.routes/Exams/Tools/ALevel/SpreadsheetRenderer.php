@@ -134,6 +134,10 @@ class SpreadsheetRenderer
       foreach($subjectA as $key => $s){
         $subjects[$key . ' (A)'] = $s;
       }
+      $subjectAS = $this->statistics->data->subjectResults['AS'];
+      foreach($subjectAS as $key => $s){
+        $subjects[$key . ' (AS)'] = $s;
+      }
       $subjectP = $this->statistics->data->subjectResults['PreU'];
       foreach($subjectP as $key => $s){
         $subjects[$key . ' (PU)'] = $s;
