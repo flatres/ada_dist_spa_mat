@@ -40,6 +40,7 @@ class StatisticsGateway
 
   public function __construct(\Dependency\Databases\ISams $sql, \Sockets\Console $console, array $moduleResults)
   {
+     ini_set('max_execution_time', 240);
      $this->sql= $sql;
      $this->console = $console; //for caching student data
      $this->console->publish("Building statistics");
