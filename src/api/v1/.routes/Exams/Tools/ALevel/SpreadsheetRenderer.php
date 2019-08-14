@@ -246,13 +246,13 @@ class SpreadsheetRenderer
     $sheet->getDefaultColumnDimension()->setWidth(4);
     $sheet->getColumnDimension('A')->setAutoSize(true);
 
-    $worksheet->getStyle('A1:M500')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+    // $worksheet->getStyle('A1:M500')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
     $styleArray = [
       'font' => [
           'size' => 10
       ]
     ];
-    $sheet->getStyle('A1:M500')->applyFromArray($styleArray);
+    // $sheet->getStyle('A1:M500')->applyFromArray($styleArray);
 
     //make columns
     $subjectColumnIndex = array();

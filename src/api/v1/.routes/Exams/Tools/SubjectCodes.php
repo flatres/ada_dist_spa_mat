@@ -138,11 +138,11 @@ class SubjectCodes
 
       // if($this->contains('math') && $this->contains('fur')) return 'MX';
       if($this->contains('decision mathematics')) return array('FM', 'Further Maths');
-      if($this->contains('mechanics 1')) return array('MA', 'Maths');
-      if($this->contains('mechanics')) return array('FM', 'Further Maths');
-      if($this->contains('statistics 1')) return array('MA', 'Maths');
-      if($this->contains('statistics')) return array('FM', 'Further Maths');
-      if($this->contains('further pure')) return array('MA', 'Maths');
+      if($this->contains('mechanics 1')) return array('MA', 'Mathematics');
+      if($this->contains('mechanics')) return array('FM', 'Further Mathematics');
+      if($this->contains('statistics 1')) return array('MA', 'Mathematics');
+      if($this->contains('statistics')) return array('FM', 'Further Mathematics');
+      if($this->contains('further pure')) return array('MA', 'Mathematics');
 
       if($this->contains('mathematics in context')) return array('MC', 'Maths in Context');
       if($this->contains('math') && $this->contains('add')) return array('ADD', 'Additional Maths');
@@ -150,13 +150,13 @@ class SubjectCodes
       if($this->contains('math')) return array('MA', 'Maths');
 
       if($this->contains('latin')) return array("LA", "Latin");
-      if($this->contains('classic')) return array("CG", "Greek");
+      if($this->contains('greek')) return array("CG", "Greek");
       if($this->contains('classical civilisation')) return array("CL", "Classical Civilisation");
 
       if($this->contains('classic')) return array("CL", "Classics");
       if($this->contains('art') )return array('AR', 'Art');
-      if($this->contains('design')) return array("DT", 'Design Tech');
-      if($this->contains('D&T')) return array("DT", 'Design Tech');
+      if($this->contains('design')) return array("DT", 'Design Technology');
+      if($this->contains('D&T')) return array("DT", 'Design Technology');
 
       // if($this->contains('russian') && $this->contains('first')) return "RUI";
       if($this->contains('russian')) return array("RU", 'Russian');
@@ -197,7 +197,7 @@ class SubjectCodes
 
       if($this->contains('drama')) return array("DR", "Theatre Studies");
       if($this->contains('extended')) return array("EPQ", "Extended Project");
-      if($this->contains('physical')) return array("PE", "PE");
+      if($this->contains('physical')) return array("PE", "Physical Education");
       return array("-", "-");
     }
 
