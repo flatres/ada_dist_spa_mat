@@ -86,7 +86,7 @@ class Student
       $this->txtCandidateCode = $result->txtCandidateCode;
       $this->txtCandidateNumber = $result->txtCandidateNumber;
 
-      if ($result->level === 'AS') return; //otherwise data doesn't dovetail well with new ucas points (no AS levels now)
+      // if ($result->level === 'AS') return; //otherwise data doesn't dovetail well with new ucas points (no AS levels now)
       $this->subjects[$result->subjectCode] = $result;
       $this->{$result->subjectCode} = $result->grade; //useful for constructing tables
 

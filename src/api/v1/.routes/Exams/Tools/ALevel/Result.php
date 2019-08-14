@@ -44,6 +44,7 @@ class Result
     public $txtCandidateNumber;
     public $txtCandidateCode;
     public $txtInitialedName;
+    public $txtSchoolID;
     public $surplus;
     public $mark;
     public $total;
@@ -53,6 +54,7 @@ class Result
     {
         $this->id = $result['id'];
         $this->title = $result['txtOptionTitle'];
+        $this->txtSchoolID = $result['txtSchoolID'];
         $this->subjectCode = $result['subjectCode'];
         $this->moduleCode = $result['txtModuleCode'];
         $this->gender = $result['txtGender'];

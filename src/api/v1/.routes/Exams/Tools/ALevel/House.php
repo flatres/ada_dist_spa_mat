@@ -94,6 +94,23 @@ class House
             'girls' => []
           ]
         ],
+        'EarlyA'  => [
+          'all' => [
+            'all' => [],
+            'boys' => [],
+            'girls' => []
+          ],
+          'NL6' => [
+            'all' => [],
+            'boys' => [],
+            'girls' => []
+          ],
+          'LS'  => [
+            'all' => [],
+            'boys' => [],
+            'girls' => []
+          ]
+        ],
         'AS'  => [
           'all' => [
             'all' => [],
@@ -210,11 +227,11 @@ class House
     {
 
       if ($result->level === 'A' || $result->level === 'PreU'){
-        if ($result->NCYear !== '13'){
+        if ($result->NCYear !== 13){
           return;
         }
       }
-      
+
       $this->results['r_' . $result->id] = $result;
 
       if ($result->txtGender === 'M') $this->boysCount++;

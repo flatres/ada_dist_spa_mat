@@ -56,14 +56,13 @@ class SpreadsheetRenderer
         $this->makeALevelRange('ucasAverage', 'UCAS Points');
         $this->makeALevelRange('pointsAvg', 'GA');
         $this->makeALevelRange('%ABCDEs', '%Pass');
-        $this->makeALevelRange('%ABs', '%AB Grades');
+        $this->makeALevelRange('%ABs', '$AB Grades');
         $this->makeALevelRange('%Astar');
         // $this->subjectResults(true);
         $this->makeEPQ(12);
         $this->makeEPQ(13);
         $this->makePreUSubjects();
         $this->makeALevelSubjects();
-        // string $title, $yearStats, $isYear13 = true, $isSSS = false, $isAS = false
         $this->makeStudentsSheet('AS Results', $this->statistics->data, true, false, true);
         $this->makeStudentsSheet('Other Years', $this->statistics->data, false);
         $this->makeStudentsSheet('U6 Results SSS', $this->statistics->data, true, true);
@@ -248,13 +247,13 @@ class SpreadsheetRenderer
     $sheet->getDefaultColumnDimension()->setWidth(4);
     $sheet->getColumnDimension('A')->setAutoSize(true);
 
-    $worksheet->getStyle('A1:M300')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+    // $worksheet->getStyle('A1:M500')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
     $styleArray = [
       'font' => [
           'size' => 10
       ]
     ];
-    $sheet->getStyle('A1:M300')->applyFromArray($styleArray);
+    // $sheet->getStyle('A1:M500')->applyFromArray($styleArray);
 
     //make columns
     $subjectColumnIndex = array();
@@ -340,13 +339,13 @@ class SpreadsheetRenderer
     $sheet->getDefaultColumnDimension()->setWidth(4);
     $sheet->getColumnDimension('A')->setAutoSize(true);
 
-    $worksheet->getStyle('A1:M300')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+    $worksheet->getStyle('A1:M5000')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
     $styleArray = [
       'font' => [
           'size' => 10
       ]
     ];
-    $sheet->getStyle('A1:M300')->applyFromArray($styleArray);
+    $sheet->getStyle('A1:M5000')->applyFromArray($styleArray);
 
     //make columns
     $subjectColumnIndex = array();
@@ -561,13 +560,6 @@ class SpreadsheetRenderer
     $sheet->getDefaultColumnDimension()->setWidth(4);
     $sheet->getColumnDimension('A')->setAutoSize(true);
 
-    $styleArray = [
-      'font' => [
-          'size' => 8
-      ]
-    ];
-    $sheet->getStyle('A1:AU300')->applyFromArray($styleArray);
-
     //can't get the dupication to work.
     // if ($isSSS) {  //set colour less than 0 to red
     //   $conditional1 = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
@@ -607,37 +599,53 @@ class SpreadsheetRenderer
     $students = [];
     //get relevant students and subjects
     foreach($yearStats->allStudents as $student){
-      // $gA = 0l
       if ($isYear13 && $student->NCYear !== 13 ) continue;
       if (!$isYear13 && $student->NCYear === 13) continue;
       $hasAS = false;
       $hasA2 = false;
-      foreach($student->results as $result) {
-        if ($result->level === 'A' || $result->level == 'PreU' || $result->level === 'EarlyA') {
-          $hasA2 = true;
-          if (!$isAS) $subjects[$result->subjectCode] = $result->txtSubjectName;
-        }
-        if ($result->level === 'AS') {
-          $hasAS = true;
-          if ($isAS) $subjects[$result->subjectCode] = $result->txtSubjectName;
-        }
+      foreach($student->results as $results) {
+        if ($result->level === 'A' || $result->level == 'PreU') $hasA2 = true;
+        if ($result->level === 'AS') $hasAS = true;
       }
-      if($isAS && $hasAS) $students[] = $student;
+      if($isAs && $hasAS) $students[] = $student;
       if(!$isAS && $hasA2) $students[] = $student;
     }
 
-    $data = array();
-
-    //load students
-    usort($students, array($this, "compareNames"));
-
-    ksort($subjects);
     foreach($subjects as $key => $subject){
-      $fields[] = $subject;
+        if(!isset($yearStats->subjectResults[$level1][$key]) && !isset($yearStats->subjectResults[$level2][$key])) continue;
+        $fields[] = $subject;
+        $usedSubjects[$key] = $subject;
     }
+
+    $data = array();
     $data[] = $fields;
 
+    //load students
+    $students = $yearStats->allStudents;
+    usort($students, array($this, "compareNames"));
+
     foreach($students as $student){
+      if ($isYear13) {
+        if ($student->NCYear !== 13) continue;
+      } else {
+        if ($student->NCYear === 13) continue;
+      }
+
+      $hasAS = false;
+      $hasUS = false;
+      if ($isAS) {
+        foreach($student->results as $result) {
+          if($result->level === 'AS') $hasAS = true;
+        }
+        if(!$hasAS) continue;
+      } else {
+        // foreach($student->results as $result) {
+        //   if($result->level === 'A' || $result->level === 'PreU') $hasUS = true;
+        // }
+        // if(!$hasAS) continue;
+        //
+      }
+
       $d = [  $student->txtInitialedName,
               $student->txtGender,
               $student->txtHouseCode,
@@ -645,7 +653,8 @@ class SpreadsheetRenderer
               $student->resultCount,
               $student->gradeAverage
             ];
-      foreach($subjects as $key => $subject){
+      foreach($usedSubjects as $key => $subject){
+          if(!isset($yearStats->subjectResults[$level1][$key]) && !isset($yearStats->subjectResults[$level2][$key])) continue;
           if(isset($student->{$key})){
             $d[] = $isSSS ? $student->subjects[$key]->surplus : $student->{$key};
           } else {
@@ -1247,17 +1256,17 @@ class SpreadsheetRenderer
 
     $sheet->getRowDimension('3')->setRowHeight(95);
 
-    // // rotate headers
-    // $styleArray = [
-    //   'font' => [
-    //       'bold' => true,
-    //   ],
-    //   'alignment' => [
-    //     'textRotation' => 90,
-    //     'shrinkToFit' => true
-    //   ]
-    // ];
-    // $sheet->getStyle('K3:R3')->applyFromArray($styleArray);
+    // rotate headers
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+      ],
+      'alignment' => [
+        'textRotation' => 90,
+        'shrinkToFit' => true
+      ]
+    ];
+    $sheet->getStyle('K3:R3')->applyFromArray($styleArray);
 
   }
 
