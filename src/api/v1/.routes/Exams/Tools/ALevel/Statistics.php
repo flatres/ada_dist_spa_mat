@@ -131,9 +131,8 @@ class Statistics
       $this->makeSubjectSummaryData($year);
       $this->makeSchoolData($year);
       $this->processGender();
-
-
       $this->makeHistoricalData($year);
+      $this->makeSubjectTotals();
       // $this->makeRelationshipData()
 
 
@@ -152,6 +151,76 @@ class Statistics
       return $this;
     }
 
+    private function makeSubjectTotals() {
+        //AL
+        $subjects = $this->subjectResults['A'];
+
+        $data = [ 'A*'  => 0,
+                        'A'   => 0,
+                        'B'   => 0,
+                        'C'   => 0,
+                        'D'   => 0,
+                        'E'   => 0,
+                        'U'   => 0,
+                        'D1'  => 0,
+                        'D2'  => 0,
+                        'D3'  => 0,
+                        'M1'  => 0,
+                        'M2'  => 0,
+                        'M3'  => 0,
+                        'P1'  => 0,
+                        'P2'  => 0,
+                        'P3'  => 0
+                      ];
+        $entries = 0;
+        foreach($subjects as $subject){
+          $data = $this->combineGradeCounts($data, $subject);
+          $entries += $subject->resultCount;
+        }
+        $total = 0;
+        foreach($data as $grade){
+          $total += $grade;
+        }
+        $data['entries'] = $entries;
+        $data['%A*'] = round(100 * $data['A*'] / $total);
+        $data['%A*A'] = round(100 * ($data['A*'] + $data['A']) / $total);
+        $data['%AB'] = round(100 * ($data['A*'] + $data['A'] + $data['B']) / $total);
+        $data['%Pass'] = round(100 * ($data['A*'] + $data['A'] + $data['B'] + $data['C'] + $data['D'] + $data['E']) / $total);
+
+        $this->summaryData['totals'] = [
+          'A' => $data,
+          'PreU' => []
+        ];
+
+        //PreU
+        $subjects = $this->subjectResults['PreU'];
+
+        $data = [       'U'   => 0,
+                        'D1'  => 0,
+                        'D2'  => 0,
+                        'D3'  => 0,
+                        'M1'  => 0,
+                        'M2'  => 0,
+                        'M3'  => 0,
+                        'P1'  => 0,
+                        'P2'  => 0,
+                        'P3'  => 0
+                      ];
+        $entries = 0;
+        foreach($subjects as $subject){
+          $data = $this->combineGradeCounts($data, $subject);
+          $entries += $subject->resultCount;
+        }
+        $total = 0;
+        foreach($data as $grade){
+          $total += $grade;
+        }
+        $data['entries'] = $entries;
+        $data['%D'] = round(100 * ($data['D1'] + $data['D2'] + $data['D3']) / $total);
+        $data['%M'] = round(100 * ($data['M1'] + $data['M2'] + $data['M3']) / $total);
+        $data['%P'] = round(100 * ($data['P1'] + $data['P2'] + $data['P3']) / $total);
+        $this->summaryData['totals']['PreU'] = $data;
+    }
     private function makeSurplusScores()
     {
       $this->console->publish("Marking surplus scores..");
