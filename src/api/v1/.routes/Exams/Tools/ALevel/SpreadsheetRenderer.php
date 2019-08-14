@@ -1136,6 +1136,7 @@ class SpreadsheetRenderer
       $t['P1'],
       $t['P2'],
       $t['P3'],
+      $t['U'],
       $t['%D'],
       $t['%M'],
       $t['%P']
