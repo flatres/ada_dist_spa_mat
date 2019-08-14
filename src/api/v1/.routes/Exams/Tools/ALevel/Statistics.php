@@ -300,7 +300,8 @@ class Statistics
                       'M3'  => 0,
                       'P1'  => 0,
                       'P2'  => 0,
-                      'P3'  => 0
+                      'P3'  => 0,
+                      'Q'   => 0
                     ];
       $count = 0;
       $points = 0;
@@ -415,7 +416,8 @@ class Statistics
                         'M3'  => 0,
                         'P1'  => 0,
                         'P2'  => 0,
-                        'P3'  => 0
+                        'P3'  => 0,
+                        'Q'   => 0
                       ];
       $boysAvg = $girlsAvg = $allAvg = $newAvg = 0;
       $boysCount = $girlsCount = $allCount = $newCount = 0;
@@ -548,7 +550,8 @@ class Statistics
                               'M3'  => 0,
                               'P1'  => 0,
                               'P2'  => 0,
-                              'P3'  => 0
+                              'P3'  => 0,
+                              'Q'   => 0
                             ];
 
       foreach($this->allStudents as $student){
