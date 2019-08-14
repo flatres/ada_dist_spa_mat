@@ -33,6 +33,8 @@ class Statistics
     public $houseResults = array(); // key h_{houseCode}
     public $subjectResults = [
       'A'   => [],
+      'EarlyA' => [],
+      'LateA' => [],
       'AS'  => [],
       'PreU'=> [],
       'EPQ' => [],
@@ -84,7 +86,7 @@ class Statistics
         if($i % 100 == 0) $this->console->replace("Sorting Results $i / $count");
 
         switch($result['txtLevel']) {
-            case 'A'  : $level = 'A'; break;
+            case 'A'  : $level = $result['NCYear'] < 13 ? 'EarlyA' : 'A'; break;
             case 'ASB': $level = 'AS'; break;
             case 'CE3': $level = 'AS'; break;
             case 'FC': $level = 'PreU'; break;
@@ -203,6 +205,7 @@ class Statistics
         }
         $subject->surplus = $count == 0 ? 0 : round($subject->surplus / $count, 2);
       }
+
       unset($student);
       unset($subject);
       //round the student's individual surplus scores now that they have been xml_set_unparsed_entity_decl_handler
@@ -305,8 +308,7 @@ class Statistics
                       'M3'  => 0,
                       'P1'  => 0,
                       'P2'  => 0,
-                      'P3'  => 0,
-                      'Q'   => 0
+                      'P3'  => 0
                     ];
       $count = 0;
       $points = 0;
@@ -318,6 +320,7 @@ class Statistics
       {
         $stats = $house->summaryData['data']['U6'][$intake][$gender];
         $gC = $stats['gradeCounts'];
+        unset($gC['Q']);
         $gradeCounts = $this->combineGradeCounts($gradeCounts, $gC);
         $count += $stats['results'];
         $points += $stats['points'];
@@ -644,7 +647,7 @@ class Statistics
       $ranges['L1'] = ['A*', $sD['%Astar'], 'D1-D2', $sD['%D1D2'], $sD['L1']];
       $ranges['L2'] = ['A*-A', $sD['%As'], 'D1-D3', $sD['%D1D3'], $sD['L2']];
       $ranges['L3'] = ['A*-B', $sD['%ABs'], 'D1-M2', $sD['%D1M2'], $sD['L3']];
-      $ranges['L4'] = ['A*-D', $sD['%ABCs'], 'D1-M3', $sD['%D1M3'], $sD['L4']];
+      $ranges['L4'] = ['A*-C', $sD['%ABCs'], 'D1-M3', $sD['%D1M3'], $sD['L4']];
       $ranges['L5'] = ['A*-D', $sD['%ABCDs'], 'D1-P2', $sD['%D1P2'], $sD['L5']];
       $ranges['L6'] = ['A*-E', $sD['%ABCDEs'], 'D1-P3', $sD['%D1P3'], $sD['L6']];
 
@@ -791,7 +794,8 @@ class Statistics
     {
       $subject = new \Exams\Tools\ALevel\Subject($result);
       $key = $result['subjectCode'];
-      $this->subjectResults[$result['level']][$key] = $subject;
+      $level = $result['level'];
+      $this->subjectResults[$level][$key] = $subject;
       return $subject;
     }
 
