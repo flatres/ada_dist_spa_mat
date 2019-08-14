@@ -136,7 +136,7 @@ class SpreadsheetRenderer
     $spreadsheet = $this->spreadsheet;
     $name = $year == '13' ? 'EPQ U6' : 'EPQ L6';
     $worksheet = new Worksheet($spreadsheet, $name);
-    $color = '50C878';    
+    $color = '50C878';
     $worksheet->getTabColor()->setRGB($color);
     $spreadsheet->addSheet($worksheet, 0);
 
@@ -886,7 +886,7 @@ class SpreadsheetRenderer
           'argb' => 'FFA0A0A0',
       ],
       'endColor' => [
-          'argb' => 'FFFFFFFF',
+          'argb' => 'FFA0A0A0',
       ],
     ];
 
@@ -1059,7 +1059,7 @@ class SpreadsheetRenderer
           'argb' => 'FFA0A0A0',
       ],
       'endColor' => [
-          'argb' => 'FFFFFFFF',
+          'argb' => 'FFA0A0A0',
       ],
     ];
 
