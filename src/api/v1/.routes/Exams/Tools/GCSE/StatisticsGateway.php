@@ -82,7 +82,7 @@ class StatisticsGateway
     if(count($this->shellResults) > 0){
       $this->console->publish('Shell statistics', 1);
       $this->shellStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console, $cache);
-      $this->shellStats->makeStatistics($session, $this->shellResults);
+      $this->shellStats->makeStatistics($session, $this->shellResults, $cache);
       $this->years[] = array('label' => 'Shell', 'value' => 9);
     } else {
       $this->console->publish('No shell results found', 2);
