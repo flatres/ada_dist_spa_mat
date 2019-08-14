@@ -649,13 +649,22 @@ class SpreadsheetRenderer
               $student->resultCount,
               $student->gradeAverage
             ];
+      $count = 0;
+      $points = 0;
       foreach($subjects as $key => $subject){
           if(isset($student->{$key})){
+            if ($isAS && $student->subjects[$key]->level !== 'AS') continue;
+            if (!$isAS && $student->subjects[$key]->level !== 'A' && $student->subjects[$key]->level !== 'PreU' && $student->subjects[$key]->level !== 'EarlyA') continue;
+
+            $count++;
+            $points += $student->subjects[$key]->points;
             $d[] = $isSSS ? $student->subjects[$key]->surplus : $student->{$key};
           } else {
             $d[] = null;
           }
       }
+      $d[4] = $count;
+      $d[5] = $count == 0 ? 0 : round($points / $count, 1);
       $data[] = $d;
     }
 

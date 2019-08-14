@@ -510,6 +510,7 @@ class Statistics
       $allGradeCounts = $gradeCounts;
 
       foreach ($this->allStudents as $student) {
+        if ($student->NCYear !== 13) continue;
         $avg = $student->points;
         if ($student->txtGender === 'M') {
           $boysAvg += $avg;
@@ -647,6 +648,7 @@ class Statistics
 
       foreach($this->subjectResults['A'] as $subject){
         foreach($subject->results as $result){
+          if ($result->NCYear !== 13) continue;
           $grade = $result->grade;
           $gender = $result->txtGender === 'M' ? 'boys' : 'girls';
           $gradeCounts[$grade][$gender]++;
@@ -657,6 +659,7 @@ class Statistics
 
       foreach($this->subjectResults['PreU'] as $subject){
         foreach($subject->results as $result){
+          if ($result->NCYear !== 13) continue;
           $grade = $result->grade;
           $gender = $result->txtGender === 'M' ? 'boys' : 'girls';
           $gradeCounts[$grade][$gender]++;
