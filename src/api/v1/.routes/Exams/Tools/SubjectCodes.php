@@ -191,7 +191,7 @@ class SubjectCodes
       if($this->contains('science')) return array("SC", "Science");
       if($this->contains('astronomy')) return array("AS", "Astronomy");
 
-      if($this->contains('drama')) return array("DR", "Theater Studies");
+      if($this->contains('drama')) return array("DR", "Theatre Studies");
       if($this->contains('extended')) return array("EPQ", "Extended Project");
       if($this->contains('physical')) return array("PE", "PE");
       return array("-", "-");
