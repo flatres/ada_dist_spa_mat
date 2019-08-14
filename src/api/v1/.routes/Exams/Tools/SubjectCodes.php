@@ -131,7 +131,7 @@ class SubjectCodes
       if($this->contains('history')) return array("HI", 'History');
 
       if($this->contains('english') && $this->contains('language')) return array('EN', 'English Language');
-      if($this->contains('english') && $this->contains('literature')) return array('ELI', 'English Literature');
+      if($this->contains('english') && $this->contains('literature')) return array('ELI', 'Literature in English');
 
       if($this->contains('music') && $this->contains('technology')) return array("MT", "Music Technology");
       if($this->contains('music')) return array("MU", 'Music');
@@ -144,10 +144,14 @@ class SubjectCodes
       if($this->contains('statistics')) return array('FM', 'Further Maths');
       if($this->contains('further pure')) return array('MA', 'Maths');
 
+      if($this->contains('mathematics in context')) return array('MC', 'Maths in Context');
       if($this->contains('math') && $this->contains('add')) return array('ADD', 'Additional Maths');
       if($this->contains('math') && $this->contains('fur')) return array('FM', 'Further Maths');
       if($this->contains('math')) return array('MA', 'Maths');
 
+      if($this->contains('latin')) return array("LA", "Latin");
+      if($this->contains('classic')) return array("CG", "Greek");
+      if($this->contains('classical civilisation')) return array("CL", "Classical Civilisation");
 
       if($this->contains('classic')) return array("CL", "Classics");
       if($this->contains('art') )return array('AR', 'Art');
@@ -171,7 +175,7 @@ class SubjectCodes
       if($this->contains('german')) return array('DE', "German");
       if($this->contains('spanish')) return array("SP", "Spanish");
       if($this->contains('arabic')) return array("AI", "Arabic");
-      if($this->contains('latin')) return array("LA", "Latin");
+
       if($this->contains('dutch')) return array("DU", "Dutch");
 
       if($this->contains('creative writing')) return array("CR", "Creative Writing");

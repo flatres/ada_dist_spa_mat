@@ -102,12 +102,19 @@ class Result
           $ucasPoints = $ucasPoints / 2;
         }
 
-        if ($this->level === 'AS') {
-          $points = 0;
-          $ucasPoints = 0;
-          $pass = 0;
-          $fail = 0;
+        if ($this->level === 'AS' || $this->level === 'CE3') {
+          $points = $points / 2;
+          $ucasPoints = $points / 2;
         }
+
+        // if ($this->level === 'A' || $this->level === 'PreU'){
+        //   if ($result['NCYear'] !== 13){
+        //     $this->ucasPoints = 0;
+        //     $this->points = 0;
+        //     $this->passes = 0;
+        //     $this->fails = 0;
+        //   }
+        // }
 
         $this->ucasPoints = $ucasPoints;
         $this->points = $points;

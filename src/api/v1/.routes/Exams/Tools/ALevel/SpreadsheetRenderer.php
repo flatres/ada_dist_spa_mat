@@ -13,6 +13,8 @@ class SpreadsheetRenderer
   private $session;
   private $writer;
   private $year;
+  private $keyA = 'For Grade Average A*=12, A = 10, B = 8, C = 6, D = 4, E = 2';
+  private $keyP = 'For UCAS tariff A*=56, A=48, B=40, C=32, D=24, E=16';
 
   public function __construct($filename, $title, $type,  array $session, \Sockets\Console $console, \Exams\Tools\Alevel\StatisticsGateway $statistics)
   {
@@ -56,6 +58,7 @@ class SpreadsheetRenderer
         $this->makeALevelRange('%ABCDEs', '%Pass');
         $this->makeALevelRange('%ABs', '$AB Grades');
         $this->makeALevelRange('%Astar');
+        $this->subjectResults(true);
         $this->makeEPQ(12);
         $this->makeEPQ(13);
         $this->makePreUSubjects();
@@ -88,23 +91,7 @@ class SpreadsheetRenderer
         };
         break;
       case 'subjectresults':
-        $subjects = [];
-        $subjectA = $this->statistics->data->subjectResults['A'];
-        foreach($subjectA as $key => $s){
-          $subjects[$key . ' (A)'] = $s;
-        }
-        $subjectP = $this->statistics->data->subjectResults['PreU'];
-        foreach($subjectP as $key => $s){
-          $subjects[$key . ' (PU)'] = $s;
-        }
-        $subjectE = $this->statistics->data->subjectResults['EPQ'];
-        foreach($subjectE as $key => $s){
-          $subjects['EPQ'] = $s;
-        }
-        krsort($subjects);
-        foreach($subjects as $key => $subject){
-          $this->makeSubjectCandidates($subject, $key);
-        };
+        $this->subjectResults();
         break;
 
     }
@@ -131,6 +118,36 @@ class SpreadsheetRenderer
     return $this;
   }
 
+  private function subjectResults($ASLevel = false){
+    $subjects = [];
+
+    if ($ASLevel){
+      $subjectAS = $this->statistics->data->subjectResults['AS'];
+      foreach($subjectAS as $key => $s){
+        $subjects[$key . ' (AS)'] = $s;
+      }
+    } else {
+
+      $subjectA = $this->statistics->data->subjectResults['A'];
+      foreach($subjectA as $key => $s){
+        $subjects[$key . ' (A)'] = $s;
+      }
+      $subjectP = $this->statistics->data->subjectResults['PreU'];
+      foreach($subjectP as $key => $s){
+        $subjects[$key . ' (PU)'] = $s;
+      }
+      $subjectE = $this->statistics->data->subjectResults['EPQ'];
+      foreach($subjectE as $key => $s){
+        $subjects['EPQ'] = $s;
+      }
+    }
+
+    krsort($subjects);
+    foreach($subjects as $key => $subject){
+      $this->makeSubjectCandidates($subject, $key);
+    };
+
+  }
   private function makeEPQ($year)
   {
     $spreadsheet = $this->spreadsheet;
@@ -229,13 +246,13 @@ class SpreadsheetRenderer
     $sheet->getDefaultColumnDimension()->setWidth(4);
     $sheet->getColumnDimension('A')->setAutoSize(true);
 
-    $worksheet->getStyle('A1:M1000')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+    $worksheet->getStyle('A1:M500')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
     $styleArray = [
       'font' => [
           'size' => 10
       ]
     ];
-    $sheet->getStyle('A1:M1000')->applyFromArray($styleArray);
+    $sheet->getStyle('A1:M500')->applyFromArray($styleArray);
 
     //make columns
     $subjectColumnIndex = array();
@@ -321,13 +338,13 @@ class SpreadsheetRenderer
     $sheet->getDefaultColumnDimension()->setWidth(4);
     $sheet->getColumnDimension('A')->setAutoSize(true);
 
-    $worksheet->getStyle('A1:M1000')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+    $worksheet->getStyle('A1:M5000')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
     $styleArray = [
       'font' => [
           'size' => 10
       ]
     ];
-    $sheet->getStyle('A1:M1000')->applyFromArray($styleArray);
+    $sheet->getStyle('A1:M5000')->applyFromArray($styleArray);
 
     //make columns
     $subjectColumnIndex = array();
@@ -820,8 +837,9 @@ class SpreadsheetRenderer
     $data = array();
     $year = $this->year;
     $lastYear =  $this->year - 1;
+    $lastYear2 =  $this->year - 2;
     //generate array to be placed in spreadsheet
-    $fields = ['Subject', 'Board', 'Entries', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', '%A*', '%A*A','%A*AB', '%Pass', "Grd Avg ($year)", "Grd Avg ($lastYear)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls'];
+    $fields = ['Subject', 'Board', 'Entries', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', '%A*', '%A*A','%A*AB', '%Pass', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", "UCAS Avg ($lastYear2)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls'];
     $data[] = $fields;
     $data[] = []; //blank row
 
@@ -848,8 +866,10 @@ class SpreadsheetRenderer
                   $sum['%passRate'],
                   $sum['gradeAverage'],
                   $sum['historyKeys']['y_' . $lastYear]['gradeAverage'] ?? '',
+                  $sum['historyKeys']['y_' . $lastYear2]['gradeAverage'] ?? '',
                   $sum['ucasAverage'],
                   $sum['historyKeys']['y_' . $lastYear]['ucasAverage'] ?? '',
+                  $sum['historyKeys']['y_' . $lastYear2]['ucasAverage'] ?? '',
                   $sum['boysCount'],
                   $sum['girlsCount'],
                   $sum['pointsAvgBoys'],
@@ -876,7 +896,7 @@ class SpreadsheetRenderer
     //border
     $worksheet->getStyle('A3:C' .$count)->applyFromArray($styleArray);
     $worksheet->getStyle('K3:N'.$count)->applyFromArray($styleArray);
-    $worksheet->getStyle('S3:T'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('R3:T'.$count)->applyFromArray($styleArray);
     $worksheet->getStyle('W3:X'.$count)->applyFromArray($styleArray);
 
     $styleArray['fill'] = [
@@ -892,8 +912,9 @@ class SpreadsheetRenderer
 
 
     $worksheet->getStyle('D3:J'.$count)->applyFromArray($styleArray);
-    $worksheet->getStyle('O3:R'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('O3:Q'.$count)->applyFromArray($styleArray);
     $worksheet->getStyle('U3:V'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('Y3:Z'.$count)->applyFromArray($styleArray);
 
     //styling
     $sheet->getColumnDimension('A')->setAutoSize(true);
@@ -934,45 +955,16 @@ class SpreadsheetRenderer
         'shrinkToFit' => true
       ]
     ];
-    $sheet->getStyle('K3:X3')->applyFromArray($styleArray);
+    $sheet->getStyle('K3:Z3')->applyFromArray($styleArray);
 
-    // $styleArray = [
-    //   'fill' => [
-    //       'fillType' => Fill::FILL_GRADIENT_LINEAR,
-    //       'startColor' => [
-    //           'hex' => 'eeeeee',
-    //       ],
-    //       'endColor' => [
-    //           'hex' => 'eeeeee',
-    //       ],
-    //   ]
-    // ];
-    //
-    // $to = count($this->statistics->data->subjectResults['A']) + 4;
-    // $sheet->getStyle('D3:J3')->applyFromArray($styleArray);
+    //grade key
+    $count = $count + 2;
+    $sheet->setCellValue("A$count" , $this->keyA);
+    $sheet->mergeCells("A$count:O$count");
 
-
-
-
-
-    // //put key at the bottom
-    // $bottomRow = count($this->statistics->hundredStats->subjectResults) + 6;
-    // $keyString = '';
-    //
-    // $keyString .= 'A*' . ' = ' . $this->getPointsFromGrade('A*') . ', ';
-    // foreach (range('A','E') as $grade) {
-    //   $keyString .= $grade . ' = ' . $this->getPointsFromGrade($grade) . ', ';
-    // }
-    // foreach (range(9,1) as $grade) {
-    //   $keyString .= $grade . ' = ' . $this->getPointsFromGrade($grade) . ', ';
-    // }
-    //
-    // $sheet->mergeCells('A' . $bottomRow . ':XX' . $bottomRow);
-    // $sheet->setCellValue('A' . $bottomRow, $keyString);
-    // $bottomRow++;
-    // // $sheet->setCellValue('A' . $bottomRow, "X");
-    // $sheet->setCellValue('A' . $bottomRow, 'Average Subject Points = ' . $this->statistics->hundredStats->weightedAvgSubjectPoints);
-
+    $count = $count + 1;
+    $sheet->setCellValue("A$count", $this->keyP);
+    $sheet->mergeCells("A$count:O$count");
   }
 
   //create the sheet which lists the hundred stats for each subject
@@ -993,11 +985,15 @@ class SpreadsheetRenderer
     $data = array();
     $year = $this->year;
     $lastYear =  $this->year - 1;
+    $lastYear2 =  $this->year - 2;
     //generate array to be placed in spreadsheet
-    $fields = ['Subject', 'Board', 'Entries', 'D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U', '%D', '%M', '%P', "Grd Avg ($year)", "Grd Avg ($lastYear)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls'];
+    $fields = ['Subject', 'Board', 'Entries', 'D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U', '%D', '%M', '%P', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", "UCAS Avg ($lastYear2)",  '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls'];
     $data[] = $fields;
     $data[] = []; //blank row
     $count = 4;
+
+    ksort($this->statistics->data->subjectResults['PreU']);
+
     foreach($this->statistics->data->subjectResults['PreU'] as $s){
       $count++;
       $sum = $s->summaryData;
@@ -1020,8 +1016,10 @@ class SpreadsheetRenderer
                   $sum['%P'],
                   $sum['gradeAverage'],
                   $sum['historyKeys']['y_' . $lastYear]['gradeAverage'] ?? '',
+                  $sum['historyKeys']['y_' . $lastYear2]['gradeAverage'] ?? '',
                   $sum['ucasAverage'],
                   $sum['historyKeys']['y_' . $lastYear]['ucasAverage'] ?? '',
+                  $sum['historyKeys']['y_' . $lastYear2]['ucasAverage'] ?? '',
                   $sum['boysCount'],
                   $sum['girlsCount'],
                   $sum['pointsAvgBoys'],
@@ -1049,7 +1047,7 @@ class SpreadsheetRenderer
     //border
     $worksheet->getStyle('A3:C' .$count)->applyFromArray($styleArray);
     $worksheet->getStyle('N3:P'.$count)->applyFromArray($styleArray);
-    $worksheet->getStyle('U3:V'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('T3:V'.$count)->applyFromArray($styleArray);
     $worksheet->getStyle('Y3:Z'.$count)->applyFromArray($styleArray);
 
     $styleArray['fill'] = [
@@ -1065,9 +1063,9 @@ class SpreadsheetRenderer
 
 
     $worksheet->getStyle('D3:M'.$count)->applyFromArray($styleArray);
-    $worksheet->getStyle('Q3:T'.$count)->applyFromArray($styleArray);
+    $worksheet->getStyle('Q3:S'.$count)->applyFromArray($styleArray);
     $worksheet->getStyle('W3:X'.$count)->applyFromArray($styleArray);
-
+    $worksheet->getStyle('AA3:AB'.$count)->applyFromArray($styleArray);
 
 
     $sheet->getColumnDimension('A')->setAutoSize(true);
@@ -1107,25 +1105,16 @@ class SpreadsheetRenderer
         'shrinkToFit' => true
       ]
     ];
-    $sheet->getStyle('Q3:Z3')->applyFromArray($styleArray);
+    $sheet->getStyle('Q3:AB3')->applyFromArray($styleArray);
 
-    // //put key at the bottom
-    // $bottomRow = count($this->statistics->hundredStats->subjectResults) + 6;
-    // $keyString = '';
-    //
-    // $keyString .= 'A*' . ' = ' . $this->getPointsFromGrade('A*') . ', ';
-    // foreach (range('A','E') as $grade) {
-    //   $keyString .= $grade . ' = ' . $this->getPointsFromGrade($grade) . ', ';
-    // }
-    // foreach (range(9,1) as $grade) {
-    //   $keyString .= $grade . ' = ' . $this->getPointsFromGrade($grade) . ', ';
-    // }
-    //
-    // $sheet->mergeCells('A' . $bottomRow . ':XX' . $bottomRow);
-    // $sheet->setCellValue('A' . $bottomRow, $keyString);
-    // $bottomRow++;
-    // // $sheet->setCellValue('A' . $bottomRow, "X");
-    // $sheet->setCellValue('A' . $bottomRow, 'Average Subject Points = ' . $this->statistics->hundredStats->weightedAvgSubjectPoints);
+    //grade key
+    $count = $count + 2;
+    $sheet->setCellValue("A$count", $this->keyA);
+    $sheet->mergeCells("A$count:O$count");
+
+    $count = $count + 1;
+    $sheet->setCellValue("A$count", $this->keyP);
+    $sheet->mergeCells("A$count:O$count");
 
   }
 

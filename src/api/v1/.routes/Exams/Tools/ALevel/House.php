@@ -208,6 +208,13 @@ class House
 
     public function setResult(\Exams\Tools\ALevel\Result &$result)
     {
+
+      if ($result->level === 'A' || $result->level === 'PreU'){
+        if ($result->NCYear !== '13'){
+          return;
+        }
+      }
+      
       $this->results['r_' . $result->id] = $result;
 
       if ($result->txtGender === 'M') $this->boysCount++;

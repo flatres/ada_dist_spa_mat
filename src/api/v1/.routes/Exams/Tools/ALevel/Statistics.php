@@ -86,6 +86,7 @@ class Statistics
         switch($result['txtLevel']) {
             case 'A'  : $level = 'A'; break;
             case 'ASB': $level = 'AS'; break;
+            case 'CE3': $level = 'AS'; break;
             case 'FC': $level = 'PreU'; break;
             case 'B' : $level = 'EPQ'; break;
             default: $level = 'unknown';
@@ -103,8 +104,11 @@ class Statistics
 
         $subjectCode = $result['subjectCode'];
         $subjectName = $result['subjectName'];
-        if (!isset($this->subjectKeys[$subjectCode])) $this->subjectKeys[$subjectCode] = $subjectCode;
-        if (!isset($this->subjectNames[$subjectCode])) $this->subjectNames[$subjectCode] = $subjectName;
+
+        if($level === 'A' || $level === 'PreU') {
+          if (!isset($this->subjectKeys[$subjectCode])) $this->subjectKeys[$subjectCode] = $subjectCode;
+          if (!isset($this->subjectNames[$subjectCode])) $this->subjectNames[$subjectCode] = $subjectName;
+        }
 
         if(!isset($this->subjectResults[$objResult->level][$subjectCode])) $this->newSubject($result);
         $this->subjectResults[$objResult->level][$subjectCode]->setResult($objResult);
@@ -224,6 +228,7 @@ class Statistics
         switch($moduleResult['txtLevel']) {
             case 'A'  : $level = 'A'; break;
             case 'ASB': $level = 'AS'; break;
+            case 'CE3': $level = 'AS'; break;
             case 'FC': $level = 'PreU'; break;
             case 'B' : $level = 'EPQ'; break;
             default: $level = 'unknown';
