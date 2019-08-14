@@ -56,7 +56,8 @@ class House
                             'P1'  => 0,
                             'P2'  => 0,
                             'P3'  => 0,
-                            'PU'  => 0
+                            'PU'  => 0,
+                            'Q'   => 0
                           ];
     public $data = [
         'all'=> [

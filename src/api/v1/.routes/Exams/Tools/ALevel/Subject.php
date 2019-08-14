@@ -48,7 +48,8 @@ class Subject
                             'M3'  => 0,
                             'P1'  => 0,
                             'P2'  => 0,
-                            'P3'  => 0
+                            'P3'  => 0,
+                            'Q'   => 0
                           ];
     public $points = 0;
     public $pointsBoys = 0;
