@@ -62,6 +62,7 @@ class Student
     public $modules = [];
     public $txtCandidateNumber;
     public $txtCandidateCode;
+    public $USchoolResultCount;
 
     public function __construct(array $result)
     {
@@ -97,9 +98,11 @@ class Student
       $this->resultCount++;
 
       $grade = strtoupper($result->grade);
-
-      if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
-      $this->gradeCounts[$grade]++;
+      if($result->level === 'A' || $result->level === 'PreU'){
+        $this->USchoolResultCount++;
+        if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
+        $this->gradeCounts[$grade]++;
+      }
     }
 
     public function setModuleResult(array $moduleResult)
