@@ -261,6 +261,7 @@ class House
       $item['fails'] += $result->fails;
       $item['points'] += $result->points;
       $item['ucasPoints'] += $result->ucasPoints;
+      if (!isset($item['gradeCounts'][trim($result->grade)])) $item['gradeCounts'][trim($result->grade)] = 0;
       $item['gradeCounts'][trim($result->grade)]++;
       $item['results']++;
     }
