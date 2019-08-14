@@ -133,6 +133,12 @@ class SpreadsheetRenderer
       foreach($subjectA as $key => $s){
         $subjects[$key . ' (A)'] = $s;
       }
+
+      $subjectAS = $this->statistics->data->subjectResults['AS'];
+      foreach($subjectA as $key => $s){
+        $subjects[$key . ' (AS)'] = $s;
+      }
+
       $subjectP = $this->statistics->data->subjectResults['PreU'];
       foreach($subjectP as $key => $s){
         $subjects[$key . ' (PU)'] = $s;
@@ -919,11 +925,40 @@ class SpreadsheetRenderer
                 ];
       $data[] = $values;
     }
+
+    $t = $this->statistics->data->summaryData['totals']['A'];
+    $totals = [
+      '',
+      '',
+      $t['entries'],
+      $t['A*'],
+      $t['A'],
+      $t['B'],
+      $t['C'],
+      $t['D'],
+      $t['U'],
+      $t['%A*'],
+      $t['%A*A'],
+      $t['%AB'],
+      $t['%Pass']
+    ];
+    $data[] = $totals;
+
     $sheet->fromArray(
         $data,  // The data to set
         NULL,        // Array values with this value will not be set
         'A3'         // Top left coordinate of the worksheet range where
     );
+
+
+    // $count++;
+    // $sheet->fromArray(
+    //     $totals,  // The data to set
+    //     NULL,        // Array values with this value will not be set
+    //     "C26"         // Top left coordinate of the worksheet range where
+    // );
+    // $count++;
+
 
     $styleArray = [
     'borders' => [
@@ -998,7 +1033,7 @@ class SpreadsheetRenderer
     $sheet->getStyle('K3:Z3')->applyFromArray($styleArray);
 
     //grade key
-    $count = $count + 2;
+    $count = $count + 3;
     $sheet->setCellValue("A$count" , $this->keyA);
     $sheet->mergeCells("A$count:O$count");
 

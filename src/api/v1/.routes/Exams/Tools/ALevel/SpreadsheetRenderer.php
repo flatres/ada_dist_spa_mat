@@ -916,6 +916,7 @@ class SpreadsheetRenderer
         'A3'         // Top left coordinate of the worksheet range where
     );
 
+
     $styleArray = [
     'borders' => [
         'outline' => [
@@ -946,6 +947,30 @@ class SpreadsheetRenderer
     $sheet->getStyle('O3:Q'.$count)->applyFromArray($styleArray);
     $sheet->getStyle('U3:V'.$count)->applyFromArray($styleArray);
     $sheet->getStyle('Y3:Z'.$count)->applyFromArray($styleArray);
+
+    //totals at bottom of sheet
+    $t = $this->statistics->data->summaryData['totals']['A'];
+    $totals = [
+      $t['entries'],
+      $t['A*'],
+      $t['A'],
+      $t['B'],
+      $t['C'],
+      $t['D'],
+      $t['E'],
+      $t['U'],
+      $t['%A*'],
+      $t['%A*A'],
+      $t['%AB'],
+      $t['%Pass']
+    ];
+    $count++;
+    $sheet->fromArray(
+        $totals,  // The data to set
+        NULL,        // Array values with this value will not be set
+        "C$count"         // Top left coordinate of the worksheet range where
+    );
+
 
     //styling
     $sheet->getColumnDimension('A')->setAutoSize(true);
@@ -1098,6 +1123,30 @@ class SpreadsheetRenderer
     $sheet->getStyle('W3:X'.$count)->applyFromArray($styleArray);
     $sheet->getStyle('AA3:AB'.$count)->applyFromArray($styleArray);
 
+    //totals at bottom of sheet
+    $t = $this->statistics->data->summaryData['totals']['PreU'];
+    $totals = [
+      $t['entries'],
+      $t['D1'],
+      $t['D2'],
+      $t['D3'],
+      $t['M1'],
+      $t['M2'],
+      $t['M3'],
+      $t['P1'],
+      $t['P2'],
+      $t['P3'],
+      $t['%D'],
+      $t['%M'],
+      $t['%P']
+    ];
+    $count++;
+    $sheet->fromArray(
+        $totals,  // The data to set
+        NULL,        // Array values with this value will not be set
+        "C$count"         // Top left coordinate of the worksheet range where
+    );
+    $count++;
 
     $sheet->getColumnDimension('A')->setAutoSize(true);
     //the title
