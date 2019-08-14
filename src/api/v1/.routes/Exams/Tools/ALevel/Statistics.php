@@ -510,18 +510,18 @@ class Statistics
         if ($student->txtGender === 'M') {
           $boysAvg += $avg;
           $boysCount++;
-          $boysResultsCount += $student->$USchoolResultCount;
+          $boysResultsCount += $student->USchoolResultCount;
           $boysGradeCounts = $this->combineGradeCounts($boysGradeCounts, $student);
         } else {
           $girlsAvg += $avg;
           $girlsCount++;
-          $girlsResultsCount += $student->$USchoolResultCount;
+          $girlsResultsCount += $student->USchoolResultCount;
           $girlsGradeCounts = $this->combineGradeCounts($girlsGradeCounts, $student);
         }
         if ($student->isNewSixthForm === true) {
           $newAvg += $avg;
           $newCount++;
-          $newResultsCount += $student->$USchoolResultCount;
+          $newResultsCount += $student->USchoolResultCount;
           $newGradeCounts = $this->combineGradeCounts($newGradeCounts, $student);
         }
         $allAvg += $avg;
