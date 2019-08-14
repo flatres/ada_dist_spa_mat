@@ -80,13 +80,17 @@ class Statistics
       $this->console->publish("Sorting Results $i / $count", 1);
 
       foreach($results as &$result){
-        // if($result['NCYear'] > 13) continue;
+        if($result['NCYear'] > 13) continue;
 
         $i++;
         if($i % 100 == 0) $this->console->replace("Sorting Results $i / $count");
 
         switch($result['txtLevel']) {
-            case 'A'  : $level = $result['NCYear'] < 13 ? 'EarlyA' : 'A'; break;
+            case 'A'  :
+              $level = 'A';
+              if ($result['NCYear'] < 13) $level = 'EarlyA';
+              if ($result['NCYear'] > 13) $level = 'LateA';
+              break;
             case 'ASB': $level = 'AS'; break;
             case 'CE3': $level = 'AS'; break;
             case 'FC': $level = 'PreU'; break;
