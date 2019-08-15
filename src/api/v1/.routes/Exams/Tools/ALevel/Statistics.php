@@ -84,6 +84,10 @@ class Statistics
       foreach($results as &$result){
         if($result['NCYear'] > 13) continue;
 
+        //ignore izzy sanderseon who was expelled
+
+        if($result['txtSchoolID'] == '4144804846') continue;
+
         $i++;
         if($i % 100 == 0) $this->console->replace("Sorting Results $i / $count");
 
