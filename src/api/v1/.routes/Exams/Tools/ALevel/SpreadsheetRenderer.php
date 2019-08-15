@@ -552,7 +552,7 @@ class SpreadsheetRenderer
           $results[] = $result;
         }
       }
-
+      if($count == 0) continue;
       $avg1 = round($avg / $count);
       $avg = round($avg / $count,2);
 
