@@ -617,7 +617,7 @@ class SpreadsheetRenderer
       $hasAS = false;
       $hasA2 = false;
       foreach($student->results as $result) {
-        if ($result->level === 'A' || $result->level == 'PreU' || $result->level === 'EarlyA') {
+        if ($result->level === 'A' || $result->level == 'PreU' || $result->level === 'EarlyA' || $result->level === 'EarlyP' || $result->level === 'LateA' || $result->level === 'LateP') {
           $hasA2 = true;
           if (!$isAS) $subjects[$result->subjectCode] = $result->txtSubjectName;
         }

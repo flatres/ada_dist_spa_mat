@@ -34,7 +34,9 @@ class Statistics
     public $subjectResults = [
       'A'   => [],
       'EarlyA' => [],
+      'EarlyP' => [],
       'LateA' => [],
+      'LateP' => [],
       'AS'  => [],
       'PreU'=> [],
       'EPQ' => [],
@@ -93,7 +95,11 @@ class Statistics
               break;
             case 'ASB': $level = 'AS'; break;
             case 'CE3': $level = 'AS'; break;
-            case 'FC': $level = 'PreU'; break;
+            case 'FC': $level = 'PreU';
+              $level = 'PreU';
+              if ($result['NCYear'] < 13) $level = 'EarlyP';
+              if ($result['NCYear'] > 13) $level = 'LateP';
+              break;
             case 'B' : $level = 'EPQ'; break;
             default: $level = 'unknown';
         }
