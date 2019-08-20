@@ -983,9 +983,12 @@ class SpreadsheetRenderer
   {
     if(!$yearStats) return;
 
+    $subjectsOnly = [];
+
     $spreadsheet = $this->spreadsheet;
     $worksheet = new Worksheet($spreadsheet, $title);
-    $worksheet->getTabColor()->setRGB('0000FF');
+    $color = $isSSS ? '7F7FFF': '0000FF';
+    $worksheet->getTabColor()->setRGB($color);
     $spreadsheet->addSheet($worksheet, 0);
 
     //sheet title
@@ -1026,6 +1029,7 @@ class SpreadsheetRenderer
     ksort($subjects);
     foreach($subjects as $key => $subject){
       $fields[] = $subject;
+      $subjectsOnly[$key] = $subject;
     }
     $data[] = $fields;
 
@@ -1059,10 +1063,21 @@ class SpreadsheetRenderer
         'A1'         // Top left coordinate of the worksheet range where
     );
 
+    $d = [];
+    foreach($subjectsOnly as $key => $subject){
+          $d[] = $key;
+    }
+    $lastRow = count($students) + 2;
+    $sheet->fromArray(
+        $d,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'G' . $lastRow        // Top left coordinate of the worksheet range where
+    );
+
     //make totals and averages
-    $lastRow = count($students) + 1;
+    $lastRow = count($students) + 3;
     $dataRow = $lastRow + 1;
-    $sheet->setCellValueByColumnAndRow(5, $dataRow, "=count(A2:A$lastRow)");
+    // $sheet->setCellValueByColumnAndRow(5, $dataRow, "=count(A2:A$lastRow)");
     $sheet->setCellValueByColumnAndRow(6, $dataRow, "=Round(Average(F2:F$lastRow),2)");
 
     $subjectCount = 7; //first column containing a subject
