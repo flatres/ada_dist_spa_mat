@@ -73,7 +73,7 @@ class StatisticsGateway
     if(count($this->removeResults) > 0){
       $this->console->publish('Remove statistics', 1);
       $this->removeStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
-      $this->removeStats->makeStatistics($session, $this->removeResults, $cache);
+      $this->removeStats->makeStatistics($session, $this->removeResults);
       $this->years[] = array('label' => 'Remove', 'value' => 10);
     }else{
       $this->console->publish('No remove results found', 2);
@@ -81,14 +81,19 @@ class StatisticsGateway
     //make stats for each year with results
     if(count($this->shellResults) > 0){
       $this->console->publish('Shell statistics', 1);
-      $this->shellStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console, $cache);
-      $this->shellStats->makeStatistics($session, $this->shellResults, $cache);
+      $this->shellStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
+      $this->shellStats->makeStatistics($session, $this->shellResults);
       $this->years[] = array('label' => 'Shell', 'value' => 9);
     } else {
       $this->console->publish('No shell results found', 2);
     }
 
-    $this->spreadsheet = new SpreadsheetRenderer($session, $this->console, $this);
+
+    $this->spreadsheet = new SpreadsheetRenderer('GCSE_Detailed_Report', 'GCSE Results', 'detailed', $session, $this->console, $this);
+    $this->spreadsheetSSS = new SpreadsheetRenderer('GCSE_SSS', 'Subject Surplus Scores', 'sss', $session, $this->console, $this);
+    $this->spreadsheetHouseCandidates = new SpreadsheetRenderer('House_Candidate_Results', 'House Candidate Results', 'houseresults', $session, $this->console, $this);
+    $this->spreadsheetSubjectCandidates = new SpreadsheetRenderer('Subject_Candidate_Results', 'Subject Candidate Results', 'subjectresults', $session, $this->console, $this);
+
     $this->cemSpreadsheet = new CemSpreadsheetRenderer($session, $this->console, $this);
     return $this;
   }

@@ -33,18 +33,27 @@ class Result
     public $points = 0;
     public $passes = 1;
     public $fails = 0;
+    public $level = 'GCSE';
     public $NCYear;
     public $txtGender;
     public $txtForename;
     public $txtSurname;
     public $txtHouseCode;
     public $txtLevel;
+    public $txtSchoolID;
+    public $txtCandidateNumber;
+    public $txtCandidateCode;
+    public $mark;
+    public $total;
+    public $title;
+
 
     public function __construct(array $result = null)
     {
         if(!$result) return;
 
         $this->id = $result['id'];
+
         $this->subjectCode = $result['subjectCode'];
         $this->moduleCode = $result['txtModuleCode'];
         $this->grade = $result['grade'];
@@ -55,6 +64,16 @@ class Result
         $this->txtSurname = $result['txtSurname'];
         $this->txtHouseCode = $result['txtHouseCode'];
         $this->txtLevel = $result['txtLevel'];
+        $this->txtSchoolID = $result['txtSchoolID'];
+        $this->txtSubjectName = $result['subjectName'];
+        $this->isNumeric = false;
+        $this->isLetter = false;
+        $this->mark =  ltrim($result['mark'], '0');
+        $this->total = ltrim($result['total'], '0');
+        $this->early = $result['early'];
+        $this->txtCandidateCode = $result['txtCandidateCode'];
+        $this->txtCandidateNumber = $result['txtCandidateNumber'];
+        $this->title = $result['txtOptionTitle'];
 
         $points = 0;
         $pass = 1;
@@ -62,11 +81,17 @@ class Result
 
         $this->processGrade($this->grade);
 
+        if ($this->isLetter) $this->subjectCode = $this->subjectCode . '.';
+        if ($this->isLetter) $this->txtSubjectName = $this->txtSubjectName . '.';
+
     }
 
     public function processGrade($grade)
     {
       if(!$grade) return;
+
+      if (is_numeric($grade)) $this->isNumeric = true;
+      if (!is_numeric($grade)) $this->isLetter = true;
 
       $points = 0;
       $pass = 0;
@@ -102,10 +127,10 @@ class Result
         case 'C'  : $points = 4; $pass = 1; $fail = 0; break;
         case 'D'  : $points = 3; $pass = 0; $fail = 1; break;
         case 'E'  : $points = 2; $pass = 0; $fail = 1; break;
-        case 'F'  : $points = 1.5; $pass = 0; $fail = 1; break;
-        case 'G'  : $points = 1; $pass = 0; $fail = 1; break;
+        case 'F'  : $points = 1.5; $pass = 1; $fail = 0; break;
+        case 'G'  : $points = 1; $pass = 1; $fail = 0; break;
         case 'U'  : $points = 0; $pass = 0; $fail = 1; break;
-        case 'X'  : $points = 0; $pass = 0; $fail = 0; break;
+        case 'X'  : $points = 0; $pass = 0; $fail = 1; break;
 
         case '9' : $points = (int)$grade; $pass = 1; $fail = 0; break;
         case '8'  : $points = (int)$grade; $pass = 1; $fail = 0; break;
@@ -113,9 +138,9 @@ class Result
         case '6'  : $points = (int)$grade; $pass = 1; $fail = 0; break;
         case '5'  : $points = (int)$grade; $pass = 1; $fail = 0; break;
         case '4'  : $points = (int)$grade; $pass = 1; $fail = 0; break;
-        case '3'  : $points = (int)$grade; $pass = 0; $fail = 1; break;
-        case '2'  : $points = (int)$grade; $pass = 0; $fail = 1; break;
-        case '1'  : $points = (int)$grade; $pass = 0; $fail = 1; break;
+        case '3'  : $points = (int)$grade; $pass = 1; $fail = 0; break;
+        case '2'  : $points = (int)$grade; $pass = 1; $fail = 0; break;
+        case '1'  : $points = (int)$grade; $pass = 1; $fail = 0; break;
       }
 
       $this->points = $points;

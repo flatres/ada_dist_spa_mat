@@ -795,6 +795,7 @@ class SpreadsheetRenderer
     //make totals and averages
     $lastRow = count($students) + 1;
     $dataRow = $lastRow + 1;
+    $sheet->setCellValueByColumnAndRow(5, $dataRow, "=count(A2:A$lastRow)");
     $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(6, $dataRow, "=Round(Average(F2:F$lastRow),2)");
 
     $subjectCount = 7; //first column containing a subject
