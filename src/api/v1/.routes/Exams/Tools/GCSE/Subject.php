@@ -48,19 +48,28 @@ class Subject
                                   '#4'  => 0,
                                   '#3'  => 0,
                                   '#2'  => 0,
-                                  '#1'  => 0
+                                  '#1'  => 0,
+                                  'Q'   => 0
                                 );
     public $points = 0;
+    public $pointsBoys = 0;
+    public $pointsGirls = 0;
     public $passes = 0;
     public $fails = 0;
     public $resultCount = 0;
+    public $resultCountBoys = 0;
+    public $resultCountGirls = 0;
     public $position = 0;
+    public $surplus = 0;
     public $summaryData = array();
     public $isNumeric = false;
+    public $isLetter = false;
     public $isGCSE = true;
     public $title;
     public $unknown = false;
     public $level;
+    public $hasEarly = false;
+
 
     public function __construct(array $result)
     {
@@ -72,22 +81,33 @@ class Subject
       $this->title = $result['txtOptionTitle'];
       $this->unknown = $result['subjectCode'] == '-' ? true : false;
       $this->level = 'GCSE';
-      
+
     }
 
-    public function setResult(\Exams\Tools\GCSE\Result &$result)
+    public function setResult(\Exams\Tools\GCSE\Result $result)
     {
-      $this->results['r_' . $result->id] = &$result;
+      $this->results['r_' . $result->id] = $result;
 
       $this->passes += $result->passes;
       $this->fails += $result->fails;
       $this->points += $result->points;
       $this->resultCount++;
+      if ($result->early) $this->hasEarly = true;
 
-      $this->isNumeric = is_numeric($result->grade);
+      if (is_numeric($result->grade)) $this->isNumeric = true;
+      if (!is_numeric($result->grade)) $this->isLetter = true;
+
       $grade = is_numeric($result->grade) ? "#" . $result->grade : $result->grade;
       if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
       $this->gradeCounts[$grade]++;
+
+      if ($result->txtGender === "M") {
+        $this->pointsBoys += $result->points;
+        $this->resultCountBoys++;
+      } else {
+        $this->pointsGirls += $result->points;
+        $this->resultCountGirls++;
+      }
 
     }
 
@@ -97,14 +117,17 @@ class Subject
       $this->students['s_' . $txtSchoolID] = &$student;
     }
 
-    public function makeSummaryData()
+    public function makeSummaryData(int $year)
     {
       $sD = array();
 
       $gradeCounts = $this->gradeCounts;
 
+      $sD['surplus'] = $this->surplus;
       $sD['gradeAverage'] = round($this->points / $this->resultCount, 2);
       $sD['candidateCount'] = $this->resultCount;
+
+      $sD['%9'] = round(100 * $gradeCounts['#9'] / $this->resultCount);
 
       $As = $gradeCounts['A*'] +  $gradeCounts['#9'] +  $gradeCounts['#8'];
       $sD['%Astar'] = round(100 * $As / $this->resultCount);
@@ -116,6 +139,19 @@ class Subject
       $sD['%ABs'] = round(100 * $ABs / $this->resultCount);
 
       $sD['%passRate'] = round(100 * $this->passes / $this->resultCount);
+
+      $sD['boysCount'] = $this->resultCountBoys;
+      $sD['girlsCount'] = $this->resultCountGirls;
+
+      $sD['pointsAvgBoys'] = $this->resultCountBoys == 0 ? 0 : round($this->pointsBoys / $this->resultCountBoys,2);
+      $sD['pointsAvgGirls'] = $this->resultCountGirls == 0 ? 0 : round($this->pointsGirls / $this->resultCountGirls,2);
+
+      $sD['gradeCounts'] = $this->gradeCounts;
+      $sD['year'] = $year;
+      $sD['board'] = $this->boardName;
+
+      $sD['history'] = [$sD];
+      $sD['historyKeys'] = ['y_' . $year => $sD];
 
       $this->summaryData = $sD;
 

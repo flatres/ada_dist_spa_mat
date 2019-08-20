@@ -30,6 +30,8 @@ namespace Exams\Tools\GCSE;
 class Student
 {
     public $txtSchoolID, $txtGender, $txtInitialedName, $intEnrolementNCYear;
+    public $txtCandidateNumber;
+    public $txtCandidateCode;
     public $results = array();
     public $subjects = array();
     public $gradeCounts = array(  'A*'  => 0,
@@ -58,6 +60,10 @@ class Student
     public $numericResultCount = 0;
     public $letterPoints = 0;
     public $letterResultCount = 0;
+    public $gradeAverage = 0;
+    public $count9 = 0;
+    public $count98 = 0;
+    public $count97 = 0;
 
     public function __construct(array $result)
     {
@@ -74,12 +80,13 @@ class Student
 
     }
 
-    public function setResult(\Exams\Tools\GCSE\Result &$result)
+    public function setResult(\Exams\Tools\GCSE\Result $result)
     {
-
+      $this->txtCandidateCode = $result->txtCandidateCode;
+      $this->txtCandidateNumber = $result->txtCandidateNumber;
       // if($result['subjectCode'] == '')
       $this->results['r_' . $result->id] = &$result;
-      $this->subject[$result->subjectCode] = &$result;
+      $this->subjects[$result->subjectCode] = &$result;
       $this->{$result->subjectCode} = $result->grade; //useful for constructing tables
 
       $this->passes += $result->passes;
@@ -108,6 +115,10 @@ class Student
       $summaryData = array();
 
       $gradeCounts = $this->gradeCounts;
+
+      $this->count9 = $gradeCounts['#9'];
+      $this->count98 = $gradeCounts['#9'] + $gradeCounts['#8'] + $gradeCounts['A*'];
+      $this->count97 = $gradeCounts['#9'] + $gradeCounts['#8'] +  $gradeCounts['#7'] + $gradeCounts['A*'] +  $gradeCounts['A'];
 
       $this->gradeAverage = round($this->points / $this->resultCount, 2);
 

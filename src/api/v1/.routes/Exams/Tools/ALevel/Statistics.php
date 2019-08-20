@@ -648,10 +648,10 @@ class Statistics
       $girlsCount = count($girls);
       $newCount = count($newL6);
       $allCount = $boysCount + $girlsCount;
-      $avgResultsPerBoy = $boysResultsCount / $boysCount;
-      $avgResultsPerGirl = $girlsResultsCount / $girlsCount;
-      $avgResultsPerAll = $allResultsCount / $allCount;
-      $avgResultsPerNew = $newResultsCount / $newCount;
+      $avgResultsPerBoy = $boysCount > 0 ? $boysResultsCount / $boysCount : 0;
+      $avgResultsPerGirl = $girlsCount > 0 ? $girlsResultsCount / $girlsCount : 0;
+      $avgResultsPerAll = $allCount > 0 ? $allResultsCount / $allCount : 0;
+      $avgResultsPerNew = $newCount > 0 ? $newResultsCount / $newCount : 0;
 
       $data['year'] = $this->year;
       $data['boysAvg'] = $boysCount > 0 ? round($boysAvg / $boysCount, 2) : 0;
