@@ -111,57 +111,6 @@ class House
             'girls' => []
           ]
         ],
-        'LateA'  => [
-          'all' => [
-            'all' => [],
-            'boys' => [],
-            'girls' => []
-          ],
-          'NL6' => [
-            'all' => [],
-            'boys' => [],
-            'girls' => []
-          ],
-          'LS'  => [
-            'all' => [],
-            'boys' => [],
-            'girls' => []
-          ]
-        ],
-        'EarlyP'  => [
-          'all' => [
-            'all' => [],
-            'boys' => [],
-            'girls' => []
-          ],
-          'NL6' => [
-            'all' => [],
-            'boys' => [],
-            'girls' => []
-          ],
-          'LS'  => [
-            'all' => [],
-            'boys' => [],
-            'girls' => []
-          ]
-        ],
-        'LateP'  => [
-          'all' => [
-            'all' => [],
-            'boys' => [],
-            'girls' => []
-          ],
-          'NL6' => [
-            'all' => [],
-            'boys' => [],
-            'girls' => []
-          ],
-          'LS'  => [
-            'all' => [],
-            'boys' => [],
-            'girls' => []
-          ]
-        ],
         'AS'  => [
           'all' => [
             'all' => [],
