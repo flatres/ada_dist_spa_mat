@@ -485,7 +485,119 @@ class SpreadsheetRenderer
     foreach (range('A','L') as $col) {
       $sheet->getColumnDimension($col)->setAutoSize(true);
     }
+
+    /// isc stats
+
+    //candidate counts;
+    $students = $this->statistics->data->allStudents;
+    $countA = 0;
+    $countAB = 0;
+    $countAG = 0;
+    $countP = 0;
+    $countPB = 0;
+    $countPG = 0;
+    $threeOrMoreAstar = 0;
+    $threeOrMoreAstarEquiv = 0;
+    foreach($students as $student){
+      if($student->NCYear !== 13) continue;
+      $AstarCount = 0;
+      $AstarEquivCount = 0;
+      $isAL = false;
+      $isALG = false;
+      $isALB = false;
+      $isPU = false;
+      $isPUG = false;
+      $isPUB = false;
+      foreach($student->results as $result){
+
+        if($result->level === 'A') {
+          $isAL = true;
+          if($result->txtGender==='M') $isALB = true;
+          if($result->txtGender==='F') $isALG = true;
+          if($result->grade === 'A*') {
+            $AstarCount++;
+            $AstarEquivCount++;
+          }
+        }
+        if($result->level === 'PreU') {
+          $isPU = true;
+          if($result->txtGender==='M') $isPUB = true;
+          if($result->txtGender==='F') $isPUG = true;
+          if($result->grade === 'D1' || $result->grade === 'D2') {
+            $AstarEquivCount++;
+          }
+        }
+      }
+      if ($AstarCount > 2) $threeOrMoreAstar++;
+      if ($AstarEquivCount > 2) $threeOrMoreAstarEquiv++;
+      if ($isALB) $countAB++;
+      if ($isALG) $countAG++;
+      if ($isAL) $countA++;
+      if ($isPUB) $countPB++;
+      if ($isPUG) $countPG++;
+      if ($isPU) $countP++;
+
+    }
+
+    $countAAB = 0;
+    $test = [];
+    //calculate how many have AAB or better (or equivalent). Take three best results and the qualify if the score is 26 or more
+    foreach($students as $student){
+      //sort results by points
+      if($student->NCYear !== 13) continue;
+      //get only A and PRU results
+      $results = [];
+      $count = 0;
+      $avg = 0;
+      foreach($student->results as $result){
+        if($result->level === 'A' || $result->level === 'PreU') {
+          $avg = $avg + $result->points;
+          $count++;
+          $results[] = $result;
+        }
+      }
+      if($count == 0) continue;
+      $avg1 = round($avg / $count);
+      $avg = round($avg / $count,2);
+
+      usort($results, array($this, "compareResults"));
+
+      $first = $results[0]->points ?? 0;
+      $second = $results[1]->points ?? 0;
+      $third = $results[2]->points ?? 0;
+      $total = $first + $second + $third;
+      if ($total > 25) {
+        $countAAB++;
+      }
+    }
+
+
+    $data = [];
+    $data[] = ['# A Level Candidates Boys', $countAB];
+    $data[] = ['# A Level Candidates Girls', $countAG];
+    $data[] = ['# A Level Candidates', $countA];
+    $data[] = ['> 2 A*', $threeOrMoreAstar];
+    $data[] = ['# Pre U Level Candidates Boys', $countPB];
+    $data[] = ['# Pre U  Level Candidates Girls', $countPG];
+    $data[] = ['# Pre U Level Candidates', $countP];
+    $data[] = ['>2 A* Equiv (D1, D2)', $threeOrMoreAstarEquiv];
+    $data[] = ['>AAB or Equiv', $countAAB];
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'N3'         // Top left coordinate of the worksheet range where
+    );
+
+
+    $sheet->getColumnDimension('N')->setAutoSize(true);
+
   }
+
+  private function compareResults($a, $b){
+     return $a->points < $b->points;
+  }
+
   private function makeGenderComparison()
   {
     $spreadsheet = $this->spreadsheet;
@@ -621,7 +733,7 @@ class SpreadsheetRenderer
       $hasAS = false;
       $hasA2 = false;
       foreach($student->results as $result) {
-        if ($result->level === 'A' || $result->level == 'PreU' || $result->level === 'EarlyA') {
+        if ($result->level === 'A' || $result->level == 'PreU' || $result->level === 'EarlyA' || $result->level === 'EarlyP' || $result->level === 'LateA' || $result->level === 'LateP') {
           $hasA2 = true;
           if (!$isAS) $subjects[$result->subjectCode] = $result->txtSubjectName;
         }
@@ -653,13 +765,22 @@ class SpreadsheetRenderer
               $student->resultCount,
               $student->gradeAverage
             ];
+      $count = 0;
+      $points = 0;
       foreach($subjects as $key => $subject){
           if(isset($student->{$key})){
+            if ($isAS && $student->subjects[$key]->level !== 'AS') continue;
+            if (!$isAS && $student->subjects[$key]->level !== 'A' && $student->subjects[$key]->level !== 'PreU' && $student->subjects[$key]->level !== 'EarlyA') continue;
+
+            $count++;
+            $points += $student->subjects[$key]->points;
             $d[] = $isSSS ? $student->subjects[$key]->surplus : $student->{$key};
           } else {
             $d[] = null;
           }
       }
+      $d[4] = $count;
+      $d[5] = $count == 0 ? 0 : round($points / $count, 1);
       $data[] = $d;
     }
 

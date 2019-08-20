@@ -34,7 +34,9 @@ class Statistics
     public $subjectResults = [
       'A'   => [],
       'EarlyA' => [],
+      'EarlyP' => [],
       'LateA' => [],
+      'LateP' => [],
       'AS'  => [],
       'PreU'=> [],
       'EPQ' => [],
@@ -49,6 +51,7 @@ class Statistics
     public $earlyResults = array();
     public $year;
     public $relationships;
+    public $results = [];
 
     private $error = false;
     private $typeKey;
@@ -82,6 +85,10 @@ class Statistics
       foreach($results as &$result){
         if($result['NCYear'] > 13) continue;
 
+        //ignore izzy sanderseon who was expelled
+
+        if($result['txtSchoolID'] == '4144804846') continue;
+
         $i++;
         if($i % 100 == 0) $this->console->replace("Sorting Results $i / $count");
 
@@ -93,7 +100,11 @@ class Statistics
               break;
             case 'ASB': $level = 'AS'; break;
             case 'CE3': $level = 'AS'; break;
-            case 'FC': $level = 'PreU'; break;
+            case 'FC': $level = 'PreU';
+              $level = 'PreU';
+              if ($result['NCYear'] < 13) $level = 'EarlyP';
+              if ($result['NCYear'] > 13) $level = 'LateP';
+              break;
             case 'B' : $level = 'EPQ'; break;
             default: $level = 'unknown';
         }
@@ -101,6 +112,7 @@ class Statistics
         $result['level'] = $level;
 
         $objResult = new \Exams\Tools\ALevel\Result($result);
+        $this->results[] = $objResult;
 
         if($result['early']) $this->earlyResults[] = $objResult;
 
@@ -485,7 +497,7 @@ class Statistics
 
     }
 
-    private function makeSchoolData()
+    private function makeSchoolDataOLD()
     {
       $this->console->publish('Making School Summary Data');
       $data = [];
@@ -551,6 +563,110 @@ class Statistics
       $data['girlsAvgPerExam'] = $girlsCount > 0 ? round($girlsAvg / $girlsResultsCount, 2) : 0;
       $data['allAvgPerExam'] = $allCount > 0 ? round($allAvg / $allResultsCount, 2) : 0;
       $data['newAvgPerExam'] = $newCount > 0 ? round($newAvg / $newResultsCount, 2) : 0;
+
+
+      $gradeCounts = [];
+      $gradeCounts['boys'] = $boysGradeCounts;
+      $gradeCounts['girls'] = $girlsGradeCounts;
+      $gradeCounts['new'] = $newGradeCounts;
+      $gradeCounts['all'] = $allGradeCounts;
+      $data['gradeCounts'] = $gradeCounts;
+
+      $this->averages = $data;
+      $this->history = [$data];
+      $this->historyKeys = ['y_' . $this->year];
+    }
+
+    private function makeSchoolData()
+    {
+      $this->console->publish('Making School Summary Data');
+      $data = [];
+      $gradeCounts = [ 'A*'  => 0,
+                        'A'   => 0,
+                        'B'   => 0,
+                        'C'   => 0,
+                        'D'   => 0,
+                        'E'   => 0,
+                        'U'   => 0,
+                        'D1'  => 0,
+                        'D2'  => 0,
+                        'D3'  => 0,
+                        'M1'  => 0,
+                        'M2'  => 0,
+                        'M3'  => 0,
+                        'P1'  => 0,
+                        'P2'  => 0,
+                        'P3'  => 0,
+                        'Q'   => 0
+                      ];
+      $boysAvg = $girlsAvg = $allAvg = $newAvg = 0;
+      $boysAvgUcas = $girlsAvgUcas = $allAvgUcas = $newAvgUcas = 0;
+      $boysCount = $girlsCount = $allCount = $newCount = 0;
+      $boysResultsCount = $girlsResultsCount = $allResultsCount = $newResultsCount = 0;
+
+      $boysGradeCounts = $gradeCounts;
+      $girlsGradeCounts = $gradeCounts;
+      $newGradeCounts = $gradeCounts;
+      $allGradeCounts = $gradeCounts;
+      $boys = [];
+      $girls = [];
+      $newL6 = [];
+
+      foreach ($this->results as $result) {
+        if ($result->NCYear !== 13) continue;
+        if ($result->level !== 'A' && $result->level !== 'PreU') continue;
+        $avg = $result->points;
+        $avgUcas = $result->ucasPoints;
+        if ($result->txtGender === 'M') {
+          $boysAvg += $avg;
+          $boysAvgUcas += $avgUcas;
+          $boysResultsCount ++;
+          $boysGradeCounts[$result->grade]++;
+          $boys['s_' . $result->txtSchoolID] = true;
+        } else {
+          $girlsAvg += $avg;
+          $girlsAvgUcas += $avgUcas;
+          $girlsResultsCount++;
+          $girlsGradeCounts[$result->grade]++;
+          $girls['s_' . $result->txtSchoolID] = true;
+        }
+        if ($result->isNewSixthForm === true) {
+          $newAvg += $avg;
+          $newAvgUcas += $avgUcas;
+          $newResultsCount++;
+          $newGradeCounts[$result->grade]++;
+          $newL6['s_' . $result->txtSchoolID] = true;
+        }
+        $allAvg += $avg;
+        $allAvgUcas += $avgUcas;
+        $allResultsCount++;
+        $allGradeCounts[$result->grade]++;
+      }
+
+      $boysCount = count($boys);
+      $girlsCount = count($girls);
+      $newCount = count($newL6);
+      $allCount = $boysCount + $girlsCount;
+      $avgResultsPerBoy = $boysResultsCount / $boysCount;
+      $avgResultsPerGirl = $girlsResultsCount / $girlsCount;
+      $avgResultsPerAll = $allResultsCount / $allCount;
+      $avgResultsPerNew = $newResultsCount / $newCount;
+
+      $data['year'] = $this->year;
+      $data['boysAvg'] = $boysCount > 0 ? round($boysAvg / $boysCount, 2) : 0;
+      $data['girlsAvg'] = $girlsCount > 0 ? round($girlsAvg / $girlsCount, 2) : 0;
+      $data['allAvg'] = $allCount > 0 ? round($allAvg / $allCount, 2) : 0;
+      $data['newAvg'] = $newCount > 0 ? round($newAvg / $newCount, 2) : 0;
+
+      $data['boysAvgUcas'] = $boysCount > 0 ? round($boysAvgUcas / $boysCount, 2) : 0;
+      $data['girlsAvgUcas'] = $girlsCount > 0 ? round($girlsAvgUcas / $girlsCount, 2) : 0;
+      $data['allAvgUcas'] = $allCount > 0 ? round($allAvgUcas / $allCount, 2) : 0;
+      $data['newAvgUcas'] = $newCount > 0 ? round($newAvgUcas / $newCount, 2) : 0;
+
+      $data['boysAvgPerExam'] = $boysCount > 0 ? round($boysAvg / ($boysCount * $avgResultsPerBoy), 2) : 0;
+      $data['girlsAvgPerExam'] = $girlsCount > 0 ? round($girlsAvg / ($girlsCount * $avgResultsPerGirl), 2) : 0;
+      $data['allAvgPerExam'] = $allCount > 0 ? round($allAvg / ($allCount * $avgResultsPerAll), 2) : 0;
+      $data['newAvgPerExam'] = $newCount > 0 ? round($newAvg / ($newCount * $avgResultsPerNew), 2) : 0;
 
 
       $gradeCounts = [];
