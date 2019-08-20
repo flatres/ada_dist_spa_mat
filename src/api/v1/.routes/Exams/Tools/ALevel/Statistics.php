@@ -193,15 +193,16 @@ class Statistics
           $data = $this->combineGradeCounts($data, $subject);
           $entries += $subject->resultCount;
         }
-        $total = 0;
-        foreach($data as $grade){
-          $total += $grade;
-        }
+        // $total = $data['A*'] + $data['A'] + $data['B'] + $data['C'] + $data['D'] + $data['E'] + $data['U'] ;
+        // foreach($data as $grade){
+        //   $total += $grade;
+        // }
+        $total = $entries;
         $data['entries'] = $entries;
-        $data['%A*'] = round(100 * $data['A*'] / $total);
-        $data['%A*A'] = round(100 * ($data['A*'] + $data['A']) / $total);
-        $data['%AB'] = round(100 * ($data['A*'] + $data['A'] + $data['B']) / $total);
-        $data['%Pass'] = round(100 * ($data['A*'] + $data['A'] + $data['B'] + $data['C'] + $data['D'] + $data['E']) / $total);
+        $data['%A*'] = $total == 0 ? 0 : round(100 * $data['A*'] / $total);
+        $data['%A*A'] = $total == 0 ? 0 : round(100 * ($data['A*'] + $data['A']) / $total);
+        $data['%AB'] = $total == 0 ? 0 : round(100 * ($data['A*'] + $data['A'] + $data['B']) / $total);
+        $data['%Pass'] = $total == 0 ? 0 : round(100 * ($data['A*'] + $data['A'] + $data['B'] + $data['C'] + $data['D'] + $data['E']) / $total);
 
         $this->summaryData['totals'] = [
           'A' => $data,
@@ -232,9 +233,9 @@ class Statistics
           $total += $grade;
         }
         $data['entries'] = $entries;
-        $data['%D'] = round(100 * ($data['D1'] + $data['D2'] + $data['D3']) / $total);
-        $data['%M'] = round(100 * ($data['M1'] + $data['M2'] + $data['M3']) / $total);
-        $data['%P'] = round(100 * ($data['P1'] + $data['P2'] + $data['P3']) / $total);
+        $data['%D'] = $total == 0 ? 0 : round(100 * ($data['D1'] + $data['D2'] + $data['D3']) / $total);
+        $data['%M'] = $total == 0 ? 0 : round(100 * ($data['M1'] + $data['M2'] + $data['M3']) / $total);
+        $data['%P'] = $total == 0 ? 0 : round(100 * ($data['P1'] + $data['P2'] + $data['P3']) / $total);
         $this->summaryData['totals']['PreU'] = $data;
     }
     private function makeSurplusScores()

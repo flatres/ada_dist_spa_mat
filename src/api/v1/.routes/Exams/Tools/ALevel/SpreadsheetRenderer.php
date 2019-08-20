@@ -15,6 +15,8 @@ class SpreadsheetRenderer
   private $year;
   private $keyA = 'For Grade Average A*=12, A = 10, B = 8, C = 6, D = 4, E = 2';
   private $keyP = 'For UCAS tariff A*=56, A=48, B=40, C=32, D=24, E=16';
+  private $keyAPreU = 'For Grade Average D1=12, D2=12, D3=11, M1=9, M2=8, M3=7, P1=5, P2=4, P3=3';
+  private $keyPPreU = 'For new UCAS tariff D1=56, D2=56, D3=52, M1=44, M2=40, M3=36, P1=28, P2=24, P3=20';
 
   public function __construct($filename, $title, $type,  array $session, \Sockets\Console $console, \Exams\Tools\Alevel\StatisticsGateway $statistics)
   {
@@ -770,7 +772,7 @@ class SpreadsheetRenderer
       foreach($subjects as $key => $subject){
           if(isset($student->{$key})){
             if ($isAS && $student->subjects[$key]->level !== 'AS') continue;
-            if (!$isAS && $student->subjects[$key]->level !== 'A' && $student->subjects[$key]->level !== 'PreU' && $student->subjects[$key]->level !== 'EarlyA') continue;
+            if (!$isAS && $student->subjects[$key]->level !== 'A' && $student->subjects[$key]->level !== 'PreU' && $student->subjects[$key]->level !== 'EarlyA' && $student->subjects[$key]->level !== 'EarlyP') continue;
 
             $count++;
             $points += $student->subjects[$key]->points;
@@ -790,6 +792,22 @@ class SpreadsheetRenderer
         'A1'         // Top left coordinate of the worksheet range where
     );
 
+    //make totals and averages
+    $lastRow = count($students) + 1;
+    $dataRow = $lastRow + 1;
+    $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(6, $dataRow, "=Round(Average(F2:F$lastRow),2)");
+
+    $subjectCount = 7; //first column containing a subject
+    foreach($subjects as $subject){
+        $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($subjectCount);
+        if ($isSSS) {
+          $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($subjectCount, $dataRow, "=round(average(".$col."2:$col$lastRow),2)");
+        } else {
+            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($subjectCount, $dataRow, "=countA(".$col."2:$col$lastRow)");
+        }
+        $subjectCount++;
+    }
+
     $sheet->getRowDimension('1')->setRowHeight(100);
     $styleArray = [
       'font' => [
@@ -797,6 +815,7 @@ class SpreadsheetRenderer
       ]
     ];
     $sheet->getStyle('A1:E1')->applyFromArray($styleArray);
+    $sheet->getStyle("A$dataRow:AZ$dataRow")->applyFromArray($styleArray);
 
     $styleArray = [
       'font' => [
@@ -1077,6 +1096,39 @@ class SpreadsheetRenderer
     $sheet->getStyle('U3:V'.$count)->applyFromArray($styleArray);
     $sheet->getStyle('Y3:Z'.$count)->applyFromArray($styleArray);
 
+    $count++;
+    //make totals and averages
+    $lastRow = $count - 1;
+    $dataRow = $count;
+    $sheet->setCellValueByColumnAndRow(3, $dataRow, "=sum(C5:C$lastRow)");
+    $sheet->setCellValueByColumnAndRow(4, $dataRow, "=sum(D5:D$lastRow)");
+    $sheet->setCellValueByColumnAndRow(5, $dataRow, "=sum(E5:E$lastRow)");
+    $sheet->setCellValueByColumnAndRow(6, $dataRow, "=sum(F5:F$lastRow)");
+    $sheet->setCellValueByColumnAndRow(7, $dataRow, "=sum(G5:G$lastRow)");
+    $sheet->setCellValueByColumnAndRow(8, $dataRow, "=sum(H5:H$lastRow)");
+    $sheet->setCellValueByColumnAndRow(9, $dataRow, "=sum(I5:I$lastRow)");
+    $sheet->setCellValueByColumnAndRow(10, $dataRow, "=sum(J5:J$lastRow)");
+
+    $sheet->setCellValueByColumnAndRow(11, $dataRow, "=round(100*sum(D5:D$lastRow)/C$dataRow,1)");
+    $sheet->setCellValueByColumnAndRow(12, $dataRow, "=round(100*sum(D5:E$lastRow)/C$dataRow,1)");
+    $sheet->setCellValueByColumnAndRow(13, $dataRow, "=round(100*sum(D5:F$lastRow)/C$dataRow,1)");
+    $sheet->setCellValueByColumnAndRow(14, $dataRow, "=round(100*sum(D5:I$lastRow)/C$dataRow,1)");
+
+    $sheet->setCellValueByColumnAndRow(15, $dataRow, "=round(average(O5:O$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(16, $dataRow, "=round(average(P5:P$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(17, $dataRow, "=round(average(Q5:Q$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(18, $dataRow, "=round(average(R5:R$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(19, $dataRow, "=round(average(S5:S$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(20, $dataRow, "=round(average(T5:T$lastRow),1)");
+
+    $sheet->setCellValueByColumnAndRow(21, $dataRow, "=sum(U5:U$lastRow)");
+    $sheet->setCellValueByColumnAndRow(22, $dataRow, "=sum(V5:V$lastRow)");
+
+    $sheet->setCellValueByColumnAndRow(23, $dataRow, "=round(average(W5:W$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(24, $dataRow, "=round(average(X5:X$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(25, $dataRow, "=round(average(Y5:Y$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(26, $dataRow, "=round(average(Z5:Z$lastRow),1)");
+
     //totals at bottom of sheet
     $t = $this->statistics->data->summaryData['totals']['A'];
     $totals = [
@@ -1094,11 +1146,11 @@ class SpreadsheetRenderer
       $t['%Pass']
     ];
     $count++;
-    $sheet->fromArray(
-        $totals,  // The data to set
-        NULL,        // Array values with this value will not be set
-        "C$count"         // Top left coordinate of the worksheet range where
-    );
+    // $sheet->fromArray(
+    //     $totals,  // The data to set
+    //     NULL,        // Array values with this value will not be set
+    //     "C$count"         // Top left coordinate of the worksheet range where
+    // );
 
 
     //styling
@@ -1117,8 +1169,11 @@ class SpreadsheetRenderer
           'bold' => true,
         ]
     ];
-    $sheet->getStyle('A1:A1000')->applyFromArray($styleArray);
+    $sheet->getStyle('A1:A50')->applyFromArray($styleArray);
     $sheet->getStyle('A3:AA3')->applyFromArray($styleArray);
+    $sheet->getStyle('A3:AA3')->applyFromArray($styleArray);
+    $sheet->getStyle("A$dataRow:AA$dataRow")->applyFromArray($styleArray);
+
 
     foreach (range('A','Z') as $col) {
       $sheet->getColumnDimension($col)->setAutoSize(true);
@@ -1252,6 +1307,41 @@ class SpreadsheetRenderer
     $sheet->getStyle('W3:X'.$count)->applyFromArray($styleArray);
     $sheet->getStyle('AA3:AB'.$count)->applyFromArray($styleArray);
 
+    $count++;
+    //make totals and averages
+    $lastRow = $count - 1;
+    $dataRow = $count;
+    $sheet->setCellValueByColumnAndRow(3, $dataRow, "=sum(C5:C$lastRow)");
+    $sheet->setCellValueByColumnAndRow(4, $dataRow, "=sum(D5:D$lastRow)");
+    $sheet->setCellValueByColumnAndRow(5, $dataRow, "=sum(E5:E$lastRow)");
+    $sheet->setCellValueByColumnAndRow(6, $dataRow, "=sum(F5:F$lastRow)");
+    $sheet->setCellValueByColumnAndRow(7, $dataRow, "=sum(G5:G$lastRow)");
+    $sheet->setCellValueByColumnAndRow(8, $dataRow, "=sum(H5:H$lastRow)");
+    $sheet->setCellValueByColumnAndRow(9, $dataRow, "=sum(I5:I$lastRow)");
+    $sheet->setCellValueByColumnAndRow(10, $dataRow, "=sum(J5:J$lastRow)");
+    $sheet->setCellValueByColumnAndRow(11, $dataRow, "=sum(K5:K$lastRow)");
+    $sheet->setCellValueByColumnAndRow(12, $dataRow, "=sum(L5:L$lastRow)");
+    $sheet->setCellValueByColumnAndRow(13, $dataRow, "=sum(M5:M$lastRow)");
+
+    $sheet->setCellValueByColumnAndRow(14, $dataRow, "=round(100*sum(D5:F$lastRow)/C$dataRow,1)");
+    $sheet->setCellValueByColumnAndRow(15, $dataRow, "=round(100*sum(D5:I$lastRow)/C$dataRow,1)");
+    $sheet->setCellValueByColumnAndRow(16, $dataRow, "=round(100*sum(D5:L$lastRow)/C$dataRow,1)");
+
+    $sheet->setCellValueByColumnAndRow(17, $dataRow, "=round(average(Q5:Q$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(18, $dataRow, "=round(average(R5:R$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(19, $dataRow, "=round(average(S5:S$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(20, $dataRow, "=round(average(T5:T$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(21, $dataRow, "=round(average(U5:U$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(22, $dataRow, "=round(average(V5:V$lastRow),1)");
+
+    $sheet->setCellValueByColumnAndRow(23, $dataRow, "=sum(W5:W$lastRow)");
+    $sheet->setCellValueByColumnAndRow(24, $dataRow, "=sum(X5:X$lastRow)");
+
+    $sheet->setCellValueByColumnAndRow(25, $dataRow, "=round(average(Y5:Y$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(26, $dataRow, "=round(average(Z5:Z$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(27, $dataRow, "=round(average(AA5:AA$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(28, $dataRow, "=round(average(AB5:AB$lastRow),1)");
+
     //totals at bottom of sheet
     $t = $this->statistics->data->summaryData['totals']['PreU'];
     $totals = [
@@ -1271,11 +1361,11 @@ class SpreadsheetRenderer
       $t['%P']
     ];
     $count++;
-    $sheet->fromArray(
-        $totals,  // The data to set
-        NULL,        // Array values with this value will not be set
-        "C$count"         // Top left coordinate of the worksheet range where
-    );
+    // $sheet->fromArray(
+    //     $totals,  // The data to set
+    //     NULL,        // Array values with this value will not be set
+    //     "C$count"         // Top left coordinate of the worksheet range where
+    // );
     $count++;
 
     $sheet->getColumnDimension('A')->setAutoSize(true);
@@ -1295,6 +1385,7 @@ class SpreadsheetRenderer
     ];
     $sheet->getStyle('A1:A1000')->applyFromArray($styleArray);
     $sheet->getStyle('A3:AA3')->applyFromArray($styleArray);
+    $sheet->getStyle("A$dataRow:AB$dataRow")->applyFromArray($styleArray);
 
     foreach (range('A','L') as $col) {
       $sheet->getColumnDimension($col)->setAutoSize(true);
@@ -1319,11 +1410,11 @@ class SpreadsheetRenderer
 
     //grade key
     $count = $count + 2;
-    $sheet->setCellValue("A$count", $this->keyA);
+    $sheet->setCellValue("A$count", $this->keyAPreU);
     $sheet->mergeCells("A$count:O$count");
 
     $count = $count + 1;
-    $sheet->setCellValue("A$count", $this->keyP);
+    $sheet->setCellValue("A$count", $this->keyPPreU);
     $sheet->mergeCells("A$count:O$count");
 
   }
