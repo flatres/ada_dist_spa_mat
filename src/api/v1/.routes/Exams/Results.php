@@ -14,6 +14,7 @@ class Results
 
     private $houseCodes = array();
     private $error = false;
+    private $isGCSE;
 
     public function __construct(\Slim\Container $container)
     {
@@ -310,12 +311,16 @@ class Results
         $this->resultKeys['r_' . $resultsFileResult['id']] = true;
         //look for this module else make a new one
         if(!isset($this->subjectData['s_' . $resultsFileResult['txtModuleCode']])){
-          $objSubject = new \Exams\Tools\SubjectCodes($resultsFileResult['txtModuleCode'], $resultsFileResult['txtOptionTitle'], $this->sql, $resultsFileResult['txtLevel']);
+          $level = $this->isGCSE ? 'GCSE' : $resultsFileResult['txtLevel'];
+          $objSubject = new \Exams\Tools\SubjectCodes($resultsFileResult['txtModuleCode'], $resultsFileResult['txtOptionTitle'], $this->sql, $level, false, $this->console);
           if($resultsFileResult['txtLevel'] === 'ASB') {
               $resultsFileResult['txtOptionTitle'] .= ' (AS)';
               $objSubject->txtOptionTitle = $resultsFileResult['txtOptionTitle'];
               $objSubject->subjectName .= ' (AS)';
           }
+
+          if($this->isGCSE) $objSubject->GCSEType();
+
           $resultsFileResult = array_merge($resultsFileResult, (array)$objSubject);
           $this->subjectData['s_' . $resultsFileResult['txtModuleCode']] = $objSubject;
 

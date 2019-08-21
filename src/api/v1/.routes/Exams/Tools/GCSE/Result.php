@@ -46,6 +46,7 @@ class Result
     public $mark;
     public $total;
     public $title;
+    public $isIGCSE;
 
 
     public function __construct(array $result = null)
@@ -74,6 +75,7 @@ class Result
         $this->txtCandidateCode = $result['txtCandidateCode'];
         $this->txtCandidateNumber = $result['txtCandidateNumber'];
         $this->title = $result['txtOptionTitle'];
+        $this->isIGCSE = $result['isIGCSE'];
 
         $points = 0;
         $pass = 1;

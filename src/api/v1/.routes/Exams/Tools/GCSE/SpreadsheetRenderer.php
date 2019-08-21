@@ -44,6 +44,7 @@ class SpreadsheetRenderer
     switch($type){
       case 'detailed':
       //generate the data sheets
+      $this->makeISCSummary();
       $this->makeOverview();
       $this->makeStudentsSheet('Hundred Stats', $this->statistics->hundredStats, false, true);
       // $this->makeHouseSheets();
@@ -360,6 +361,108 @@ class SpreadsheetRenderer
 
 
     $sheet->getColumnDimension('N')->setAutoSize(true);
+
+  }
+
+  private function makeISCSummary()
+  {
+    $spreadsheet = $this->spreadsheet;
+    $worksheet = new Worksheet($spreadsheet, 'ISC');
+    $worksheet->getTabColor()->setRGB('008B00');
+    $spreadsheet->addSheet($worksheet, 0);
+
+    //sheet title
+    $sheet = $spreadsheet->getSheetByName('ISC');
+
+    $sheet->setCellValue('A1', 'ISC Data ' . $this->session['year']);
+    $sheet->mergeCells('A1:J1');
+    $sheet->getRowDimension('1')->setRowHeight(50);
+
+    //column widths
+    $sheet->getDefaultColumnDimension()->setWidth(6);
+    $sheet->getColumnDimension('A')->setAutoSize(true);
+
+
+
+    $fields = ['ALL', '#Boys', '#Girls', '#Total'];
+    $data = [$fields];
+
+    krsort($this->statistics->hundredStats->gradeCounts);
+
+    foreach($this->statistics->hundredStats->gradeCounts as $key => $grade)
+    {
+      $data[] = [
+        is_numeric($key) ? '#' . $key : $key,
+        $grade['boys'],
+        $grade['girls'],
+        $grade['all']
+      ];
+    }
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'A3'         // Top left coordinate of the worksheet range where
+    );
+
+    $fields = ['IGCSE', '#Boys', '#Girls', '#Total'];
+    $data = [$fields];
+
+    krsort($this->statistics->hundredStats->gradeCountsIGCSE);
+
+    foreach($this->statistics->hundredStats->gradeCountsIGCSE as $key => $grade)
+    {
+      $data[] = [
+        is_numeric($key) ? '#' . $key : $key,
+        $grade['boys'],
+        $grade['girls'],
+        $grade['all']
+      ];
+    }
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'F3'         // Top left coordinate of the worksheet range where
+    );
+
+    $fields = ['GCSE', '#Boys', '#Girls', '#Total'];
+    $data = [$fields];
+
+    krsort($this->statistics->hundredStats->gradeCountsGCSE);
+
+    foreach($this->statistics->hundredStats->gradeCountsGCSE as $key => $grade)
+    {
+      $data[] = [
+        is_numeric($key) ? '#' . $key : $key,
+        $grade['boys'],
+        $grade['girls'],
+        $grade['all']
+      ];
+    }
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'K3'         // Top left coordinate of the worksheet range where
+    );
+
+    $data = [
+      [
+        '#GCSE',
+        $this->statistics->hundredStats->hasGCSECount
+      ],
+      [
+        '#IGCSE',
+        $this->statistics->hundredStats->hasIGCSECount
+      ],
+    ];
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'A25'         // Top left coordinate of the worksheet range where
+    );
 
   }
 
@@ -1241,7 +1344,8 @@ class SpreadsheetRenderer
     }
     $lastRow = count($students) + 2;
     $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($fields));
-    $sheet->setAutoFilter("A2:$col".$lastRow);
+    $w = $lastRow - 2;
+    $sheet->setAutoFilter("A2:$col". $w);
     $lastRow++;
     $sheet->fromArray(
         $d,  // The data to set

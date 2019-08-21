@@ -39,14 +39,17 @@ class SubjectCodes
 {
     public $subjectCode;
     public $level;
+    public $isIGCSE;
+    private $console;
     // public $boardName;
     // public $boardDesc;
 
     private static $boardInfo = [];
 
-    public function __construct(string $moduleCode, string $subjectTitle, $sql, $level = null, $supressBoard = false)
+    public function __construct(string $moduleCode, string $subjectTitle, $sql, $level = null, $supressBoard = false, $console = false)
     {
        $this->sql= $sql;
+       $this->console = $console;
        $this->txtModuleCode = $moduleCode;
        $this->txtOptionTitle = $subjectTitle;
        $codes = $this->getCodes();
@@ -65,10 +68,53 @@ class SubjectCodes
            case 'ASB': $level = 'AS'; break;
            case 'FC': $level = 'PreU'; break;
            case 'B' : $level = 'EPQ'; break;
+           case 'GCSE': $level = 'GCSE'; break;
            default: $level = '';
        }
 
        $this->level = $level;
+    }
+
+    public function GCSEType(){
+      $sql = new \Dependency\Databases\ISams();
+      $ada = new \Dependency\Databases\AdaModules();
+      $d = $ada->select('exams_modules', 'isIGCSE', 'moduleID=? AND title=?', [$this->txtModuleCode, $this->txtOptionTitle]);
+      if(isset($d[0])) {
+        $this->isIGCSE = $d[0]['isIGCSE'] == 1 ? true : false;
+        return $this->isIGCSE;
+      } else {
+        $this->console->publish('Searching Google for ' . $this->boardName . '('.$this->txtOptionTitle .')');
+        // $text = $this->txtModuleCode . ' ' . $this->boardName;
+        // $text = 'is ' . $this->txtModuleCode . ' igcse';
+        // $cleanQuery = urlencode($text);
+        // $url = 'http://www.google.com/search?q='.$cleanQuery;
+        // $scrape = file_get_contents($url);
+        // $pos1 = stripos($scrape, 'international gcse');
+        // $pos2 = stripos($scrape, 'igcse');
+        // $pos3 = stripos($scrape, ' gcse');
+        //
+        // if ($pos1 < $pos3 || $pos2 < $pos3) {
+        //     $isIGCSE = true;
+        // } else {
+        //     $isIGCSE = false;
+        // }
+        $d = $sql->select('TblExamManagerTeachingProgram', 'intProgram', 'txtModuleCode=?', [$this->txtModuleCode]);
+        if (!isset($d[0])){
+          $this->console->publish('ERROR!');
+        } else {
+          $intProgram = $d[0]['intProgram'];
+          $e = $sql->select('TblExamManagerTeachingProgramHeaders', 'txtHeaderName', 'TblExamManagerTeachingProgramHeadersID=?',[$intProgram]);
+          $string = $e[0]['txtHeaderName'] ?? '';
+          $isIGCSE = stripos($string, 'igcse') !== false ? true : false;
+          $ans = $isIGCSE ? 'YES' : 'NO';
+          $this->console->publish('Is IGCSE = ' . $ans);
+          $this->isIGCSE = $isIGCSE;
+          $bit = $isIGCSE ? 1 : 0;
+          $ada->insert('exams_modules', 'isIGCSE, moduleID, title, header', [$bit, $this->txtModuleCode, $this->txtOptionTitle, $string]);
+        }
+
+      }
+
     }
 
     private function getBoardInformation(){
