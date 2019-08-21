@@ -112,7 +112,7 @@ class SpreadsheetRenderer
     $sheet->getRowDimension('1')->setRowHeight(50);
 
     //column widths
-    $sheet->getDefaultColumnDimension()->setWidth(4);
+    $sheet->getDefaultColumnDimension()->setWidth(6);
     $sheet->getColumnDimension('A')->setAutoSize(true);
 
     //make columns
@@ -162,7 +162,7 @@ class SpreadsheetRenderer
       $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 
-    $history = $this->statistics->hundredStats->history;
+    $history = $this->statistics->hundredStats->historyKeys ;
     //find smallest years
     $smallest = 9999;
     foreach($history as $h){
@@ -170,10 +170,63 @@ class SpreadsheetRenderer
     }
     $data = [];
 
-    $fields = [];
-    $fields[] = '';
+    $fields = [''];
     for($x = $smallest; $x <= $this->year; $x++) {
       $fields[] = "20$x";
+    }
+    $data[] = $fields;
+
+    $fields = ['%9'];
+    for($x = $smallest; $x <= $this->year; $x++) {
+      $fields[] = $history['y_' . $x]['ranges']['%9'];
+    }
+    $data[] = $fields;
+
+    $fields = ['%9-8 (A*)'];
+    for($x = $smallest; $x <= $this->year; $x++) {
+      $fields[] = $history['y_' . $x]['ranges']['%98'];
+    }
+    $data[] = $fields;
+
+    $fields = ['%9-7 (A*-A)'];
+    for($x = $smallest; $x <= $this->year; $x++) {
+      $fields[] = $history['y_' . $x]['ranges']['%97'];
+    }
+    $data[] = $fields;
+
+    $fields = ['%9-6'];
+    for($x = $smallest; $x <= $this->year; $x++) {
+      $fields[] = $history['y_' . $x]['ranges']['%96'];
+    }
+    $data[] = $fields;
+
+    $fields = ['%9-5 (A*-B)'];
+    for($x = $smallest; $x <= $this->year; $x++) {
+      $fields[] = $history['y_' . $x]['ranges']['%95'];
+    }
+    $data[] = $fields;
+
+    $fields = ['%9-4 (A*-C)'];
+    for($x = $smallest; $x <= $this->year; $x++) {
+      $fields[] = $history['y_' . $x]['ranges']['%94'];
+    }
+    $data[] = $fields;
+
+    $fields = ['%9-3 (A*-D)'];
+    for($x = $smallest; $x <= $this->year; $x++) {
+      $fields[] = $history['y_' . $x]['ranges']['%93'];
+    }
+    $data[] = $fields;
+
+    $fields = ['%9-2 (A*-E)'];
+    for($x = $smallest; $x <= $this->year; $x++) {
+      $fields[] = $history['y_' . $x]['ranges']['%92'];
+    }
+    $data[] = $fields;
+
+    $fields = ['%9-1'];
+    for($x = $smallest; $x <= $this->year; $x++) {
+      $fields[] = $history['y_' . $x]['ranges']['%91'];
     }
     $data[] = $fields;
 
@@ -182,6 +235,26 @@ class SpreadsheetRenderer
         NULL,        // Array values with this value will not be set
         'H3'         // Top left coordinate of the worksheet range where
     );
+
+    $styleArray = [
+    ];
+
+    $styleArray['fill'] = [
+      'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+      'rotation' => 90,
+      'startColor' => [
+          'argb' => 'FFA0A0A0',
+      ],
+      'endColor' => [
+          'argb' => 'FFA0A0A0',
+      ],
+    ];
+
+    $sheet->getStyle('H3:H12')->applyFromArray($styleArray);
+    $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(9 + ($this->year - $smallest));
+    $sheet->getStyle("I3:$col3")->applyFromArray($styleArray);
+
+
     /// isc stats
 
     // //candidate counts;

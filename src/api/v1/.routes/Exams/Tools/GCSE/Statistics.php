@@ -485,7 +485,7 @@ class Statistics
       $data['totals'] = $this->totals;
       $this->averages = $data;
       $this->history = [$data];
-      $this->historyKeys = ['y_' . $this->year];
+      $this->historyKeys['y_' . $this->year] = $data;
     }
 
     private function makeSurplusScores()
