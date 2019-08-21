@@ -192,8 +192,7 @@ class SubjectCodes
       if($this->contains('biology')) return array("BI", "Biology");
 
       if($this->contains('comp') && $this->contains('sci')) return array("CS", 'Computer Science');
-      if($this->contains('science 1')) return array("SC", "Science 1");
-      if($this->contains('science 2')) return array("SC", "Science 2");
+      if($this->contains('science')) return array("SC", "Science");
       if($this->contains('astronomy')) return array("AS", "Astronomy");
 
       if($this->contains('drama')) return array("DR", "Theatre Studies");
