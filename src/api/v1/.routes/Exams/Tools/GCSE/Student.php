@@ -64,6 +64,8 @@ class Student
     public $count9 = 0;
     public $count98 = 0;
     public $count97 = 0;
+    public $hasGCSE = false;
+    public $hasIGCSE = false;
 
     public function __construct(array $result)
     {
@@ -82,6 +84,10 @@ class Student
 
     public function setResult(\Exams\Tools\GCSE\Result $result)
     {
+
+      if ($result->isIGCSE) $this->hasIGCSE = true;
+      if (!$result->isIGCSE) $this->hasGCSE = true;
+
       $this->txtCandidateCode = $result->txtCandidateCode;
       $this->txtCandidateNumber = $result->txtCandidateNumber;
       // if($result['subjectCode'] == '')

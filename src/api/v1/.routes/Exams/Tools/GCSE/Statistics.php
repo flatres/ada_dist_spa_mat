@@ -46,6 +46,10 @@ class Statistics
     public $subjectKeys = []; // used in construcing the chord plot in relationships
     public $subjectNames = [];
     public $gradeCounts = [];
+    public $gradeCountsGCSE = [];
+    public $gradeCountsIGCSE = [];
+    public $hasGCSECount = 0;
+    public $hasIGCSECount = 0;
 
     private $error = false;
 
@@ -240,7 +244,18 @@ class Statistics
                               'X'   => 0
                             ];
 
+      $gradeCountsGCSE = $gradeCounts;
+      $gradeCountsIGCSE = $gradeCounts;
+
       foreach($gradeCounts as $grade => &$value){
+        $value = ['grade' => $grade, 'boys'=> 0, 'girls' => 0, 'all' => 0];
+      }
+
+      foreach($gradeCountsGCSE as $grade => &$value){
+        $value = ['grade' => $grade, 'boys'=> 0, 'girls' => 0, 'all' => 0];
+      }
+
+      foreach($gradeCountsIGCSE as $grade => &$value){
         $value = ['grade' => $grade, 'boys'=> 0, 'girls' => 0, 'all' => 0];
       }
 
@@ -253,10 +268,24 @@ class Statistics
           $gradeCounts[$grade][$gender]++;
           $gradeCounts[$grade]['all']++;
           $count++;
+          if ($result->isIGCSE) {
+            $gradeCountsIGCSE[$grade][$gender]++;
+            $gradeCountsIGCSE[$grade]['all']++;
+          } else {
+            $gradeCountsGCSE[$grade][$gender]++;
+            $gradeCountsGCSE[$grade]['all']++;
+          }
         }
       }
 
       $this->gradeCounts = $gradeCounts;
+      $this->gradeCountsGCSE = $gradeCountsGCSE;
+      $this->gradeCountsIGCSE = $gradeCountsIGCSE;
+
+      foreach($this->allStudents as $student){
+        if ($student->hasGCSE) $this->hasGCSECount++;
+        if ($student->hasIGCSE) $this->hasIGCSECount++;
+      }
 
       // $sD = [];
       // $g9 = $gradeCounts['#9']['all'];

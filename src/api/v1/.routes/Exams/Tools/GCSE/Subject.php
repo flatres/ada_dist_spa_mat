@@ -69,6 +69,7 @@ class Subject
     public $unknown = false;
     public $level;
     public $hasEarly = false;
+    public $isIGCSE;
 
 
     public function __construct(array $result)
@@ -87,7 +88,7 @@ class Subject
     public function setResult(\Exams\Tools\GCSE\Result $result)
     {
       $this->results['r_' . $result->id] = $result;
-
+      $this->isIGCSE = $result->isIGCSE;
       $this->passes += $result->passes;
       $this->fails += $result->fails;
       $this->points += $result->points;
