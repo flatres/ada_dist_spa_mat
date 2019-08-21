@@ -105,7 +105,7 @@ class SpreadsheetRenderer
     //sheet title
     $sheet = $spreadsheet->getSheetByName('Overview');
 
-    $sheet->setCellValue('A1', 'U6 Results Overview 20' . $this->session['year']);
+    $sheet->setCellValue('A1', 'GCSE Results Overview 20' . $this->session['year']);
     $sheet->mergeCells('A1:J1');
     $sheet->getRowDimension('1')->setRowHeight(50);
 
