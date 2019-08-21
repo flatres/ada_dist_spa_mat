@@ -86,12 +86,35 @@ class Result
 
     }
 
+    private function isNumeric($grade)
+    {
+      if ($grade === 'U') {
+          //need to check against module number
+          $s = "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')";
+          $sql = new \Dependency\Databases\ISams();
+          $results = $sql->select( 'TblExamManagerResultsStore',
+                                                    'TblExamManagerResultsStoreID as id, txtModuleCode, txtFirstGrade as grade',
+                                                    "txtOptionTitle = ? AND txtModuleCode = ? AND $s AND txtCertificationType='C'",
+                                                    [$this->title, $this->moduleCode]);
+
+        foreach($results as $result) {
+          $grade = $result['grade'];
+          if (is_numeric($grade)) return true;
+          if ($grade == 'A' || $grade == 'B' || $grade == 'C') return false;
+        }
+
+      } else {
+          return is_numeric($grade);
+      }
+
+    }
+
     public function processGrade($grade)
     {
       if(!$grade) return;
 
-      if (is_numeric($grade)) $this->isNumeric = true;
-      if (!is_numeric($grade)) $this->isLetter = true;
+      if ($this->isNumeric($grade)) $this->isNumeric = true;
+      if (!$this->isNumeric($grade)) $this->isLetter = true;
 
       $points = 0;
       $pass = 0;
