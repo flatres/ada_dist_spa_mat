@@ -112,9 +112,10 @@ class Statistics
       $this->makeSurplusScores();
       $this->makeHouseSummaryData($year);
       $this->makeSubjectSummaryData($year);
-      $this->makeSchoolData($year);
-      if ($this->cache) $this->makeHistoricalData($year);
       $this->makeSubjectTotals();
+      $this->makeSchoolData($year); //must come after totals
+      if ($this->cache) $this->makeHistoricalData($year);
+
 
       $this->console->replace("Sorting Results $count / $count");
 
@@ -177,7 +178,8 @@ class Statistics
         $data['entries'] = $entries;
         $data['%A*'] = $total == 0 ? 0 : round(100 * ($data['A*'] + $data['#9'] + $data['#8']) / $total);
         $data['%A*A'] = $total == 0 ? 0 : round(100 * ($data['A*'] + $data['A'] + $data['#9'] + $data['#8'] + $data['#7']) / $total);
-        $data['%AB'] = $total == 0 ? 0 : round(100 * ($data['A*'] + $data['A'] + $data['B'] + $data['#9'] + $data['#8'] + $data['#7'] + $data['#6'] ) / $total);
+        $data['%AB'] = $total == 0 ? 0 : round(100 * ($data['A*'] + $data['A'] + $data['B'] + $data['#9'] + $data['#8'] + $data['#7'] + $data['#6'] + $data['#5']) / $total);
+        $data['%AC'] = $total == 0 ? 0 : round(100 * ($data['A*'] + $data['A'] + $data['B'] + $data['C'] + $data['#9'] + $data['#8'] + $data['#7'] + $data['#6'] + $data['#5']) / $total);
         $data['%Pass'] = $total == 0 ? 0 : round(100 * ($data['A*'] + $data['A'] + $data['B'] + $data['C'] + $data['#9'] + $data['#8'] + $data['#7'] + $data['#6'] + $data['#5'] ) / $total);
 
         $this->totals = $data;
@@ -464,6 +466,23 @@ class Statistics
       $gradeCounts['all'] = $allGradeCounts;
       $data['gradeCounts'] = $gradeCounts;
 
+      $g = $allGradeCounts;
+      $sD = [];
+      if ($allResultsCount > 0) {
+        $sD['%9'] = round(100 *  $g['#9'] / $allResultsCount);
+        $sD['%98'] = round(100 * ($g['#9'] + $g['#8'] + $g['A*']) / $allResultsCount);
+        $sD['%97'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['A*'] + $g['A']) / $allResultsCount);
+        $sD['%96'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6']) / $allResultsCount);
+        $sD['%95'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['A*'] + $g['A'] + $g['B'] ) / $allResultsCount);
+        $sD['%94'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['A*'] + $g['A'] + $g['B'] + $g['C']) / $allResultsCount);
+        $sD['%93'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3']  + $g['A*'] + $g['A'] + $g['B'] + $g['C'] + $g['D']) / $allResultsCount);
+        $sD['%92'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3'] + $g['#2']  + $g['A*'] + $g['A'] + $g['B'] + $g['C'] + $g['D'] + $g['E']) / $allResultsCount);
+        $sD['%91'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3'] + $g['#2'] + $g['#1']) / $allResultsCount);
+      }
+
+      $data['ranges'] = $sD;
+
+      $data['totals'] = $this->totals;
       $this->averages = $data;
       $this->history = [$data];
       $this->historyKeys = ['y_' . $this->year];
@@ -553,9 +572,9 @@ class Statistics
 
           $statistics = $data['statistics']['hundredStats'];
 
-          if (isset($statistics['averages'])) $statistics['averages']['totals'] = $this->totals;
+
           $this->history[] = $statistics['averages'] ?? null;
-          $this->historyKeys['y_' . $year] = true ?? null;
+          $this->historyKeys['y_' . $year] = $statistics['averages'] ?? null;
           //subject data
           $subjects = $statistics['subjectResults'];
           foreach ($subjects as $key => $subject) {

@@ -45,15 +45,17 @@ class SpreadsheetRenderer
       case 'detailed':
       //generate the data sheets
       $this->makeOverview();
-
+      $this->makeStudentsSheet('Hundred Stats', $this->statistics->hundredStats, false, true);
       // $this->makeHouseSheets();
       $this->makeHouseSummary($this->statistics->hundredStats->hasLetterGrades);
+      $this->makeCombinedSubjects();
       $this->makeLetterSubjects();
       $this->makeNumericSubjects();
       $this->makeStudentsSheet('SSS', $this->statistics->hundredStats, true);
-      $this->makeStudentsSheet('Shell', $this->statistics->shellStats);
-      $this->makeStudentsSheet('Remove', $this->statistics->removeStats);
-      $this->makeStudentsSheet('Hundred', $this->statistics->hundredStats);
+      $this->makeStudentsSheet('Other', $this->statistics->otherStats, false);
+      $this->makeStudentsSheet('Shell', $this->statistics->shellStats, false);
+      $this->makeStudentsSheet('Remove', $this->statistics->removeStats, false);
+      $this->makeStudentsSheet('Hundred', $this->statistics->hundredStats, false);
       $this->makeSummary();
 
         break;
@@ -160,6 +162,26 @@ class SpreadsheetRenderer
       $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 
+    $history = $this->statistics->hundredStats->history;
+    //find smallest years
+    $smallest = 9999;
+    foreach($history as $h){
+      if ($h['year'] < $smallest) $smallest = $h['year'];
+    }
+    $data = [];
+
+    $fields = [];
+    $fields[] = '';
+    for($x = $smallest; $x <= $this->year; $x++) {
+      $fields[] = "20$x";
+    }
+    $data[] = $fields;
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'H3'         // Top left coordinate of the worksheet range where
+    );
     /// isc stats
 
     // //candidate counts;
@@ -745,7 +767,7 @@ class SpreadsheetRenderer
     $lastYear =  $this->year - 1;
     $lastYear2 =  $this->year - 2;
     //generate array to be placed in spreadsheet
-    $fields = ['Subject', 'Board', 'Entries', '9', '8', '7', '6', '5', '4', '3', '2', '1', 'U', '%9', '%9-8', '%9-7','%9-6', '%Pass', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls'];
+    $fields = ['Subject', 'Board', 'Entries', '9', '8', '7', '6', '5', '4', '3', '2', '1', 'U', '%9', '%9-8', '%9-7','%9-6', '%9-5', '%9-4', '%9-3', '%9-2', '%9-1', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls'];
     $data[] = $fields;
     $data[] = []; //blank row
 
@@ -773,10 +795,14 @@ class SpreadsheetRenderer
                   $g['#1'],
                   $g['U'],
                   $sum['%9'],
-                  $sum['%Astar'],
-                  $sum['%As'],
-                  $sum['%ABs'],
-                  $sum['%passRate'],
+                  $sum['%98'],
+                  $sum['%97'],
+                  $sum['%96'],
+                  $sum['%95'],
+                  $sum['%94'],
+                  $sum['%93'],
+                  $sum['%92'],
+                  $sum['%91'],
                   $sum['gradeAverage'],
                   $sum['historyKeys']['y_' . $lastYear]['gradeAverage'] ?? '',
                   $sum['historyKeys']['y_' . $lastYear2]['gradeAverage'] ?? '',
@@ -801,6 +827,7 @@ class SpreadsheetRenderer
     $sheet->setCellValue('A1', 'GCSE (9-1) Results 20' . $this->session['year']);
     $sheet->mergeCells('A1:D1');
     $sheet->getRowDimension('1')->setRowHeight(50);
+    $sheet->getRowDimension('3')->setRowHeight(80);
 
     $sheet->fromArray(
         $data,  // The data to set
@@ -819,8 +846,8 @@ class SpreadsheetRenderer
     ];
     //border
     $sheet->getStyle('A3:C' .$count)->applyFromArray($styleArray);
-    $sheet->getStyle('N3:R'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('V3:W'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('N3:W'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('Z3:AA'.$count)->applyFromArray($styleArray);
 
     $styleArray['fill'] = [
       'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
@@ -835,8 +862,8 @@ class SpreadsheetRenderer
 
 
     $sheet->getStyle('D3:M'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('S3:U'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('X3:Y'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('W3:Y'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('AB3:AC'.$count)->applyFromArray($styleArray);
 
     $count++;
     //make totals and averages
@@ -913,7 +940,7 @@ class SpreadsheetRenderer
         'shrinkToFit' => true
       ]
     ];
-    $sheet->getStyle('N3:Z3')->applyFromArray($styleArray);
+    $sheet->getStyle('N3:AD3')->applyFromArray($styleArray);
 
     //grade key
     $count = $count + 2;
@@ -979,7 +1006,7 @@ class SpreadsheetRenderer
   }
 
 
-  private function makeStudentsSheet(string $title, $yearStats, $isSSS = false)
+  private function makeStudentsSheet(string $title, $yearStats, $isSSS = false, $detailed = false)
   {
     if(!$yearStats) return;
 
@@ -1004,7 +1031,7 @@ class SpreadsheetRenderer
           'size' => 8
       ]
     ];
-    $sheet->getStyle('A1:AU300')->applyFromArray($styleArray);
+    $sheet->getStyle('A1:BZ300')->applyFromArray($styleArray);
 
     //make columns
     $subjectColumnIndex = array();
@@ -1031,7 +1058,43 @@ class SpreadsheetRenderer
       $fields[] = $subject;
       $subjectsOnly[$key] = $subject;
     }
+
+    if ($detailed) {
+      $fields = array_merge($fields, [
+                              '#1',
+                              '#2',
+                              '#3',
+                              '#4',
+                              '#5',
+                              '#6',
+                              '#7',
+                              '#8',
+                              '#9',
+                              '#9-8',
+                              '#9-7',
+                              '#9-6',
+                              '#9-5',
+                              '#9-4',
+                              '#9-3',
+                              '#9-2',
+                              '#9-1',
+                              'A*',
+                              'A',
+                              'B',
+                              'C',
+                              'D',
+                              'E',
+                              '#9-8, A*',
+                              '#9-7, A*-A',
+                              '#9-5, A*-B',
+                              '#9-4, A*-C',
+                              '#9-3, A*-D',
+                              '#9-1, A*-E'
+                            ]);
+    }
+
     $data[] = $fields;
+    $data[] = []; //blank row for filters
 
     foreach($students as $student){
       $d = [  $student->txtInitialedName,
@@ -1054,6 +1117,41 @@ class SpreadsheetRenderer
       }
       $d[4] = $count;
       $d[5] = $count == 0 ? 0 : round($points / $count, 1);
+
+      $g = $student->gradeCounts;
+      if ($detailed){
+        $d = array_merge($d, [
+            $g['#1'],
+            $g['#2'],
+            $g['#3'],
+            $g['#4'],
+            $g['#5'],
+            $g['#6'],
+            $g['#7'],
+            $g['#8'],
+            $g['#9'],
+            $g['#9'] + $g['#8'],
+            $g['#9'] + $g['#8'] + $g['#7'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3'] + $g['#2'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3'] + $g['#2'] + $g['#1'],
+            $g['A*'],
+            $g['A'],
+            $g['B'],
+            $g['C'],
+            $g['D'],
+            $g['E'],
+            $g['#9'] + $g['#8'] + $g['A*'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['A*'] + $g['A'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['A*'] + $g['A'] + $g['B'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['A*'] + $g['A'] + $g['B'] + + $g['C'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3'] + $g['A*'] + $g['A'] + $g['B'] + $g['C'] + $g['D'],
+            $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3'] + $g['#2'] + $g['#1'] + $g['A*'] + $g['A'] + $g['B'] + $g['C'] + $g['D'] + $g['E'],
+        ]);
+      }
       $data[] = $d;
     }
 
@@ -1063,11 +1161,15 @@ class SpreadsheetRenderer
         'A1'         // Top left coordinate of the worksheet range where
     );
 
+
     $d = [];
     foreach($subjectsOnly as $key => $subject){
           $d[] = $key;
     }
     $lastRow = count($students) + 2;
+    $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($fields));
+    $sheet->setAutoFilter("A2:$col".$lastRow);
+    $lastRow++;
     $sheet->fromArray(
         $d,  // The data to set
         NULL,        // Array values with this value will not be set
@@ -1077,6 +1179,7 @@ class SpreadsheetRenderer
     //make totals and averages
     $lastRow = count($students) + 3;
     $dataRow = $lastRow + 1;
+
     // $sheet->setCellValueByColumnAndRow(5, $dataRow, "=count(A2:A$lastRow)");
     $sheet->setCellValueByColumnAndRow(6, $dataRow, "=Round(Average(F2:F$lastRow),2)");
 
@@ -1091,6 +1194,12 @@ class SpreadsheetRenderer
         $subjectCount++;
     }
 
+    for ($x = 0; $x <= 28; $x++) {
+      $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($subjectCount + $x);
+      if ($detailed) $sheet->setCellValueByColumnAndRow($subjectCount + $x, $dataRow, "=sum(".$col."2:$col$lastRow)");
+    }
+
+
     $sheet->getRowDimension('1')->setRowHeight(100);
     $styleArray = [
       'font' => [
@@ -1098,7 +1207,7 @@ class SpreadsheetRenderer
       ]
     ];
     $sheet->getStyle('A1:E1')->applyFromArray($styleArray);
-    $sheet->getStyle("A$dataRow:AZ$dataRow")->applyFromArray($styleArray);
+    $sheet->getStyle("A$dataRow:BZ$dataRow")->applyFromArray($styleArray);
 
     $styleArray = [
       'font' => [
@@ -1129,6 +1238,228 @@ class SpreadsheetRenderer
   {
     $result = new \Exams\Tools\GCSE\Result();
     return $result->processGrade($grade);
+  }
+
+  private function makeCombinedSubjects()
+  {
+
+    $data = array();
+    $year = $this->year;
+    $lastYear =  $this->year - 1;
+    $lastYear2 =  $this->year - 2;
+    //generate array to be placed in spreadsheet
+
+    //first row
+    $data[] = [
+      '',
+      'A* Equivalent',
+      '',
+      '',
+      'A Equivalent',
+      '',
+      'B Equivalent',
+      '',
+      '',
+      'C Equivalent',
+      '',
+      'D Equivalent',
+      '',
+      'E Equivalent',
+      ''
+    ];
+    //second row
+    $data[] = [
+      'New Points:',
+      9,
+      8.5,
+      8,
+      7,
+      7,
+      6,
+      5.5,
+      5,
+      4,
+      4,
+      3,
+      3,
+      2
+    ];
+    $data[] = [
+      'Raw Grade',
+      9,
+      'A*',
+      8,
+      'A',
+      7,
+      6,
+      'B',
+      5,
+      'C',
+      4,
+      'D',
+      3,
+      'E',
+      'Total'
+    ];
+    $data[] = []; //blank row
+
+    ksort($this->statistics->hundredStats->subjectResults);
+
+    $count = 6;
+    $hasSubjects = false;
+    foreach($this->statistics->hundredStats->subjectResults as $s){
+
+      $sum = $s->summaryData;
+      $g = $s->gradeCounts;
+      $values = [
+        $s->subjectName,
+        $g['#9'],
+        $g['A*'],
+        $g['#8'],
+        $g['A'],
+        $g['#7'],
+        $g['#6'],
+        $g['B'],
+        $g['#5'],
+        $g['C'],
+        $g['#4'],
+        $g['D'],
+        $g['#3'],
+        $g['E'],
+        "=SUM(B$count:N$count)"
+      ];
+      $count++;
+      $data[] = $values;
+    }
+
+
+    $spreadsheet = $this->spreadsheet;
+    $worksheet = new Worksheet($spreadsheet, 'Subjects (Combined)');
+    $worksheet->getTabColor()->setRGB('FF0000');
+    $spreadsheet->addSheet($worksheet, 0);
+
+    //sheet title
+    $sheet = $spreadsheet->getSheetByName('Subjects (Combined)');
+    $sheet->getDefaultColumnDimension()->setWidth(15);
+    $sheet->setCellValue('A1', 'GCSE Results (Combined Data) 20' . $this->session['year']);
+    $sheet->mergeCells('A1:G1');
+    $sheet->getRowDimension('1')->setRowHeight(50);
+
+    $sheet->fromArray(
+        $data,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'A3'         // Top left coordinate of the worksheet range where
+    );
+
+    $sheet->mergeCells('B3:D3');
+    $sheet->mergeCells('E3:F3');
+    $sheet->mergeCells('G3:I3');
+    $sheet->mergeCells('J3:K3');
+    $sheet->mergeCells('L3:M3');
+    $sheet->mergeCells('N3:O3');
+
+    $styleArray = [
+    'borders' => [
+        'outline' => [
+            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => '00000000'],
+            ],
+        ],
+    ];
+    //border
+    $sheet->getStyle('E3:F' .$count)->applyFromArray($styleArray);
+    $sheet->getStyle('J3:K'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('N3:O'.$count)->applyFromArray($styleArray);
+
+    $styleArray['fill'] = [
+      'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+      'rotation' => 90,
+      'startColor' => [
+          'argb' => 'FFA0A0A0',
+      ],
+      'endColor' => [
+          'argb' => 'FFA0A0A0',
+      ],
+    ];
+
+
+    $sheet->getStyle('B3:D'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('G3:I'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('L3:M'.$count)->applyFromArray($styleArray);
+
+    $sheet->getRowDimension('3')->setRowHeight(80);
+
+    $count++;
+    //make totals and averages
+    $lastRow = $count - 1;
+    $dataRow = $count;
+    $sheet->setCellValueByColumnAndRow(2, $dataRow, "=sum(B7:B$lastRow)");
+    $sheet->setCellValueByColumnAndRow(3, $dataRow, "=sum(C7:C$lastRow)");
+    $sheet->setCellValueByColumnAndRow(4, $dataRow, "=sum(D7:D$lastRow)");
+    $sheet->setCellValueByColumnAndRow(5, $dataRow, "=sum(E7:E$lastRow)");
+    $sheet->setCellValueByColumnAndRow(6, $dataRow, "=sum(F7:F$lastRow)");
+    $sheet->setCellValueByColumnAndRow(7, $dataRow, "=sum(G7:G$lastRow)");
+    $sheet->setCellValueByColumnAndRow(8, $dataRow, "=sum(H7:H$lastRow)");
+    $sheet->setCellValueByColumnAndRow(9, $dataRow, "=sum(I7:I$lastRow)");
+    $sheet->setCellValueByColumnAndRow(10, $dataRow, "=sum(J7:J$lastRow)");
+    $sheet->setCellValueByColumnAndRow(11, $dataRow, "=sum(K7:K$lastRow)");
+    $sheet->setCellValueByColumnAndRow(12, $dataRow, "=sum(L7:L$lastRow)");
+    $sheet->setCellValueByColumnAndRow(13, $dataRow, "=sum(M7:M$lastRow)");
+    $sheet->setCellValueByColumnAndRow(14, $dataRow, "=sum(N7:N$lastRow)");
+    //
+
+
+
+    //styling
+    $sheet->getColumnDimension('A')->setAutoSize(true);
+    //the title
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+          'size' => 18
+      ]
+    ];
+    $sheet->getStyle('A1')->applyFromArray($styleArray);
+    //headers
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+        ]
+    ];
+    $dataRow = $count+1;
+    $sheet->getStyle('A1:A50')->applyFromArray($styleArray);
+    $sheet->getStyle('A3:O5')->applyFromArray($styleArray);
+    $sheet->getStyle("A$dataRow:O$dataRow")->applyFromArray($styleArray);
+    $sheet->getStyle("A$dataRow:AA$dataRow")->applyFromArray($styleArray);
+
+    foreach (range('A','Z') as $col) {
+      $sheet->getColumnDimension($col)->setWidth(8);;
+    }
+    // foreach (range('L','Z') as $col) {
+    //   $sheet->getColumnDimension($col)->setWidth(4);
+    // }
+    $sheet->getColumnDimension('AA')->setWidth(4);
+
+    $sheet->getRowDimension('3')->setRowHeight(95);
+
+    $styleArray = [
+        'alignment' => [
+            'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+        ]
+    ];
+
+    $sheet->getStyle('B4:O'.$dataRow)->applyFromArray($styleArray);
+
+    $styleArray = [
+        'alignment' => [
+            'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+        ]
+    ];
+
+    $sheet->getStyle('B3:O3')->applyFromArray($styleArray);
+
+
+
   }
 
 }
