@@ -127,7 +127,16 @@ class Subject
       $sD['gradeAverage'] = round($this->points / $this->resultCount, 2);
       $sD['candidateCount'] = $this->resultCount;
 
-      $sD['%9'] = round(100 * $gradeCounts['#9'] / $this->resultCount);
+      $g = $this->gradeCounts;
+      $sD['%9'] = round(100 *  $g['#9'] / $this->resultCount);
+      $sD['%98'] = round(100 * ($g['#9'] + $g['#8']) / $this->resultCount);
+      $sD['%97'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7']) / $this->resultCount);
+      $sD['%96'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6']) / $this->resultCount);
+      $sD['%95'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5']) / $this->resultCount);
+      $sD['%94'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4']) / $this->resultCount);
+      $sD['%93'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3']) / $this->resultCount);
+      $sD['%92'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3'] + $g['#2']) / $this->resultCount);
+      $sD['%91'] = round(100 * ($g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3'] + $g['#2'] + $g['#1']) / $this->resultCount);
 
       $As = $gradeCounts['A*'] +  $gradeCounts['#9'] +  $gradeCounts['#8'];
       $sD['%Astar'] = round(100 * $As / $this->resultCount);

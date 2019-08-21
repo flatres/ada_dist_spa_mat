@@ -33,10 +33,12 @@ class StatisticsGateway
   public $hundredResults = array();
   public $removeResults = array();
   public $shellResults = array();
+  public $otherResults = array();
   public $years = array();
   public $hundredStats;
   public $removeStats;
   public $shellStats;
+  public $otherStats;
   public $spreadsheet;
 
   private $sql;
@@ -47,6 +49,7 @@ class StatisticsGateway
      $this->sql= $sql;
      $this->console = $console; //for caching student data
      $this->console->publish("Building statistics");
+     ini_set('max_execution_time', 240);
 
   }
 
@@ -60,6 +63,7 @@ class StatisticsGateway
         case 11:  $this->hundredResults[] = $result; break;
         case 10:  $this->removeResults[] = $result; break;
         case 9:   $this->shellResults[] = $result; break;
+        default: $this->otherResults[] = $result;
       }
     }
     //make stats for each year with results
@@ -88,11 +92,20 @@ class StatisticsGateway
       $this->console->publish('No shell results found', 2);
     }
 
+    if(count($this->otherResults) > 0){
+      $this->console->publish('Other Year Statistics', 1);
+      $this->otherStats = new \Exams\Tools\GCSE\Statistics($this->sql, $this->console);
+      $this->otherStats->makeStatistics($session, $this->otherResults);
+      $this->years[] = array('label' => 'Other', 'value' => 12);
+    } else {
+      $this->console->publish('No other results found', 2);
+    }
+
 
     $this->spreadsheet = new SpreadsheetRenderer('GCSE_Detailed_Report', 'GCSE Results', 'detailed', $session, $this->console, $this);
-    $this->spreadsheetSSS = new SpreadsheetRenderer('GCSE_SSS', 'Subject Surplus Scores', 'sss', $session, $this->console, $this);
-    $this->spreadsheetHouseCandidates = new SpreadsheetRenderer('House_Candidate_Results', 'House Candidate Results', 'houseresults', $session, $this->console, $this);
-    $this->spreadsheetSubjectCandidates = new SpreadsheetRenderer('Subject_Candidate_Results', 'Subject Candidate Results', 'subjectresults', $session, $this->console, $this);
+    // $this->spreadsheetSSS = new SpreadsheetRenderer('GCSE_SSS', 'Subject Surplus Scores', 'sss', $session, $this->console, $this);
+    // $this->spreadsheetHouseCandidates = new SpreadsheetRenderer('House_Candidate_Results', 'House Candidate Results', 'houseresults', $session, $this->console, $this);
+    // $this->spreadsheetSubjectCandidates = new SpreadsheetRenderer('Subject_Candidate_Results', 'Subject Candidate Results', 'subjectresults', $session, $this->console, $this);
 
     $this->cemSpreadsheet = new CemSpreadsheetRenderer($session, $this->console, $this);
     return $this;
