@@ -147,7 +147,7 @@ class SubjectCodes
       if($this->contains('mathematics in context')) return array('MC', 'Maths in Context');
       if($this->contains('math') && $this->contains('add')) return array('ADD', 'Additional Maths');
       if($this->contains('math') && $this->contains('fur')) return array('FM', 'Further Maths');
-      if($this->contains('math')) return array('MA', 'Maths');
+      if($this->contains('math')) return array('MA', 'Mathematics');
 
       if($this->contains('latin')) return array("LA", "Latin");
       if($this->contains('greek')) return array("CG", "Greek");
@@ -171,7 +171,7 @@ class SubjectCodes
       if($this->contains('greek') || $this->contains('classical')) return array("GC", 'Greek');
 
       if($this->contains('french')) return array("FR", "French");
-      if($this->contains('japanese')) return array("JA", 'Japenese');
+      if($this->contains('japanese')) return array("JA", 'Japanese');
       if($this->contains('german')) return array('DE', "German");
       if($this->contains('spanish')) return array("SP", "Spanish");
       if($this->contains('arabic')) return array("AI", "Arabic");
@@ -192,7 +192,8 @@ class SubjectCodes
       if($this->contains('biology')) return array("BI", "Biology");
 
       if($this->contains('comp') && $this->contains('sci')) return array("CS", 'Computer Science');
-      if($this->contains('science')) return array("SC", "Science");
+      if($this->contains('science 1')) return array("SC", "Science 1");
+      if($this->contains('science 2')) return array("SC", "Science 2");
       if($this->contains('astronomy')) return array("AS", "Astronomy");
 
       if($this->contains('drama')) return array("DR", "Theatre Studies");
