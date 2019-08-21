@@ -252,7 +252,7 @@ class SpreadsheetRenderer
 
     $sheet->getStyle('H3:H12')->applyFromArray($styleArray);
     $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(9 + ($this->year - $smallest));
-    $sheet->getStyle("I3:$col3")->applyFromArray($styleArray);
+    $sheet->getStyle('I3:'.$col.'3')->applyFromArray($styleArray);
 
 
     /// isc stats
