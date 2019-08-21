@@ -241,28 +241,28 @@ class Results
       foreach($this->studentData as $student){
 
         if($i % 10 == 0) $this->console->replace("Students: $i / $studentsCount");
-
+        if ($isGCSE && $student['NCYear'] > 11) continue; //for sixth form that have taken a gcse it won't go back and find their old results
         $ids[] = $student['txtSchoolID'];
         if ($i > 0) $questionMarks .= ', ?';
         $i++;
 
       }
 
-        $data = [$this->lowestFileID];
-        $data = array_merge($data, $ids);
-        $s = $isGCSE ? "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')" : " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
-        $resultsData = $this->sql->select(  'TblExamManagerResultsStore',
-                                            'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtLevel, txtOptionTitle, txtModuleCode, txtFirstGrade as grade, txtUniformMarkScale as mark, txtMaxMark as total',
-                                            "$s AND txtCertificationType='C' AND intResultsID < ? AND txtSchoolID IN ($questionMarks)",
-                                            $data);
+      $data = [$this->lowestFileID];
+      $data = array_merge($data, $ids);
+      $s = $isGCSE ? "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')" : " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
+      $resultsData = $this->sql->select(  'TblExamManagerResultsStore',
+                                          'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtLevel, txtOptionTitle, txtModuleCode, txtFirstGrade as grade, txtUniformMarkScale as mark, txtMaxMark as total',
+                                          "$s AND txtCertificationType='C' AND intResultsID < ? AND txtSchoolID IN ($questionMarks)",
+                                          $data);
 
-        if (!$isGCSE) {
-          $moduleResults = $this->sql->select( 'TblExamManagerResultsStore',
-                                                    'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtUniformMarkScale as mark, txtMaxMark as total, txtUniformGrade as grade',
-                                                    "intResultsID < ? AND $s AND txtCertificationType <> 'C' AND txtSchoolID IN ($questionMarks) ORDER BY txtLevel ASC",
-                                                    $data);
-          $this->moduleResults = array_merge($this->moduleResults, $moduleResults);
-        }
+      if (!$isGCSE) {
+        $moduleResults = $this->sql->select( 'TblExamManagerResultsStore',
+                                                  'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtUniformMarkScale as mark, txtMaxMark as total, txtUniformGrade as grade',
+                                                  "intResultsID < ? AND $s AND txtCertificationType <> 'C' AND txtSchoolID IN ($questionMarks) ORDER BY txtLevel ASC",
+                                                  $data);
+        $this->moduleResults = array_merge($this->moduleResults, $moduleResults);
+      }
 
       $this->processResults($resultsData, true);
       $this->console->publish(count($resultsData) . " early results found");

@@ -603,15 +603,21 @@ class Statistics
         //Double Science Award
         if($this->contains("double", $result['txtOptionTitle']) && $result['subjectCode'] = "SC"){
           //create two copies and extract grades
+          $end = '';
+          // is_numeric($result['grade']) ? '' : '.';
           $sci1 = $result;
           $sci2 = $result;
-          $sci1['subjectCode'] = "S1";
-          $sci2['subjectCode'] = "S2";
-          $sci1['subjectName'] = "Science 1";
-          $sci2['subjectName'] = "Science 2";
-          $sci1['grade'] = $result['grade'][0];
+          $sci2['id'] = $sci2['id'] . '.2';
+          $sci1['subjectCode'] = "S1$end";
+          $sci2['subjectCode'] = "S2$end";
+          $sci1['subjectName'] = "Science 1$end";
+          $sci2['subjectName'] = "Science 2$end";
+          // $sci1['grade'] = $result['grade'][0];
+          $sci1['grade'] = substr($result['grade'],0,1);
           // if(!$result['grade'][1]) echo '---'.$result['grade'].'---';
-          $sci2['grade'] = isset($result['grade'][1]) ? $result['grade'][1] : $result['grade'][0];
+          substr($result['grade'],0,1);
+          $sci2['grade'] = substr($result['grade'],1,1) ? substr($result['grade'],1,1) : $result['grade'][0];
+          // $sci2['grade'] = isset($result['grade'][1]) ? $result['grade'][1] : $result['grade'][0];
           if($sci1['grade'] == '*') $sci1['grade'] = 'A*';
           if($sci2['grade'] == '*') $sci2['grade'] = 'A*';
           $newResults[] = $sci1;
@@ -647,6 +653,7 @@ class Statistics
     private function newSubject($result, $objResult)
     {
       $subject = new \Exams\Tools\GCSE\Subject($result);
+      $subject->subjectName = $objResult->txtSubjectName;
       $key = $objResult->subjectCode;
       $this->subjectResults[$key] = $subject;
       return $subject;
