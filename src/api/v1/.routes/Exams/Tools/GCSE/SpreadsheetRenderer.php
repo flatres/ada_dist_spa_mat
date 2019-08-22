@@ -1061,17 +1061,26 @@ class SpreadsheetRenderer
     $sheet->setCellValueByColumnAndRow(15, $dataRow, "=round(100*sum(D5:E$lastRow)/C$dataRow,1)");
     $sheet->setCellValueByColumnAndRow(16, $dataRow, "=round(100*sum(D5:F$lastRow)/C$dataRow,1)");
     $sheet->setCellValueByColumnAndRow(17, $dataRow, "=round(100*sum(D5:G$lastRow)/C$dataRow,1)");
-    $sheet->setCellValueByColumnAndRow(18, $dataRow, "=round(100*sum(D5:L$lastRow)/C$dataRow,1)");
+    $sheet->setCellValueByColumnAndRow(18, $dataRow, "=round(100*sum(D5:H$lastRow)/C$dataRow,1)");
+    $sheet->setCellValueByColumnAndRow(19, $dataRow, "=round(100*sum(D5:I$lastRow)/C$dataRow,1)");
+    $sheet->setCellValueByColumnAndRow(20, $dataRow, "=round(100*sum(D5:J$lastRow)/C$dataRow,1)");
+    $sheet->setCellValueByColumnAndRow(21, $dataRow, "=round(100*sum(D5:K$lastRow)/C$dataRow,1)");
+    $sheet->setCellValueByColumnAndRow(22, $dataRow, "=round(100*sum(D5:L$lastRow)/C$dataRow,1)");
 
-    $sheet->setCellValueByColumnAndRow(19, $dataRow, "=round(average(S5:S$lastRow),1)");
-    $sheet->setCellValueByColumnAndRow(20, $dataRow, "=round(average(T5:T$lastRow),1)");
-    $sheet->setCellValueByColumnAndRow(21, $dataRow, "=round(average(U5:U$lastRow),1)");
 
-    $sheet->setCellValueByColumnAndRow(22, $dataRow, "=sum(V5:V$lastRow)");
-    $sheet->setCellValueByColumnAndRow(23, $dataRow, "=sum(W5:W$lastRow)");
 
+
+
+
+    $sheet->setCellValueByColumnAndRow(23, $dataRow, "=round(average(W5:W$lastRow),1)");
     $sheet->setCellValueByColumnAndRow(24, $dataRow, "=round(average(X5:X$lastRow),1)");
     $sheet->setCellValueByColumnAndRow(25, $dataRow, "=round(average(Y5:Y$lastRow),1)");
+
+    $sheet->setCellValueByColumnAndRow(22, $dataRow, "=sum(Z5:Z$lastRow)");
+    $sheet->setCellValueByColumnAndRow(23, $dataRow, "=sum(AA5:AA$lastRow)");
+
+    $sheet->setCellValueByColumnAndRow(24, $dataRow, "=round(average(AB5:AB$lastRow),1)");
+    $sheet->setCellValueByColumnAndRow(25, $dataRow, "=round(average(AC5:AC$lastRow),1)");
 
 
     //styling
