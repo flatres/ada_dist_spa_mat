@@ -17,20 +17,20 @@
 
     "autoload":{
         "psr-4" : {
-          "Auth\\":"v1/.routes/Auth",
-          "Students\\":"v1/.routes/Students",
-          "Data\\":"v1/.routes/Data",
-          "Exams\\":"v1/.routes/Exams",
-          "Academic\\":"v1/.routes/Academic",
-          "Transport\\":"v1/.routes/Transport",
           "Admin\\":"v1/.routes/Admin",
+          "Academic\\":"v1/.routes/Academic",
           "Accounts\\":"v1/.routes/Accounts",
+          "Auth\\":"v1/.routes/Auth",
+          "Exams\\":"v1/.routes/Exams",
           "HM\\":"v1/.routes/HM",
+          "Houses\\":"v1/.routes/Houses",
           "Lab\\":"v1/.routes/Lab",
-          "Location\\":"v1/.routes/Location",
-          "Entities\\":"v1/.routes/_Entities",
+          "Students\\":"v1/.routes/Students",
+          "Transport\\":"v1/.routes/Transport",
+          "Watch\\":"v1/.routes/Watch",
           "Sockets\\":"v1/sockets",
           "Utility\\":"v1/utilities",
+          "Entities\\":"v1/entities",
           "Dependency\\":"v1/dependencies",
           "Middleware\\":"v1/middleware",
           "SocketServer\\":"services/socketServer"

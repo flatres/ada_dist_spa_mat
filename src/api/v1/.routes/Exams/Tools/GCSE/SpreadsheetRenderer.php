@@ -781,7 +781,7 @@ class SpreadsheetRenderer
       $sum = $s->summaryData;
       $g = $s->gradeCounts;
       $values = [ $s->subjectName,
-                  $s->boardName,
+                  $s->boardName . " " . $s->moduleCode,
                   $sum['candidateCount'],
                   $g['A*'],
                   $g['A'],
@@ -958,7 +958,7 @@ class SpreadsheetRenderer
       $sum = $s->summaryData;
       $g = $s->gradeCounts;
       $values = [ $s->subjectName,
-                  $s->boardName,
+                  $s->boardName . " " . $s->moduleCode,
                   $sum['candidateCount'],
                   $g['#9'],
                   $g['#8'],
@@ -1066,7 +1066,7 @@ class SpreadsheetRenderer
     $sheet->setCellValueByColumnAndRow(20, $dataRow, "=round(100*sum(D5:J$lastRow)/C$dataRow,1)");
     $sheet->setCellValueByColumnAndRow(21, $dataRow, "=round(100*sum(D5:K$lastRow)/C$dataRow,1)");
     $sheet->setCellValueByColumnAndRow(22, $dataRow, "=round(100*sum(D5:L$lastRow)/C$dataRow,1)");
-    
+
     $sheet->setCellValueByColumnAndRow(23, $dataRow, "=round(average(W5:W$lastRow),1)");
     $sheet->setCellValueByColumnAndRow(24, $dataRow, "=round(average(X5:X$lastRow),1)");
     $sheet->setCellValueByColumnAndRow(25, $dataRow, "=round(average(Y5:Y$lastRow),1)");

@@ -16,7 +16,7 @@ class TbsExtTaxisBookings
     {
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
-       $this->student = new \Entities\Students\Student($container);
+       $this->student = new \Entities\People\Student($this->ada);
 
        $this->status = $this->getAllStatus();
     }

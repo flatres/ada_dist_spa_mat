@@ -31,6 +31,7 @@ class Subject
 {
 
     public $subjectCode;
+    public $moduleCode;
     // public $students = array(); // key s_{txtSchoolID}
     public $results = [];
     public $gradeCounts = [ 'A*'  => 0,
@@ -116,6 +117,7 @@ class Subject
 
       // if($result->NCYear < 11) return;
       $this->results['r_' . $result->id] = &$result;
+      $this->moduleCode = $result->moduleCode;
 
       $this->passes += $result->passes;
       $this->fails += $result->fails;

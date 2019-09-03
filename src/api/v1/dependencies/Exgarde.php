@@ -4,6 +4,10 @@ use \PDO;
 
 class Exgarde {
 
+	public $types = [];
+	public $students = [];
+	public $names = [];
+
 	public function __construct(\Dependency\Mysql $mysql = null)
 	{
     date_default_timezone_set("Europe/London");
@@ -78,6 +82,37 @@ class Exgarde {
 	 	return $events;
 	}
 
+	public function getPerson(int $id)
+  {
+
+		$events = $this->getEventsByPerson($id);
+
+	 foreach($events as &$item){
+		 $unix = strtotime($item['LOCAL_TIME']);
+		 $item['entry_timestamp'] = date('d.m.y, g:i a', $unix);
+		 $item['entry_time'] = date('G:i', $unix);
+		 $item['entry_unix'] = $unix;
+		 $item['name'] = $this->makeName($item);
+	 }
+
+	 return $events;
+	}
+
+	public function getPersonByDate(int $unix, int $id)
+  {
+		$events = $this->getEventsByPerson($id, $unix);
+
+		 foreach($events as &$item){
+			 $unix = strtotime($item['LOCAL_TIME']);
+			 $item['entry_timestamp'] = date('d.m.y, g:i a', $unix);
+			 $item['entry_time'] = date('G:i', $unix);
+			 $item['entry_unix'] = $unix;
+			 $item['name'] = $this->makeName($item);
+		 }
+
+	 return $events;
+	}
+
 	public function getAreaByDate(int $unix, int $id)
   {
     $names = $this->getAllKeyHolderNames();
@@ -102,19 +137,22 @@ class Exgarde {
     $this->houses = array();
 		$item['node_id'] = $userID;
 
-		$d = $sql->select('t_categories', 'id', 'name=? AND school=223', array('BOARDING'));
-		$catID = $d[0]['id'];
+		$student = new \Entities\People\Student();
+		return $student->byId($userID)->boardingHouse;
 
-		$d = $sql->select('t_tags', 'id, name', 'category=?', array($catID));
-		foreach($d as $bhouse){
-			$houses['h_'. $bhouse['id']]  = $bhouse['name'];
-		}
-
-		$d = $sql->select('t_tagmap', 'tag_id', 'user_id=?', array($userID));
-		foreach($d as $tag){
-			$tagID = $tag['tag_id'];
-			if(isset($houses['h_'.$tagID])){ return $houses['h_'.$tagID];}
-		}
+		// $d = $sql->select('t_categories', 'id', 'name=? AND school=223', array('BOARDING'));
+		// $catID = $d[0]['id'];
+		//
+		// $d = $sql->select('t_tags', 'id, name', 'category=?', array($catID));
+		// foreach($d as $bhouse){
+		// 	$houses['h_'. $bhouse['id']]  = $bhouse['name'];
+		// }
+		//
+		// $d = $sql->select('t_tagmap', 'tag_id', 'user_id=?', array($userID));
+		// foreach($d as $tag){
+		// 	$tagID = $tag['tag_id'];
+		// 	if(isset($houses['h_'.$tagID])){ return $houses['h_'.$tagID];}
+		// }
 
 		return '-';
 
@@ -131,24 +169,24 @@ class Exgarde {
 		if($item) $item['lastName'] = $lastname;
 
     $bind = array($firstname.'%', $firstname.'%', '%'.$lastname);
-		$d = $sql->select('stu_details', "id, is_student", "(firstname LIKE ? OR prename LIKE ?) AND lastname LIKE ?", $bind);
+		$d = $sql->select('stu_details', "id", "(firstname LIKE ? OR prename LIKE ?) AND lastname LIKE ?", $bind);
 
 		if(!isset($d[0])){
       //only look for students as less chance of double match
 			$bind = array($firstname[0].'%', $firstname[0].'%', $lastname);  //check for J Smith
-			$d = $sql->select('stu_details', "id, is_student", "(firstname LIKE ? OR prename LIKE ?) AND lastname LIKE ?", $bind);
+			$d = $sql->select('stu_details', "id", "(firstname LIKE ? OR prename LIKE ?) AND lastname LIKE ?", $bind);
 
       if(!isset($d[0])){
 				return '-';
 			}else{
 				if(count($d)>1) return 'Ambiguous';
 				$userID = $d[0]['id'];
-				return $d[0]['is_student']==1 ? $this->getBoardingFromID($userID, $item) : 'Staff';
+				return $this->getBoardingFromID($userID, $item);
 			}
 		}else{
 			$userID = $d[0]['id'];
 
-			return $d[0]['is_student']==1 ? $this->getBoardingFromID($userID, $item) : 'Staff';
+			return $this->getBoardingFromID($userID, $item);
 		}
 	}
 
@@ -165,7 +203,7 @@ class Exgarde {
 			return "-";
 		}else{
 			if($name){ $name = $d[0]['firstname'] . ' ' . $d[0]['lastname'];}
-			if(count($d)>1){ return "!!!!!";} //multiple results
+			if(count($d)>1){ return "!!!!!multiples";} //multiple results
 			$userID = $d[0]['userid'];
 			if($item) {
 				$item['lastName'] =$d[0]['lastname'];
@@ -179,9 +217,11 @@ class Exgarde {
   {
 		if(!$this->names){ $this->names = $this->getAllKeyHolderNames(); }
 
+		$key = 'id_' . $item['ID_3'];
+
 		if(strlen($item['ID_2'])==4 && ($item['EVENT_ID'] == 2009 || $item['EVENT_ID'] == 2002)){
 			 $item['name'] = "PIN (".$item['ID_2'].")";
-			 $item['boarding'] = $this->getBoardingFromPIN($item['ID_2'], $item['name'], $item);
+			 $item['boarding'] = isset($this->students[$key]) ? $this->getBoardingFromPIN($item['ID_2'], $item['name'], $item) : 'code';
 			 $item['style'] = 'PIN';
 			 $this->errorEvents[] = $item;
 		}elseif(strlen($item['ID_2'])>4 && ($item['EVENT_ID'] == 2009 || $item['EVENT_ID'] == 2002)){
@@ -191,10 +231,10 @@ class Exgarde {
 			$this->errorEvents[] = $item;
 			return;
 		}else{
-			if(isset($this->names['id_' . $item['ID_3']])){
-				$item['name'] = $this->names['id_' . $item['ID_3']];
-				$item['type'] = $this->types['id_' . $item['ID_3']];
-				$item['boarding'] = $this->getBoardingFromName($item['name'], $item);
+			if(isset($this->names[$key])){
+				$item['name'] = $this->names[$key];
+				$item['type'] = $this->types[$key];
+				$item['boarding'] = isset($this->students[$key]) ? $this->getBoardingFromName($item['name'], $item) : 'staff';
 			}else{
 				$item['name'] = '-';
 				$item['style'] = 'error';
@@ -204,8 +244,6 @@ class Exgarde {
 
 		return $item['name'];
 	}
-
-
 
   public function log(string $message, bool $error = false)
   {
@@ -350,15 +388,46 @@ class Exgarde {
 		$types = array();
 
 		foreach($data as $item){
+			$isStudent = strtolower(explode(' ',trim($item['COMMENT']))[0]) == 'student';
 			$names['id_'. $item['ID']] = $item['NAME'];
+			if ($isStudent) $student['id_'. $item['ID']] = true;
 			//some comments have a house abbreviation after student
-			$types['id_'. $item['ID']] = strtolower(explode(' ',trim($item['COMMENT']))[0]) == 'student' ? 'Student' : '-';
+			$types['id_'. $item['ID']] = $isStudent ? 'Student' : '-';
 		}
 
 		$this->names = $names;
 		$this->types = $types;
 
 		return $names;
+	}
+
+	//simplar to getAllKeyHolderNames but returns in a format suitable for viewing
+	public function getAllPeople()
+  {
+		$binding = array();
+		$query = "SELECT [ID], [NAME], [COMMENT] FROM dbo.KEYHOLDER_View";
+		$data = $this->query($query, $binding);
+
+		$names = array();
+		$list = [];
+
+		foreach($data as $item){
+			$id = $item['ID'];
+			$key = 'id_' . $id;
+			if (!isset($names[$key])){
+
+					$isStudent = strtolower(explode(' ',trim($item['COMMENT']))[0]) == 'student';
+					$names['id_'. $id] = $item['NAME'];
+					$d = [
+						'id'	=> $id,
+						'name'	=> $item['NAME'],
+						'type' => $isStudent ? 'Student' : '-',
+						'isStudent' => $isStudent,
+					];
+					$list[] = $d;
+			}
+		}
+		return $list;
 	}
 
 	private function getAllKeyHolderComments()
@@ -374,6 +443,36 @@ class Exgarde {
 
 		return $names;
 	}
+
+	private function getEventsByPerson($id, $unixDate = null)
+  {
+		if($unixDate){
+		 $dayStart = date('Y-m-d 00:00:00', $unixDate);
+	 	 $dayEnd = date('Y-m-d 23:59:59', $unixDate);
+
+	 	 $binding = array($id, $dayStart, $dayEnd);
+		 $query = "SELECT [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_3], [ID_2], [LOCAL_TIME], [EVENT_ID]
+		 					 FROM dbo.EVENT_LOG_View
+							 WHERE [ID_3] = ?  AND ([EVENT_ID] = 2001 OR [EVENT_ID] = 2002 OR [EVENT_ID] = 2009) AND [LOCAL_TIME] > ? AND [LOCAL_TIME] < ?
+							 ORDER BY [LOCAL_TIME] DESC";
+
+	 	 $data = $this->query($query, $binding);
+	 } else{
+		 $binding = array($id);
+  	 $query = " SELECT TOP 100 [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_3], [ID_2], [LOCAL_TIME], [EVENT_ID]
+                FROM dbo.EVENT_LOG_View
+                WHERE [ID_3] = ? AND ([EVENT_ID] = 2001 OR [EVENT_ID] = 2002 OR [EVENT_ID] = 2009)
+                ORDER BY [LOCAL_TIME] DESC";
+	 }
+
+	  $results = $this->query($query, $binding);
+		foreach($results as &$result){
+			$result['location'] = $this->getDoorNameByReader($result['ID_1']);
+		}
+
+		return $results;
+	}
+
 
 	private function getEventsByReader($id, $unixDate = null)
   {
