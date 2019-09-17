@@ -71,7 +71,7 @@ class Exgarde {
 
   public function unmatch(int $studentId)
 	{
-		$adaModules->delete('watch_exgarde_students', 'student_id=?', [$studentId]);
+		$this->adaModules->delete('watch_exgarde_students', 'student_id=?', [$studentId]);
 	}
 
 	public function match(\Entities\People\Student &$student) {
