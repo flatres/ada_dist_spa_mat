@@ -1031,7 +1031,7 @@ class SpreadsheetRenderer
       $sum = $s->summaryData;
       $g = $s->gradeCounts;
       $values = [ $s->subjectName,
-                  $s->boardName,
+                  $s->boardName . " " . $s->moduleCode,
                   $sum['candidateCount'],
                   $g['A*'],
                   $g['A'],
@@ -1240,7 +1240,7 @@ class SpreadsheetRenderer
       $sum = $s->summaryData;
       $g = $s->gradeCounts;
       $values = [ $s->subjectName,
-                  $s->boardName,
+                  $s->boardName . " " . $s->moduleCode,
                   $sum['candidateCount'],
                   $g['D1'],
                   $g['D2'],

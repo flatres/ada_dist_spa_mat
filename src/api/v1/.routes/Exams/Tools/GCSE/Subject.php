@@ -31,6 +31,7 @@ class Subject
 {
 
     public $subjectCode;
+    public $moduleCode;
     public $students = array(); // key s_{txtSchoolID}
     public $results = array();
     public $gradeCounts = array(  'A*'  => 0,
@@ -88,6 +89,7 @@ class Subject
     public function setResult(\Exams\Tools\GCSE\Result $result)
     {
       $this->results['r_' . $result->id] = $result;
+      $this->moduleCode = $result->moduleCode;
       $this->isIGCSE = $result->isIGCSE;
       $this->passes += $result->passes;
       $this->fails += $result->fails;
