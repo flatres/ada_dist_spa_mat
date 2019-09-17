@@ -6,7 +6,16 @@ class Exgarde {
 
 	public $types = [];
 	public $students = [];
+
+	public $adaStudents = [];
+	public $adaMatched = [];
+	public $adaUnmatched = [];
+	public $adaNames = [];
+	public $adaModules;
+
 	public $names = [];
+	public $comments = [];
+	public $namesForSearch = []; // all lowercase with spaces removed
 
 	public function __construct(\Dependency\Mysql $mysql = null)
 	{
@@ -15,7 +24,115 @@ class Exgarde {
 		$this->errorEvents = array();
 		$this->names = null;
     $this->sql = $mysql;
+		$this->adaModules = new \Dependency\Databases\AdaModules();
     $this->connect();
+	}
+
+	public function initialiseTest(\Entities\People\AllStudents $allStudents)
+	{
+		$this->adaStudents = $allStudents->keyedStudentIds;
+		$this->getAllKeyHolderNames();
+	}
+
+	//does a basic search and returns true if there is exactly one match
+	private function search($search, &$exgardeId){
+		$filtered = array_filter($this->namesForSearch, function($k) use ($search) {
+				//if a student is put into the system and a staff member al
+				// if (str_word_count)
+		    return strstr($k, $search) !== FALSE;
+		});
+		
+		if ($filtered && count($filtered) === 1) {
+			// https://stackoverflow.com/questions/1028668/get-first-key-in-a-possibly-associative-array
+			reset($filtered);
+			$exgardeId = str_replace('id_', '', key($filtered));
+			return true;
+		} else {
+			return false;
+		};
+	}
+
+	// https://www.php.net/manual/en/function.similar-text.php
+	private function similarSearch($search, &$exgardeId){
+		$similarity = [];
+		foreach($this->namesForSearch as $key => $name){
+			similar_text($search, $name, $percentage);
+			$similarity[$key] = $percentage;
+		}
+		// var_dump($similarity);
+		arsort($similarity);
+		// https://www.php.net/manual/en/function.key.php
+		if (reset($similarity) > 80) {
+				$exgardeId = str_replace('id_', '', key($similarity));
+				return reset($similarity);
+		}
+		return false;
+	}
+
+  public function unmatch(int $studentId)
+	{
+		$adaModules->delete('watch_exgarde_students', 'student_id=?', [$studentId]);
+	}
+
+	public function match(\Entities\People\Student &$student) {
+		if(count($this->adaStudents) == 0) $this->initialiseTest(new \Entities\People\AllStudents());
+		$exgardeId = 0;
+		$fullName = $this->sanitize($student->fullName);
+		$this->adaNames[] = $fullName;
+		$fullPreName = $this->sanitize($student->fullPreName);
+		$firstName = $this->sanitize($student->firstName);
+		$preName = $this->sanitize($student->preName);
+		$lastName = $this->sanitize($student->lastName);
+
+		$search = $this->namesForSearch;
+		if ($this->search($fullName, $exgardeId)) {
+			$this->adaMatched($student, $exgardeId);
+			$student->matched  = 'name';
+		} else {
+			if ($this->search($fullPreName, $exgardeId)) {				// echo $fullPreName;
+				$this->adaMatched($student, $exgardeId);
+				$student->matched  = 'prename';
+			} else {
+				$search = $this->similarSearch($fullName, $exgardeId);
+				if ($search){
+						$this->adaMatched($student, $exgardeId);
+						$student->matched  = 'similar';
+						$student->similarity = $search;
+				} else {
+					$search = $this->similarSearch($fullPreName, $exgardeId);
+					if ($search){
+							$this->adaMatched($student, $exgardeId);
+							$student->matched  = 'similar';
+							$student->similarity = $search;
+					} else {
+							$this->adaUnmatched($student);
+							$student->matched  = 'none';
+							return false;
+					}
+				}
+			}
+		}
+		$student->exgardeId = $exgardeId;
+		$student->exgardeName = $this->names['id_'.$exgardeId];
+		$student->exgardeComment = $this->comments['id_'.$exgardeId];
+
+		// $exgardeId = false;
+		// $fl_array = preg_grep("/^(\d+)?\.\d+$/", $array);
+		//
+		return $exgardeId;
+	}
+
+	private function adaMatched(\Entities\People\Student &$student, int $exgardeId = 0) {
+		$student->exgardeId = $exgardeId;
+		$this->adaMatched['id_'.$student->id] = $student;
+		$adaModules = $this->adaModules;
+		$adaModules->delete('watch_exgarde_students', 'student_id=?', [$student->id]);
+		$adaModules->insert('watch_exgarde_students', 'student_id, exgarde_id', [$student->id, $exgardeId]);
+	}
+
+	private function adaUnMatched(\Entities\People\Student &$student) {
+		$this->adaUnmatched['id_'.$student->id] = $student;
+		$this->adaModules->delete('watch_exgarde_students', 'student_id=?', [$student->id]);
 	}
 
   public function getLocations()
@@ -113,29 +230,36 @@ class Exgarde {
 	 return $events;
 	}
 
-	public function getAreaByDate(int $unix, int $id)
+	public function getAreaByDate(int $unix, int $id, bool $studentsOnly = false)
   {
     $names = $this->getAllKeyHolderNames();
     $readerAry = $this->getReadersByArea($id);
     $events = $this->getEventsByReaders($readerAry, $unix);
 
+		$finalEvents = [];
     foreach($events as &$item){
     	$unix = strtotime($item['LOCAL_TIME']);
       $item['entry_timestamp'] = date('d.m.y, g:i a', $unix);
      	$item['entry_time'] = date('G:i', $unix);
       $item['entry_unix'] = $unix;
+			$item['type'] = '';
       $item['name'] = $this->makeName($item);
       $item['location'] = $this->getDoorNameByReader($item['ID_1']);
+			if ($studentsOnly){
+				if ($item['type'] == 'Student') $finalEvents[] = $item;
+			}else {
+				$finalEvents[] = $item;
+			}
     }
 
-    return $events;
+    return $finalEvents;
 	}
 
 	public function getBoardingFromID(int $userID, array &$item)
   {
     $sql = $this->sql;
     $this->houses = array();
-		$item['node_id'] = $userID;
+		$item['ada_id'] = $userID;
 
 		$student = new \Entities\People\Student();
 		return $student->byId($userID)->boardingHouse;
@@ -195,7 +319,7 @@ class Exgarde {
     $sql = $this->sql;
 		global $user_school;
 		$bind = array($pin . "@marlboroughcollege.org");
-		$d = $sql->select('stu_details', "*firstname, *lastname, userid", "email = *?", $bind);
+		$d = $sql->select('stu_details', "firstname, lastname, userid", "email = ?", $bind);
 
 		if(!isset($d[0])){
 			$item['style'] = 'error';
@@ -216,25 +340,38 @@ class Exgarde {
   public function makeName(array &$item)
   {
 		if(!$this->names){ $this->names = $this->getAllKeyHolderNames(); }
-
-		$key = 'id_' . $item['ID_3'];
+		$exgardeId = $item['ID_3'];
+		$key = 'id_' . $exgardeId;
 
 		if(strlen($item['ID_2'])==4 && ($item['EVENT_ID'] == 2009 || $item['EVENT_ID'] == 2002)){
 			 $item['name'] = "PIN (".$item['ID_2'].")";
 			 $item['boarding'] = isset($this->students[$key]) ? $this->getBoardingFromPIN($item['ID_2'], $item['name'], $item) : 'code';
 			 $item['style'] = 'PIN';
 			 $this->errorEvents[] = $item;
-		}elseif(strlen($item['ID_2'])>4 && ($item['EVENT_ID'] == 2009 || $item['EVENT_ID'] == 2002)){
-			$item['name']='-';
-			$item['boarding']='-';
-			$item['style']='error';
-			$this->errorEvents[] = $item;
-			return;
+	  ///commented out as some keypads are used for registering that the students don't actually have authorisation to access
+		// }elseif(strlen($item['ID_2'])>4 && ($item['EVENT_ID'] == 2009 || $item['EVENT_ID'] == 2002)){
+		// 	$item['name']='-';
+		// 	$item['boarding']='-';
+		// 	$item['style']='error';
+		// 	$this->errorEvents[] = $item;
+		// 	return;
 		}else{
 			if(isset($this->names[$key])){
-				$item['name'] = $this->names[$key];
-				$item['type'] = $this->types[$key];
-				$item['boarding'] = isset($this->students[$key]) ? $this->getBoardingFromName($item['name'], $item) : 'staff';
+				//check to see if it's a known, matched student
+				$d = $this->adaModules->select('watch_exgarde_students', 'student_id', 'exgarde_id=?', [$exgardeId]);
+				if(isset($d[0])){
+					$studentId = $d[0]['student_id'];
+					$student = new \Entities\People\Student(new \Dependency\Databases\Ada, $studentId);
+					$item['ada_id'] = $studentId;
+					$item['name'] = $student->fullName;
+					$item['lastName'] = $student->lastName;
+					$item['type'] = 'Student';
+					$item['boarding'] = $student->boardingHouse;
+				} else {
+					$item['name'] = $this->names[$key];
+					$item['type'] = $this->types[$key];
+					$item['boarding'] = isset($this->students[$key]) ? $this->getBoardingFromName($item['name'], $item) : '-';
+				}
 			}else{
 				$item['name'] = '-';
 				$item['style'] = 'error';
@@ -366,7 +503,7 @@ class Exgarde {
 	private function getStudentNames()
   {
 		$binding = array();
-		$query = "SELECT [ID], [NAME] FROM dbo.KEYHOLDER_View WHERE [COMMENT] = 'Student'";
+		$query = "SELECT [ID], [NAME] FROM dbo.KEYHOLDER_View WHERE [COMMENT] LIKE 'Student'";
 		$data = $this->query($query, $binding);
 		$names = array();
 
@@ -378,25 +515,48 @@ class Exgarde {
 		return $names;
 	}
 
+	private function sanitize($name){
+
+		$nospaces = str_replace(" ", '', $name);
+		// https://stackoverflow.com/questions/4389297/replace-foreign-characters
+		// $nospaces = iconv("UTF-8", "ASCII//TRANSLIT", $nospaces);
+		$nospaces = strtr($nospaces, "ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØÝßàáâãäåçèéêëìíîïñòóôõöøùúûüýÿ","AAAAAACEEEEIIIINOOOOOOYSaaaaaaceeeeiiiinoooooouuuuyy");
+		$lc = strtolower($nospaces);
+
+		return $lc;
+	}
+
 	private function getAllKeyHolderNames()
   {
 		$binding = array();
 		$query = "SELECT [ID], [NAME], [COMMENT] FROM dbo.KEYHOLDER_View";
 		$data = $this->query($query, $binding);
 
-		$names = array();
-		$types = array();
+		$names = [];
+		$namesForSearch = [];
+		$comments = [];
+		$types = [];
+		$students = [];
 
 		foreach($data as $item){
-			$isStudent = strtolower(explode(' ',trim($item['COMMENT']))[0]) == 'student';
-			$names['id_'. $item['ID']] = $item['NAME'];
-			if ($isStudent) $student['id_'. $item['ID']] = true;
 			//some comments have a house abbreviation after student
-			$types['id_'. $item['ID']] = $isStudent ? 'Student' : '-';
+			$commentLower = strtolower(explode(' ',trim($item['COMMENT']))[0]);
+			$isStudent = strpos($commentLower, 'student') !== false;
+
+			$key = 'id_'. $item['ID'];
+			$names[$key] = $item['NAME'];
+			$comments[$key] = $item['COMMENT'];
+			$namesForSearch[$key] = $this->sanitize($item['NAME']);
+
+			if ($isStudent) $students[$key] = true;
+			$types[$key] = $isStudent ? 'Student' : '-';
 		}
 
 		$this->names = $names;
+		$this->comments = $comments;
+		$this->namesForSearch = $namesForSearch;
 		$this->types = $types;
+		$this->students = $students;
 
 		return $names;
 	}
@@ -422,6 +582,7 @@ class Exgarde {
 						'id'	=> $id,
 						'name'	=> $item['NAME'],
 						'type' => $isStudent ? 'Student' : '-',
+						'comment' => $item['COMMENT'],
 						'isStudent' => $isStudent,
 					];
 					$list[] = $d;
@@ -459,7 +620,7 @@ class Exgarde {
 	 	 $data = $this->query($query, $binding);
 	 } else{
 		 $binding = array($id);
-  	 $query = " SELECT TOP 100 [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_3], [ID_2], [LOCAL_TIME], [EVENT_ID]
+  	 $query = " SELECT TOP 1000 [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_3], [ID_2], [LOCAL_TIME], [EVENT_ID]
                 FROM dbo.EVENT_LOG_View
                 WHERE [ID_3] = ? AND ([EVENT_ID] = 2001 OR [EVENT_ID] = 2002 OR [EVENT_ID] = 2009)
                 ORDER BY [LOCAL_TIME] DESC";
@@ -489,7 +650,7 @@ class Exgarde {
 	 	 $data = $this->query($query, $binding);
 	 } else{
 		 $binding = array($id);
-  	 $query = " SELECT TOP 100 [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_3], [ID_2], [LOCAL_TIME], [EVENT_ID]
+  	 $query = " SELECT TOP 1000 [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_3], [ID_2], [LOCAL_TIME], [EVENT_ID]
                 FROM dbo.EVENT_LOG_View
                 WHERE [ID_1] = ? AND ([EVENT_ID] = 2001 OR [EVENT_ID] = 2002 OR [EVENT_ID] = 2009)
                 ORDER BY [LOCAL_TIME] DESC";
@@ -536,7 +697,7 @@ class Exgarde {
 			 $flag = true;
 		 }
 
-  	 $query = "SELECT TOP 100 [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_2], [ID_3], [EVENT_ID], [LOCAL_TIME]
+  	 $query = "SELECT TOP 1000 [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_2], [ID_3], [EVENT_ID], [LOCAL_TIME]
 		 					 FROM dbo.EVENT_LOG_View
 							 WHERE [EVENT_ID] = ? AND ([ID_1] = ? $orString )
 		 					 ORDER BY [LOCAL_TIME] DESC";

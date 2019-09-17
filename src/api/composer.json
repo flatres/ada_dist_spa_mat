@@ -12,7 +12,8 @@
         "tecnickcom/tcpdf": "^6.2",
         "jpgraph/jpgraph": "^4.0",
         "react/promise-timer": "^1.5",
-        "slim/slim": "^3.12"
+        "slim/slim": "^3.12",
+        "wildbit/postmark-php": "^2.8"
     },
 
     "autoload":{
@@ -25,11 +26,12 @@
           "HM\\":"v1/.routes/HM",
           "Houses\\":"v1/.routes/Houses",
           "Lab\\":"v1/.routes/Lab",
+          "SMT\\":"v1/.routes/SMT",
           "Students\\":"v1/.routes/Students",
           "Transport\\":"v1/.routes/Transport",
           "Watch\\":"v1/.routes/Watch",
           "Sockets\\":"v1/sockets",
-          "Utility\\":"v1/utilities",
+          "Utilities\\":"v1/utilities",
           "Entities\\":"v1/entities",
           "Dependency\\":"v1/dependencies",
           "Middleware\\":"v1/middleware",

@@ -57,7 +57,7 @@ class iSamsStaff
     );
     foreach($tutees as $tutee)
     {
-      $this->tutees[] = new \Entities\Students\Tools\iSamsPupil($this->sql, $tutee['txtSchoolID']);
+      $this->tutees[] = new \Entities\Students\Tools\iSamsStudent($this->sql, $tutee['txtSchoolID']);
     }
   }
 

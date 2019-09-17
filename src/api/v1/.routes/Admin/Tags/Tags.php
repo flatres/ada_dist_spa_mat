@@ -24,6 +24,13 @@ class Tags
     {
       return emit($response, $this->ada->select('tag_tags', '*'));
     }
+
+    public function studentsTree_Get($request, $response, $args){
+      $userId = $args['id'];
+      $allCats = new \Entities\Tags\AllCats($this->ada);
+
+      return emit($response, $allCats->list($userId));
+    }
 //
 //     public function ROUTEPost($request, $response)
 //     {

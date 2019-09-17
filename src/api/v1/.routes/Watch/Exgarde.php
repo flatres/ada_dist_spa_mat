@@ -14,7 +14,7 @@ class Exgarde
 
     public function __construct(\Slim\Container $container)
     {
-       // $this->ada = $container->ada;
+       $this->ada = $container->ada;
        // $this->adaModules = $container->adaModules;
        // $this->msSql = $container->msSql;
        $this->exgarde = $container->exgarde;
@@ -65,23 +65,32 @@ class Exgarde
       $id = $args['id'];
       return emit($response, $this->exgarde->getLocationByDate($date, $id));
     }
-    //
-    // public function ROUTEPost($request, $response)
-    // {
-    //   $data = $request->getParsedBody();
-    //   $data['id'] = $this->adaModules->insertObject('TABLE', $data);
-    //   return emit($response, $data);
-    // }
-    //
-    // public function ROUTELocationsPut($request, $response)
-    // {
-    //   $data = $request->getParsedBody();
-    //   return emit($response, $this->adaModules->updateObject('TABLE', $data, 'id'));
-    // }
-    //
-    // public function ROUTEDelete($request, $response, $args)
-    // {
-    //   return emit($response, $this->adaModules->delete('TABLE', 'id=?', array($args['id'])));
-    // }
+
+    public function TestGet($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+
+      $this->progress = new \Sockets\Progress($auth, 'Watch/Exgarde/Test');
+      $students = new \Entities\People\AllStudents($this->ada);
+      $i = 0;
+      $this->exgarde->initialiseTest($students);
+      $count = count($students->list);
+      foreach($students->list as $student){
+          $i++;
+          $this->exgarde->match($student);
+          $this->progress->publish($i/$count);
+      }
+      rsort($this->exgarde->adaNames);
+      $data = [
+        'all' => array_values($students->list),
+        'matched' => array_values($this->exgarde->adaMatched),
+        'unmatched' => array_values($this->exgarde->adaUnmatched),
+        'namesForSearch' => array_values($this->exgarde->namesForSearch),
+        'adaNames' => array_values($this->exgarde->adaNames),
+        'count_unmatched' => count($this->exgarde->adaUnmatched),
+        'count_matched' => count($this->exgarde->adaMatched)
+      ];
+      return emit($response, $data);
+    }
 
 }

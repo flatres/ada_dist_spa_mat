@@ -1338,7 +1338,8 @@ class SpreadsheetRenderer
     $sheet->fromArray(
         $data,  // The data to set
         NULL,        // Array values with this value will not be set
-        'A1'         // Top left coordinate of the worksheet range where
+        'A1',         // Top left coordinate of the worksheet range where
+        true  //prevents zero being displayed as blank cells https://stackoverflow.com/questions/9704434/phpexcel-outputting-zeros-as-blank-cells
     );
 
 

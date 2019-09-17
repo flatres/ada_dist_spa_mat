@@ -18,7 +18,9 @@ class Students
     public function __construct(\Slim\Container $container)
     {
        $this->isams= $container->isams;
-       $this->sql = $container->mysql;
+       $this->ada = $container->ada;
+       $this->exgarde = $container->exgarde;
+       ini_set('max_execution_time', 3600);
 
     }
 
@@ -56,7 +58,7 @@ class Students
 
       // get ada students to get comparison for syncing
       $console->publish('Pulling ADA students');
-      $adaStudents = $this->sql->select('stu_details', 'id, mis_id', 'usr_type=? ORDER BY lastname ASC', array(1));
+      $adaStudents = $this->ada->select('stu_details', 'id, mis_id', 'usr_type=? AND disabled = 0 ORDER BY lastname ASC', array(1));
       $console->publish('Got ' . count($adaStudents), 1);
 
 
@@ -114,7 +116,7 @@ class Students
     private function newStudent($student)
     {
       $d = $student['misData'];
-      $id = $this->sql->insert(
+      $id = $this->ada->insert(
         'stu_details',
         'lastname, firstname, prename, initials, boardingHouse, email, mis_id, gender, dob, enrolmentNCYear, EnrolmentSchoolYear',
         array(
@@ -131,20 +133,28 @@ class Students
           $d['intEnrolmentSchoolYear']
         )
       );
-      $tag = new \Entities\Tags\Tools\TagWriter($this->sql);
+      $tag = new \Entities\Tags\Category($this->ada);
       $tag->newByNames('House', $d['txtBoardingHouse'], $id);
+      
+      //try to match to exgarde database
+      $studentObj = new \Entities\People\Student($this->ada, $id);
+      $this->exgarde->match($studentObj);
+      
       $this->newCount++;
     }
 
     private function updateStudent($student)
     {
+      $id = $student['adaId'];
       if ($student['disable'] == true)
       {
-        $this->sql->update('usr_details', 'disabled=1', 'id=?', array($student['adaId']));
+        
+        $this->ada->update('stu_details', 'disabled=1', 'id=?', array($id));
+        $this->exgarde->unmatch($id);
         $this->disabledCount++;
       } else {
         $d = $student['misData'];
-        $this->sql->update(
+        $this->ada->update(
           'stu_details',
           'lastname=?, firstname=?, prename=?, initials=?, boardingHouse=?, email=?, mis_id=?, gender=?, dob=?, enrolmentNCYear=?, enrolmentSchoolYear=?, disabled=?',
           'id=?',
@@ -164,8 +174,12 @@ class Students
             $student['adaId']
           )
         );
-        $tag = new \Entities\Tags\Tools\TagWriter($this->sql);
-        $tag->newByNames('House', $d['txtBoardingHouse'], $student['adaId']);
+        $category = new \Entities\Tags\Category($this->ada);
+        $category->newByNames('House', $d['txtBoardingHouse'], $id);
+        //try to match to exgarde database
+        $studentObj = new \Entities\People\Student($this->ada, $id);
+        $this->exgarde->match($studentObj);
+        
         $this->updatedCount++;
       }
     }
@@ -178,7 +192,7 @@ class Students
                                           'intSystemStatus = 1', array());
 
       //get ada students to get comparison for syncing
-      $adaStudents = $this->sql->select('stu_details', 'id, firstname, lastname, *email, mis_id', 'usr_type=? ORDER BY lastname ASC', array(1));
+      $adaStudents = $this->ada->select('stu_details', 'id, firstname, lastname, *email, mis_id', 'disabled=? ORDER BY lastname ASC', array(0));
       $data['misStudents'] = $misStudents;
       $stats = array();
       $stats['misStudentCount'] = count($misStudents);

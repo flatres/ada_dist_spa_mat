@@ -8,6 +8,7 @@ $app->group('/admin', function(){
 
 // TAGS
     $this->get('/tags', '\Admin\Tags\Tags:globalTags_Get');
+    $this->get('/tags/tree/students/{id}', '\Admin\Tags\Tags:studentsTree_Get');    
     // $this->get('/tags', '\Admin\ActiveDirectory\Explorer:allUsers_GET');
 //    $this->get('/tags/categories', '\Admin\Tags\Tags:globalCategories');
 

@@ -6,7 +6,7 @@ use Slim\Http\Response;
 
 $app->group('/hm', function(){
 
-    $this->get('/hm', '\Auth\TestClass:testGet');
+    $this->get('/houses', '\HM\House:listGet');
 
 })->add("Authenticate");
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);
