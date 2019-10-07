@@ -14,6 +14,7 @@ class Student
     private $sql;
 
     public $id, $firstName, $lastName, $email, $boardingHouse, $gender, $displayName;
+    public $misFamilyId;
     public $boardingHouseSafe; //has spaces replaced with _ for use in array keys
     public $preName, $fullName, $fullPreName, $name;
     public $misId;
@@ -50,7 +51,7 @@ class Student
     {
       $student = $this->sql->select(
         'stu_details',
-        'id, firstname, lastname, prename, email, boardingHouse, gender, mis_id',
+        'id, firstname, lastname, prename, email, boardingHouse, gender, mis_id, mis_family_id',
         'id=?',
         [$id]);
 
@@ -64,6 +65,7 @@ class Student
         $this->name = $this->fullName;
         $this->fullPreName = $student['prename'] . ' ' . $student['lastname'];
         $this->misId = $student['mis_id'];
+        $this->misFamilyId = $student['mis_family_id'];
         
         $this->email = $student['email'];
         $this->boardingHouse = $student['boardingHouse'];

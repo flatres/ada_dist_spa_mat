@@ -4,6 +4,7 @@ namespace Entities\People;
 class iSamsStudent
 {
   public $firstName, $lastName, $fullName, $initials, $gender, $dob, $enrolmentNVYear, $enrolmentSchoolYear, $boardingHouse;
+  public $familyId;
   public $adaId;
   private $sql;
 
@@ -18,7 +19,7 @@ class iSamsStudent
     $this->id = $txtSchoolID;
     $d = $this->sql->select(
       'TblPupilManagementPupils',
-      'txtSchoolID, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
+      'txtSchoolID, intFamily, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
       'txtSchoolID=?', [$id]);
 
     if(isset($d[0])){
@@ -27,6 +28,7 @@ class iSamsStudent
       $this->lastName = $d['txtSurname'];
       $this->fullName = $d['txtFullName'];
       $this->initials = $d['txtInitials'];
+      $this->familyId = $d['intFamily'];
       // $this->familyID = $d['txtFamily'];
       $this->gender = $d['txtGender'];
       $this->dob = $d['txtDOB'];

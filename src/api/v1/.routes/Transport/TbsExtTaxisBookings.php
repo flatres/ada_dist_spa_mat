@@ -76,6 +76,16 @@ class TbsExtTaxisBookings
       return emit($response, $companies);
     }
 //
+    public function familyBookings($familyId)
+    {
+      $data = $this->adaModules->select('tbs_taxi_bookings', '*', 'mis_family_id=? ORDER BY sessionId DESC', [$familyId]);
+      foreach ($data as &$booking) {
+        $booking['type'] = 'taxi';
+        $booking = $this->makeDisplayValues($booking);
+      }
+      return $data;
+    }
+
     public function bookingsGet($request, $response, $args)
     {
       $sessID = $args['session'];
@@ -208,11 +218,14 @@ class TbsExtTaxisBookings
     private function newBooking(int $sessionId, int $studentId, array $booking, $note, $isReturn = false)
     {
       $schoolLocation = $isReturn ? $booking['destination']['value'] : $booking['pickup']['value'];
+      $student = new \Entities\People\Student($this->ada, $studentId);
+      $familyId = $student->misFamilyId;
       $id = $this->adaModules->insert(
         'tbs_taxi_bookings',
-        'studentId, sessionId, pickupTime, isReturn, note, journeyType, schoolLocation, address, airportId, flightNumber, flightTime, stationId, trainTime',
+        'studentId, mis_family_id, sessionId, pickupTime, isReturn, note, journeyType, schoolLocation, address, airportId, flightNumber, flightTime, stationId, trainTime',
         array(
           $studentId,
+          $familyId,
           $sessionId,
           $booking['pickupTime'],
           $isReturn ? 1 : 0,
@@ -250,9 +263,11 @@ class TbsExtTaxisBookings
         }
         foreach($passengers as $passenger) {
           $id = $passenger['id'];
+          $student = new \Entities\People\Student($this->ada, $id);
+          $familyId = $student->misFamilyId;
           if (!isset($currentKeys['p_' . $id])) {
             //must be new
-            $this->adaModules->insert('tbs_taxi_passenger', 'studentId, bookingId', array($id, $bookingId));
+            $this->adaModules->insert('tbs_taxi_passenger', 'studentId, bookingId, mis_family_id', array($id, $bookingId, $familyId));
           } else {
             //already exists
             $currentKeys['p_' . $id] = false;
