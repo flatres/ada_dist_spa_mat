@@ -12,7 +12,7 @@ class Chapel{
 
   function __construct($ada, $adaModules, $isams, $mcCustom, $exgarde)
   {
-    $this->debug = false;
+    $this->debug = true;
 
     $this->ada = $ada;
     $this->adaModules = $adaModules;

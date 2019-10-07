@@ -26,6 +26,7 @@
           "HM\\":"v1/.routes/HM",
           "Houses\\":"v1/.routes/Houses",
           "Lab\\":"v1/.routes/Lab",
+          "Portal\\":"v1/.routes/Portal",
           "SMT\\":"v1/.routes/SMT",
           "Students\\":"v1/.routes/Students",
           "Transport\\":"v1/.routes/Transport",

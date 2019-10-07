@@ -52,7 +52,7 @@ class Students
 
       $console->publish('Pulling iSAMS students...');
       $misStudents = $this->isams->select(  'TblPupilManagementPupils',
-                                            'txtSchoolID as id, txtForename, txtPreName, txtEmailAddress, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
+                                            'txtSchoolID as id, txtForename, intFamily, txtPreName, txtEmailAddress, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
                                             'intSystemStatus = 1', array());
       $console->publish('Got ' . count($misStudents), 1);
 
@@ -118,7 +118,7 @@ class Students
       $d = $student['misData'];
       $id = $this->ada->insert(
         'stu_details',
-        'lastname, firstname, prename, initials, boardingHouse, email, mis_id, gender, dob, enrolmentNCYear, EnrolmentSchoolYear',
+        'lastname, firstname, prename, initials, boardingHouse, email, mis_id, mis_family_id, gender, dob, enrolmentNCYear, EnrolmentSchoolYear',
         array(
           $d['txtSurname'],
           $d['txtForename'],
@@ -127,6 +127,7 @@ class Students
           $d['txtBoardingHouse'],
           $d['txtEmailAddress'],
           $d['id'],
+          $d['intFamily'],
           $d['txtGender'],
           $d['txtDOB'],
           $d['intEnrolmentNCYear'],
@@ -156,7 +157,7 @@ class Students
         $d = $student['misData'];
         $this->ada->update(
           'stu_details',
-          'lastname=?, firstname=?, prename=?, initials=?, boardingHouse=?, email=?, mis_id=?, gender=?, dob=?, enrolmentNCYear=?, enrolmentSchoolYear=?, disabled=?',
+          'lastname=?, firstname=?, prename=?, initials=?, boardingHouse=?, email=?, mis_id=?, mis_family_id=?, gender=?, dob=?, enrolmentNCYear=?, enrolmentSchoolYear=?, disabled=?',
           'id=?',
           array(
             $d['txtSurname'],
@@ -166,6 +167,7 @@ class Students
             $d['txtBoardingHouse'],
             $d['txtEmailAddress'],
             $d['id'],
+            $d['intFamily'],
             $d['txtGender'],
             $d['txtDOB'],
             $d['intEnrolmentNCYear'],
