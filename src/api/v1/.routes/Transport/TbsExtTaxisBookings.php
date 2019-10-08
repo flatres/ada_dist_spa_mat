@@ -217,7 +217,7 @@ class TbsExtTaxisBookings
 
     private function newBooking(int $sessionId, int $studentId, array $booking, $note, $isReturn = false)
     {
-      $schoolLocation = $isReturn ? $booking['destination']['value'] : $booking['pickup']['value'];
+      $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
       $student = new \Entities\People\Student($this->ada, $studentId);
       $familyId = $student->misFamilyId;
       $id = $this->adaModules->insert(
@@ -283,7 +283,7 @@ class TbsExtTaxisBookings
 
     private function updateBooking(int $bookingId, array $booking, $note, $isReturn = false)
     {
-      $schoolLocation = $isReturn ? $booking['destination']['value'] : $booking['pickup']['value'];
+      $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
       $this->adaModules->update(
         'tbs_taxi_bookings',
         'pickupTime=?, isReturn=?, note=?, journeyType=?, schoolLocation=?, address=?, airportId=?, flightNumber=?, flightTime=?, stationId=?, trainTime=?',
