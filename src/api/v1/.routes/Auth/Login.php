@@ -33,20 +33,27 @@ class Login
       // reading post params
       $login = $data['login']; $password = $data['password'];
 
-      if ($this->isADLogin($login) || $this->isNewUser)
-      {
+      if ($this->isADLogin($login) || $this->isNewUser) {
           $id = $this->checkLoginAd($login, $password);
       } else {
-
           $id = $this->checkLoginNative($login, $password);
       }
 
       if ($id !== FALSE) {
+          $this->writeLog($request, $login, false);
           return emit($response, $this->loginReturnObject($id ));
       } else {
           return emitError($response, 400, "Not happening");
       }
 
+    }
+
+    private function writeLog($request, string $login, bool $hasFailed)
+    {
+      $ip = $request->getServerParam('REMOTE_ADDR');
+      $hasFailed = $hasFailed ? 1 : 0;
+      $user_id = $this->sql->select('usr_details', 'id', 'login=?', array($login))[0]['id'];
+      $this->sql->insert('usr_log', 'user_id, ip, failed', [$user_id, $ip, $hasFailed]);
     }
 
     private function isADLogin($login)

@@ -1,6 +1,6 @@
 {
     "require": {
-        "monolog/monolog": "^1.23",
+        "monolog/monolog": "^2.0",
         "react/zmq": "^0.4.0",
         "voryx/thruway": "^0.5.3",
         "thruway/pawl-transport": "^0.5.0",
@@ -13,7 +13,8 @@
         "jpgraph/jpgraph": "^4.0",
         "react/promise-timer": "^1.5",
         "slim/slim": "^3.12",
-        "wildbit/postmark-php": "^2.8"
+        "wildbit/postmark-php": "^2.8",
+        "guzzlehttp/guzzle": "~6.0"
     },
 
     "autoload":{
