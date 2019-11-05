@@ -86,6 +86,20 @@ class TbsExtTaxisBookings
       return $data;
     }
 
+    public function allBookingsGet($request, $response, $args)
+    {
+      $sessID = $args['session'];
+    
+      $data = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? ORDER BY id DESC', [$sessID]);
+      
+      $status = $this->getAllStatus();
+
+      foreach ($data as &$booking) {
+        $booking = $this->makeDisplayValues($booking);
+      }
+      return emit($response, $data);
+    }
+
     public function bookingsGet($request, $response, $args)
     {
       $sessID = $args['session'];
@@ -143,7 +157,7 @@ class TbsExtTaxisBookings
     public function bookingDelete($request, $response, $args)
     {
       $data = array();
-      $this->adaModules->update('tbs_taxi_bookings', 'statusId=?', 'id = ?', [0, $args['id']]);
+      $this->adaModules->update('tbs_taxi_bookings', 'statusId=?', 'id = ?', [4, $args['id']]);
       return emit($response, $data);
     }
 
@@ -211,6 +225,16 @@ class TbsExtTaxisBookings
         $this->setStatus($bookingId, 2);
         $this->adaModules->update('tbs_taxi_bookings', 'taxiId=?, cost=?', 'id=?', array($taxiId, 0, $bookingId));
       }
+
+      return emit($response, $data);
+    }
+    
+    public function taxiConfirmPut($request, $response)
+    {
+      $data = $request->getParsedBody();
+      $bookingId = $data['id'];
+
+      $this->setStatus($bookingId, 3);
 
       return emit($response, $data);
     }

@@ -1277,7 +1277,7 @@ class SpreadsheetRenderer
     $data[] = []; //blank row for filters
 
     foreach($students as $student){
-      $d = [  $student->txtInitialedName,
+      $d = [  $student->txtInitialedName . ' [' . $student->txtCandidateNumber .']' ,
               $student->txtGender,
               $student->txtHouseCode,
               $student->NCYear,

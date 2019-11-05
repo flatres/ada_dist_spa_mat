@@ -76,9 +76,7 @@ class Student
       $this->isNewSixthForm = $result['isNewSixthForm'];
       $this->txtHouseCode = $result['txtHouseCode'];
       $this->txtDOB = $result['txtDOB'];
-
-
-
+      
     }
 
     public function setResult(\Exams\Tools\ALevel\Result $result)
