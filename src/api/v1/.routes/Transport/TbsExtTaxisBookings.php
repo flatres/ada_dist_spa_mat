@@ -347,8 +347,10 @@ class TbsExtTaxisBookings
         //get current Passengers
         $current = $this->adaModules->select('tbs_taxi_passenger', 'id, studentId', 'bookingId=?', array($bookingId));
         $currentKeys = array();
+        $ids = array();
         foreach($current as $passenger) {
           $currentKeys['p_' . $passenger['id']] = true;
+          $ids['p_' . $passenger['id']] = $passenger['id'];
         }
         foreach($passengers as $passenger) {
           $id = $passenger['id'];
@@ -363,9 +365,9 @@ class TbsExtTaxisBookings
           }
         }
         //delete any remaining passengers as they must have been taken off the booking
-        foreach($currentKeys as $passenger) {
+        foreach($currentKeys as $key => $passenger) {
           if ($passenger === true) {
-            $this->adaModules->delete('tbs_taxi_passenger', 'studentId = ? and bookingId = ?', array($id, $bookingId));
+            $this->adaModules->delete('tbs_taxi_passenger', 'studentId = ? and bookingId = ?', array($ids[$key], $bookingId));
           }
         }
     }
