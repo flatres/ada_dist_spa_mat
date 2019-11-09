@@ -23,18 +23,23 @@ class TbsExtSessions
 
     public function sessionsGet($request, $response, $args)
     {
-        return emit($response,
-                    $this->adaModules->select('tbs_sessions', '*', '1=1 ORDER BY isActive DESC, dateOut DESC'));
+        $sessions = $this->adaModules->select('tbs_sessions', '*', '1=1 ORDER BY isActive DESC, dateOut DESC');
+        convertArrayToAdaDatetime($sessions);
+        return emit($response, $sessions);
     }
 
     public function sessionGet($request, $response, $args)
     {
+        $session = $this->adaModules->select(
+          'tbs_sessions',
+          '*',
+          'id=? ORDER BY isActive DESC, dteOutward DESC',
+          array($args['id']));
+          
+        convertArrayToAdaDatetime($session);
+          
         return emit($response,
-                    $this->adaModules->select(
-                      'tbs_sessions',
-                      '*',
-                      'id=? ORDER BY isActive DESC, dteOutward DESC',
-                      array($args['id']))
+                    $session
                   );
     }
 
@@ -50,12 +55,15 @@ class TbsExtSessions
     public function sessionPut($request, $response)
     {
      $data = $request->getParsedBody();
+     convertArrayToMysqlDatetime($data);
      return emit($response, $this->adaModules->updateObject('tbs_sessions', $data, 'id'));
     }
 
     public function sessionPost($request, $response)
     {
      $data = $request->getParsedBody();
+     convertArrayToMysqlDatetime($data);
+     
      $data['id'] = $this->adaModules->insertObject('tbs_sessions', $data, 'id');
      return emit($response, $data);
     }

@@ -1,12 +1,8 @@
 <?php
 namespace Entities\People;
 
-class iSamsStudent
+class iSamsParent
 {
-  public $firstName, $lastName, $fullName, $initials, $gender, $dob, $enrolmentNVYear, $enrolmentSchoolYear, $boardingHouse;
-  public $familyId;
-  public $adaId;
-  private $sql;
 
   public function __construct(\Dependency\Databases\MCCustom $msSql, (int) $id = null)
   {
@@ -16,10 +12,10 @@ class iSamsStudent
 
   public function byId($id)
   {
-    $this->id = $txtSchoolID;
     $d = $this->sql->select(
-      'TblPupilManagementPupils',
-      'txtSchoolID, intFamily, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
+      'TblPupilManagementAddresses',
+      'TblPupilManagementAddressesID,
+      txtLetterSalutation, txtRelationType, txtContactsForename, txtContactsSurname, txtAddress1, txtAddress2, txtAddress3, txtTown',
       'txtSchoolID=?', [$id]);
 
     if(isset($d[0])){
@@ -38,20 +34,6 @@ class iSamsStudent
       
       $this->getAdaId();
     }
-  }
-  
-  //returns an array of \Entities\People\isamsParent s accociated with this pupil's family Id
-  public function family()
-  {
-    
-  }
-
-  private function getAdaId()
-  {
-    $ada = new \Dependency\Databases\Ada();
-    $d = $ada->select('stu_details', 'id', 'mis_id=?', [$this->id]);
-    $this->adaId = $d[0]['id'] ?? false;
-    return $this->adaId;
   }
 
   public function family()
