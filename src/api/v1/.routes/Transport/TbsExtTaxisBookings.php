@@ -110,7 +110,7 @@ class TbsExtTaxisBookings
       if (!$isCancelled) {
         $data = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND isReturn = ? AND statusId > 0 ORDER BY statusId ASC, studentId DESC', [$sessID, $isReturn]);
       } else {
-        $data = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND statusId = 0', [$sessID]);
+        $data = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND statusId = 4', [$sessID]);
       }
       $status = $this->getAllStatus();
 
@@ -118,6 +118,14 @@ class TbsExtTaxisBookings
         $booking = $this->makeDisplayValues($booking);
       }
       return emit($response, $data);
+    }
+    
+    public function bookingsNewCountGet($request, $response, $args)
+    {
+      $sessID = $args['session'];
+      $data = $this->adaModules->select('tbs_taxi_bookings', 'id', 'sessionId = ? AND statusId = 1', [$sessID]);
+      
+      return emit($response, count($data));
     }
 
     private function makeDisplayValues($booking)
@@ -145,6 +153,10 @@ class TbsExtTaxisBookings
       $booking['status'] = $status['s_' . $booking['statusId']];
       $booking['displayName'] = $this->student->displayName($booking['studentId']);
 
+      $taxiId = $booking['taxiId'];
+      $d = $this->adaModules->select('tbs_taxi_companies', 'name', 'id=?', [$taxiId]);
+      if (isset($d[0])) $booking['companyName'] = $d[0]['name'];
+
       return $booking;
     }
 
@@ -171,6 +183,7 @@ class TbsExtTaxisBookings
     {
       $this->adaModules->update('tbs_taxi_bookings', 'statusId=?', 'id = ?', [4, $args['id']]);
       $this->publish($args['id']);
+      $this->sendCancelledEmail($args['id']);
       return emit($response, []);
     }
 
@@ -202,6 +215,18 @@ class TbsExtTaxisBookings
 
       // $data['id'] = $this->adaModules->insertObject('tbs_taxi_bookings', $data);
       return emit($response, $data);
+    }
+
+    public function summaryPost($request, $response)
+    {
+      $bookings = $request->getParsedBody();
+
+      foreach($bookings as $booking) {
+          $this->adaModules->update('tbs_taxi_bookings', 'sentToCompany=?', 'id=?', [1, $booking['id']]);
+      }
+
+      // $data['id'] = $this->adaModules->insertObject('tbs_taxi_bookings', $data);
+      return emit($response, $bookings);
     }
 
     public function bookingPut($request, $response)
@@ -259,6 +284,8 @@ class TbsExtTaxisBookings
       $this->publish($bookingId);
 
       $this->setStatus($bookingId, 3);
+
+      $this->sendConfirmedEmail($bookingId);
 
       return emit($response, $data);
     }
@@ -332,6 +359,90 @@ class TbsExtTaxisBookings
       ];
 
       $content = $email->template('TBS.ReceivedTaxi', $fields);
+
+      $res = $email->send($content);
+    }
+
+    private function sendCancelledEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_taxi_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
+
+      $booking = $this->makeDisplayValues($booking);
+      $passengers = $this->getPassengerNames($bookingId);
+
+      $count = count($passengers);
+      if ( $count > 0 ) {
+        $c = 0;
+        $passengerString = '';
+        $comma = ';';
+        foreach($passengers as $p){
+          $c++;
+          if ($c == $count) $comma = '';
+          $passengerString .= "<span style='margin-right:5px'>{$p}$comma</span>";
+          $comma = ';';
+        }
+      } else {
+        $passengerString = '-';
+      }
+
+      $email = new \Utilities\Email\Email('flatres@gmail.com', 'MC Taxi Booking Cancelled');
+      $fields = [
+        'name'    => 'Simon',
+        'id'      => $bookingId,
+        'pupil' => $booking['displayName'],
+        'date'    => '31/1/92',
+        'time'    => $booking['pickupTime'],
+        'from'    => $booking['displayFrom'],
+        'to'      => $booking['displayTo'],
+        'passengers'  => $passengerString,
+        'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
+      ];
+
+      $content = $email->template('TBS.CancelledTaxi', $fields);
+
+      $res = $email->send($content);
+    }
+
+    private function sendConfirmedEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_taxi_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
+
+      $booking = $this->makeDisplayValues($booking);
+      $passengers = $this->getPassengerNames($bookingId);
+
+      $count = count($passengers);
+      if ( $count > 0 ) {
+        $c = 0;
+        $passengerString = '';
+        $comma = ';';
+        foreach($passengers as $p){
+          $c++;
+          if ($c == $count) $comma = '';
+          $passengerString .= "<span style='margin-right:5px'>{$p}$comma</span>";
+          $comma = ';';
+        }
+      } else {
+        $passengerString = '-';
+      }
+
+      $email = new \Utilities\Email\Email('flatres@gmail.com', 'MC Taxi Booking Confirmed');
+      $fields = [
+        'name'    => 'Simon',
+        'id'      => $bookingId,
+        'pupil' => $booking['displayName'],
+        'date'    => '31/1/92',
+        'time'    => $booking['pickupTime'],
+        'from'    => $booking['displayFrom'],
+        'to'      => $booking['displayTo'],
+        'cost'    => $booking['cost'],
+        'company'    => $booking['companyName'],
+        'passengers'  => $passengerString,
+        'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
+      ];
+
+      $content = $email->template('TBS.ConfirmedTaxi', $fields);
 
       $res = $email->send($content);
     }

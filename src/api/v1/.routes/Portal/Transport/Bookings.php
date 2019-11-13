@@ -24,10 +24,10 @@ class Bookings
 // returns a list of students for the given familly ID
     public function activeSessionGet($request, $response, $args)
     {
-      $d = $this->adaModules->select('tbs_sessions', 'id, dateOut, dateRtn', 'isActive=?', [1]);
-      $d = $d[0] ?? null;
-      
-      return emit($response, $d);
+      $d = $this->adaModules->select('tbs_sessions', '*', 'isActive=?', [1]);
+      if (!isset($d[0])) return emit($response, []);
+      convertArrayToAdaDatetime($d);
+      return emit($response, $d[0]);
     }
     
     public function familyBookingsGet($request, $response, $args)

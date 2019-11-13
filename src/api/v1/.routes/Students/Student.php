@@ -34,4 +34,7 @@ class Student
       $student = new \Entities\People\Student($this->sql);
       return emit($response, $student->byId($args['id']));
     }
+    
+    
+    
 }
