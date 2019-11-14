@@ -1,4 +1,5 @@
 <?php
+$userId = null;
 
 $showErrors = true;
 

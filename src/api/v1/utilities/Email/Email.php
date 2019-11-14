@@ -15,11 +15,12 @@ class Email {
 		private $bcc;
 		private $htmlbody, $textbody, $tag, $track;
 
-		public function __construct($to = null, $subject = null, $from = 'noreply@marlboroughcollege.org', $bcc = null)
+		public function __construct($to = null, $subject = null, $from = 'noreply@marlboroughcollege.org', array $cc = [], array $bcc = [])
 		{
 			$this->to = $to;
 			$this->subject = $subject;
 			$this->from = $from;
+			$this->cc = $cc;
 			$this->bcc = $bcc;
 		}
 
@@ -50,10 +51,15 @@ class Email {
 					$mail->setFrom($this->from);
 					$mail->addAddress($this->to);               // Name is optional
 					
-					if ($this->bcc) $mail->addBCC($this->bcc);
+					foreach ($this->bcc as $bccAddress) {
+						$mail->addBCC($bccAddress);
+					}
 				
+					foreach ($this->cc as $ccAddress) {
+						$mail->addCC($ccAddress);
+					}
 					// Attachments
-					$mail->addAttachment(dirname(__FILE__). '/img/logo.jpg', 'logo');         // Add attachments
+					// $mail->addAttachment(dirname(__FILE__). '/img/logo.jpg', 'logo');         // Add attachments
 
 					// Content
 					$mail->isHTML(true);                                  // Set email format to HTML

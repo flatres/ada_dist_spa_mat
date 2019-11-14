@@ -13,6 +13,8 @@ class Authenticate
   // The __invoke() method is called when a script tries to call an object as a function.
   public function __invoke($request, $response, $next)
   {
+    global $userId;
+    
     $auth =  $request->getHeader('Authorization')[0];
     $auth = str_replace('Bearer ', '', $auth);
     $d= $this->sql->select('usr_sessions', 'user_id', 'token=? AND expired=0', array($auth));

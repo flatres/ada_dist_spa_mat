@@ -11,6 +11,7 @@ namespace Transport;
 class TbsExtTaxisBookings
 {
     protected $container;
+    private $user, $email;
 
     public function __construct(\Slim\Container $container)
     {
@@ -19,6 +20,11 @@ class TbsExtTaxisBookings
        $this->student = new \Entities\People\Student($this->ada);
 
        $this->status = $this->getAllStatus();
+       
+       global $userId;
+       $this->user = new \Entities\People\Staff($this->ada, $userId);
+       $this->email = $this->user->email;
+       
     }
 
     private function getStation($id)
@@ -123,6 +129,7 @@ class TbsExtTaxisBookings
     public function bookingsNewCountGet($request, $response, $args)
     {
       $sessID = $args['session'];
+      
       $data = $this->adaModules->select('tbs_taxi_bookings', 'id', 'sessionId = ? AND statusId = 1', [$sessID]);
       
       return emit($response, count($data));
@@ -345,7 +352,7 @@ class TbsExtTaxisBookings
         $passengerString = '-';
       }
 
-      $email = new \Utilities\Email\Email('flatres@gmail.com', 'MC Taxi Booking Received');
+      $email = new \Utilities\Email\Email($this->email, 'MC Taxi Booking Received');
       $fields = [
         'name'    => 'Simon',
         'id'      => $bookingId,
@@ -386,7 +393,7 @@ class TbsExtTaxisBookings
         $passengerString = '-';
       }
 
-      $email = new \Utilities\Email\Email('flatres@gmail.com', 'MC Taxi Booking Cancelled');
+      $email = new \Utilities\Email\Email($this->email, 'MC Taxi Booking Cancelled');
       $fields = [
         'name'    => 'Simon',
         'id'      => $bookingId,
@@ -427,7 +434,7 @@ class TbsExtTaxisBookings
         $passengerString = '-';
       }
 
-      $email = new \Utilities\Email\Email('flatres@gmail.com', 'MC Taxi Booking Confirmed');
+      $email = new \Utilities\Email\Email($this->email, 'MC Taxi Booking Confirmed');
       $fields = [
         'name'    => 'Simon',
         'id'      => $bookingId,
