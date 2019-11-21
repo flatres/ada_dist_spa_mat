@@ -32,7 +32,10 @@ $app->group('/transport', function(){
     $this->get('/taxis/companies/bookings/{session}', '\Transport\TbsExtTaxisBookings:bookingsByCompanyGet');
     // $this->get('/taxis/bookings/{session}/{id}', '\Transport\TbsExtTaxisBookings:bookingGet');
     $this->post('/taxis/bookings', '\Transport\TbsExtTaxisBookings:bookingPost');
+    
     $this->post('/taxis/summary', '\Transport\TbsExtTaxisBookings:summaryPost');
+    $this->get('/taxis/summary/{sessionId}/{taxiId}', '\Transport\TbsExtTaxisBookings:summaryGET');
+    
     $this->put('/taxis/bookings', '\Transport\TbsExtTaxisBookings:bookingPut');
     $this->put('/taxis/assignment', '\Transport\TbsExtTaxisBookings:taxiAssigmentPut');
     $this->put('/taxis/confirm', '\Transport\TbsExtTaxisBookings:taxiConfirmPut');

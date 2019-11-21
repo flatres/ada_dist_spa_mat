@@ -68,7 +68,7 @@ class TbsExtTaxisBookings
           $journey = $booking['isReturn'] ? 'ret' : 'out';
           $booking = $this->makeDisplayValues($booking);
           switch ($booking['statusId']){
-            case 0:
+            case 4:
               $c[$journey]['cancelled'][] = $booking; break;
             case 1:
               $c[$journey]['new'][] = $booking; break;
@@ -80,6 +80,138 @@ class TbsExtTaxisBookings
         }
       }
       return emit($response, $companies);
+    }
+    
+    //generated the email html summary to be sent for review to the front
+    public function summaryGet($request, $response, $args)
+    {
+      $sessionId = $args['sessionId'];
+      $taxiId = $args['taxiId'];
+      $c = $this->adaModules->select('tbs_taxi_companies', 'id, name, phoneNumber, email', 'id=?', [$taxiId])[0];
+  
+      // $c['out'] = ['cancelled' => [], 'new' => [], 'ammended' => [], 'confirmed' => []];
+      // $c['ret'] = ['cancelled' => [], 'new' => [], 'ammended' => [], 'confirmed' => []];
+      $c['out'] = [];
+      $c['ret'] = [];
+      $c['outCount'] = 0;
+      $c['retCount'] = 0;
+
+      $bookings = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND taxiId = ? ORDER BY id DESC', [$sessionId, $taxiId]);
+
+      foreach ($bookings as &$booking){
+        $journey = $booking['isReturn'] ? 'ret' : 'out';
+        $booking = $this->makeDisplayValues($booking);
+        $c[$journey . 'Count']++;
+        switch ($booking['statusId']){
+          case 4:
+            // $c[$journey]['cancelled'][] = $booking;
+            $booking['status'] = 'Cancelled';
+            $booking['statusColor'] = 'red';
+            $c[$journey][] = $booking;
+            break;
+          case 2:
+          case 3:
+            if ($booking['sentToCompany'] === 1) {
+              $booking['status'] = 'Confirmed';
+              $booking['statusColor'] = 'blue';
+              $c[$journey][] = $booking;
+              // $c[$journey]['confirmed'][] = $booking;
+            } else {
+              $booking['status'] = 'New';
+              $booking['statusColor'] = 'Green';
+              $c[$journey][] = $booking;
+              // $c[$journey]['new'][] = $booking;
+            }
+            break;
+        }
+      }
+      
+      $session = $this->getSession($sessionId);
+      
+      $c['html'] = $this->makeSummaryHTML($c, $session);
+      
+      return emit($response, $c);
+    }
+    
+    private function getSession($id)
+    {
+      $session = $this->adaModules->select(
+        'tbs_sessions',
+        '*',
+        'id=?',
+        [$id]);
+        
+      convertArrayToAdaDatetime($session);
+      return $session[0];
+    }
+    
+    private function makeSummaryHTML(array &$company, array $session)
+    {
+      $html = '';
+      $email = new \Utilities\Email\Email($this->email, 'Marlborough College Bookings');
+      
+      if ($company['outCount'] > 0) {
+        $html .= "<h1 width:200px; style='background:grey; margin-left:0px; padding-left:10px;  margin-top:20px;color:white;font-size:14px;text-align:left;font-weight: bold'>Outbound : {$session['dateOut']}</h1>";
+        $bookings = $company['out'];
+        foreach($bookings as &$outBooking){
+          $html .= $this->makeBookingHTML($outBooking);
+        }
+      }
+      
+      if ($company['retCount'] > 0) {
+        $html .= "<h1 style='background:grey; margin-left:0px; padding-left:10px;  color: white; margin-top:20px;font-size:14px;text-align:left;font-weight: bold'>Return : {$session['dateRtn']}</h1>";
+        $bookings = $company['ret'];
+        foreach($bookings as &$retBooking){
+          $html .= $this->makeBookingHTML($retBooking);
+        }
+      }
+      
+      $fields = [
+        'name' => $company['name'],
+        'bookings' => $html
+      ];
+      
+      $content = $email->template('TBS.TaxiSummary', $fields);
+      return $content;
+    }
+    
+    
+    // $b is type Booking
+    private function makeBookingHTML(array &$b)
+    {
+      
+      // 'name'    => 'Simon',
+      // 'id'      => $bookingId,
+      // 'pupil' => $booking['displayName'],
+      // 'date'    => '31/1/92',
+      // 'time'    => $booking['pickupTime'],
+      // 'from'    => $booking['displayFrom'],
+      // 'to'      => $booking['displayTo'],
+      // 'passengers'  => $passengerString,
+      // 'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
+        $html = "<table class='body-action' align='center' widthx='100%' cellpadding='0' cellspacing='0' style='border-bottom:1px solid black; font-size:12px; color:#000000; widthx:100%;margin-top:20px;margin-bottom:5px;margin-right:auto;margin-left:0;padding-top:0;padding-bottom:15px;padding-right:0;padding-left:0;text-align:left;' >
+                <tr style='background:{$b['statusColor']}; color: white; '><td style='padding-left:5px; padding-right:5px text-align:center'>{$b['status']}</td></tr>
+                <tr><td style='xmin-width:100px; text-align:right; padding-right:10px'>Ref #:</td><td>{$b['id']}</td>
+                <td style='xmin-width:100px; text-align:right; padding-right:10px'>Pupil:</td><td>{$b['displayName']}</td></tr>
+                <tr><td style='xmin-width:100px; text-align:right; padding-right:10px'>Time:</td><td>{$b['pickupTime']}</td>
+                <td style='xmin-width:100px; text-align:right; padding-right:10px'>Price:</td><td>£{$b['cost']}</td></tr>
+                <tr><td style='xmin-width:100px; text-align:right; padding-right:10px'>From:</td><td>{$b['displayFrom']}</td>
+                <td style='xmin-width:100px; text-align:right; padding-right:10px'>To:</td><td>{$b['displayTo']}</td></tr>
+                </table>
+              ";
+        if ($b['passengerCount'] > 0) {
+          $passengerString = $this->makePassengerString($b['passengers']);
+          $b['passengerString'] = $passengerString;
+          $html .= "<table class='body-action' align='center' widthx='100%' cellpadding='0' cellspacing='0' style='border-bottom:0px solid black; font-size:12px; color:#000000; widthx:100%;margin-top:5px;margin-bottom:0px;margin-right:auto;margin-left:0;padding-top:0;padding-bottom:15px;padding-right:0;padding-left:0;text-align:left;' >
+                    <tr><td colspan='2' style='xmin-width:100px; text-align:right; padding-right:10px'>Passengers:</td><td>$passengerString</td></tr>
+                    </table>";
+        }
+        if (strlen($b['note'] > 0)) {
+          $html .= "<tr style='background:yellow'><td style='xmin-width:100px; text-align:right; padding-right:10px'>Note:</td><td>{$b['note']}</td></tr>";
+        }
+        $html .= '</table>';
+        return $html;
+      
     }
 //
     public function familyBookings($familyId)
@@ -328,20 +460,15 @@ class TbsExtTaxisBookings
 
       return $id;
     }
-
-    private function sendPendingEmail(int $bookingId)
+    
+    //makes the of passenger names HTML for sending within emails. Taken an array of passenger names
+    private function makePassengerString($passengers)
     {
-      $booking = $this->adaModules->select('tbs_taxi_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
-      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
-
-      $booking = $this->makeDisplayValues($booking);
-      $passengers = $this->getPassengerNames($bookingId);
-
       $count = count($passengers);
       if ( $count > 0 ) {
         $c = 0;
         $passengerString = '';
-        $comma = ';';
+        $comma = ' / ';
         foreach($passengers as $p){
           $c++;
           if ($c == $count) $comma = '';
@@ -351,6 +478,18 @@ class TbsExtTaxisBookings
       } else {
         $passengerString = '-';
       }
+      return $passengerString;
+    }
+
+    private function sendPendingEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_taxi_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
+
+      $booking = $this->makeDisplayValues($booking);
+      $passengers = $this->getPassengerNames($bookingId);
+
+      $passengerString = $this->makePassengerString($passengers);
 
       $email = new \Utilities\Email\Email($this->email, 'MC Taxi Booking Received');
       $fields = [
@@ -364,7 +503,7 @@ class TbsExtTaxisBookings
         'passengers'  => $passengerString,
         'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
-
+    
       $content = $email->template('TBS.ReceivedTaxi', $fields);
 
       $res = $email->send($content);

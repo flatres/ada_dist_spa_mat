@@ -21,6 +21,7 @@
     "autoload":{
         "psr-4" : {
           "Admin\\":"v1/.routes/Admin",
+          "Home\\":"v1/.routes/Home",
           "Academic\\":"v1/.routes/Academic",
           "Accounts\\":"v1/.routes/Accounts",
           "Auth\\":"v1/.routes/Auth",
