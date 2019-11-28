@@ -33,13 +33,13 @@ class TbsExtSessions
         $session = $this->adaModules->select(
           'tbs_sessions',
           '*',
-          'id=? ORDER BY isActive DESC, dteOutward DESC',
+          'id=? ORDER BY isActive DESC, dateOut DESC',
           array($args['id']));
           
         convertArrayToAdaDatetime($session);
-          
+        
         return emit($response,
-                    $session
+                    $session[0]
                   );
     }
 

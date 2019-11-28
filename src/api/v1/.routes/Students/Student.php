@@ -15,6 +15,7 @@ class Student
     public function __construct(\Slim\Container $container = null)
     {
        $this->sql= $container->ada ?? new \Dependency\Databases\Ada();
+       $this->isams = $container->isams;
 
     }
 
@@ -32,7 +33,13 @@ class Student
     public function details_GET($request, $response, $args)
     {
       $student = new \Entities\People\Student($this->sql);
-      return emit($response, $student->byId($args['id']));
+      $student->byId($args['id']);
+      $isamsStudent = new \Entities\People\iSamsStudent($this->isams);
+      $isamsStudent->byAdaId($student->id);
+      $isamsStudent->getContacts();
+      $student->contacts = $isamsStudent->contacts;
+      $student->mobile = $isamsStudent->mobile;
+      return emit($response, $student);
     }
     
     

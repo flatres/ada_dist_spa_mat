@@ -14,6 +14,9 @@ class Email {
 		private $from;
 		private $bcc;
 		private $htmlbody, $textbody, $tag, $track;
+		
+		private $debug = true;
+		private $userEmail;
 
 		public function __construct($to = null, $subject = null, $from = 'noreply@marlboroughcollege.org', array $cc = [], array $bcc = [])
 		{
@@ -22,6 +25,12 @@ class Email {
 			$this->from = $from;
 			$this->cc = $cc;
 			$this->bcc = $bcc;
+			
+			global $userId;
+			$ada = new \Dependency\Databases\Ada();
+			$this->user = new \Entities\People\Staff($ada, $userId);
+			$this->userEmail = $this->user->email;
+			
 		}
 
 
@@ -49,14 +58,14 @@ class Email {
 					
 					//Recipients
 					$mail->setFrom($this->from);
-					$mail->addAddress($this->to);               // Name is optional
+					$mail->addAddress($this->debug === true ? $this->userEmail : $this->to);               // Name is optional
 					
 					foreach ($this->bcc as $bccAddress) {
-						$mail->addBCC($bccAddress);
+						$mail->addBCC($this->debug === true ? $this->userEmail : $bccAddress);
 					}
 				
 					foreach ($this->cc as $ccAddress) {
-						$mail->addCC($ccAddress);
+						$mail->addCC($this->debug === true ? $this->userEmail : $ccAddress);
 					}
 					// Attachments
 					// $mail->addAttachment(dirname(__FILE__). '/img/logo.jpg', 'logo');         // Add attachments

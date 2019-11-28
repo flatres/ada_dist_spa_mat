@@ -23,6 +23,25 @@ $app->group('/transport', function(){
     $this->put('/coaches/bookings/changebusout', '\Transport\Coaches:changeBusOutPut');
     $this->put('/coaches/bookings/changebusreturn', '\Transport\Coaches:changeBusReturnPut');
     // $this->get('/coaches/bookings/bussummaries/{id}', '\Transport\Coaches:busSummariesGet');
+    
+    //ROUTES
+    $this->get('/coaches/routes/{sessionId}', '\Transport\TbsExtRoutes:routesGet');
+    $this->get('/coaches/route/{id}', '\Transport\TbsExtRoutes:routeGet');
+    $this->post('/coaches/route', '\Transport\TbsExtRoutes:routePost');
+    $this->put('/coaches/route', '\Transport\TbsExtRoutes:routePut');
+    $this->delete('/coaches/route/{id}', '\Transport\TbsExtRoutes:routeDelete');
+    $this->post('/coaches/copy/{from}/{to}', '\Transport\TbsExtRoutes:copyRoutesPost');
+    
+    //ROUTE COACHES
+    $this->post('/coaches/coach', '\Transport\TbsExtRoutes:coachPost');
+    $this->put('/coaches/coach', '\Transport\TbsExtRoutes:coachPut');
+    $this->delete('/coaches/coach/{id}', '\Transport\TbsExtRoutes:coachDelete');
+      
+    //ROUTE COACH STOPS
+    $this->post('/coaches/stop', '\Transport\TbsExtRoutes:stopPost');
+    $this->put('/coaches/stop', '\Transport\TbsExtRoutes:stopPut');
+    $this->delete('/coaches/stop/{id}', '\Transport\TbsExtRoutes:stopDelete');
+    
 
 // TAXIS --------------------------------------------------------------------------------------------------------
 
