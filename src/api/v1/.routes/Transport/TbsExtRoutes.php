@@ -22,7 +22,7 @@ class TbsExtRoutes
     public function routesGet($request, $response, $args)
     {
         $sessionId = $args['sessionId'];
-        $sessions = $this->adaModules->select('tbs_coaches_routes', 'id, sessionId, name, isReturn, cost', 'sessionId = ? ORDER BY name ASC', [$sessionId]);
+        $sessions = $this->adaModules->select('tbs_coaches_routes', 'id, sessionId, name, isReturn', 'sessionId = ? ORDER BY name ASC', [$sessionId]);
 
         return emit($response, $sessions);
     }
@@ -37,10 +37,11 @@ class TbsExtRoutes
      ]);
 
      //put in a stop: parade ground
-     $this->adaModules->insert('tbs_coaches_stops', 'routeId, name, time', [
+     $this->adaModules->insert('tbs_coaches_stops', 'routeId, name, time, isSchoolLocation', [
        $data['id'],
        'Parade Ground',
-       '00:00'
+       '00:00',
+       1
      ]);
 
      return emit($response, $data);
@@ -62,37 +63,117 @@ class TbsExtRoutes
    {
        $id = $args['id'];
        $this->adaModules->delete('tbs_coaches_routes', 'id=?', [$id]);
+       $this->adaModules->delete('tbs_coaches_stops', 'routeId=?', [$id]);
+       $d = $this->adaModules->select('tbs_coaches_coaches', 'id', 'routeId=?', [$id]);
+       foreach($d as $coach){
+         $this->adaModules->delete('tbs_coaches_coach_stops', 'coachId=?', [$coach['id']]);
+       }
+       $this->adaModules->delete('tbs_coaches_coaches', 'routeId=?', [$id]);
 
        return emit($response, $id);
+   }
+
+   public function stopsGet($request, $response, $args)
+   {
+       $sessionId = $args['sessionId'];
+       $allStops = ['out' => [], 'ret' => []];
+       $schoolLocation = 'Unknown';
+       $schoolTime = '00:00';
+       $routes = $this->adaModules->select('tbs_coaches_routes', 'id, sessionId, name, isReturn', 'sessionId = ? ORDER BY name ASC', [$sessionId]);
+       foreach($routes as $r) {
+         $route = $this->route($r['id']);
+         $stops = $route['stops'];
+         foreach($stops as $stop) {
+           if ($stop['isSchoolLocation'] === 1) {
+             $schoolLocation = $stop['name'];
+             $schoolTime = $stop['time'];
+             break;
+           }
+         }
+        unset($stop);
+        foreach($stops as &$stop) {
+          if ($stop['isSchoolLocation'] === 1) continue;
+          $stop['schoolLocation'] = $schoolLocation;
+          $stop['schoolTime'] = $schoolTime;
+          $key = $r['isReturn'] === 1 ? 'ret' : 'out';
+          $stop['coaches'] = $this->getStopCoaches($stop['id']);
+
+          $allStops[$key][$stop['name']] = $stop;
+        }
+       }
+
+       ksort($allStops['out']);
+       ksort($allStops['ret']);
+       $allStops['out'] = array_values($allStops['out']);
+       $allStops['ret'] = array_values($allStops['ret']);
+
+       return emit($response, $allStops);
+   }
+
+   private function getStopCoaches($stopId) {
+     $d = $this->adaModules->select('tbs_coaches_coach_stops', 'coachId', 'stopId=?', [$stopId]);
+     $coaches = [];
+     foreach($d as $coach) {
+       $c = $this->adaModules->select('tbs_coaches_coaches', 'id, capacity, code, supervisorId', 'id=?', [$coach['coachId']]);
+       if (isset($c[0])) {
+         $c = $c[0];
+         //get bookings to count
+         $b = $this->adaModules->select('tbs_coaches_bookings', 'id', 'coachId=?', [$coach['coachId']]);
+         $bookingsCount = count($b);
+         $c['bookingsCount'] = $bookingsCount;
+         $c['spacesLeft'] = (int)$c['capacity'] - (int)$bookingsCount;
+         $coaches[] = $c;
+       }
+     }
+     return $coaches;
+   }
+
+   private function route($id) {
+     $d = $this->adaModules->select('tbs_coaches_routes', 'id, sessionId, name, isReturn', 'id = ?', [$id]);
+
+     if(!isset($d[0])) return emit($response, []);
+     $route = $d[0];
+     //STOPS
+     $route['stops'] = $this->adaModules->select(
+       'tbs_coaches_stops',
+       'id, routeId, name, time, cost, isSchoolLocation',
+        'routeId = ? ORDER BY time ASC, id ASC',
+        [$id]
+      );
+
+      foreach($route['stops'] as &$stop) {
+        $dateTime = new \DateTime($stop['time']);
+        $stop['time'] = $dateTime->format('H:i');
+      }
+
+      //COACHES
+      $route['coaches'] = $this->adaModules->select(
+        'tbs_coaches_coaches',
+        'id, routeId, capacity, code',
+         'routeId = ? ORDER BY id ASC',
+         [$id]
+       );
+
+       foreach($route['coaches'] as &$coach){
+         // otherwise copies by reference and mucks everything up
+         // https://stackoverflow.com/questions/1532618/is-there-a-function-to-make-a-copy-of-a-php-array-to-another
+         $coach['stops'] = unserialize(serialize($route['stops']));
+         $activeCount = 0;
+         foreach($coach['stops'] as &$stop){
+           $s = $this->adaModules->select('tbs_coaches_coach_stops', 'id', 'coachId=? AND stopId=?', [$coach['id'], $stop['id']]);
+           $stop['isActive'] = isset($s[0]);
+           if (!$stop['isSchoolLocation'] && isset($s[0])) $activeCount++;
+         }
+         $coach['activeCount'] = $activeCount;
+       }
+
+      return $route;
    }
 
    public function routeGet($request, $response, $args)
    {
        $id = $args['id'];
-       $d = $this->adaModules->select('tbs_coaches_routes', 'id, sessionId, name, isReturn, cost', 'id = ?', [$id]);
-
-       if(!isset($d[0])) return emit($response, []);
-       $route = $d[0];
-       //STOPS
-       $route['stops'] = $this->adaModules->select(
-         'tbs_coaches_stops',
-         'id, routeId, name, time',
-          'routeId = ? ORDER BY Time ASC, id ASC',
-          [$id]
-        );
-
-        foreach($route['stops'] as &$stop) {
-          $dateTime = new \DateTime($stop['time']);
-          $stop['time'] = $dateTime->format('H:i');
-        }
-        
-        //COACHES
-        $route['coaches'] = $this->adaModules->select(
-          'tbs_coaches_coaches',
-          'id, routeId, capacity',
-           'routeId = ? ORDER BY id ASC',
-           [$id]
-         );
+       $route = $this->route($id);
        return emit($response, $route);
    }
 
@@ -103,90 +184,139 @@ class TbsExtRoutes
       $data['routeId'],
       $data['name']
     ]);
+    $coaches = $this->adaModules->select('tbs_coaches_coaches', 'id', 'routeId = ?', [$data['routeId']]);
+    foreach($coaches as $coach) {
+      $this->adaModules->insert('tbs_coaches_coach_stops', 'coachId, stopId', [$coach['id'], $data['id']]);
+    }
     return emit($response, $data);
   }
 
   public function stopPut($request, $response)
   {
    $data = $request->getParsedBody();
-   $this->adaModules->update('tbs_coaches_stops', 'routeId=?, name=?, time=?', 'id=?', [
+   $this->adaModules->update('tbs_coaches_stops', 'routeId=?, name=?, time=?, cost=?', 'id=?', [
      $data['routeId'],
      $data['name'],
      $data['time'],
+     $data['cost'],
      $data['id']
    ]);
    return emit($response, $data);
   }
-  
+
+  public function coachStopPut($request, $response)
+  {
+   $data = $request->getParsedBody();
+   $stopId = $data['stopId'];
+   $coachId = $data['coachId'];
+   $isActive = $data['isActive'];
+
+   if ($isActive === 1 || $isActive === true) {
+     $this->adaModules->insert('tbs_coaches_coach_stops', 'coachId, stopId', [$coachId, $stopId]);
+   } else {
+     $this->adaModules->delete('tbs_coaches_coach_stops', 'coachId=? AND stopId=?', [$coachId, $stopId]);
+   }
+
+   return emit($response, $data);
+  }
+
   public function stopDelete($request, $response, $args)
   {
       $id = $args['id'];
       $this->adaModules->delete('tbs_coaches_stops', 'id=?', [$id]);
 
+      $this->adaModules->delete('tbs_coaches_coach_stops', 'stopId=?', [$id]);
+
       return emit($response, $id);
   }
-  
+
   public function coachPost($request, $response)
   {
    $data = $request->getParsedBody();
-   $data['id'] = $this->adaModules->insert('tbs_coaches_coaches', 'routeId, capacity', [
+   $data['id'] = $this->adaModules->insert('tbs_coaches_coaches', 'routeId, code, capacity', [
      $data['routeId'],
+     $data['code'],
      $data['capacity']
    ]);
+   // copy all stops from the route to the new coach
+   $stops = $this->adaModules->select('tbs_coaches_stops', 'id', 'isSchoolLocation = 0 AND routeId = ? ORDER BY TIME ASC', [$data['routeId']]);
+   foreach($stops as $stop) {
+     $this->adaModules->insert('tbs_coaches_coach_stops', 'coachId, stopId', [$data['id'], $stop['id']]);
+   }
    return emit($response, $data);
  }
 
  public function coachPut($request, $response)
  {
   $data = $request->getParsedBody();
-  $this->adaModules->update('tbs_coaches_coaches', 'routeId=?, capacity=?', 'id=?', [
+  $this->adaModules->update('tbs_coaches_coaches', 'routeId=?, capacity=?, code=?', 'id=?', [
     $data['routeId'],
     $data['capacity'],
+    $data['code'],
     $data['id']
   ]);
   return emit($response, $data);
  }
- 
+
  public function coachDelete($request, $response, $args)
  {
      $id = $args['id'];
      $this->adaModules->delete('tbs_coaches_coaches', 'id=?', [$id]);
+     $this->adaModules->delete('tbs_coaches_coach_stops', 'coachId=?', [$id]);
 
      return emit($response, $id);
  }
- 
+
  public function copyRoutesPost($request, $response, $args)
  {
     $sql = $this->adaModules;
     //to from are sessionIds
     $from = $args['from'];
     $to = $args['to'];
-    
+
     //copy routes
-    $routes = $sql->select('tbs_coaches_routes', 'id, sessionId, name, isReturn, cost', 'sessionId=?', [$from]);
+    $routes = $sql->select('tbs_coaches_routes', 'id, sessionId, name, isReturn', 'sessionId=?', [$from]);
     foreach($routes as $route){
-      $newRouteId = $sql->insert('tbs_coaches_routes', 'sessionId, name, isReturn, cost', [
+      $newRouteId = $sql->insert('tbs_coaches_routes', 'sessionId, name, isReturn', [
         $to,
         $route['name'],
-        $route['isReturn'],
-        $route['cost']
+        $route['isReturn']
       ]);
       //get stops
-      $stops = $sql->select('tbs_coaches_stops', 'name, time', 'routeId = ?', [$route['id']]);
+      $stopMap = [];
+      $stops = $sql->select('tbs_coaches_stops', 'id, name, time, cost, isSchoolLocation', 'routeId = ?', [$route['id']]);
       foreach($stops as $stop) {
-        $sql->insert('tbs_coaches_stops', 'routeId, name, time', [
+        $id = $sql->insert('tbs_coaches_stops', 'routeId, name, time, cost, isSchoolLocation', [
           $newRouteId,
           $stop['name'],
-          $stop['time']
+          $stop['time'],
+          $stop['cost'],
+          $stop['isSchoolLocation']
         ]);
+        $stopMap["s_" . $stop['id']] = $id;
       }
       //get coaches
-      $coaches = $sql->select('tbs_coaches_coaches', 'capacity', 'routeId = ?', [$route['id']]);
+      $coachMap = [];
+      $coaches = $sql->select('tbs_coaches_coaches', 'id, capacity, code', 'routeId = ?', [$route['id']]);
       foreach($coaches as $coach) {
-        $sql->insert('tbs_coaches_coaches', 'routeId, capacity', [
+        $id = $sql->insert('tbs_coaches_coaches', 'routeId, capacity, code', [
           $newRouteId,
-          $coach['capacity']
+          $coach['capacity'],
+          $coach['code']
         ]);
+        $coachMap["c_" . $coach['id']] = $id;
+      }
+
+      unset($coach);
+      //copy coach stops using maps
+      foreach($coaches as $coach) {
+        $cs = $this->adaModules->select('tbs_coaches_coach_stops', 'stopId', 'coachId=?', [$coach['id']]);
+        foreach($cs as $coachStop) {
+          $oldStopId = $coachStop['stopId'];
+          $newStopId = $stopMap["s_" . $oldStopId];
+          $newCoachId = $coachMap["c_" . $coach['id']];
+          $this->adaModules->insert('tbs_coaches_coach_stops', 'coachId, stopId', [$newCoachId, $newStopId]);
+        }
       }
     }
 

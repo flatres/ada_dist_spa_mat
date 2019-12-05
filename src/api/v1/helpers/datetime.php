@@ -1,5 +1,10 @@
 <?php
 
+function tidyTime(string &$time) {
+  $dateTime = new \DateTime($time);
+  $time = $dateTime->format('H:i');
+  return $time;
+}
 
 function convertToMysqlDatetime(&$date){
 

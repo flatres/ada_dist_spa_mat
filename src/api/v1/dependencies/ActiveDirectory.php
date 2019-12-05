@@ -16,6 +16,7 @@ class ActiveDirectory
 
     public function connect($username, $password)
     {
+      $adServer = "ldaps://192.168.2.5";
       $adServer = "192.168.2.5";
       $ldap = ldap_connect($adServer);
       $this->ldap = $ldap;

@@ -17,13 +17,20 @@ $app->group('/transport', function(){
 // COACHES --------------------------------------------------------------------------------------------------------
 
     // COACHES
-    $this->get('/coaches', '\Transport\Coaches:coachesGet');
-    $this->get('/coaches/bookings/{sessionID}', '\Transport\Coaches:bookingsGet');
-    $this->post('/coaches/bookings/cancel', '\Transport\Coaches:bookingsCancelPost');
-    $this->put('/coaches/bookings/changebusout', '\Transport\Coaches:changeBusOutPut');
-    $this->put('/coaches/bookings/changebusreturn', '\Transport\Coaches:changeBusReturnPut');
+    // $this->get('/coaches', '\Transport\Coaches:coachesGet');
+    // $this->get('/coaches/bookings/{sessionID}', '\Transport\Coaches:bookingsGet');
+    // $this->post('/coaches/bookings/cancel', '\Transport\Coaches:bookingsCancelPost');
+    // $this->put('/coaches/bookings/changebusout', '\Transport\Coaches:changeBusOutPut');
+    // $this->put('/coaches/bookings/changebusreturn', '\Transport\Coaches:changeBusReturnPut');
     // $this->get('/coaches/bookings/bussummaries/{id}', '\Transport\Coaches:busSummariesGet');
-    
+    $this->post('/coaches/bookings', '\Transport\TbsExtCoachesBookings:bookingPost');
+    $this->get('/coaches/bookings/{session}', '\Transport\TbsExtCoachesBookings:allBookingsGet');
+    $this->get('/coaches/newbookings/{session}', '\Transport\TbsExtCoachesBookings:bookingsNewCountGet');
+    $this->delete('/coaches/bookings/{id}', '\Transport\TbsExtCoachesBookings:bookingDelete');
+    $this->delete('/coaches/bookings/decline/{id}', '\Transport\TbsExtCoachesBookings:bookingDecline');
+    $this->put('/coaches/confirm', '\Transport\TbsExtCoachesBookings:coachConfirmPut');
+    $this->put('/coaches/assignment', '\Transport\TbsExtCoachesBookings:coachAssigmentPut');
+
     //ROUTES
     $this->get('/coaches/routes/{sessionId}', '\Transport\TbsExtRoutes:routesGet');
     $this->get('/coaches/route/{id}', '\Transport\TbsExtRoutes:routeGet');
@@ -31,17 +38,20 @@ $app->group('/transport', function(){
     $this->put('/coaches/route', '\Transport\TbsExtRoutes:routePut');
     $this->delete('/coaches/route/{id}', '\Transport\TbsExtRoutes:routeDelete');
     $this->post('/coaches/copy/{from}/{to}', '\Transport\TbsExtRoutes:copyRoutesPost');
-    
+
     //ROUTE COACHES
     $this->post('/coaches/coach', '\Transport\TbsExtRoutes:coachPost');
     $this->put('/coaches/coach', '\Transport\TbsExtRoutes:coachPut');
     $this->delete('/coaches/coach/{id}', '\Transport\TbsExtRoutes:coachDelete');
-      
+
     //ROUTE COACH STOPS
+    $this->get('/coaches/stops/{sessionId}', '\Transport\TbsExtRoutes:stopsGet');
     $this->post('/coaches/stop', '\Transport\TbsExtRoutes:stopPost');
     $this->put('/coaches/stop', '\Transport\TbsExtRoutes:stopPut');
     $this->delete('/coaches/stop/{id}', '\Transport\TbsExtRoutes:stopDelete');
-    
+
+    $this->put('/coaches/coach/stop', '\Transport\TbsExtRoutes:coachStopPut');
+
 
 // TAXIS --------------------------------------------------------------------------------------------------------
 
@@ -51,10 +61,10 @@ $app->group('/transport', function(){
     $this->get('/taxis/companies/bookings/{session}', '\Transport\TbsExtTaxisBookings:bookingsByCompanyGet');
     // $this->get('/taxis/bookings/{session}/{id}', '\Transport\TbsExtTaxisBookings:bookingGet');
     $this->post('/taxis/bookings', '\Transport\TbsExtTaxisBookings:bookingPost');
-    
+
     $this->post('/taxis/summary', '\Transport\TbsExtTaxisBookings:summaryPost');
     $this->get('/taxis/summary/{sessionId}/{taxiId}', '\Transport\TbsExtTaxisBookings:summaryGET');
-    
+
     $this->put('/taxis/bookings', '\Transport\TbsExtTaxisBookings:bookingPut');
     $this->put('/taxis/assignment', '\Transport\TbsExtTaxisBookings:taxiAssigmentPut');
     $this->put('/taxis/confirm', '\Transport\TbsExtTaxisBookings:taxiConfirmPut');

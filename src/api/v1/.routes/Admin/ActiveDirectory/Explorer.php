@@ -27,12 +27,12 @@ class Explorer
 
     private function connect()
     {
-      $adServer = "192.168.2.5";
+      $adServer = "ldaps://192.168.2.5";
       $ldap = ldap_connect($adServer);
       $this->ldap = $ldap;
 
       $username = 'sdf';
-      $password = 'XX0misje1s.';
+      $password = 'XX0misje1s.mmondcol';
 
       $ldaprdn = 'marlborough' . "\\" . $username;
 

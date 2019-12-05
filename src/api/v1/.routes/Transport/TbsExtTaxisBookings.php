@@ -292,10 +292,10 @@ class TbsExtTaxisBookings
       $booking['passengerCount'] = count($booking['passengerIds']);
       $booking['status'] = $status['s_' . $booking['statusId']];
       $booking['displayName'] = $this->student->displayName($booking['studentId']);
-      
+
       // contacts
       $booking['contacts'] = $this->getContacts($booking['studentId']);
-      
+
       // taxi company
       $taxiId = $booking['taxiId'];
       $d = $this->adaModules->select('tbs_taxi_companies', 'name, phoneNumber', 'id=?', [$taxiId]);
@@ -303,7 +303,7 @@ class TbsExtTaxisBookings
         $booking['companyName'] = $d[0]['name'];
         $booking['companyPhoneNumber'] = $d[0]['phoneNumber'];
       }
-      
+
       // dates
       $d = $this->adaModules->select('tbs_sessions', 'dateOut, dateRtn', 'id=?', [$booking['sessionId']]);
       if (isset($d[0])){
@@ -380,7 +380,7 @@ class TbsExtTaxisBookings
     public function summaryPost($request, $response)
     {
       $summary = $request->getParsedBody();
-      
+
       $email = new \Utilities\Email\Email($this->email, 'Marlborough College Bookings');
       $content = $summary['html'];
       $email->send($content);
@@ -675,7 +675,9 @@ class TbsExtTaxisBookings
 
     private function updateBooking(int $bookingId, array $booking, $note, $isReturn = false)
     {
+
       $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
+      
       $this->adaModules->update(
         'tbs_taxi_bookings',
         'pickupTime=?, isReturn=?, note=?, journeyType=?, schoolLocation=?, address=?, airportId=?, flightNumber=?, flightTime=?, stationId=?, trainTime=?',
