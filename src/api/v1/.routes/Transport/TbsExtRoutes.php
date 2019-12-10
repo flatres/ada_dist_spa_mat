@@ -350,7 +350,7 @@ class TbsExtRoutes
  {
    $route = $this->adaModules->select('tbs_coaches_routes', '*', 'id = ?', [$id]);
    $route = $route[0] ?? false;
-
+   return $route;
  }
  
  private function publish(int $routeId) {

@@ -196,7 +196,7 @@ class TbsExtCoachesBookings
     {
       $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ?', [$id]);
       $booking = $booking[0] ?? false;
-
+      return $booking;
     }
 
     public function getCoachBookings($coachId) {
