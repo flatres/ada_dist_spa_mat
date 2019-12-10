@@ -14,6 +14,7 @@ class TbsExtRoutes
 
     public function __construct(\Slim\Container $container)
     {
+       $this->container = $container;
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
 
@@ -43,7 +44,7 @@ class TbsExtRoutes
        '00:00',
        1
      ]);
-
+     $this->publish($data['id']);
      return emit($response, $data);
    }
 
@@ -56,6 +57,7 @@ class TbsExtRoutes
       $data['isReturn'],
       $data['id']
     ]);
+    $this->publish($data['id']);
     return emit($response, $data);
    }
 
@@ -69,6 +71,7 @@ class TbsExtRoutes
          $this->adaModules->delete('tbs_coaches_coach_stops', 'coachId=?', [$coach['id']]);
        }
        $this->adaModules->delete('tbs_coaches_coaches', 'routeId=?', [$id]);
+       $this->publish($id);
 
        return emit($response, $id);
    }
@@ -149,11 +152,12 @@ class TbsExtRoutes
       //COACHES
       $route['coaches'] = $this->adaModules->select(
         'tbs_coaches_coaches',
-        'id, routeId, capacity, code',
+        'id, routeId, capacity, code, supervisorId',
          'routeId = ? ORDER BY id ASC',
          [$id]
        );
 
+       $tbsExtCoachesBookings = new \Transport\TbsExtCoachesBookings($this->container);
        foreach($route['coaches'] as &$coach){
          // otherwise copies by reference and mucks everything up
          // https://stackoverflow.com/questions/1532618/is-there-a-function-to-make-a-copy-of-a-php-array-to-another
@@ -165,7 +169,11 @@ class TbsExtRoutes
            if (!$stop['isSchoolLocation'] && isset($s[0])) $activeCount++;
          }
          $coach['activeCount'] = $activeCount;
+         $coach['bookings'] = $tbsExtCoachesBookings->getCoachBookings($coach['id']);
+         $coach['supervisor'] = new \Entities\People\User($this->ada, $coach['supervisorId']);
        }
+       
+       $route['unassigned'] = $tbsExtCoachesBookings->getUnassignedBookings($id);
 
       return $route;
    }
@@ -188,6 +196,7 @@ class TbsExtRoutes
     foreach($coaches as $coach) {
       $this->adaModules->insert('tbs_coaches_coach_stops', 'coachId, stopId', [$coach['id'], $data['id']]);
     }
+    $this->publish($data['routeId']);
     return emit($response, $data);
   }
 
@@ -201,6 +210,7 @@ class TbsExtRoutes
      $data['cost'],
      $data['id']
    ]);
+   $this->publish($data['routeId']);
    return emit($response, $data);
   }
 
@@ -243,6 +253,8 @@ class TbsExtRoutes
    foreach($stops as $stop) {
      $this->adaModules->insert('tbs_coaches_coach_stops', 'coachId, stopId', [$data['id'], $stop['id']]);
    }
+   
+   $this->publish($data['routeId']);
    return emit($response, $data);
  }
 
@@ -255,6 +267,8 @@ class TbsExtRoutes
     $data['code'],
     $data['id']
   ]);
+  
+  $this->publish($data['routeId']);
   return emit($response, $data);
  }
 
@@ -321,6 +335,27 @@ class TbsExtRoutes
     }
 
      return emit($response, $newRouteId);
+ }
+ 
+ public function supervisorPut($request, $response, $args)
+ {
+     $coachId = $args['coachId'];
+     $supervisorId = $args['supervisorId'];
+     $this->adaModules->update('tbs_coaches_coaches', 'supervisorId=?', 'id=?', [$supervisorId, $coachId]);
+
+     return emit($response, $supervisorId);
+ }
+ 
+ private function retrieveRoute(int $id)
+ {
+   $route = $this->adaModules->select('tbs_coaches_routes', '*', 'id = ?', [$id]);
+   $route = $route[0] ?? false;
+
+ }
+ 
+ private function publish(int $routeId) {
+   $route = $this->retrieveRoute($routeId);
+   $session = new \Sockets\CRUD("routes{$route['sessionId']}");
  }
 
 

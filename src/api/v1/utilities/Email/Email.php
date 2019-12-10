@@ -28,7 +28,7 @@ class Email {
 			
 			global $userId;
 			$ada = new \Dependency\Databases\Ada();
-			$this->user = new \Entities\People\Staff($ada, $userId);
+			$this->user = new \Entities\People\User($ada, $userId);
 			$this->userEmail = $this->user->email;
 			
 		}

@@ -43,6 +43,7 @@ $app->group('/transport', function(){
     $this->post('/coaches/coach', '\Transport\TbsExtRoutes:coachPost');
     $this->put('/coaches/coach', '\Transport\TbsExtRoutes:coachPut');
     $this->delete('/coaches/coach/{id}', '\Transport\TbsExtRoutes:coachDelete');
+    $this->put('/coaches/coach/supervisor/{coachId}/{supervisorId}', '\Transport\TbsExtRoutes:supervisorPut');
 
     //ROUTE COACH STOPS
     $this->get('/coaches/stops/{sessionId}', '\Transport\TbsExtRoutes:stopsGet');

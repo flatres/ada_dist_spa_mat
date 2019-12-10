@@ -23,7 +23,7 @@ class TbsExtCoachesBookings
        $this->status = $this->getAllStatus();
 
        global $userId;
-       $this->user = new \Entities\People\Staff($this->ada, $userId);
+       $this->user = new \Entities\People\User($this->ada, $userId);
        $this->email = $this->user->email;
 
     }
@@ -162,7 +162,7 @@ class TbsExtCoachesBookings
       $data = $request->getParsedBody();
 
       $coachId = $data['coachId'];
-      $bookingId = $data['id'];
+      $bookingId = $data['id'] === 0 ? null : $data['id'];
 
       //get current taxi to look for changes. Don't want to set status to 2 w
       $oldCoachId = $this->adaModules->select('tbs_coaches_bookings', 'coachId', 'id=?', array($bookingId))[0]['coachId'];
@@ -199,6 +199,22 @@ class TbsExtCoachesBookings
 
     }
 
+    public function getCoachBookings($coachId) {
+      $bookings = $this->adaModules->select('tbs_coaches_bookings', '*', 'coachId = ?', [$coachId]);
+      foreach($bookings as &$booking) {
+        $booking = $this->makeDisplayValues($booking);
+      }
+      return $bookings;
+    }
+    
+    public function getUnassignedBookings($routeId) {
+      $bookings = $this->adaModules->select('tbs_coaches_bookings', '*', 'routeId = ? AND coachID IS NULL', [$routeId]);
+      foreach($bookings as &$booking) {
+        $booking = $this->makeDisplayValues($booking);
+      }
+      return $bookings;
+    }
+    
     public function bookingDelete($request, $response, $args)
     {
       $this->adaModules->update('tbs_coaches_bookings', 'statusId=?', 'id = ?', [4, $args['id']]);

@@ -16,7 +16,7 @@ class Bug
     {
       global $userId;
       $data = $request->getParsedBody();
-      $staff = new \Entities\People\Staff($this->ada, $userId);
+      $staff = new \Entities\People\User($this->ada, $userId);
       $data['email'] = $staff->email;
       
       $cc = [

@@ -23,7 +23,7 @@ class TbsExtTaxisBookings
        $this->status = $this->getAllStatus();
 
        global $userId;
-       $this->user = new \Entities\People\Staff($this->ada, $userId);
+       $this->user = new \Entities\People\User($this->ada, $userId);
        $this->email = $this->user->email;
 
     }
