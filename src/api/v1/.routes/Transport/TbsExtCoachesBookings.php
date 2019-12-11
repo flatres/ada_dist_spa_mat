@@ -201,7 +201,7 @@ class TbsExtCoachesBookings
     }
 
     public function getCoachBookings($coachId) {
-      $bookings = $this->adaModules->select('tbs_coaches_bookings', '*', 'coachId = ?', [$coachId]);
+      $bookings = $this->adaModules->select('tbs_coaches_bookings', '*', 'coachId = ? AND statusId <> 4', [$coachId]);
       foreach($bookings as &$booking) {
         $booking = $this->makeDisplayValues($booking);
       }
@@ -229,7 +229,7 @@ class TbsExtCoachesBookings
       $this->adaModules->update('tbs_coaches_bookings', 'statusId=?', 'id = ?', [5, $args['id']]);
       $this->publish($args['id']);
       
-      // $this->sendCancelledEmail($args['id']);
+      $this->sendDeclinedEmail($args['id']);
       return emit($response, []);
     }
 
@@ -250,11 +250,11 @@ class TbsExtCoachesBookings
 
       if ($outId) {
         $this->publish($outId);
-        // $this->sendPendingEmail($outId);
+        $this->sendPendingEmail($outId);
       }
       if ($retId) {
         $this->publish($retId);
-        // $this->sendPendingEmail($retId);
+        $this->sendPendingEmail($retId);
       }
 
       return emit($response, $data);
@@ -290,8 +290,14 @@ class TbsExtCoachesBookings
 
       $retId = $outId = null;
 
-      if ($out['stop']) $this->updateBooking($bookingId, $out);
-      if ($ret['stop']) $this->updateBooking($bookingId, $ret, true);
+      if ($out['stopId']) {
+        $this->updateBooking($bookingId, $out);
+        $this->setStatus($bookingId, 2);
+      }
+      if ($ret['stopId']) {
+        $this->updateBooking($bookingId, $ret, true);
+        $this->setStatus($bookingId, 2);
+      }
 
       $this->publish($bookingId);
 
@@ -353,16 +359,28 @@ class TbsExtCoachesBookings
       $booking = $this->makeDisplayValues($booking);
 
       $email = new \Utilities\Email\Email($this->email, 'MC Coach Booking Received');
-      $fields = [
-        'name'    => 'Simon',
-        'id'      => $bookingId,
-        'pupil'   => $booking['displayName'],
-        'date'    => $booking['date'],
-        'stopTime'=> $booking['stopTime'],
-        'stop'    => $booking['stop'],
-        'schoolLocation'  => $booking['schoolLocation'],
-        'schoolTime'  => $booking['schoolTime']
-      ];
+      
+      if ($booking['isReturn'] == 0) {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'to'    => $booking['stop'],
+          'from'  => $booking['schoolLocation'],
+          'time'  => $booking['schoolTime']
+        ];
+      } else {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'=> $booking['stopTime'],
+          'from'    => $booking['stop'],
+          'to'  => $booking['schoolLocation'],
+        ];
+      }
 
       $content = $email->template('TBS.ReceivedCoach', $fields);
 
@@ -383,10 +401,9 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'fromTime'=> $booking['stopTime'],
+          'time'=> $booking['stopTime'],
           'from'    => $booking['stop'],
-          'to'  => $booking['schoolLocation'],
-          'toTime'  => $booking['schoolTime']
+          'to'  => $booking['schoolLocation']
         ];
       } else {
         $fields = [
@@ -394,14 +411,48 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'fromTime'=> $booking['schoolTime'],
+          'time'=> $booking['schoolTime'],
           'from'    => $booking['schoolLocation'],
-          'to'      => $booking['stop'],
-          'toTime'  => $booking['stopTime']
+          'to'      => $booking['stop']
         ];
       }
 
       $content = $email->template('TBS.CancelledCoach', $fields);
+
+      $res = $email->send($content);
+    }
+    
+    private function sendDeclinedEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
+
+      $booking = $this->makeDisplayValues($booking);
+
+      $email = new \Utilities\Email\Email($this->email, 'MC Coach Booking Declined');
+      if ($booking['isReturn'] === 1) {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'=> $booking['stopTime'],
+          'from'    => $booking['stop'],
+          'to'  => $booking['schoolLocation']
+        ];
+      } else {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'=> $booking['schoolTime'],
+          'from'    => $booking['schoolLocation'],
+          'to'      => $booking['stop']
+        ];
+      }
+
+      $content = $email->template('TBS.DeclinedCoach', $fields);
 
       $res = $email->send($content);
     }
@@ -420,10 +471,9 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'fromTime'=> $booking['stopTime'],
+          'time'=> $booking['stopTime'],
           'from'    => $booking['stop'],
           'to'  => $booking['schoolLocation'],
-          'toTime'  => $booking['schoolTime'],
           'cost'    => $booking['cost'],
           'code'    => $booking['coachCode']
         ];
@@ -433,10 +483,9 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'fromTime'=> $booking['schoolTime'],
+          'time'=> $booking['schoolTime'],
           'from'    => $booking['schoolLocation'],
           'to'      => $booking['stop'],
-          'toTime'  => $booking['stopTime'],
           'cost'    => $booking['cost'],
           'code'    => $booking['coachCode']
         ];

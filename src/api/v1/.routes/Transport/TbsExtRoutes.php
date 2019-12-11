@@ -179,8 +179,12 @@ class TbsExtRoutes
          }
          $coach['activeCount'] = $activeCount;
          $coach['bookings'] = $tbsExtCoachesBookings->getCoachBookings($coach['id']);
+         $coach['alert'] = false;
          foreach ($coach['bookings'] as $booking) {
-           if (!isset($stops['s_' . $booking['stopId']])) $alert = true;
+           if (!isset($stops['s_' . $booking['stopId']])) {
+             $alert = true;
+             $coach['alert'] = true;
+           }
          }
          if (!$coach['supervisorId']) $supervisorAlert = true;
          $coach['supervisor'] = new \Entities\People\User($this->ada, $coach['supervisorId']);

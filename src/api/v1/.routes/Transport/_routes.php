@@ -24,6 +24,7 @@ $app->group('/transport', function(){
     // $this->put('/coaches/bookings/changebusreturn', '\Transport\Coaches:changeBusReturnPut');
     // $this->get('/coaches/bookings/bussummaries/{id}', '\Transport\Coaches:busSummariesGet');
     $this->post('/coaches/bookings', '\Transport\TbsExtCoachesBookings:bookingPost');
+    $this->put('/coaches/bookings', '\Transport\TbsExtCoachesBookings:bookingPut');
     $this->get('/coaches/bookings/{session}', '\Transport\TbsExtCoachesBookings:allBookingsGet');
     $this->get('/coaches/newbookings/{session}', '\Transport\TbsExtCoachesBookings:bookingsNewCountGet');
     $this->delete('/coaches/bookings/{id}', '\Transport\TbsExtCoachesBookings:bookingDelete');
