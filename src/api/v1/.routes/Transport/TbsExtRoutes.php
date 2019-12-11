@@ -23,9 +23,13 @@ class TbsExtRoutes
     public function routesGet($request, $response, $args)
     {
         $sessionId = $args['sessionId'];
-        $sessions = $this->adaModules->select('tbs_coaches_routes', 'id, sessionId, name, isReturn', 'sessionId = ? ORDER BY name ASC', [$sessionId]);
-
-        return emit($response, $sessions);
+        $routes = $this->adaModules->select('tbs_coaches_routes', 'id, sessionId, name, isReturn', 'sessionId = ? ORDER BY name ASC', [$sessionId]);
+        foreach($routes as &$r) {
+          $route = $this->route($r['id']);
+          $r['supervisorAlert'] = $route['supervisorAlert'];
+          $r['alert'] = $route['alert'];
+        }
+        return emit($response, $routes);
     }
 
     public function routePost($request, $response)
@@ -156,6 +160,9 @@ class TbsExtRoutes
          'routeId = ? ORDER BY id ASC',
          [$id]
        );
+       
+       $supervisorAlert = false;
+       $alert = false;
 
        $tbsExtCoachesBookings = new \Transport\TbsExtCoachesBookings($this->container);
        foreach($route['coaches'] as &$coach){
@@ -163,18 +170,28 @@ class TbsExtRoutes
          // https://stackoverflow.com/questions/1532618/is-there-a-function-to-make-a-copy-of-a-php-array-to-another
          $coach['stops'] = unserialize(serialize($route['stops']));
          $activeCount = 0;
+         $stops = [];
          foreach($coach['stops'] as &$stop){
            $s = $this->adaModules->select('tbs_coaches_coach_stops', 'id', 'coachId=? AND stopId=?', [$coach['id'], $stop['id']]);
            $stop['isActive'] = isset($s[0]);
+           if ($stop['isActive']) $stops['s_' . $stop['id']] = true;
            if (!$stop['isSchoolLocation'] && isset($s[0])) $activeCount++;
          }
          $coach['activeCount'] = $activeCount;
          $coach['bookings'] = $tbsExtCoachesBookings->getCoachBookings($coach['id']);
+         foreach ($coach['bookings'] as $booking) {
+           if (!isset($stops['s_' . $booking['stopId']])) $alert = true;
+         }
+         if (!$coach['supervisorId']) $supervisorAlert = true;
          $coach['supervisor'] = new \Entities\People\User($this->ada, $coach['supervisorId']);
        }
        
        $route['unassigned'] = $tbsExtCoachesBookings->getUnassignedBookings($id);
-
+       
+       //has the route got unassigned bookings or bookings assigned to coaches without that stop
+       if (count($route['unassigned']) >  0) $alert = true;
+       $route['alert'] = $alert;
+       $route['supervisorAlert'] = $supervisorAlert;
       return $route;
    }
 
@@ -226,16 +243,20 @@ class TbsExtRoutes
    } else {
      $this->adaModules->delete('tbs_coaches_coach_stops', 'coachId=? AND stopId=?', [$coachId, $stopId]);
    }
-
+   $this->publishByCoach($coachId);
    return emit($response, $data);
   }
 
   public function stopDelete($request, $response, $args)
   {
       $id = $args['id'];
+      
+      $routeId = $this->adaModules->select('tbs_coaches_stops', 'routeId', 'id=?', [$id])[0]['routeId'] ?? null;
+      
       $this->adaModules->delete('tbs_coaches_stops', 'id=?', [$id]);
-
       $this->adaModules->delete('tbs_coaches_coach_stops', 'stopId=?', [$id]);
+      
+      if ($routeId) $this->publish($routeId);
 
       return emit($response, $id);
   }
@@ -277,7 +298,7 @@ class TbsExtRoutes
      $id = $args['id'];
      $this->adaModules->delete('tbs_coaches_coaches', 'id=?', [$id]);
      $this->adaModules->delete('tbs_coaches_coach_stops', 'coachId=?', [$id]);
-
+     $this->publishByCoach($id);
      return emit($response, $id);
  }
 
@@ -333,7 +354,7 @@ class TbsExtRoutes
         }
       }
     }
-
+     $this->publish($newRouteId);
      return emit($response, $newRouteId);
  }
  
@@ -342,7 +363,7 @@ class TbsExtRoutes
      $coachId = $args['coachId'];
      $supervisorId = $args['supervisorId'];
      $this->adaModules->update('tbs_coaches_coaches', 'supervisorId=?', 'id=?', [$supervisorId, $coachId]);
-
+     $this->publishByCoach($coachId);
      return emit($response, $supervisorId);
  }
  
@@ -351,6 +372,13 @@ class TbsExtRoutes
    $route = $this->adaModules->select('tbs_coaches_routes', '*', 'id = ?', [$id]);
    $route = $route[0] ?? false;
    return $route;
+ }
+ 
+ private function publishByCoach(int $id)
+ {
+   $coach = $this->adaModules->select('tbs_coaches_coaches', '*', 'id = ?', [$id]);
+   $routeId = $coach[0]['routeId'] ?? false;
+   if ($routeId) $this->publish($routeId);
  }
  
  private function publish(int $routeId) {

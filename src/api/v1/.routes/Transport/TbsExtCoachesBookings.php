@@ -170,6 +170,7 @@ class TbsExtCoachesBookings
       if ($coachId === $oldCoachId) {
         $this->adaModules->update('tbs_coaches_bookings', 'coachId=?', 'id=?', array($coachId, $bookingId));
       } elseif (!$coachId) {
+        $this->adaModules->update('tbs_coaches_bookings', 'coachId=?', 'id=?', array(0, $bookingId));
         $this->setStatus($bookingId, 1);
       } else {
         $this->setStatus($bookingId, 2);
@@ -208,7 +209,7 @@ class TbsExtCoachesBookings
     }
     
     public function getUnassignedBookings($routeId) {
-      $bookings = $this->adaModules->select('tbs_coaches_bookings', '*', 'routeId = ? AND coachID IS NULL', [$routeId]);
+      $bookings = $this->adaModules->select('tbs_coaches_bookings', '*', 'routeId = ? AND (coachID IS NULL || coachID = 0)', [$routeId]);
       foreach($bookings as &$booking) {
         $booking = $this->makeDisplayValues($booking);
       }
@@ -218,8 +219,8 @@ class TbsExtCoachesBookings
     public function bookingDelete($request, $response, $args)
     {
       $this->adaModules->update('tbs_coaches_bookings', 'statusId=?', 'id = ?', [4, $args['id']]);
-      $this->publish($args['id']);
       $this->sendCancelledEmail($args['id']);
+      $this->publish($args['id']);
       return emit($response, []);
     }
     
@@ -227,6 +228,7 @@ class TbsExtCoachesBookings
     {
       $this->adaModules->update('tbs_coaches_bookings', 'statusId=?', 'id = ?', [5, $args['id']]);
       $this->publish($args['id']);
+      
       // $this->sendCancelledEmail($args['id']);
       return emit($response, []);
     }
