@@ -80,6 +80,14 @@ class TbsExtRoutes
        return emit($response, $id);
    }
 
+   //used mainly when booking throuigh portal. Given a list of all stops along with the total capacity remaining from all bussed on that route
+   public function allStopsWithCapacity($request, $response, $args)
+   {
+     $sessionId = $args['sessionId'];
+
+
+   }
+
    public function stopsGet($request, $response, $args)
    {
        $sessionId = $args['sessionId'];
@@ -104,6 +112,11 @@ class TbsExtRoutes
           $stop['schoolTime'] = $schoolTime;
           $key = $r['isReturn'] === 1 ? 'ret' : 'out';
           $stop['coaches'] = $this->getStopCoaches($stop['id']);
+          $spacesLeft = 0;
+          foreach($stop['coaches'] as $coach) {
+            $spacesLeft += $coach['spacesLeft'];
+          }
+          $stop['spacesLeft'] = $spacesLeft;
 
           $allStops[$key][$stop['name']] = $stop;
         }
@@ -117,7 +130,7 @@ class TbsExtRoutes
        return emit($response, $allStops);
    }
 
-   private function getStopCoaches($stopId) {
+   public function getStopCoaches($stopId) {
      $d = $this->adaModules->select('tbs_coaches_coach_stops', 'coachId', 'stopId=?', [$stopId]);
      $coaches = [];
      foreach($d as $coach) {
@@ -125,7 +138,7 @@ class TbsExtRoutes
        if (isset($c[0])) {
          $c = $c[0];
          //get bookings to count
-         $b = $this->adaModules->select('tbs_coaches_bookings', 'id', 'coachId=?', [$coach['coachId']]);
+         $b = $this->adaModules->select('tbs_coaches_bookings', 'id', 'coachId=? AND statusId <> 4', [$coach['coachId']]);
          $bookingsCount = count($b);
          $c['bookingsCount'] = $bookingsCount;
          $c['spacesLeft'] = (int)$c['capacity'] - (int)$bookingsCount;
@@ -160,7 +173,7 @@ class TbsExtRoutes
          'routeId = ? ORDER BY id ASC',
          [$id]
        );
-       
+
        $supervisorAlert = false;
        $alert = false;
 
@@ -189,9 +202,9 @@ class TbsExtRoutes
          if (!$coach['supervisorId']) $supervisorAlert = true;
          $coach['supervisor'] = new \Entities\People\User($this->ada, $coach['supervisorId']);
        }
-       
+
        $route['unassigned'] = $tbsExtCoachesBookings->getUnassignedBookings($id);
-       
+
        //has the route got unassigned bookings or bookings assigned to coaches without that stop
        if (count($route['unassigned']) >  0) $alert = true;
        $route['alert'] = $alert;
@@ -254,12 +267,12 @@ class TbsExtRoutes
   public function stopDelete($request, $response, $args)
   {
       $id = $args['id'];
-      
+
       $routeId = $this->adaModules->select('tbs_coaches_stops', 'routeId', 'id=?', [$id])[0]['routeId'] ?? null;
-      
+
       $this->adaModules->delete('tbs_coaches_stops', 'id=?', [$id]);
       $this->adaModules->delete('tbs_coaches_coach_stops', 'stopId=?', [$id]);
-      
+
       if ($routeId) $this->publish($routeId);
 
       return emit($response, $id);
@@ -278,7 +291,7 @@ class TbsExtRoutes
    foreach($stops as $stop) {
      $this->adaModules->insert('tbs_coaches_coach_stops', 'coachId, stopId', [$data['id'], $stop['id']]);
    }
-   
+
    $this->publish($data['routeId']);
    return emit($response, $data);
  }
@@ -292,7 +305,7 @@ class TbsExtRoutes
     $data['code'],
     $data['id']
   ]);
-  
+
   $this->publish($data['routeId']);
   return emit($response, $data);
  }
@@ -361,7 +374,7 @@ class TbsExtRoutes
      $this->publish($newRouteId);
      return emit($response, $newRouteId);
  }
- 
+
  public function supervisorPut($request, $response, $args)
  {
      $coachId = $args['coachId'];
@@ -370,21 +383,21 @@ class TbsExtRoutes
      $this->publishByCoach($coachId);
      return emit($response, $supervisorId);
  }
- 
+
  private function retrieveRoute(int $id)
  {
    $route = $this->adaModules->select('tbs_coaches_routes', '*', 'id = ?', [$id]);
    $route = $route[0] ?? false;
    return $route;
  }
- 
+
  private function publishByCoach(int $id)
  {
    $coach = $this->adaModules->select('tbs_coaches_coaches', '*', 'id = ?', [$id]);
    $routeId = $coach[0]['routeId'] ?? false;
    if ($routeId) $this->publish($routeId);
  }
- 
+
  private function publish(int $routeId) {
    $route = $this->retrieveRoute($routeId);
    $session = new \Sockets\CRUD("routes{$route['sessionId']}");

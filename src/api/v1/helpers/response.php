@@ -15,7 +15,7 @@ function emitRaw($response, $data){
 }
 
 // 400 = bad request
-function emitError($response,$code, $message){
+function emitError($response, $code, $message){
 
   $data = ['error'=>true, 'message' => $message];
 

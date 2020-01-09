@@ -14,7 +14,7 @@ class Email {
 		private $from;
 		private $bcc;
 		private $htmlbody, $textbody, $tag, $track;
-		
+
 		private $debug = true;
 		private $userEmail;
 
@@ -25,22 +25,22 @@ class Email {
 			$this->from = $from;
 			$this->cc = $cc;
 			$this->bcc = $bcc;
-			
+
 			global $userId;
 			$ada = new \Dependency\Databases\Ada();
 			$this->user = new \Entities\People\User($ada, $userId);
-			$this->userEmail = $this->user->email;
-			
+			$this->userEmail = $this->user->email ? $this->user->email : 'flatres@gmail.com';
+
 		}
 
 
   public function send($htmlcontent, $title = ''){
 
 		  $htmlbody = $this->template('skeleton', array('title' => $title, 'content'=>$htmlcontent, 'year' => date("Y")));
-			
+
 			// Instantiation and passing `true` enables exceptions
 			$mail = new PHPMailer(true);
-			
+
 			try {
 				// https://pepipost.com/tutorials/phpmailer-smtp-error-could-not-connect-to-smtp-host/
 				$mail->SMTPOptions = array(
@@ -55,15 +55,15 @@ class Email {
 					$mail->isSMTP();                                            // Send using SMTP
 					$mail->Host = '192.168.2.4';                    // Set the SMTP server to send through
 					$mail->Port = 25;
-					
+
 					//Recipients
 					$mail->setFrom($this->from);
 					$mail->addAddress($this->debug === true ? $this->userEmail : $this->to);               // Name is optional
-					
+
 					foreach ($this->bcc as $bccAddress) {
 						$mail->addBCC($this->debug === true ? $this->userEmail : $bccAddress);
 					}
-				
+
 					foreach ($this->cc as $ccAddress) {
 						$mail->addCC($this->debug === true ? $this->userEmail : $ccAddress);
 					}
@@ -76,7 +76,7 @@ class Email {
 					$mail->Body = $htmlbody;
 
 					$mail->send();
-					
+
 			} catch (Exception $e) {
 					$res = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
 			}
@@ -101,7 +101,7 @@ class Email {
         return $data;
 
     }
-		
+
 		public function listTemplates()
 		{
 				$path = dirname(__FILE__)."/templates";
@@ -118,9 +118,9 @@ class Email {
 	        fclose($myfile);
 					$item['data'] = $data;
 					$item['vars'] = $this->getContents($data, '{{', '}}');
-						
+
 					$list[] = $item;
-					
+
 				}
 				return $list;
 		}

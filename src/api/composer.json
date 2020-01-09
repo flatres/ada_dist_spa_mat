@@ -1,6 +1,5 @@
 {
     "require": {
-        "monolog/monolog": "^2.0",
         "react/zmq": "^0.4.0",
         "voryx/thruway": "^0.5.3",
         "thruway/pawl-transport": "^0.5.0",
@@ -15,7 +14,8 @@
         "slim/slim": "^3.12",
         "wildbit/postmark-php": "^2.8",
         "guzzlehttp/guzzle": "~6.0",
-        "phpmailer/phpmailer": "^6.1"
+        "phpmailer/phpmailer": "^6.1",
+        "lavary/crunz": "^2.0"
     },
 
     "autoload":{

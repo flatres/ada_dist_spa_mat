@@ -225,6 +225,16 @@ class TbsExtTaxisBookings
       return $data;
     }
 
+    public function userBookings($contactIsamsUserId)
+    {
+      $data = $this->adaModules->select('tbs_taxi_bookings', '*', 'contactIsamsUserId=? ORDER BY sessionId DESC', [$contactIsamsUserId]);
+      foreach ($data as &$booking) {
+        $booking['type'] = 'taxi';
+        $booking = $this->makeDisplayValues($booking);
+      }
+      return $data;
+    }
+
     public function allBookingsGet($request, $response, $args)
     {
       $sessID = $args['session'];
@@ -294,7 +304,7 @@ class TbsExtTaxisBookings
       $booking['displayName'] = $this->student->displayName($booking['studentId']);
 
       // contacts
-      $booking['contacts'] = $this->getContacts($booking['studentId']);
+      $booking['contact'] = new \Entities\People\iSamsUser($this->isams, $booking['contactIsamsUserId']);
 
       // taxi company
       $taxiId = $booking['taxiId'];
@@ -353,14 +363,15 @@ class TbsExtTaxisBookings
 
       $sessionId = $data['sessionId'];
       $pupilId = $data['pupilId'];
+      $parentUserId = $data['parentUserId'];
       // var_dump($data); return;
       $out = $data['out'];
       $ret = $data['ret'];
 
       $retId = $outId = null;
 
-      if ($out['pickup']) $outId = $this->newBooking($sessionId, $pupilId, $out, $data['note']);
-      if ($ret['journeyType']) $retId = $this->newBooking($sessionId, $pupilId, $ret, $data['note'], true);
+      if ($out['pickup']) $outId = $this->newBooking($sessionId, $pupilId, $parentUserId, $out, $data['note']);
+      if ($ret['journeyType']) $retId = $this->newBooking($sessionId, $pupilId, $parentUserId, $ret, $data['note'], true);
 
       if ($outId) {
         $this->savePassengers($outId, $out['passengers']);
@@ -456,7 +467,7 @@ class TbsExtTaxisBookings
       return emit($response, $data);
     }
 
-    private function newBooking(int $sessionId, int $studentId, array $booking, $note, $isReturn = false)
+    private function newBooking(int $sessionId, int $studentId, int $parentUserId, array $booking, $note, $isReturn = false)
     {
       $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
       $booking['schoolLocation'] = $schoolLocation;
@@ -465,10 +476,11 @@ class TbsExtTaxisBookings
       $familyId = $student->misFamilyId;
       $id = $this->adaModules->insert(
         'tbs_taxi_bookings',
-        'studentId, mis_family_id, sessionId, pickupTime, isReturn, note, journeyType, schoolLocation, address, airportId, flightNumber, flightTime, stationId, trainTime',
+        'studentId, mis_family_id, contactIsamsUserId, sessionId, pickupTime, isReturn, note, journeyType, schoolLocation, address, airportId, flightNumber, flightTime, stationId, trainTime',
         array(
           $studentId,
           $familyId,
+          $parentUserId,
           $sessionId,
           $booking['pickupTime'],
           $isReturn ? 1 : 0,
@@ -518,9 +530,11 @@ class TbsExtTaxisBookings
 
       $passengerString = $this->makePassengerString($passengers);
 
-      $email = new \Utilities\Email\Email($this->email, 'MC Taxi Booking Received');
+      $user = new \Entities\People\iSamsUser($this->isams, $booking['contactIsamsUserId']);
+
+      $email = new \Utilities\Email\Email('flatres@gmail.com', 'MC Taxi Booking Received');
       $fields = [
-        'name'    => 'Simon',
+        'name'    => $user->firstName,
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'date'    => $booking['date'],
@@ -532,7 +546,6 @@ class TbsExtTaxisBookings
       ];
 
       $content = $email->template('TBS.ReceivedTaxi', $fields);
-
       $res = $email->send($content);
     }
 
@@ -677,7 +690,7 @@ class TbsExtTaxisBookings
     {
 
       $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
-      
+
       $this->adaModules->update(
         'tbs_taxi_bookings',
         'pickupTime=?, isReturn=?, note=?, journeyType=?, schoolLocation=?, address=?, airportId=?, flightNumber=?, flightTime=?, stationId=?, trainTime=?',
@@ -702,7 +715,7 @@ class TbsExtTaxisBookings
 
     private function publish(int $bookingId) {
       $booking = $this->retrieveBooking($bookingId);
-      $family = new \Sockets\CRUD("taxi.family.{$booking['mis_family_id']}");
+      $family = new \Sockets\CRUD("coaches.user.{$booking['contactIsamsUserId']}");
       $session = new \Sockets\CRUD("taxi{$booking['sessionId']}");
     }
 

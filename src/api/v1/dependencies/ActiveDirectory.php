@@ -18,7 +18,7 @@ class ActiveDirectory
     {
       $adServer = "ldaps://192.168.2.5";
       $adServer = "192.168.2.5";
-      $ldap = ldap_connect($adServer);
+      $ldap = \ldap_connect($adServer);
       $this->ldap = $ldap;
 
       $ldaprdn = 'marlborough' . "\\" . $username;

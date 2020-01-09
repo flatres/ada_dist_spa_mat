@@ -15,6 +15,7 @@ class TbsExtCoachesBookings
 
     public function __construct(\Slim\Container $container)
     {
+       $this->container = $container;
        $this->isams = $container->isams;
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
@@ -52,6 +53,16 @@ class TbsExtCoachesBookings
     public function familyBookings($familyId)
     {
       $data = $this->adaModules->select('tbs_coaches_bookings', '*', 'mis_family_id=? ORDER BY sessionId DESC', [$familyId]);
+      foreach ($data as &$booking) {
+        $booking['type'] = 'coaches';
+        $booking = $this->makeDisplayValues($booking);
+      }
+      return $data;
+    }
+
+    public function userBookings($contactIsamsUserId)
+    {
+      $data = $this->adaModules->select('tbs_coaches_bookings', '*', 'contactIsamsUserId=? ORDER BY sessionId DESC', [$contactIsamsUserId]);
       foreach ($data as &$booking) {
         $booking['type'] = 'coaches';
         $booking = $this->makeDisplayValues($booking);
@@ -105,11 +116,11 @@ class TbsExtCoachesBookings
     private function makeDisplayValues($booking)
     {
       $this->status = $this->getAllStatus();
-      
+
       $status = $this->status;
       $booking['status'] = $status['s_' . $booking['statusId']];
       $booking['displayName'] = $this->student->displayName($booking['studentId']);
-      
+
       if ($booking['routeId']) {
         $r = $this->adaModules->select('tbs_coaches_stops', 'name, time, cost', 'routeId=? AND isSchoolLocation=?', [$booking['routeId'], 1]);
         if (isset($r[0])) {
@@ -117,14 +128,14 @@ class TbsExtCoachesBookings
           $booking['schoolTime'] = tidyTime($r[0]['time']);
         }
       }
-      
+
       if ($booking['stopId']){
         $stop = $this->getStop($booking['stopId']);
         $booking['stop'] = $stop['name'];
         $booking['stopTime'] = $stop['time'];
         $booking['cost'] = $stop['cost'];
       }
-      
+
       if ($booking['coachId']) {
         $c = $this->adaModules->select('tbs_coaches_coaches', 'code', 'id=?', [$booking['coachId']]);
         $booking['coachCode'] = $c[0]['code'] ?? '';
@@ -132,9 +143,9 @@ class TbsExtCoachesBookings
         $booking['coachHasStop'] = isset($s[0]);
         //check to make sure that the coach still goes to these stops
       }
-      
+
       // contacts
-      $booking['contacts'] = $this->getContacts($booking['studentId']);
+      $booking['contact'] = new \Entities\People\iSamsUser($this->isams, $booking['contactIsamsUserId']);
 
       // dates
       $d = $this->adaModules->select('tbs_sessions', 'dateOut, dateRtn', 'id=?', [$booking['sessionId']]);
@@ -207,7 +218,7 @@ class TbsExtCoachesBookings
       }
       return $bookings;
     }
-    
+
     public function getUnassignedBookings($routeId) {
       $bookings = $this->adaModules->select('tbs_coaches_bookings', '*', 'routeId = ? AND (coachID IS NULL || coachID = 0)', [$routeId]);
       foreach($bookings as &$booking) {
@@ -215,7 +226,7 @@ class TbsExtCoachesBookings
       }
       return $bookings;
     }
-    
+
     public function bookingDelete($request, $response, $args)
     {
       $this->adaModules->update('tbs_coaches_bookings', 'statusId=?', 'id = ?', [4, $args['id']]);
@@ -223,14 +234,50 @@ class TbsExtCoachesBookings
       $this->publish($args['id']);
       return emit($response, []);
     }
-    
+
     public function bookingDecline($request, $response, $args)
     {
       $this->adaModules->update('tbs_coaches_bookings', 'statusId=?', 'id = ?', [5, $args['id']]);
       $this->publish($args['id']);
-      
+
       $this->sendDeclinedEmail($args['id']);
       return emit($response, []);
+    }
+
+    //self service booking are done by parents via the portal when the deadline has passed. Only return journeys.
+    public function bookingSelfServicePost($request, $response, $args)
+    {
+      $data = $request->getParsedBody();
+      $sessionId = $data['sessionId'];
+      $pupilId = $data['pupilId'];
+      $parentUserId = $data['parentUserId'];
+
+      $ret = $data['ret'];
+      $stopId = $ret['stopId'];
+      //get coaches for this stop
+      $tbsExtRoutes = new \Transport\TbsExtRoutes($this->container);
+      $coaches = $tbsExtRoutes->getStopCoaches($stopId);
+
+      $coachId = null;
+      foreach($coaches as $coach){
+        if ($coach['spacesLeft'] > 0) {
+          $coachId = $coach['id'];
+          break;
+        }
+      }
+      if ($coachId && $stopId) {
+        $bookingId = $this->newBooking($sessionId, $pupilId, $parentUserId, $ret, true);
+        $this->adaModules->update('tbs_coaches_bookings', 'coachId=?', 'id=?', array($coachId, $bookingId));
+        $this->setStatus($bookingId, 6);
+        $this->publish($bookingId);
+        $this->sendConfirmedEmail($bookingId);
+
+        return emit($response, ['success' => true]);
+
+      } else {
+        return emit($response, ['success' => false]);
+      }
+
     }
 
     public function bookingPost($request, $response)
@@ -239,14 +286,15 @@ class TbsExtCoachesBookings
 
       $sessionId = $data['sessionId'];
       $pupilId = $data['pupilId'];
+      $parentUserId = $data['parentUserId'];
       // var_dump($data); return;
       $out = $data['out'];
       $ret = $data['ret'];
 
       $retId = $outId = null;
 
-      if ($out['stopId']) $outId = $this->newBooking($sessionId, $pupilId, $out);
-      if ($ret['stopId']) $retId = $this->newBooking($sessionId, $pupilId, $ret, true);
+      if ($out['stopId']) $outId = $this->newBooking($sessionId, $pupilId, $parentUserId, $out);
+      if ($ret['stopId']) $retId = $this->newBooking($sessionId, $pupilId, $parentUserId, $ret, true);
 
       if ($outId) {
         $this->publish($outId);
@@ -328,7 +376,7 @@ class TbsExtCoachesBookings
       return $d[0]['routeId'] ?? null;
     }
 
-    private function newBooking(int $sessionId, int $studentId, array $booking, $isReturn = false)
+    private function newBooking(int $sessionId, int $studentId, int $parentUserId, array $booking, $isReturn = false)
     {
       $student = new \Entities\People\Student($this->ada, $studentId);
       $familyId = $student->misFamilyId;
@@ -336,10 +384,11 @@ class TbsExtCoachesBookings
 
       $id = $this->adaModules->insert(
         'tbs_coaches_bookings',
-        'studentId, mis_family_id, sessionId, routeId, stopId, isReturn',
+        'studentId, mis_family_id, contactIsamsUserId, sessionId, routeId, stopId, isReturn',
         array(
           $studentId,
           $familyId,
+          $parentUserId,
           $sessionId,
           $booking['routeId'],
           $booking['stopId'],
@@ -359,7 +408,7 @@ class TbsExtCoachesBookings
       $booking = $this->makeDisplayValues($booking);
 
       $email = new \Utilities\Email\Email($this->email, 'MC Coach Booking Received');
-      
+
       if ($booking['isReturn'] == 0) {
         $fields = [
           'name'    => 'Simon',
@@ -421,7 +470,7 @@ class TbsExtCoachesBookings
 
       $res = $email->send($content);
     }
-    
+
     private function sendDeclinedEmail(int $bookingId)
     {
       $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
@@ -471,9 +520,9 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'time'=> $booking['stopTime'],
+          'time'    => $booking['stopTime'],
           'from'    => $booking['stop'],
-          'to'  => $booking['schoolLocation'],
+          'to'      => $booking['schoolLocation'],
           'cost'    => $booking['cost'],
           'code'    => $booking['coachCode']
         ];
@@ -483,7 +532,7 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'time'=> $booking['schoolTime'],
+          'time'    => $booking['schoolTime'],
           'from'    => $booking['schoolLocation'],
           'to'      => $booking['stop'],
           'cost'    => $booking['cost'],
@@ -514,8 +563,10 @@ class TbsExtCoachesBookings
 
     private function publish(int $bookingId) {
       $booking = $this->retrieveBooking($bookingId);
-      $family = new \Sockets\CRUD("coaches.family.{$booking['mis_family_id']}");
+      $family = new \Sockets\CRUD("coaches.user.{$booking['contactIsamsUserId']}");
       $session = new \Sockets\CRUD("coaches{$booking['sessionId']}");
+      $self = new \Sockets\CRUD("coaches.self.{$booking['sessionId']}");
+
     }
 
 //
