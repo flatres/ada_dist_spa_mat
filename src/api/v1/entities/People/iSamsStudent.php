@@ -7,7 +7,8 @@ class iSamsStudent
   public $familyId;
   public $adaId;
   public $contacts = [];
-  
+  public $portalUserCodes = [];
+
   private $sql;
 
   public function __construct(\Dependency\Databases\isams $msSql, int $id = null)
@@ -87,7 +88,7 @@ class iSamsStudent
                                         'TblPupilManagementAddressesID=?',
                                         [$motherId]
                                         )[0];
-      
+
       if ($d['forename1']) {
         $contacts[] = [
           'title'           => $d['title1'],
@@ -110,8 +111,8 @@ class iSamsStudent
           'hasPortalAccess' => $this->hasPortalAccess($d['email2'])
         ];
       }
-                                        
-      if($motherId !== $fatherId) {
+
+      if($motherId !== $fatherId && $fatherId) {
         $d = $this->sql->select(  'TblPupilManagementAddresses',
                                           'txtLetterSalutation as letterSalutation,
                                           txtEmail1 as email1,
@@ -153,10 +154,13 @@ class iSamsStudent
     $this->contacts = $contacts;
     return $contacts;
   }
-  
+
   private function hasPortalAccess($email) {
     if(!$email || strlen($email) === 0) return false;
-    $d = $this->sql->select('TbliSAMSManagerUsers', 'txtEmailAddress', 'txtemailAddress=?', [$email]);
+    $d = $this->sql->select('TbliSAMSManagerUsers', 'txtEmailAddress, txtUserCode', 'txtemailAddress=?', [$email]);
+    if (isset($d[0])) {
+      $this->portalUserCodes[] = $d[0]['txtUserCode'];
+    }
     return isset($d[0]);
   }
 }
