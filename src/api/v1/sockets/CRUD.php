@@ -39,7 +39,7 @@ class CRUD
                            'data'     =>  $data,
                            'when'     => time(),
                            'socketId' => $this->channel
-                        );      
+                        );
        // This is our new stuff
        $context = new \ZMQContext();
        // $context = new \React\ZMQ\Context();

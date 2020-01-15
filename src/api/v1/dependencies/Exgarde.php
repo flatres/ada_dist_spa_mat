@@ -41,7 +41,7 @@ class Exgarde {
 				// if (str_word_count)
 		    return strstr($k, $search) !== FALSE;
 		});
-		
+
 		if ($filtered && count($filtered) === 1) {
 			// https://stackoverflow.com/questions/1028668/get-first-key-in-a-possibly-associative-array
 			reset($filtered);
@@ -149,10 +149,10 @@ class Exgarde {
    return $this->query($query, $binding);
   }
 
-	public function getArea(int $id)
+	public function getArea(int $id, $forceAllEvents = false)
   {
     $readerAry = $this->getReadersByArea($id);
-		$events = $this->getEventsByReaders($readerAry);
+		$events = $this->getEventsByReaders($readerAry, null, $forceAllEvents);
     foreach($events as &$item){
 		 $unix = strtotime($item['LOCAL_TIME']);
 		 $item['entry_timestamp'] = date('d.m.y, g:i a', $unix);
@@ -661,11 +661,13 @@ class Exgarde {
 		return $result;
 	}
 
-	private function getEventsByReaders($readersAry, $unixDate = null)
+	private function getEventsByReaders($readersAry, $unixDate = null, $forceAllEvents = false)
   {
 		$this->unix = $unixDate;
 		$this->readers = $readersAry;
 		$this->date = date('Y-m-d', $unixDate);
+
+		$eventString = $forceAllEvents ? '' : '([EVENT_ID] = 2001 OR [EVENT_ID] = 2002 OR [EVENT_ID] = 2009)  AND';
 
 		if($unixDate){
 		 $dayStart = date('Y-m-d 00:00:00', $unixDate);
@@ -682,12 +684,13 @@ class Exgarde {
 
 		 $query = "SELECT [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_2], [ID_3], [LOCAL_TIME], [EVENT_ID]
 		 					 FROM dbo.EVENT_LOG_View
-							 WHERE ([EVENT_ID] = 2001 OR [EVENT_ID] = 2002 OR [EVENT_ID] = 2009)  AND [LOCAL_TIME] > ? AND [LOCAL_TIME] < ? AND ([ID_1] = ? $orString )
+							 WHERE $eventString [LOCAL_TIME] > ? AND [LOCAL_TIME] < ? AND ([ID_1] = ? $orString )
 							 ORDER BY [LOCAL_TIME] DESC";
 
 	 	 $data = $this->query($query, $binding);
 	 } else{
-		 $binding = array(2001);
+		 // $binding = array(2001);
+		 $binding = [];
 		 $orString = '';
 		 $flag = false;
 
@@ -697,10 +700,15 @@ class Exgarde {
 			 $flag = true;
 		 }
 
-  	 $query = "SELECT TOP 1000 [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_2], [ID_3], [EVENT_ID], [LOCAL_TIME]
-		 					 FROM dbo.EVENT_LOG_View
-							 WHERE [EVENT_ID] = ? AND ([ID_1] = ? $orString )
-		 					 ORDER BY [LOCAL_TIME] DESC";
+  	 // $query = "SELECT TOP 1000 [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_2], [ID_3], [EVENT_ID], [LOCAL_TIME]
+		 // 					 FROM dbo.EVENT_LOG_View
+			// 				 WHERE [EVENT_ID] = ? AND ([ID_1] = ? $orString )
+		 // 					 ORDER BY [LOCAL_TIME] DESC";
+
+		 $query = "SELECT TOP 1000 [UNIQUE_ID], [UNIQUE_ID] as id, [ID_1], [ID_2], [ID_3], [EVENT_ID], [LOCAL_TIME]
+ 							FROM dbo.EVENT_LOG_View
+ 							WHERE $eventString ([ID_1] = ? $orString )
+ 							ORDER BY [LOCAL_TIME] DESC";
 	 }
 
 	  $this->events = $this->query($query, $binding);

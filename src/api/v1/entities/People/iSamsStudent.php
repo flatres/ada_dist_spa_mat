@@ -97,7 +97,7 @@ class iSamsStudent
           'lastName'        => $d['surname1'],
           'email'           => $d['email1'],
           'letterSalulation'=> $d['letterSalutation'],
-          'hasPortalAccess' => $this->hasPortalAccess($d['email1'])
+          'portalUserInfo' => $this->hasPortalAccess($d['email1'])
         ];
       }
       if ($d['forename2']) {
@@ -108,7 +108,7 @@ class iSamsStudent
           'lastName'        => $d['surname2'],
           'email'           => $d['email2'],
           'letterSalulation'=> $d['letterSalutation'],
-          'hasPortalAccess' => $this->hasPortalAccess($d['email2'])
+          'portalUserInfo' => $this->hasPortalAccess($d['email2'])
         ];
       }
 
@@ -135,7 +135,7 @@ class iSamsStudent
             'lastName'        => $d['surname1'],
             'email'           => $d['email1'],
             'letterSalulation'=> $d['letterSalutation'],
-            'hasPortalAccess' => $this->hasPortalAccess($d['email1'])
+            'portalUserInfo' => $this->hasPortalAccess($d['email1'])
           ];
         }
         if ($d['forename2']) {
@@ -146,7 +146,7 @@ class iSamsStudent
             'lastName'          => $d['surname2'],
             'email'             => $d['email2'],
             'letterSalulation'  => $d['letterSalutation'],
-            'hasPortalAccess' => $this->hasPortalAccess($d['email2'])
+            'portalUserInfo' => $this->hasPortalAccess($d['email2'])
           ];
         }
       }
@@ -157,11 +157,16 @@ class iSamsStudent
 
   private function hasPortalAccess($email) {
     if(!$email || strlen($email) === 0) return false;
-    $d = $this->sql->select('TbliSAMSManagerUsers', 'txtEmailAddress, txtUserCode', 'txtemailAddress=?', [$email]);
+    $d = $this->sql->select('TbliSAMSManagerUsers', 'TbliSAMSManagerUsersID, txtEmailAddress, txtUserCode', 'txtemailAddress=?', [$email]);
     if (isset($d[0])) {
       $this->portalUserCodes[] = $d[0]['txtUserCode'];
+      return [
+        'userCode'  => $d[0]['txtUserCode'],
+        'userId'    => $d[0]['TbliSAMSManagerUsersID']
+      ];
+    } else {
+      return false;
     }
-    return isset($d[0]);
   }
 }
 

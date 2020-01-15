@@ -28,15 +28,11 @@ class Bookings
       if (!isset($d[0])) return emit($response, []);
 
       $s = $d[0];
-      $stampOutTaxiDeadline = strtotime($s['taxiOutDeadline']);
-      $stampOutCoachDeadline = strtotime($s['coachOutDeadline']);
-      $stampRetTaxiDeadline = strtotime($s['taxiRetDeadline']);
-      $stampRetCoachDeadline = strtotime($s['coachRetDeadline']);
+      $stampTaxiDeadline = strtotime($s['taxiDeadline']);
+      $stampCoachDeadline = strtotime($s['coachDeadline']);
 
-      $s['taxiOutClosed'] = time() - $stampOutTaxiDeadline > 0;
-      $s['coachOutClosed'] = time() - $stampOutCoachDeadline > 0;
-      $s['taxiRetClosed'] = time() - $stampRetTaxiDeadline > 0;
-      $s['coachRetClosed'] = time() - $stampRetCoachDeadline > 0;
+      $s['taxiClosed'] = time() - $stampTaxiDeadline > 0;
+      $s['coachClosed'] = time() - $stampCoachDeadline > 0;
       $d = [$s];
       convertArrayToAdaDatetime($d);
       return emit($response, $d[0]);

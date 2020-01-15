@@ -9,10 +9,13 @@ $app->group('/transport', function(){
 // SESSIONS --------------------------------------------------------------------------------------------------------
     $this->get('/sessions', '\Transport\TbsExtSessions:sessionsGet');
     $this->get('/sessions/{id}', '\Transport\TbsExtSessions:sessionGet');
+    $this->get('/sessions/deadlines/{dateOut}', '\Transport\TbsExtSessions:deadlinesGet');
     $this->delete('/sessions/{id}', '\Transport\TbsExtSessions:sessionDelete');
     $this->put('/sessions', '\Transport\TbsExtSessions:sessionPut');
     $this->post('/sessions', '\Transport\TbsExtSessions:sessionPost');
     $this->post('/sessions/activate/{id}', '\Transport\TbsExtSessions:sessionActivate');
+    $this->post('/sessions/activate/checklist/{id}/{isActive}', '\Transport\TbsExtSessions:sessionActivateFromCheckist');
+    $this->post('/sessions/{id}/selfservice/{isOn}', '\Transport\TbsExtSessions:sessionSelfServicePost');
 
 // COACHES --------------------------------------------------------------------------------------------------------
 
@@ -26,6 +29,7 @@ $app->group('/transport', function(){
     $this->post('/coaches/bookings', '\Transport\TbsExtCoachesBookings:bookingPost');
     $this->put('/coaches/bookings', '\Transport\TbsExtCoachesBookings:bookingPut');
     $this->get('/coaches/bookings/{session}', '\Transport\TbsExtCoachesBookings:allBookingsGet');
+    $this->get('/coaches/checklist/{session}', '\Transport\TbsExtCoachesBookings:checklistGet');
     $this->get('/coaches/newbookings/{session}', '\Transport\TbsExtCoachesBookings:bookingsNewCountGet');
     $this->delete('/coaches/bookings/{id}', '\Transport\TbsExtCoachesBookings:bookingDelete');
     $this->delete('/coaches/bookings/decline/{id}', '\Transport\TbsExtCoachesBookings:bookingDecline');
@@ -42,6 +46,9 @@ $app->group('/transport', function(){
 
     //ROUTE COACHES
     $this->post('/coaches/coach', '\Transport\TbsExtRoutes:coachPost');
+    $this->post('/coaches/coach/register/email/{id}', '\Transport\TbsExtRoutes:coachRegisterEmailPost');
+    $this->post('/coaches/registers/email/{sessionId}', '\Transport\TbsExtRoutes:sendAllRegistersPost');
+    //
     $this->put('/coaches/coach', '\Transport\TbsExtRoutes:coachPut');
     $this->delete('/coaches/coach/{id}', '\Transport\TbsExtRoutes:coachDelete');
     $this->put('/coaches/coach/supervisor/{coachId}/{supervisorId}', '\Transport\TbsExtRoutes:supervisorPut');

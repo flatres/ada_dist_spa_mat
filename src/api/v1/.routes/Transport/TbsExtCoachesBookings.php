@@ -561,11 +561,113 @@ class TbsExtCoachesBookings
 
     }
 
+    public function checklistGet($request, $response, $args)
+    {
+      $id = $args['session'];
+      $checklist = [
+        'routes'          => false,
+        'coaches'         => true,
+        'deadlines'       => false,
+        'deadlineDateTimes' => [],
+        'stopsOut'       => [],
+        'stopsRet'       => [],
+        'routesOutTime'   => true,
+        'stops'           => false,
+        'supervisors'     => true,
+        'unsupervisedCoaches' => [],
+        'activeSession'   => false,
+        'allocations'        => false,
+        'confirmations'   => false,
+        'selfService'     => false,
+        'registers'       => false
+
+      ];
+      $sql = $this->adaModules;
+
+      $session = $sql->select('tbs_sessions', 'isActive, taxiDeadline, coachDeadline', 'id=?', [$id])[0];
+      if (strlen($session['coachDeadline']) > 0 && strlen($session['taxiDeadline']) > 0) $checklist['deadlines'] = true;
+
+      $checklist['deadlineDateTimes'] = [
+        'taxi'  => convertToAdaDatetime($session['coachDeadline']),
+        'coach' => convertToAdaDatetime($session['taxiDeadline'])
+      ];
+
+      $checklist['activeSession'] = $session['isActive'] == 1 ? true : false;
+
+      $routesOut = $sql->select('tbs_coaches_routes', 'id, isReturn', 'sessionId=? AND isReturn = 0', [$id]);
+      foreach ($routesOut as $route) {
+        $start = $sql->select('tbs_coaches_stops', 'id, time', 'routeId=? AND isSchoolLocation = 1 ORDER BY id ASC', [$route['id']]);
+        $time = $start[0]['time'];
+        $dateTime = new \DateTime($time);
+        $time = $dateTime->format('H:i');
+        if ($time == '00:00:00') $checklist['routesOutTime'] = false;
+        $stops = $sql->select('tbs_coaches_stops', 'id, time, cost, name', 'routeId=? AND isSchoolLocation = 0 ORDER BY name ASC', [$route['id']]);
+        foreach ($stops as $s) {
+          $stop = [
+            'id'      => $s['id'],
+            'time'    => $time,
+            'name'    => $s['name'],
+            'cost'    => $s['cost'],
+            'isError' => ($s['cost'] == 0 || $time == '00:00')
+          ];
+          $checklist['stopsOut'][] = $stop;
+        }
+      }
+
+      $routesRet = $sql->select('tbs_coaches_routes', 'id, isReturn', 'sessionId=? AND isReturn = 1', [$id]);
+      foreach ($routesRet as $route) {
+        $stops = $sql->select('tbs_coaches_stops', 'id, time, cost, name', 'routeId=? AND isSchoolLocation = 0 ORDER BY name ASC', [$route['id']]);
+        foreach ($stops as $s) {
+          $time = $s['time'];
+          $dateTime = new \DateTime($time);
+          $time = $dateTime->format('H:i');
+          $stop = [
+            'id'      => $s['id'],
+            'name'    => $s['name'],
+            'cost'    => $s['cost'],
+            'time'    => $time,
+            'isError' => ($s['cost'] == 0 || $time == '00:00')
+          ];
+          $checklist['stopsRet'][] = $stop;
+        }
+      }
+
+      $atLeastOneCoach = false;
+      $routes = $sql->select('tbs_coaches_routes', 'id, isReturn', 'sessionId=?', [$id]);
+      foreach ($routes as $route) {
+        $coaches = $sql->select('tbs_coaches_coaches', 'id, supervisorId, code, registerSent', 'routeId=?', [$route['id']]);
+        foreach($coaches as $coach) {
+          $atLeastOneCoach = true;
+          if (!$coach['supervisorId']) {
+              $checklist['supervisors'] = false;
+              $checklist['registers'] = false;
+              $checklist['unsupervisedCoaches'][] = $coach['code'];
+          } else {
+              if(!$coach['registerSent']) $checklist['registers'] = false;
+          }
+        }
+      }
+
+      if ($atLeastOneCoach == false) {
+        $checklist['supervisors'] = false;
+        $checklist['registers'] = false;
+      }
+
+      $bookingsCount = count($sql->select('tbs_coaches_bookings', 'id', 'sessionId=? AND statusId < 4', [$id]));
+      $bookings = $sql->select('tbs_coaches_bookings', 'id', 'sessionId=? AND statusId < 3', [$id]);
+      $checklist['confirmations'] = count($bookings) == 0 && $bookingsCount > 0;
+
+      $bookings = $sql->select('tbs_coaches_bookings', 'id', 'sessionId=? AND statusId = 1', [$id]);
+      $checklist['allocations'] = count($bookings) == 0 && $bookingsCount > 0;
+      return emit($response, $checklist);
+    }
+
     private function publish(int $bookingId) {
       $booking = $this->retrieveBooking($bookingId);
       $family = new \Sockets\CRUD("coaches.user.{$booking['contactIsamsUserId']}");
       $session = new \Sockets\CRUD("coaches{$booking['sessionId']}");
       $self = new \Sockets\CRUD("coaches.self.{$booking['sessionId']}");
+      $checklist = new \Sockets\CRUD("coaches.checklist.{$booking['sessionId']}");
 
     }
 

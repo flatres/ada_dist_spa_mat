@@ -18,6 +18,10 @@ class TbsExtRoutes
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
 
+       global $userId;
+       $this->user = new \Entities\People\User($this->ada, $userId);
+       $this->email = $this->user->email;
+
     }
 
     public function routesGet($request, $response, $args)
@@ -281,10 +285,11 @@ class TbsExtRoutes
   public function coachPost($request, $response)
   {
    $data = $request->getParsedBody();
-   $data['id'] = $this->adaModules->insert('tbs_coaches_coaches', 'routeId, code, capacity', [
+   $data['id'] = $this->adaModules->insert('tbs_coaches_coaches', 'routeId, code, capacity, uniqueId', [
      $data['routeId'],
      $data['code'],
-     $data['capacity']
+     $data['capacity'],
+     uniqid()
    ]);
    // copy all stops from the route to the new coach
    $stops = $this->adaModules->select('tbs_coaches_stops', 'id', 'isSchoolLocation = 0 AND routeId = ? ORDER BY TIME ASC', [$data['routeId']]);
@@ -319,6 +324,26 @@ class TbsExtRoutes
      return emit($response, $id);
  }
 
+ public function coachRegisterEmailPost($request, $response, $args){
+    $coachId = $args['id'];
+    $this->sendRegisterEmail($coachId);
+    return emit($response, $coachId);
+ }
+
+ public function sendAllRegistersPost($request, $response, $args)
+ {
+    $sessionId = $args['sessionId'];
+    $routes = $this->adaModules->select('tbs_coaches_routes', 'id', 'sessionId=?', [$sessionId]);
+    foreach ($routes as $route) {
+      $coaches = $this->adaModules->select('tbs_coaches_coaches', 'id', 'routeId=? AND registerSent = 0', [$route['id']]);
+      foreach ($coaches as $coach) {
+        $this->sendRegisterEmail($coach['id']);
+        $this->adaModules->update('tbs_coaches_coaches', 'registerSent=?', 'routeId=?', [1, $route['id']]);
+      }
+    }
+    return emit($response, $sessionId);
+ }
+
  public function copyRoutesPost($request, $response, $args)
  {
     $sql = $this->adaModules;
@@ -351,10 +376,11 @@ class TbsExtRoutes
       $coachMap = [];
       $coaches = $sql->select('tbs_coaches_coaches', 'id, capacity, code', 'routeId = ?', [$route['id']]);
       foreach($coaches as $coach) {
-        $id = $sql->insert('tbs_coaches_coaches', 'routeId, capacity, code', [
+        $id = $sql->insert('tbs_coaches_coaches', 'routeId, capacity, code, uniqueId', [
           $newRouteId,
           $coach['capacity'],
-          $coach['code']
+          $coach['code'],
+          uniqid()
         ]);
         $coachMap["c_" . $coach['id']] = $id;
       }
@@ -379,8 +405,13 @@ class TbsExtRoutes
  {
      $coachId = $args['coachId'];
      $supervisorId = $args['supervisorId'];
-     $this->adaModules->update('tbs_coaches_coaches', 'supervisorId=?', 'id=?', [$supervisorId, $coachId]);
-     $this->publishByCoach($coachId);
+
+     //get old supervisor
+     $oldId = $this->adaModules->select('tbs_coaches_coaches', 'supervisorId', 'id=?', [$coachId])[0]['supervisorId'] ?? null;
+     if ($oldId !== $supervisorId) {
+       $this->adaModules->update('tbs_coaches_coaches', 'supervisorId=?, registerSent = 0', 'id=?', [$supervisorId, $coachId]);
+       $this->publishByCoach($coachId);
+     }
      return emit($response, $supervisorId);
  }
 
@@ -401,6 +432,22 @@ class TbsExtRoutes
  private function publish(int $routeId) {
    $route = $this->retrieveRoute($routeId);
    $session = new \Sockets\CRUD("routes{$route['sessionId']}");
+ }
+
+
+ private function sendRegisterEmail(int $coachId)
+ {
+   $coach = $this->adaModules->select('tbs_coaches_coaches', 'code, supervisorId, uniqueId', 'id = ?', [$coachId])[0];
+   // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
+
+   $supervisor = new \Entities\People\User($this->ada, $coach['supervisorId']);
+   $email = new \Utilities\Email\Email($this->email, 'Coach Register - ' . $coach['code']);
+   $coach['url'] = 'http://localhost:8080/aux/bookings/coach/' . $coach['uniqueId'];
+   $coach['supervisorName'] = $supervisor->firstName;
+
+   $content = $email->template('TBS.CoachRegister', $coach);
+
+   $res = $email->send($content);
  }
 
 

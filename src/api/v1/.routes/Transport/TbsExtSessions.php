@@ -35,12 +35,23 @@ class TbsExtSessions
           '*',
           'id=? ORDER BY isActive DESC, dateOut DESC',
           array($args['id']));
-          
+
         convertArrayToAdaDatetime($session);
-        
+
         return emit($response,
                     $session[0]
                   );
+    }
+
+    //for making a new session, the deadline is midday on the monday (taxi) and wednesday (coaches) before outward travel
+    public function deadlinesGet($request, $response, $args)
+    {
+      $dateOut = $args['dateOut'];
+      $data = [];
+      $data['taxiDeadline'] = date('d-m-Y', strtotime('previous monday', strtotime($dateOut))) . ' 12:00';
+      $data['coachDeadline'] = date('d-m-Y', strtotime('previous wednesday', strtotime($dateOut))) . ' 12:00';
+
+      return emit($response, $data);
     }
 
     public function sessionActivate($request, $response, $args)
@@ -48,6 +59,26 @@ class TbsExtSessions
       $id = $args['id'];
       $this->adaModules->update('tbs_sessions', 'isActive=?', '1=1', array(0));
       $this->adaModules->update('tbs_sessions', 'isActive=?', 'id=?', array(1, $id));
+
+      return emit($response, $id);
+    }
+
+    public function sessionActivateFromCheckist($request, $response, $args)
+    {
+      $id = $args['id'];
+      $isActive = $args['isActive'];
+      $this->adaModules->update('tbs_sessions', 'isActive=?', '1=1', array(0));
+      $this->adaModules->update('tbs_sessions', 'isActive=?', 'id=?', array($isActive, $id));
+
+      return emit($response, $id);
+    }
+
+    public function sessionSelfServicePost($request, $response, $args)
+    {
+      $id = $args['id'];
+      $isOn = $args['isOn'];
+      $this->adaModules->update('tbs_sessions', 'selfServiceOn=?', 'id=?', [$isOn, $id]);
+      $this->publish($id);
 
       return emit($response, $id);
     }
@@ -63,7 +94,7 @@ class TbsExtSessions
     {
      $data = $request->getParsedBody();
      convertArrayToMysqlDatetime($data);
-     
+
      $data['id'] = $this->adaModules->insertObject('tbs_sessions', $data, 'id');
      return emit($response, $data);
     }
@@ -71,6 +102,11 @@ class TbsExtSessions
     public function sessionDelete($request, $response, $args)
     {
       return emit($response, $this->adaModules->delete('tbs_sessions', 'id=?', array($args['id'])));
+    }
+
+    private function publish(int $sessionId) {
+      $session = new \Sockets\CRUD("coaches$sessionId");
+      $self = new \Sockets\CRUD("coaches.self.$sessionId");
     }
 
 //

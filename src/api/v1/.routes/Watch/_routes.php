@@ -18,5 +18,12 @@ $app->group('/watch/exgarde', function(){
     $this->get('/locations/{id}/{date}', '\Watch\Exgarde:locationByDateGET');
 
 })->add("Authenticate");
+
+$app->group('/watch/gym', function(){
+
+    $this->get('/all', '\Watch\Gym:allGET');
+    
+})->add("Authenticate");
+
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);
 ?>

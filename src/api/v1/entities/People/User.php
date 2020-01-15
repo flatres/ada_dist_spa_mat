@@ -6,6 +6,7 @@
  * Usage:
 
  */
+//Class for Ada System User aka: Staff
 namespace Entities\People;
 
 class User
@@ -39,7 +40,7 @@ class User
       $this->displayName = $name;
       return $name;
     }
-    
+
     public function byMISId($id)
     {
       $d = $this->sql->select('usr_details', 'id', 'mis_id=?', [$id]);
@@ -72,5 +73,5 @@ class User
       $this->displayName();
       return $this;
     }
-    
+
 }
