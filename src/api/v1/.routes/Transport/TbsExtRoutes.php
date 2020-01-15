@@ -442,7 +442,7 @@ class TbsExtRoutes
 
    $supervisor = new \Entities\People\User($this->ada, $coach['supervisorId']);
    $email = new \Utilities\Email\Email($this->email, 'Coach Register - ' . $coach['code']);
-   $coach['url'] = 'http://localhost:8080/aux/bookings/coach/' . $coach['uniqueId'];
+   $coach['url'] = 'https://ada.marlboroughcollege.org/aux/bookings/coach/' . $coach['uniqueId'];
    $coach['supervisorName'] = $supervisor->firstName;
 
    $content = $email->template('TBS.CoachRegister', $coach);
