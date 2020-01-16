@@ -12,6 +12,7 @@ class TbsExtCoachesBookings
 {
     protected $container;
     private $user, $email;
+    private $oldCoachId = false;
 
     public function __construct(\Slim\Container $container)
     {
@@ -177,7 +178,7 @@ class TbsExtCoachesBookings
 
       //get current taxi to look for changes. Don't want to set status to 2 w
       $oldCoachId = $this->adaModules->select('tbs_coaches_bookings', 'coachId', 'id=?', array($bookingId))[0]['coachId'];
-
+      $this->oldCoachId = $oldCoachId;
       if ($coachId === $oldCoachId) {
         $this->adaModules->update('tbs_coaches_bookings', 'coachId=?', 'id=?', array($coachId, $bookingId));
       } elseif (!$coachId) {
@@ -676,6 +677,14 @@ class TbsExtCoachesBookings
         if (isset($c[0])) {
           $uniqueId = $c[0]['uniqueId'];
           $register = new \Sockets\CRUD("aux.coaches.register.$uniqueId");
+        }
+        if ($this->oldCoachId) {
+          $c = $this->adaModules->select('tbs_coaches_coaches', 'uniqueId', 'id=?', [$this->oldCoachId]);
+          if (isset($c[0])) {
+            $uniqueId = $c[0]['uniqueId'];
+            $register = new \Sockets\CRUD("aux.coaches.register.$uniqueId");
+          }
+
         }
       }
     }
