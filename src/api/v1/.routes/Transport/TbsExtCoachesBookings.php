@@ -673,7 +673,7 @@ class TbsExtCoachesBookings
       //see if booking is assigned a coach and if so, send to the unique ID to update the register
       if ($booking['coachId']){
         $c = $this->adaModules->select('tbs_coaches_coaches', 'uniqueId', 'id=?', [$booking['coachId']]);
-        if (isset($c[0]) {
+        if (isset($c[0])) {
           $uniqueId = $c[0]['uniqueId'];
           $register = new \Sockets\CRUD("aux.coaches.register.$uniqueId");
         }
