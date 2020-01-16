@@ -590,8 +590,8 @@ class TbsExtCoachesBookings
 
       $checklist['selfService'] = $session['selfServiceOn'] === 1 ? true : false;
       $checklist['deadlineDateTimes'] = [
-        'taxi'  => convertToAdaDatetime($session['coachDeadline']),
-        'coach' => convertToAdaDatetime($session['taxiDeadline'])
+        'taxi'  => convertToAdaDatetime($session['taxiDeadline']),
+        'coach' => convertToAdaDatetime($session['coachDeadline'])
       ];
 
       $checklist['activeSession'] = $session['isActive'] == 1 ? true : false;
