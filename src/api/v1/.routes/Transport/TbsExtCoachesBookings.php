@@ -584,9 +584,10 @@ class TbsExtCoachesBookings
       ];
       $sql = $this->adaModules;
 
-      $session = $sql->select('tbs_sessions', 'isActive, taxiDeadline, coachDeadline', 'id=?', [$id])[0];
+      $session = $sql->select('tbs_sessions', 'isActive, taxiDeadline, coachDeadline, selfServiceOn', 'id=?', [$id])[0];
       if (strlen($session['coachDeadline']) > 0 && strlen($session['taxiDeadline']) > 0) $checklist['deadlines'] = true;
 
+      $checklist['selfService'] = $session['selfServiceOn'] === 1 ? true : false;
       $checklist['deadlineDateTimes'] = [
         'taxi'  => convertToAdaDatetime($session['coachDeadline']),
         'coach' => convertToAdaDatetime($session['taxiDeadline'])

@@ -25,7 +25,7 @@ class Bookings
     public function activeSessionGet($request, $response, $args)
     {
       $d = $this->adaModules->select('tbs_sessions', '*', 'isActive=?', [1]);
-      if (!isset($d[0])) return emit($response, []);
+      if (!isset($d[0])) return emit($response, ['isActive' => false]);
 
       $s = $d[0];
       $stampTaxiDeadline = strtotime($s['taxiDeadline']);
