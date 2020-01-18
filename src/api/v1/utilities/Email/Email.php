@@ -15,7 +15,7 @@ class Email {
 		private $bcc;
 		private $htmlbody, $textbody, $tag, $track;
 
-		private $debug = true;
+		private $debug = false;
 		private $userEmail;
 
 		public function __construct($to = null, $subject = null, $from = 'noreply@marlboroughcollege.org', array $cc = [], array $bcc = [])

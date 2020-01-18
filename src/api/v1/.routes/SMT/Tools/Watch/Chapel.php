@@ -12,7 +12,7 @@ class Chapel{
 
   function __construct($ada, $adaModules, $isams, $mcCustom, $exgarde)
   {
-    $this->debug = true;
+    $this->debug = false;
 
     $this->ada = $ada;
     $this->adaModules = $adaModules;
@@ -25,7 +25,9 @@ class Chapel{
 
   public function sendAllHouseEmails($unixDate = null)
   {
+    
     if($unixDate == null) $unixDate = time();
+    
     // $unixDate = $unixDate - 24*60*60;
     // $unixDate = strtotime('yesterday');
     $this->reportAllByDate($unixDate);
@@ -36,6 +38,8 @@ class Chapel{
       $name = $report['hm'];
       $email = new \SMT\Tools\Watch\SundayReport($email, $name, $html);
     }
+    
+    $this->reportSummaryByDateEmail($unixDate);
   }
 
   private function makeHouseReport($name)
@@ -452,7 +456,7 @@ class Chapel{
         </tr>";
 
     foreach($this->allHouses as $house){
-      $name = $house->nameSafe;
+      $name = $house['name'];
       $early = count($house['sessions']['early']);
       $late = count($house['sessions']['late']);
       $talk = count($house['sessions']['talk']);
@@ -521,11 +525,11 @@ class Chapel{
 
   }
 
-  function reportSummaryByDateEmail($unixDate=null){
+  public function reportSummaryByDateEmail($unixDate=null){
     if($unixDate == null) $unixDate = time();
     $report = $this->reportSummaryByDate($unixDate);
-    // $email = new \SundaySummary('wdln@marlboroughcollege.org', 'Bill', $report['html']);
-    $email = new \SundaySummary('sdf@marlboroughcollege.org', 'Bill', $report['html']);
+    $email = new \SundaySummary('wdln@marlboroughcollege.org', 'Bill', $report['html']);
+    // $email = new \SMT\Tools\Watch\SundaySummary('flatres@gmail.com', 'Bill', $report['html']);
   }
 
 }
