@@ -68,7 +68,7 @@ class iSamsStudent
 
   public function getContacts()
   {
-    if (!$this->familyId) return;
+    if (!$this->familyId) return [];
     $d = $this->sql->select('TblPupilManagementFamily', 'intMotherID, intFatherID', 'TblPupilManagementFamilyID=?', [$this->familyId] );
     $contacts = [];
     if(isset($d[0])){

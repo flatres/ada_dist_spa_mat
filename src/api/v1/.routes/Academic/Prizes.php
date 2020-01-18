@@ -34,11 +34,17 @@ class Prizes
         $prizeData = $this->mcCustom->select('TblPrizesPrizes', '*', 'TblPrizesPrizesID=?', array($prizeID));
         $prize = array_merge($prize, $prizeData[0]);
 
-        $pupil = new \Entities\Students\Tools\iSamsStudent($this->isams, $pupilID);
+        $pupil = new \Entities\People\iSamsStudent($this->isams, $pupilID);
         $prize['firstName']= $pupil->firstName;
         $prize['lastName'] = $pupil->lastName;
         $prize['gender'] = $pupil->gender;
-        $prize = array_merge($prize, $pupil->family());
+        $contacts = $pupil->getContacts();
+        $i = 1;
+        foreach ($contacts as $c){
+          $prize["email$i"] = $c['email'];
+          $i++;
+        }
+      
 
       }
       return emit($response, $prizes);
