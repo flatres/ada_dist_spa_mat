@@ -170,6 +170,7 @@ class Alis
       
       switch ($name) {
         case 'EPQ' :
+        case 'Creative Writing':
         case 'Learning Support' :
           return false;
       }
