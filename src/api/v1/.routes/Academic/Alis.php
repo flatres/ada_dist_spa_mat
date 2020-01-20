@@ -176,6 +176,7 @@ class Alis
       }
       
       if (strpos($code, '/G') !== false) return false; //GCSE Language
+      if (strpos($code, '-Ja') !== false) return false; //GCSE Japanese
       if (strpos($code, '/DE') !== false) return false; //DELE
       if (strpos($code, '/DF') !== false) return false; //DELF
       if (strpos($code, 'Ma/mc') !== false) return false; //Maths in Contect
