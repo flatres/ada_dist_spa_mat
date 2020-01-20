@@ -135,13 +135,13 @@ class Students
           $d['intEnrolmentSchoolYear']
         )
       );
-      $tag = new \Entities\Tags\Category($this->ada);
-      $tag->newByNames('House', $d['txtBoardingHouse'], $id);
-      
+      $tag = new \Entities\Tags\Tag($this->ada);
+      $tag->create('House', $d['txtBoardingHouse'], ['studentId' => $id]);
+
       //try to match to exgarde database
       $studentObj = new \Entities\People\Student($this->ada, $id);
       $this->exgarde->match($studentObj);
-      
+
       $this->newCount++;
     }
 
@@ -150,7 +150,7 @@ class Students
       $id = $student['adaId'];
       if ($student['disable'] == true)
       {
-        
+
         $this->ada->update('stu_details', 'disabled=1', 'id=?', array($id));
         $this->exgarde->unmatch($id);
         $this->disabledCount++;
@@ -178,12 +178,12 @@ class Students
             $student['adaId']
           )
         );
-        $category = new \Entities\Tags\Category($this->ada);
-        $category->newByNames('House', $d['txtBoardingHouse'], $id);
+        $tag = new \Entities\Tags\Tag($this->ada);
+        $tag->create('House', $d['txtBoardingHouse'],  ['studentId' => $id]);
         //try to match to exgarde database
         $studentObj = new \Entities\People\Student($this->ada, $id);
         $this->exgarde->match($studentObj);
-        
+
         $this->updatedCount++;
       }
     }

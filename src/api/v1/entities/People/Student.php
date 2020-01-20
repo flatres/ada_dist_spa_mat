@@ -24,7 +24,7 @@ class Student
        // $this->sql= $ada ?? new \Dependency\Databases\Ada();
        $this->sql= $ada ?? new \Dependency\Databases\Ada();
        if ($id) $this->byId($id);
-
+       return $this;
     }
 
     public function displayName(int $id = null)
@@ -40,11 +40,15 @@ class Student
       $this->displayName = $name;
       return $name;
     }
-    
+
     public function byMISId($id)
     {
       $d = $this->sql->select('stu_details', 'id', 'mis_id=?', [$id]);
-      if($d) $this->byId($d[0]['id']);
+      if($d) {
+          $this->byId($d[0]['id']);
+          return $this;
+      }
+      return null;
     }
 
     public function byId(int $id)
@@ -66,20 +70,20 @@ class Student
         $this->fullPreName = $student['prename'] . ' ' . $student['lastname'];
         $this->misId = $student['mis_id'];
         $this->misFamilyId = $student['mis_family_id'];
-        
+
         $this->email = $student['email'];
         $this->boardingHouse = $student['boardingHouse'];
         $this->boardingHouseSafe = str_replace(" ", '_', $student['boardingHouse']);
         $this->gender = $student['gender'];
       } else {
-
+        return null;
       }
 
       $this->displayName();
       return $this;
     }
-    
+
     public function sanitizeNames(){
-      
+
     }
 }

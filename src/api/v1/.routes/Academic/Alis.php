@@ -91,10 +91,17 @@ class Alis
             }
           }
         }
+        
+        $adaStudent = new \Entities\People\Student();
+        $adaStudent->byMISId($student['id']);
+        $tag = new \Entities\Tags\Tag();
+        $student['avgGcse'] = $tag->value('Metrics', 'GCSE Avg.', $adaStudent->id);
+        
         // add white space to stop excel displaying it in scientific notation
         $student['id'] = '' . strval($student['id']) . ' ';
         $dob = strtotime($student['txtDOB']);
         $student['txtDOB'] = date('d/m/Y',$dob);
+        
         $student['s1'] = '';
         $student['s2'] = '';
         $student['s3'] = '';
