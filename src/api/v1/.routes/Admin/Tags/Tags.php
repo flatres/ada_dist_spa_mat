@@ -31,27 +31,6 @@ class Tags
 
       return emit($response, $allCats->list($userId));
     }
-    
-    public function category_POST($request, $response)
-    {
-      $data = $request->getParsedBody();
-      $cat = new \Entities\Tags\Category($this->ada);
-      $name = $data['name'];
-      if (strlen($name) == 0) return false;
-      return emit($response, $cat->create($data['name']));
-    }
-    
-    public function tag_POST($request, $response)
-    {
-      $data = $request->getParsedBody();
-      $tag = new \Entities\Tags\Tag($this->ada);
-      $name = $data['name'];
-      $catName = $data['catName'];
-      if (strlen($name) == 0) return false;
-      return emit($response, $tag->create($catName, $name));
-    }
-    
-    
 //
 //     public function ROUTEPost($request, $response)
 //     {

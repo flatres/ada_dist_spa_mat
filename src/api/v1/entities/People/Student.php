@@ -44,11 +44,7 @@ class Student
     public function byMISId($id)
     {
       $d = $this->sql->select('stu_details', 'id', 'mis_id=?', [$id]);
-      if($d) {
-          $this->byId($d[0]['id']);
-          return $this;
-      }
-      return null;
+      if($d) $this->byId($d[0]['id']);
     }
 
     public function byId(int $id)
@@ -76,7 +72,7 @@ class Student
         $this->boardingHouseSafe = str_replace(" ", '_', $student['boardingHouse']);
         $this->gender = $student['gender'];
       } else {
-        return null;
+
       }
 
       $this->displayName();

@@ -14,7 +14,7 @@ class AllCats
 
     public function list($userId = 0)
     {
-      $cats = $this->sql->select('tag_categories', 'id, name, userId', 'userId=? ORDER BY name ASC', [$userId]);
+      $cats = $this->sql->select('tag_categories', 'id, name, user_id', 'user_id=? ORDER BY name ASC', [$userId]);
       $list = [];
       foreach($cats as $cat){
         $c = new \Entities\Tags\Category($this->sql);

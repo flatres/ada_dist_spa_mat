@@ -7,7 +7,6 @@ class Category {
   public $tags = [];
   public $ownerId = 0;
   public $name;
-  public $id;
 
   private $sql;
   private $isGlobal;
@@ -21,24 +20,24 @@ class Category {
   //returns an array of objects containing the tag id and name
   public function byName(string $catName, int $userId = 0)
   {
-    $cat = $this->sql->select('tag_categories', 'id', 'name=? AND userId=?', [$catName, $userId]);
-    return $cat ? $this->byId($cat[0]['id']) : null;
+    $cat = $this->sql->select('tag_categories', 'id', 'name=? AND user_id=?', ['House', $userId]);
+    return $cat ? $this->byId($cat[0]['id']) : $this;
   }
 
   public function byId($id)
   {
     $this->id = $id;
-    $cat = $this->sql->select('tag_categories', 'id, name, userId', 'id=?', [$id]);
+    $cat = $this->sql->select('tag_categories', 'id, name, user_id', 'id=?', [$id]);
 
     if (!$cat) return null;
 
     $this->name = $cat[0]['name'];
-    $this->ownerId = $cat[0]['userId'];
+    $this->ownerId = $cat[0]['user_id'];
     $this->isGlobal = $this->ownerId == 0 ? true : false;
 
     $this->tags = [];
     $this->tagIds = [];
-    $tags = $this->sql->select('tag_tags', 'id, name', 'catId=? ORDER BY name ASC', [$id]);
+    $tags = $this->sql->select('tag_tags', 'id, name', 'cat_id=? ORDER BY name ASC', [$id]);
     foreach($tags as $tag){
       $t = new \Entities\Tags\Tag();
       $this->tags[] = $t->byId($tag['id']);
@@ -47,7 +46,7 @@ class Category {
     return $this;
   }
 
-  public function create(string $categoryName, int $ownerId = 0)
+  public function create(string $categoryName)
   {
     $this->isGlobal = $ownerId == 0 ? true : false;
     $this->ownerId = $ownerId;
@@ -68,9 +67,9 @@ class Category {
   private function newCategory(string $name)
   {
     if ($this->isGlobal) {
-      $id = $this->sql->insert('tag_categories', 'name, userId', array($name, 0));
+      $id = $this->sql->insert('tag_categories', 'name, user_id', array($name, 0));
     } else {
-      $id = $this->sql->insert('tag_categories', 'name, userId', array($name, $this->ownerId));
+      $id = $this->sql->insert('tag_categories', 'name, user_id', array($name, $this->ownerId));
     }
     return $this->byId($id);
   }
@@ -89,13 +88,13 @@ class Category {
     {
       return $this->sql->exists(
         'tag_categories',
-        'name = ? AND userId =?',
+        'name = ? AND user_id =?',
         array($categoryName, 0)
       );
     } else {
       return $this->sql->exists(
         'tag_categories',
-        'name = ? AND userId = ?',
+        'name = ? AND user_id = ?',
         array($categoryName, $this->ownerId)
       );
     }

@@ -2,6 +2,8 @@
 
 date_default_timezone_set("Europe/London");
 
+define('LOG_PATH', __DIR__ . '/logs/app.log');
+
 return [
     'settings' => [
         'displayErrorDetails' => true, // set to false in production
@@ -14,8 +16,8 @@ return [
 
         // Monolog settings
         'logger' => [
-            'name' => 'slim-app',
-            'path' => isset($_ENV['docker']) ? 'php://stdout' : __DIR__ . '/logs/app.log',
+            'name' => 'ada',
+            'path' => __DIR__ . '/logs/app.log',
             'level' => \Monolog\Logger::DEBUG,
         ],
     ],

@@ -9,8 +9,6 @@ $app->group('/admin', function(){
 // TAGS
     $this->get('/tags', '\Admin\Tags\Tags:globalTags_Get');
     $this->get('/tags/tree/students/{id}', '\Admin\Tags\Tags:studentsTree_Get');
-    $this->post('/tags/categories', '\Admin\Tags\Tags:category_Post');
-    $this->post('/tags/tag', '\Admin\Tags\Tags:tag_Post');
     // $this->get('/tags', '\Admin\ActiveDirectory\Explorer:allUsers_GET');
 //    $this->get('/tags/categories', '\Admin\Tags\Tags:globalCategories');
 
@@ -52,6 +50,8 @@ $app->group('/admin', function(){
     $this->put('/access/structure/module/page', '\Admin\Access\Structure:page_PUT');
     $this->delete('/access/structure/module/page/{id}', '\Admin\Access\Structure:page_DELETE');
     $this->post('/access/structure/module/color', '\Admin\Access\Structure:moduleColor_POST');
+
+    $this->get('/logs', '\Admin\Logs\Log:log_GET');
 
 })->add("Authenticate");
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);

@@ -234,19 +234,14 @@ class Student
       $summaryData[] = array('desc' => '7 (9-7)', 'val' => $As == 7 ? 1 : 0, 'type' => 'Students%');
       $summaryData[] = array('desc' => '6 (9-7)', 'val' => $As == 6 ? 1 : 0, 'type' => 'Students%');
       $this->summaryData = $summaryData;
-      
-      $this->writeMetricsToAda();
 
     }
 
     private function writeMetricsToAda()
     {
       $tag = new \Entities\Tags\Tag();
-      $adaStudent = (new \Entities\People\Student())->byMISId($this->txtSchoolID);
-      if ($adaStudent) $tag->create('Metrics', 'GCSE Avg.', [
-        'studentId' => $adaStudent->id,
-        'value'     => $this->gradeAverage
-      ]);
+      $adaStudent = (new \Entities\People\Student())->byMISId($this->id);
+      $tag->create('Metrics', 'GCSE Avg.', $adaStudent->id, $this->gradeAverage);
     }
 
 }

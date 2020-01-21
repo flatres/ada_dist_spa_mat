@@ -5,16 +5,17 @@ namespace MiddleWare;
 class Authenticate
 {
 
-  public function __construct($mysql)
+  public function __construct($mysql, $log)
   {
      $this->sql= $mysql;
+     $this->log = $log;
   }
 
   // The __invoke() method is called when a script tries to call an object as a function.
   public function __invoke($request, $response, $next)
   {
     global $userId;
-    
+
     $auth =  $request->getHeader('Authorization')[0];
     $auth = str_replace('Bearer ', '', $auth);
     $d= $this->sql->select('usr_sessions', 'user_id', 'token=? AND expired=0', array($auth));
@@ -22,6 +23,13 @@ class Authenticate
     // $rObj['route'] = $request->getAttribute('route')->getArgument('pattern');
     if($d) {
       $userId = $d[0]['user_id'];
+      // $this->log->error("I am an error: $userId");
+      // $this->log->warning("I am a warning: $userId");
+      // // $this->log->emergency("I am an emergency: $userId");
+      // $this->log->critical("I am critical");
+      $this->log->info('I am info');
+      // $this->log->debug('I am debug');
+
       $isAllowed = $this->checkPermissions($request, $userId);
 
       if($isAllowed) {
@@ -36,6 +44,7 @@ class Authenticate
       }
 
     } else{
+      $this->log->addInfo("Unauthorised - usr: $userID - path: {$request->getUri()->getPath()}");
       $data = array('message'=>'Unauthorised', 'error'=>true);
       $packagedResponse = $response->withJson($data, 401);
       return $packagedResponse;

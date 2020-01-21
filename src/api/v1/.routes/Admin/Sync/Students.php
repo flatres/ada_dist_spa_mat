@@ -136,7 +136,7 @@ class Students
         )
       );
       $tag = new \Entities\Tags\Tag($this->ada);
-      $tag->create('House', $d['txtBoardingHouse'], ['studentId' => $id]);
+      $tag->create('House', $d['txtBoardingHouse'], $id);
 
       //try to match to exgarde database
       $studentObj = new \Entities\People\Student($this->ada, $id);
@@ -179,7 +179,7 @@ class Students
           )
         );
         $tag = new \Entities\Tags\Tag($this->ada);
-        $tag->create('House', $d['txtBoardingHouse'],  ['studentId' => $id]);
+        $tag->create('House', $d['txtBoardingHouse'], $id);
         //try to match to exgarde database
         $studentObj = new \Entities\People\Student($this->ada, $id);
         $this->exgarde->match($studentObj);
