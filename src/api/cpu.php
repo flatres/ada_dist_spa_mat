@@ -20,6 +20,13 @@
         $memTotal = 0;
         $memFree = 0;
 
+        return [
+          'cpuIdle' => $cpuIdle,
+          'memTotal'  => $memTotal,
+          'memFree' => $memFree,
+          'string'  =>  $top
+        ];
+
 
 
     // return system("top -n 1");
@@ -87,6 +94,6 @@ private function GetCpuPercentages($stat1, $stat2) {
 	return $cpus;
 }
 
-var_dump(getResources());
+var_dump(getResources())
 
 }
