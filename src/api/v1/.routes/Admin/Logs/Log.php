@@ -8,6 +8,8 @@
  */
 namespace Admin\Logs;
 
+define('OS_ENV', getenv("OS_ENV"));
+
 class Log
 {
     protected $container;
@@ -56,7 +58,9 @@ class Log
     }
     $resources = $this->getResources();
 
-    return ['messages' => $log, 'resources' => $resources];
+    $now = date('c');
+
+    return ['messages' => $log, 'resources' => $resources, 'time' => $now, 'OS_ENV' => OS_ENV];
   }
 
   private function getStringBetween($string, $start, $end)
@@ -71,9 +75,25 @@ class Log
 // https://stackoverflow.com/questions/15538687/using-php-to-stream-data-of-programs-such-as-htop
   private function getResources(){
     $top = shell_exec("top -l 1 -n 1");
+    switch (OS_ENV) {
+      case 'OSX' :
+        $cpuIdle = round($this->getStringBetween($top, 'sys, ', '% idle'));
+        $memTotal = 16;
+        $memFree = 16 - round($this->getStringBetween($top, 'PhysMem: ', 'G'));
+        break;
+      case 'UBUNTU' :
+        $memString = $this->getStringBetween($memString, 'KiB Mem', '/cache');
+        $cpuIdle = round(str_replace(" ", "", $this->getStringBetween($top, 'ni, ', 'id')));
+        $memTotal = round(str_replace(" ", "", $this->getStringBetween($memString, ':', 'total')));
+        $memFree = round(str_replace(" ", "", $this->getStringBetween($memString, 'total,', 'free')));
+        break;
+    }
     return [
-      'cpuIdle' => round($this->getStringBetween($top, 'sys, ', '% idle'))
+      'cpuIdle' => $cpuIdle,
+      'memTotal'  => $memTotal,
+      'memFree' => $memFree
     ];
+
     // return system("top -n 1");
   }
 
