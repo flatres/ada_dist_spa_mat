@@ -188,9 +188,12 @@ private function getSystemMemInfo()
     $meminfo = array();
     foreach ($data as $line) {
         $breakdown = explode(":", $line);
+        $breakdown[1] = str_replace('kB', '', $breakdown[1]);
         if (isset($breakdown[1])) $meminfo[$breakdown[0]] = trim($breakdown[1]);
     }
-    return $meminfo;
+
+    return round((100*($meminfo['MemTotal'] - $meminfo['MemFree']) / $meminfo['MemTotal']),1);
+    // return $meminfo;
 }
 
 
