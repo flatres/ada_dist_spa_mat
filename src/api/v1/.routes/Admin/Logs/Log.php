@@ -81,7 +81,24 @@ class Log
         $cpuIdle = round($this->getStringBetween($top, 'sys, ', '% idle'));
         $memTotal = 16;
         $memFree = 16 - round($this->getStringBetween($top, 'PhysMem: ', 'G'));
-        $cores = [];
+        $cores = [
+          [
+            'id'  => 1,
+            'idle'  =>50
+          ],
+          [
+            'id'  => 2,
+            'idle'  =>75
+          ],
+          [
+            'id'  => 3,
+            'idle'  =>20
+          ],
+          [
+            'id'  => 4,
+            'idle'  =>5
+          ]
+        ];
         break;
       case 'UBUNTU' :
         $cpu = $this->getUbuntuCPU();
@@ -162,6 +179,7 @@ private function GetCpuPercentages($stat1, $stat2) {
 		foreach($dif as $x=>$y) {
       $cpu[$x] = $total == 0 ? 0 : round($y / $total * 100, 1);
     }
+    $cpu['id'] = $i;
 
 		$cpus['cpu' . $i] = $cpu;
 	}
