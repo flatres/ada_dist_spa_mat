@@ -73,8 +73,8 @@ class Log
     return substr($string, $ini, $len);
   }
 // https://stackoverflow.com/questions/15538687/using-php-to-stream-data-of-programs-such-as-htop
-  private function getResources(){
-    $top = shell_exec("top -l 1 -n 1");
+  private function getResources()
+  {
     switch (OS_ENV) {
       case 'OSX' :
         $top = shell_exec("top -l 1 -n 1");
@@ -93,7 +93,8 @@ class Log
     return [
       'cpuIdle' => $cpuIdle,
       'memTotal'  => $memTotal,
-      'memFree' => $memFree
+      'memFree' => $memFree,
+      'string'  =>  $top
     ];
 
     // return system("top -n 1");
