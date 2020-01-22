@@ -82,7 +82,7 @@ class Log
         $cpuIdle = round($this->getStringBetween($top, 'sys, ', '% idle'));
         $memTotal = 16;
         $memFree = 16 - round($this->getStringBetween($top, 'PhysMem: ', 'G'));
-        $memInfo = [];
+        $memInfo = 0;
         $cores = [
           [
             'id'  => 1,
