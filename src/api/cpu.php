@@ -32,7 +32,7 @@
     // return system("top -n 1");
   }
   // https://gist.github.com/rlemon/1780212
-  private function getUbuntuCPU() {
+  function getUbuntuCPU() {
     /* get core information (snapshot) */
     $stat1 = GetCoreInformation();
     /* sleep on server for one second */
@@ -54,7 +54,7 @@
   }
 
   /* Gets individual core information */
-  private function GetCoreInformation() {
+  function GetCoreInformation() {
   	$data = file('/proc/stat');
   	$cores = array();
   	foreach( $data as $line ) {
@@ -72,7 +72,7 @@
   	return $cores;
   }
 /* compares two information snapshots and returns the cpu percentage */
-private function GetCpuPercentages($stat1, $stat2) {
+function GetCpuPercentages($stat1, $stat2) {
 	if( count($stat1) !== count($stat2) ) {
 		return;
 	}
