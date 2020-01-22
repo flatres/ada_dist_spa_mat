@@ -56,7 +56,7 @@ class Log
       ];
       $log[] = $l;
     }
-    $resources = $this->getResources();
+    $resources = $this->getResources2();
 
     $now = date('c');
 
@@ -83,11 +83,10 @@ class Log
         $memFree = 16 - round($this->getStringBetween($top, 'PhysMem: ', 'G'));
         break;
       case 'UBUNTU' :
-        $top = shell_exec("top -n 1");
-        $memString = $this->getStringBetween($top, 'KiB Mem', '/cache');
-        $cpuIdle = round(str_replace(" ", "", $this->getStringBetween($top, 'ni, ', 'id')));
-        $memTotal = round(str_replace(" ", "", $this->getStringBetween($memString, ':', 'total')));
-        $memFree = round(str_replace(" ", "", $this->getStringBetween($memString, 'total,', 'free')));
+        $top = ''
+        $cpuIdle = $this->getUbuntuCPU();
+        $memTotal = 0;
+        $memFree = 0;
         break;
     }
     return [
@@ -99,18 +98,65 @@ class Log
 
     // return system("top -n 1");
   }
+  // https://gist.github.com/rlemon/1780212
+  private function getUbuntuCPU() {
+    /* get core information (snapshot) */
+    $stat1 = $this->GetCoreInformation();
+    /* sleep on server for one second */
+    sleep(0.5);
+    /* take second snapshot */
+    $stat2 = $this->GetCoreInformation();
+    /* get the cpu percentage based off two snapshots */
+    $cpu = $this->GetCpuPercentages($stat1, $stat2);
 
-  private function getServerMemoryUsage(){
+    $i = 0;
+    $sum = 0;
+    foreach($cpu as $c) {
+      $sum = $sum = $c['idle'];
+      $i++
+    }
+    if ($i == 0) return 0;
+    return round($sum / $i, 2);
 
-    $free = shell_exec('free');
-    $free = (string)trim($free);
-    $free_arr = explode("\n", $free);
-    $mem = explode(" ", $free_arr[1]);
-    $mem = array_filter($mem);
-    $mem = array_merge($mem);
-    $memory_usage = $mem[2]/$mem[1]*100;
+  }
 
-    return $memory_usage;
+  /* Gets individual core information */
+  private function GetCoreInformation() {
+  	$data = file('/proc/stat');
+  	$cores = array();
+  	foreach( $data as $line ) {
+  		if( preg_match('/^cpu[0-9]/', $line) )
+  		{
+  			$info = explode(' ', $line );
+  			$cores[] = array(
+  				'user' => $info[1],
+  				'nice' => $info[2],
+  				'sys' => $info[3],
+  				'idle' => $info[4]
+  			);
+  		}
+  	}
+  	return $cores;
+  }
+/* compares two information snapshots and returns the cpu percentage */
+private function GetCpuPercentages($stat1, $stat2) {
+	if( count($stat1) !== count($stat2) ) {
+		return;
+	}
+	$cpus = array();
+	for( $i = 0, $l = count($stat1); $i < $l; $i++) {
+		$dif = array();
+		$dif['user'] = $stat2[$i]['user'] - $stat1[$i]['user'];
+		$dif['nice'] = $stat2[$i]['nice'] - $stat1[$i]['nice'];
+		$dif['sys'] = $stat2[$i]['sys'] - $stat1[$i]['sys'];
+		$dif['idle'] = $stat2[$i]['idle'] - $stat1[$i]['idle'];
+		$total = array_sum($dif);
+		$cpu = array();
+		foreach($dif as $x=>$y) $cpu[$x] = round($y / $total * 100, 1);
+		$cpus['cpu' . $i] = $cpu;
+	}
+	return $cpus;
 }
+
 
 }
