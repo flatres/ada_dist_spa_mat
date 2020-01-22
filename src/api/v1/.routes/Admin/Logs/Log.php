@@ -86,8 +86,8 @@ class Log
       case 'UBUNTU' :
         $cpu = $this->getUbuntuCPU();
         $top = '';
-        $cpuIdle = $cpu['idle'],
-        $cores = $cpu['cores'],
+        $cpuIdle = $cpu['idle'];
+        $cores = $cpu['cores'];
         $memTotal = 0;
         $memFree = 0;
         break;
