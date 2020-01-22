@@ -56,7 +56,7 @@ class Log
       ];
       $log[] = $l;
     }
-    $resources = $this->getResources2();
+    $resources = $this->getResources();
 
     $now = date('c');
 
