@@ -101,7 +101,7 @@ class Log
         $cores = $cpu['cores'];
         $memTotal = 0;
         $memFree = 0;
-        $memInfo = getSystemMemInfo();
+        $memInfo = $this->getSystemMemInfo();
         break;
     }
     return [
