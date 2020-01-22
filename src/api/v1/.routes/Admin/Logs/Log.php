@@ -82,6 +82,7 @@ class Log
         $cpuIdle = round($this->getStringBetween($top, 'sys, ', '% idle'));
         $memTotal = 16;
         $memFree = 16 - round($this->getStringBetween($top, 'PhysMem: ', 'G'));
+        $memInfo = [];
         $cores = [
           [
             'id'  => 1,
@@ -100,6 +101,7 @@ class Log
         $cores = $cpu['cores'];
         $memTotal = 0;
         $memFree = 0;
+        $memInfo = getSystemMemInfo()
         break;
     }
     return [
@@ -108,6 +110,7 @@ class Log
       'memFree' => $memFree,
       'string'  =>  $top,
       'cores'   => $cores,
+      'memory'  => $memInfo
     ];
 
     // return system("top -n 1");
@@ -177,6 +180,17 @@ private function GetCpuPercentages($stat1, $stat2) {
 		$cpus['cpu' . $i] = $cpu;
 	}
 	return $cpus;
+}
+
+private function getSystemMemInfo()
+{
+    $data = explode("\n", file_get_contents("/proc/meminfo"));
+    $meminfo = array();
+    foreach ($data as $line) {
+        list($key, $val) = explode(":", $line);
+        $meminfo[$key] = trim($val);
+    }
+    return $meminfo;
 }
 
 
