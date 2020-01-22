@@ -187,8 +187,8 @@ private function getSystemMemInfo()
     $data = explode("\n", file_get_contents("/proc/meminfo"));
     $meminfo = array();
     foreach ($data as $line) {
-        list($key, $val) = explode(":", $line);
-        $meminfo[$key] = trim($val);
+        $breakdown = explode(":", $line);
+        if (isset($breakdown[1])) $meminfo[$breakdown[0]] = trim($breakdown[1]);
     }
     return $meminfo;
 }
