@@ -112,7 +112,7 @@ class Log
     $i = 0;
     $sum = 0;
     foreach($cpu as $c) {
-      $sum = $sum = $c['idle'];
+      $sum = $sum + $c['idle'];
       $i++;
     }
     if ($i == 0) return 0;
