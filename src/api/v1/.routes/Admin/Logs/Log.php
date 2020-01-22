@@ -113,7 +113,7 @@ class Log
     $sum = 0;
     foreach($cpu as $c) {
       $sum = $sum = $c['idle'];
-      $i++
+      $i++;
     }
     if ($i == 0) return 0;
     return round($sum / $i, 2);
