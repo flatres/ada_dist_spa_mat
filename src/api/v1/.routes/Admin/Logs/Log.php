@@ -77,11 +77,13 @@ class Log
     $top = shell_exec("top -l 1 -n 1");
     switch (OS_ENV) {
       case 'OSX' :
+        $top = shell_exec("top -l 1 -n 1");
         $cpuIdle = round($this->getStringBetween($top, 'sys, ', '% idle'));
         $memTotal = 16;
         $memFree = 16 - round($this->getStringBetween($top, 'PhysMem: ', 'G'));
         break;
       case 'UBUNTU' :
+        $top = shell_exec("top -n 1");
         $memString = $this->getStringBetween($top, 'KiB Mem', '/cache');
         $cpuIdle = round(str_replace(" ", "", $this->getStringBetween($top, 'ni, ', 'id')));
         $memTotal = round(str_replace(" ", "", $this->getStringBetween($memString, ':', 'total')));
