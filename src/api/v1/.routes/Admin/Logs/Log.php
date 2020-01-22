@@ -83,7 +83,7 @@ class Log
         $memFree = 16 - round($this->getStringBetween($top, 'PhysMem: ', 'G'));
         break;
       case 'UBUNTU' :
-        $top = ''
+        $top = '';
         $cpuIdle = $this->getUbuntuCPU();
         $memTotal = 0;
         $memFree = 0;
