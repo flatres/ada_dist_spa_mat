@@ -82,7 +82,7 @@ class Log
         $memFree = 16 - round($this->getStringBetween($top, 'PhysMem: ', 'G'));
         break;
       case 'UBUNTU' :
-        $memString = $this->getStringBetween($memString, 'KiB Mem', '/cache');
+        $memString = $this->getStringBetween($top, 'KiB Mem', '/cache');
         $cpuIdle = round(str_replace(" ", "", $this->getStringBetween($top, 'ni, ', 'id')));
         $memTotal = round(str_replace(" ", "", $this->getStringBetween($memString, ':', 'total')));
         $memFree = round(str_replace(" ", "", $this->getStringBetween($memString, 'total,', 'free')));
