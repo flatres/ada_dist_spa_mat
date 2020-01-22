@@ -94,6 +94,6 @@ function GetCpuPercentages($stat1, $stat2) {
 	return $cpus;
 }
 
-var_dump(getResources())
+var_dump(getResources());
 
 }
