@@ -52,6 +52,7 @@ $app->group('/admin', function(){
     $this->post('/access/structure/module/color', '\Admin\Access\Structure:moduleColor_POST');
 
     $this->get('/logs', '\Admin\Logs\Log:log_GET');
+    $this->get('/logs/resources', '\Admin\Logs\Log:resources_GET');
 
 })->add("Authenticate");
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);

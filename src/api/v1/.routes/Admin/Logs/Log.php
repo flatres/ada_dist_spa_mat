@@ -41,6 +41,13 @@ class Log
     return emit($response, $log);
   }
 
+  public function resources_GET($request, $response, $args)
+  {
+    $resources = $this->getResources();
+    $now = date('c');
+    return emit($response, ['resources' => $resources, 'time' => $now, 'OS_ENV' => OS_ENV]);
+  }
+
   private function processLog($data)
   {
     $log = [];
@@ -57,11 +64,9 @@ class Log
       ];
       $log[] = $l;
     }
-    $resources = $this->getResources();
 
     $now = date('c');
-
-    return ['messages' => $log, 'resources' => $resources, 'time' => $now, 'OS_ENV' => OS_ENV];
+    return ['messages' => $log, 'time' => $now, 'OS_ENV' => OS_ENV];
   }
 
   private function getStringBetween($string, $start, $end)
