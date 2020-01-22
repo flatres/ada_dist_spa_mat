@@ -35,8 +35,8 @@
   function getUbuntuCPU() {
     /* get core information (snapshot) */
     $stat1 = GetCoreInformation();
-    /* sleep on server for one second */
-    sleep(0.5);
+    /* sleep on server for one second - DONT SET FOR LESS THAN 1 SECOND*/
+    sleep(1);
     /* take second snapshot */
     $stat2 = GetCoreInformation();
     /* get the cpu percentage based off two snapshots */
@@ -95,5 +95,3 @@ function GetCpuPercentages($stat1, $stat2) {
 }
 
 var_dump(getResources());
-
-?>

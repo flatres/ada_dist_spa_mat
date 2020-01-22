@@ -81,10 +81,13 @@ class Log
         $cpuIdle = round($this->getStringBetween($top, 'sys, ', '% idle'));
         $memTotal = 16;
         $memFree = 16 - round($this->getStringBetween($top, 'PhysMem: ', 'G'));
+        $cores = [];
         break;
       case 'UBUNTU' :
+        $cpu = $this->getUbuntuCPU();
         $top = '';
-        $cpuIdle = $this->getUbuntuCPU();
+        $cpuIdle = $cpu['idle'],
+        $cores = $cpu['cores'],
         $memTotal = 0;
         $memFree = 0;
         break;
@@ -93,7 +96,8 @@ class Log
       'cpuIdle' => $cpuIdle,
       'memTotal'  => $memTotal,
       'memFree' => $memFree,
-      'string'  =>  $top
+      'string'  =>  $top,
+      'cores'   => $cores,
     ];
 
     // return system("top -n 1");
@@ -103,7 +107,7 @@ class Log
     /* get core information (snapshot) */
     $stat1 = $this->GetCoreInformation();
     /* sleep on server for one second */
-    sleep(0.5);
+    sleep(1);
     /* take second snapshot */
     $stat2 = $this->GetCoreInformation();
     /* get the cpu percentage based off two snapshots */
@@ -116,7 +120,10 @@ class Log
       $i++;
     }
     if ($i == 0) return 0;
-    return round($sum / $i, 2);
+    return [
+      'idle'  => round($sum / $i, 2),
+      'cores' => array_values($cpu)
+    ];
 
   }
 
