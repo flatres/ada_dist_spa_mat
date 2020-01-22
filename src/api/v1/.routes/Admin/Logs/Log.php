@@ -89,14 +89,6 @@ class Log
           [
             'id'  => 2,
             'idle'  =>75
-          ],
-          [
-            'id'  => 3,
-            'idle'  =>20
-          ],
-          [
-            'id'  => 4,
-            'idle'  =>5
           ]
         ];
         break;
