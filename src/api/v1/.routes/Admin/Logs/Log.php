@@ -152,7 +152,10 @@ private function GetCpuPercentages($stat1, $stat2) {
 		$dif['idle'] = $stat2[$i]['idle'] - $stat1[$i]['idle'];
 		$total = array_sum($dif);
 		$cpu = array();
-		foreach($dif as $x=>$y) $cpu[$x] = round($y / $total * 100, 1);
+		foreach($dif as $x=>$y) {
+      $cpu[$x] = $total == 0 ? 0 : round($y / $total * 100, 1);
+    }
+
 		$cpus['cpu' . $i] = $cpu;
 	}
 	return $cpus;
