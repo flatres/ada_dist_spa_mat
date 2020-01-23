@@ -54,7 +54,7 @@ class Log
   {
     $connections = [];
     try {
-      $sql = new \Dependency\Databases\isams();
+      $sql = new \Dependency\Databases\ISams();
       $isams = true;
     } catch (\PDOException $e) {
       $isams = false;
@@ -66,7 +66,7 @@ class Log
     ];
 
     try {
-      $sql = new \Dependency\Databases\ada();
+      $sql = new \Dependency\Databases\Ada();
       $ada = true;
     } catch (\PDOException $e) {
       $ada = false;
