@@ -17,6 +17,8 @@ class Log
 
     public function __construct(\Slim\Container $container)
     {
+      // unset($container['errorHandler']);
+      // unset($container['phpErrorHandler']);
     }
 
     //retrives roles along with names of those with that role
@@ -46,6 +48,61 @@ class Log
     $resources = $this->getResources();
     $now = date('c');
     return emit($response, ['resources' => $resources, 'time' => $now, 'OS_ENV' => OS_ENV]);
+  }
+
+  public function connections_GET($request, $response, $args)
+  {
+    $connections = [];
+    try {
+      $sql = new \Dependency\Databases\isams();
+      $isams = true;
+    } catch (\PDOException $e) {
+      $isams = false;
+    }
+
+    $connections[] = [
+      'label' => 'Isams',
+      'value' => $isams
+    ];
+
+    try {
+      $sql = new \Dependency\Databases\ada();
+      $ada = true;
+    } catch (\PDOException $e) {
+      $ada = false;
+    }
+
+    $connections[] = [
+      'label' => 'Ada',
+      'value' => $ada
+    ];
+
+    try {
+      $sql = new \Dependency\Exgarde();
+      $exgarde = true;
+    } catch (\PDOException $e) {
+      $exgarde = false;
+    }
+
+    $connections[] = [
+      'label' => 'Exgarde',
+      'value' => $exgarde
+    ];
+
+    // try {
+    //   $sql = new \Dependency\ActiveDirectory();
+    //   $sql->connect();
+    //   $ldap = true;
+    // } catch (\Exception $e) {
+    //   $ldap = false;
+    // }
+    //
+    // $connections[] = [
+    //   'label' => 'LDAP',
+    //   'value' => $ldap
+    // ];
+
+    return emit($response, $connections);
   }
 
   private function processLog($data)

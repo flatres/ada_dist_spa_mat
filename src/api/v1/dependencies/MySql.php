@@ -54,49 +54,31 @@ class Mysql {
     public $isCaseInsensitive = false;
 
 		public function __construct() {
-
-
    	}
 
     public function connect($db) {
+      global $DBCounter;
+			global $globalDB;
 
-        global $DBCounter;
-				global $globalDB;
+			// Set options
+			$options = [
+					PDO::ATTR_PERSISTENT => true,
+					PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+          PDO::ATTR_EMULATE_PREPARES => false,
+          PDO::ATTR_STRINGIFY_FETCHES => false
+			];
 
-				// Set options
-				$options = array(
-						PDO::ATTR_PERSISTENT => true,
-						PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_EMULATE_PREPARES => false,
-            PDO::ATTR_STRINGIFY_FETCHES => false
-				);
+      $DBCounter++;
+      $this->dbName = DB_NAME;
 
-				// if($DBCounter ==0){
-
-          $DBCounter++;
-
-          $this->dbName = DB_NAME;
-
-					try {
-							$this->conn = new PDO("mysql:host=".DB_HOST.";charset=utf8;dbname=".$db, DB_USERNAME, DB_PASSWORD, $options);
-						}
-
-						catch(PDOException $e) {
-							echo "Failed to connect to MySQL: " . $e->getMessage();
-                return NULL;
-						}
-
-						$globalDB = $this->conn;
-
-				// }else{
-        //
-        //
-				// 	}
-
-		 // returing connection resource
-        return $globalDB; //$this->conn;
-
-
+			try {
+					$this->conn = new PDO("mysql:host=".DB_HOST."; LoginTimeout=2; charset=utf8;dbname=".$db, DB_USERNAME, DB_PASSWORD, $options);
+			}
+			catch(\PDOException $e) {
+				throw $e;
+			}
+			$globalDB = $this->conn;
+      return $globalDB;
     }
 
     public function updateObject($table, $object, $idField){

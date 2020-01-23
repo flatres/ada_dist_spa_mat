@@ -399,13 +399,13 @@ class Exgarde {
     $uid = "DBUSER2";
 	  $pwd = "T3chnical";
 
-	  //Establishes the connection
-	  $this->conn = new \PDO( "sqlsrv:server=$serverName ; Database = $database", $uid, $pwd);
-
-    if (!$this->conn) {
-       throw new Exception('Exgarde Connection Unavailiable');
+	  try {
+			//Establishes the connection
+	  	$this->conn = new \PDO( "sqlsrv:server=$serverName ; Database = $database; LoginTimeout=2", $uid, $pwd);
     }
-
+		catch(\PDOException $e) {
+			throw $e;
+		}
     return $this->conn;
   }
 

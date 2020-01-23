@@ -45,19 +45,13 @@ class MSSql {
     }
 
 		public function connect($ip, $db,  $user, $pwd) {
-
        try {
-
-           $this->conn = new \PDO( "sqlsrv:server=$ip ; Database = $db", $user, $pwd);
-
+         // https://stackoverflow.com/questions/36172117/pdo-sqlsrv-database-connection-timeout
+           $this->conn = new \PDO( "sqlsrv:server=$ip ; Database = $db; LoginTimeout=2", $user, $pwd);
         }
-
-       catch(PDOException $e) {
-         echo "Failed to connect to MySQL: " . $e->getMessage();
-           return NULL;
+       catch(\PDOException $e) {
+         throw $e;
        }
-
-
    	}
 
     public function updateObject($table, $object, $idField){

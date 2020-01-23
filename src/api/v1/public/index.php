@@ -19,6 +19,9 @@ if($showErrors){
           throw new ErrorException($message, 0, $severity, $file, $line);
       }
   });
+} else {
+  ini_set('display_errors', 0);
+  ini_set('display_startup_errors', 0);
 }
 require __DIR__ . '/../../vendor/autoload.php';
 
