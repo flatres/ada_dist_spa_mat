@@ -53,6 +53,19 @@ class Log
   public function connections_GET($request, $response, $args)
   {
     $connections = [];
+
+    try {
+      $sql = new \Dependency\Databases\Ada();
+      $ada = true;
+    } catch (\PDOException $e) {
+      $ada = false;
+    }
+
+    $connections[] = [
+      'label' => 'Ada',
+      'value' => $ada
+    ];
+
     try {
       $sql = new \Dependency\Databases\ISams();
       $isams = true;
@@ -66,15 +79,15 @@ class Log
     ];
 
     try {
-      $sql = new \Dependency\Databases\Ada();
-      $ada = true;
+      $sql = new \Dependency\Databases\MCCustom();
+      $MCC = true;
     } catch (\PDOException $e) {
-      $ada = false;
+      $MCC = false;
     }
 
     $connections[] = [
-      'label' => 'Ada',
-      'value' => $ada
+      'label' => 'MCC',
+      'value' => $MCC
     ];
 
     try {
@@ -155,6 +168,8 @@ class Log
             'idle'  =>75
           ]
         ];
+        $disk = $this->getDiskInfo("/");
+
         break;
       case 'UBUNTU' :
         $cpu = $this->getUbuntuCPU();
@@ -164,15 +179,17 @@ class Log
         $memTotal = 0;
         $memFree = 0;
         $memInfo = $this->getSystemMemInfo();
+        $disk = $this->getDiskInfo("/var/www");
         break;
     }
+
     return [
       'cpuIdle' => $cpuIdle,
       'memTotal'  => $memTotal,
       'memFree' => $memFree,
-      'string'  =>  $top,
       'cores'   => $cores,
-      'memory'  => $memInfo
+      'memory'  => $memInfo,
+      'disk'    => $disk
     ];
 
     // return system("top -n 1");
@@ -260,5 +277,34 @@ private function getSystemMemInfo()
     // return $meminfo;
 }
 
+private function getDiskInfo($path) {
+  /* get disk space free (in bytes) */
+  $df = disk_free_space($path);
+  /* and get disk space total (in bytes)  */
+  $dt = disk_total_space($path);
+  /* now we calculate the disk space used (in bytes) */
+  $du = $dt - $df;
+  /* percentage of disk used - this will be used to also set the width % of the progress bar */
+  $dp = sprintf('%.2f',($du / $dt) * 100);
+
+  /* and we formate the size from bytes to MB, GB, etc. */
+  $df = $this->formatSize($df);
+  $du = $this->formatSize($du);
+  $dt = $this->formatSize($dt);
+
+  return [
+    'total' => intval($dt),
+    'free'  => intval($df),
+    'percentage'  => intval($dp)
+  ];
+
+}
+
+private function formatSize($bytes)
+{
+        $types = array( 'B', 'KB', 'MB', 'GB', 'TB' );
+        for( $i = 0; $bytes >= 1024 && $i < ( count( $types ) -1 ); $bytes /= 1024, $i++ );
+        return( round( $bytes, 2 ) . " " . $types[$i] );
+}
 
 }
