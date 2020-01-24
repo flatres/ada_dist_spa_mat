@@ -23,6 +23,12 @@ class Authenticate
     // $rObj['route'] = $request->getAttribute('route')->getArgument('pattern');
     if($d) {
       $userId = $d[0]['user_id'];
+      // $this->log->error("I am an error: $userId");
+      // $this->log->warning("I am a warning: $userId");
+      // // $this->log->emergency("I am an emergency: $userId");
+      // $this->log->critical("I am critical");
+      $this->log->info('I am info');
+      // $this->log->debug('I am debug');
 
       $isAllowed = $this->checkPermissions($request, $userId);
 
@@ -38,7 +44,7 @@ class Authenticate
       }
 
     } else{
-      $this->log->addWarning("Unauthorised - usr: $userID - path: {$request->getUri()->getPath()}");
+      $this->log->addInfo("Unauthorised - usr: $userID - path: {$request->getUri()->getPath()}");
       $data = array('message'=>'Unauthorised', 'error'=>true);
       $packagedResponse = $response->withJson($data, 401);
       return $packagedResponse;

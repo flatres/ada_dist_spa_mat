@@ -20,11 +20,5 @@ return [
             'path' => __DIR__ . '/logs/app.log',
             'level' => \Monolog\Logger::DEBUG,
         ],
-        // Monolog settings
-        'navLogger' => [
-            'name' => 'ada',
-            'path' => __DIR__ . '/logs/nav.log',
-            'level' => \Monolog\Logger::DEBUG,
-        ]
     ],
 ];

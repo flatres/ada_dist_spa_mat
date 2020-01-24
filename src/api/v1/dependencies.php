@@ -11,13 +11,6 @@ $container = $app->getContainer();
 //     return new Slim\Views\PhpRenderer($settings['template_path']);
 // };
 
-// $this->log->error("I am an error: $userId");
-// $this->log->warning("I am a warning: $userId");
-// $this->log->emergency("I am an emergency: $userId");
-// $this->log->critical("I am critical");
-
-$this->log->info('I am info');
-// $this->log->debug('I am debug');
 // monolog
 $container['logger'] = function($c)
 {
@@ -26,20 +19,10 @@ $container['logger'] = function($c)
     $logger->pushProcessor(new Monolog\Processor\UidProcessor());
     $logger->pushHandler(new Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
 
-    $syslog = new Monolog\Handler\SyslogHandler('log', 'local6');
+    $syslog = new Monolog\Handler\SyslogHandler('myfacility', 'local6');
     $formatter = new Monolog\Formatter\LineFormatter("%channel%.%level_name%: %message% %extra%");
     $syslog->setFormatter($formatter);
     $logger->pushHandler($syslog);
-
-    return $logger;
-};
-
-$container['navLog'] = function($c)
-{
-    $settings = $c->get('settings')['navLogger'];
-    $logger = new Monolog\Logger($settings['name']);
-    $logger->pushProcessor(new Monolog\Processor\UidProcessor());
-    $logger->pushHandler(new Monolog\Handler\StreamHandler($settings['path'], $settings['level']));
 
     return $logger;
 };
