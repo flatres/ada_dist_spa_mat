@@ -8,6 +8,8 @@
  */
 namespace Dependency;
 
+define('LDAP_IP', getenv("LDAP_IP"));
+
 class ActiveDirectory
 {
     public function __construct()
@@ -16,8 +18,8 @@ class ActiveDirectory
 
     public function connect($username, $password)
     {
-      $adServer = "ldaps://192.168.2.5";
-      $adServer = "192.168.2.5";
+      // $adServer = "ldaps://192.168.2.5";
+      $adServer = LDAP_IP;
       $ldap = \ldap_connect($adServer);
       $this->ldap = $ldap;
 

@@ -1,26 +1,22 @@
 <?php
-
-// namespace MicroStats;
 namespace Dependency\Databases;
+
+define('MCCUSTOM_IP', getenv("MCCUSTOM_IP"));
+define('MCCUSTOM_DB', getenv("MCCUSTOM_DB"));
+define('MCCUSTOM_USER', getenv("MCCUSTOM_USER"));
+define('MCCUSTOM_PWD', getenv("MCCUSTOM_PWD"));
 
 class MCCustom extends \Dependency\MSSql
 {
-
   public function __construct() {
 
-    // $ip = "192.168.2.165";
-    $ip="192.168.2.164";
-    $db = "mccustom";
-    //$database = "dbo";
-    $user = "mcnode";
-    $pwd = "MM0ndcol1s.03";
+    $ip = MCCUSTOM_IP;
+    $db = MCCUSTOM_DB;
+    $user = MCCUSTOM_USER;
+    $pwd = MCCUSTOM_PWD;
 
     $this->connect($ip, $db,  $user, $pwd);
-
   }
-
-
-
 }
 
- ?>
+?>

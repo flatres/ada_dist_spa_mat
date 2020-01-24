@@ -2,6 +2,11 @@
 namespace Dependency;
 use \PDO;
 
+define('EXGARDE_IP', getenv("EXGARDE_IP"));
+define('EXGARDE_DB', getenv("EXGARDE_DB"));
+define('EXGARDE_USER', getenv("EXGARDE_USER"));
+define('EXGARDE_PWD', getenv("EXGARDE_PWD"));
+
 class Exgarde {
 
 	public $types = [];
@@ -27,6 +32,23 @@ class Exgarde {
 		$this->adaModules = new \Dependency\Databases\AdaModules();
     $this->connect();
 	}
+
+	private function connect()
+  {
+    $serverName = EXGARDE_IP;
+  	$database = EXGARDE_DB;
+    $uid = EXGARDE_USER;
+	  $pwd = EXGARDE_PWD;
+
+	  try {
+			//Establishes the connection
+	  	$this->conn = new \PDO( "sqlsrv:server=$serverName ; Database = $database; LoginTimeout=2", $uid, $pwd);
+    }
+		catch(\PDOException $e) {
+			throw $e;
+		}
+    return $this->conn;
+  }
 
 	public function initialiseTest(\Entities\People\AllStudents $allStudents)
 	{
@@ -390,23 +412,6 @@ class Exgarde {
     if($error) $message = "!! " . $message;
     array_unshift($this->logArray , $message);
 
-  }
-
-  private function connect()
-  {
-    $serverName = "172.16.6.5";
-  	$database = "EXGARDE";
-    $uid = "DBUSER2";
-	  $pwd = "T3chnical";
-
-	  try {
-			//Establishes the connection
-	  	$this->conn = new \PDO( "sqlsrv:server=$serverName ; Database = $database; LoginTimeout=2", $uid, $pwd);
-    }
-		catch(\PDOException $e) {
-			throw $e;
-		}
-    return $this->conn;
   }
 
   private function query($query, $binding)

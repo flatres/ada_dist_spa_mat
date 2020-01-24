@@ -3,12 +3,12 @@ namespace Dependency;
 
 $url = 'https://www.mybrix.world/';
 
-define('DB_USERNAME', getenv("HTTP_DB_USER"));
-define('DB_PASSWORD', getenv("HTTP_DB_PASSWORD"));
-define('DB_HOST', getenv("HTTP_DB_HOST"));
-define('DB_NAME', getenv("HTTP_DB_NAME"));
-define('DB_SALT', getenv("HTTP_DB_SALT"));
-define('DB_SALT_ID', getenv("HTTP_DB_SALT_ID"));
+define('DB_USERNAME', getenv("ADA_USER"));
+define('DB_PASSWORD', getenv("ADA_PWD"));
+define('DB_HOST', getenv("ADA_IP"));
+define('DB_NAME', getenv("ADA_DB"));
+define('DB_SALT', getenv("ADA_SALT"));
+define('DB_SALT_ID', getenv("ADA_SALT_ID"));
 
 $DBCounter = 0;
 $globalDB;
