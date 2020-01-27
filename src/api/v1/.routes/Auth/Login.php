@@ -10,7 +10,7 @@ class Login
 {
     /** @var \Slim\Container
      */
-
+    const LOCKOUT_TIME_MINUTES = 2;
     protected $container;
     private $isNewUser = false;
 
@@ -19,6 +19,7 @@ class Login
        $this->sql= $container->mysql;
        $this->ad = $container->ad;
        $this->isams = $container->isams;
+       $this->log = $container->logger;
     }
 
 
@@ -32,6 +33,22 @@ class Login
       }
       // reading post params
       $login = $data['login']; $password = $data['password'];
+      $userId = $this->sql->select('usr_details', 'id', 'login=?', array($login))[0]['id'] ?? null;
+      //check if login exists
+
+      if (!$userId) {  //user doesn't exist
+        $data = $data = [
+          'success' => false,
+          'message' => "Invalid username / password"
+        ];
+        return emit($response, $data);
+      }
+
+      if ($this->isLocked($login)) {
+        $ip = $request->getServerParam('REMOTE_ADDR');
+        $this->log->warning("Attempt on Locked Account usr:$login ip:$ip");
+        return emitError($response, 400, []);
+      }
 
       if ($this->isADLogin($login) || $this->isNewUser) {
           $id = $this->checkLoginAd($login, $password);
@@ -41,9 +58,36 @@ class Login
 
       if ($id !== FALSE) {
           $this->writeLog($request, $login, false);
-          return emit($response, $this->loginReturnObject($id ));
+          $data = [
+            'success' => true,
+            'loginObject' => $this->loginReturnObject($id)
+          ];
+          $this->sql->update('usr_details', 'failedAttempts=?, isLocked=?', 'login=?', [0, 0, $login]);
+          return emit($response, $data);
       } else {
-          return emitError($response, 400, "Not happening");
+          $failedAttempts = $this->sql->select('usr_details', 'failedAttempts', 'login=?', [$login])[0]['failedAttempts'];
+          $failedAttempts++;
+          $locked = $failedAttempts > 3 ? 1 : 0;
+
+          $this->sql->update('usr_details', 'failedAttempts=?, isLocked=?', 'login=?', [$failedAttempts, $locked, $login]);
+          if ($locked == 1) {
+            //write log
+            $ip = $request->getServerParam('REMOTE_ADDR');
+            $userId = $this->sql->select('usr_details', 'id', 'login=?', array($login))[0]['id'];
+            $this->log->warning("User Account Locked usr:$login ip:$ip");
+            $time = self::LOCKOUT_TIME_MINUTES;
+            $data = $data = [
+              'success' => false,
+              'message' => "Too many attempts. Account locked for $time minutes."
+            ];
+            return emit($response, $data);
+          }
+
+          $data = $data = [
+            'success' => false,
+            'message' => "Invalid username / password"
+          ];
+          return emit($response, $data);
       }
 
     }
@@ -60,6 +104,21 @@ class Login
     {
       $usr = $this->sql->select('usr_details', 'ad_login', 'login=?', array($login));
       return isset($usr[0]) ? $usr[0]['ad_login'] : false;
+
+    }
+
+    private function isLocked($login)
+    {
+      $usr = $this->sql->select('usr_details', 'isLocked, lastActive', 'login=?', [$login]);
+      if (!isset($usr[0])) return FALSE;
+
+      $usr = $usr[0];
+      if ($usr['isLocked'] == 0) return false;
+      if (time() - strtotime($usr['lastActive']) > self::LOCKOUT_TIME_MINUTES * 60) {
+        $this->sql->update('usr_details', 'failedAttempts=?, isLocked=?', 'login=?', [0, 0, $login]);
+        return false;
+      }
+      return true;
 
     }
 
