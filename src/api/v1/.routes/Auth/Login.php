@@ -22,6 +22,17 @@ class Login
        $this->log = $container->logger;
     }
 
+    public function darkPost($request, $response, $args)
+    {
+       // reading json params
+      $data = $request->getParsedBody();
+      $isDarkMode = $data['isDarkMode'] ? 1 : 0;
+      $userId = $data['userId'];
+
+      $this->sql->update('usr_details', 'isDarkMode=?', 'id=?', [$isDarkMode, $userId]);
+
+      return emit($response, $data);
+    }
 
     public function login($request, $response, $args)
     {
@@ -158,7 +169,7 @@ class Login
     {
       $sql = $this->sql;
 
-      $data = $sql->select('usr_details', 'firstname, lastname, ad_login', 'id=?', array($id));
+      $data = $sql->select('usr_details', 'firstname, lastname, ad_login, isDarkMode', 'id=?', array($id));
 
       if(!$data) return array();
 
@@ -169,6 +180,7 @@ class Login
       $returnObj['firstname'] = $d['firstname'];
       $returnObj['lastname'] = $d['lastname'];
       $returnObj['auth'] = $this->newSession($id);
+      $returnObj['isDarkMode'] = $d['isDarkMode'] === 1 ? true : false;
 
       $permissions = new Tools\PermissionsRetriever($sql);
       $returnObj['permissions'] =  $permissions->getUserPermissions($id);

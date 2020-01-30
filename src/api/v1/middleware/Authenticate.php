@@ -37,7 +37,7 @@ class Authenticate
       }
 
     } else{
-      $this->log->addWarning("Unauthorised Access Request - usr: $userID - path: {$request->getUri()->getPath()}");
+      $this->log->addWarning("Unauthorised Access Request - usr: $userId - path: {$request->getUri()->getPath()}");
       $data = array('message'=>'Unauthorised', 'error'=>true);
       $packagedResponse = $response->withJson($data, 401);
       return $packagedResponse;
