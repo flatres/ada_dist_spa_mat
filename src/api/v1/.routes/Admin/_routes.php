@@ -53,10 +53,16 @@ $app->group('/admin', function(){
     $this->delete('/access/structure/module/page/{id}', '\Admin\Access\Structure:page_DELETE');
     $this->post('/access/structure/module/color', '\Admin\Access\Structure:moduleColor_POST');
 
-    $this->get('/logs', '\Admin\Logs\Log:log_GET');
-    $this->get('/logs/resources', '\Admin\Logs\Log:resources_GET');
-    $this->get('/logs/connections', '\Admin\Logs\Log:connections_GET');
+    // $this->get('/logs', '\Admin\Logs\Log:log_GET');
+    // $this->get('/logs/resources', '\Admin\Logs\Log:resources_GET');
+    // $this->get('/logs/connections', '\Admin\Logs\Log:connections_GET');
 
 })->add("Authenticate");
+
+$app->group('/admin', function(){
+  $this->get('/logs', '\Admin\Logs\Log:log_GET');
+  $this->get('/logs/resources', '\Admin\Logs\Log:resources_GET');
+  $this->get('/logs/connections', '\Admin\Logs\Log:connections_GET');
+})
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);
 ?>
