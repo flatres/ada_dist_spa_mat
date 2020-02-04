@@ -51,6 +51,17 @@ class Student
       return null;
     }
 
+    public function bySchoolNumber($number)
+    {
+      $email = $number . "@marlboroughcollege.org";
+      $d = $this->sql->select('stu_details', 'id', 'email=?', [$email]);
+      if($d) {
+          $this->byId($d[0]['id']);
+          return $this;
+      }
+      return null;
+    }
+
     public function byId(int $id)
     {
       $student = $this->sql->select(

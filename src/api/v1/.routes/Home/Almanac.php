@@ -24,7 +24,7 @@ class Almanac
     {
       $sql = $this->isams;
       // var_dump($this->isams);
-      
+
       $d = $this->isams->select(
         'TblSchoolCalendar',
         'TblSchoolCalendarID as id,
@@ -40,7 +40,7 @@ class Almanac
         []
       );
       $categories = $this->getCategories();
-      
+
       $events = [];
       foreach($d as $event) {
         $event['category'] = $categories["id_{$event['categoryId']}"];
@@ -48,7 +48,7 @@ class Almanac
       }
       return emit($response, $events);
     }
-    
+
     private function processEvent(&$event){
       $event['id'] = (int)$event['id'];
       $event['categoryId'] = (int)$event['categoryId'];
@@ -56,9 +56,11 @@ class Almanac
         //extract date from startdate stamp which has time set to 00:00
         $startDateStamp = strtotime($event['date']);
         $date = date('d-m-Y', $startDateStamp);
+        $dateISO = date('Y-m-d', $startDateStamp);
         $startTimeStamp = strtotime($event['startTime']);
         $startTime = date('G:i', $startTimeStamp);
         $event['start'] = "$date $startTime";
+        $event['startISO'] = "$dateISO $startTime";
       }
       if ($event['endTime']) {
         $endDateStamp = strtotime($event['endTime']);
@@ -69,7 +71,7 @@ class Almanac
       unset($event['date']);
       return $event;
     }
-    
+
     private function getCategories(){
       $d = $this->isams->select('TblSchoolCalendarCategory', 'TblSchoolCalendarCategoryID as id, txtName', '1=1', []);
       $categories = ['id_0' => 'None'];

@@ -285,7 +285,7 @@ class Exgarde {
 
 		$student = new \Entities\People\Student();
 		return $student->byId($userID)->boardingHouse;
-		
+
 		return '-';
 
 	}
@@ -353,7 +353,13 @@ class Exgarde {
 
 		if(strlen($item['ID_2'])==4 && ($item['EVENT_ID'] == 2009 || $item['EVENT_ID'] == 2002)){
 			 $item['name'] = "PIN (".$item['ID_2'].")";
-			 $item['boarding'] = isset($this->students[$key]) ? $this->getBoardingFromPIN($item['ID_2'], $item['name'], $item) : 'code';
+			 $student = new \Entities\People\Student(new \Dependency\Databases\Ada);
+			 $student->bySchoolNumber($item['ID_2']);
+			 $item['ada_id'] = $student->id ?? null;
+			 $item['name'] = $student->fullName ?? null;
+			 $item['lastName'] = $student->lastName ?? null;
+			 $item['type'] = 'Student';
+			 $item['boarding'] = $student->boardingHouse ?? null;
 			 $item['style'] = 'PIN';
 			 $this->errorEvents[] = $item;
 	  ///commented out as some keypads are used for registering that the students don't actually have authorisation to access
