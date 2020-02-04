@@ -35,6 +35,7 @@
           "Students\\":"v1/.routes/Students",
           "Users\\":"v1/.routes/Users",
           "Transport\\":"v1/.routes/Transport",
+          "Tools\\":"v1/.routes/Tools",
           "Watch\\":"v1/.routes/Watch",
           "Sockets\\":"v1/sockets",
           "Utilities\\":"v1/utilities",

@@ -37,7 +37,7 @@ class SingleSheet
     //delete the default sheet
     $sheetIndex = $this->spreadsheet->getIndex($this->spreadsheet->getSheetByName('Worksheet'));
     $this->spreadsheet->removeSheetByIndex($sheetIndex);
-    
+
     $title = $settings['title'] ?? '';
 
     //set metadata
@@ -52,10 +52,10 @@ class SingleSheet
 
 
     //generate file path and save sheet
-    
+
     $path = $settings['path'] ?? 'spreadsheets/';
     $filename = $settings['filename'] ?? uniqid() . '(' . date('d-m-y@H.i.s',time()) . ')' . '.xlsx';;
- 
+
     $filepath = FILESTORE_PATH . "$path$filename";
     $url = FILESTORE_URL . "$path$filename";
 
@@ -65,7 +65,7 @@ class SingleSheet
     $this->url = $url;
     $this->filename = $filename;
     $this->path = $filepath;
-    
+
     $this->package = [
       'file' => $filename,
       'url'  => $url
@@ -83,28 +83,32 @@ class SingleSheet
 
     //sheet title
     $sheet = $spreadsheet->getSheetByName($title);
-    
+
     $sheetData = [];
     $header = [];
     foreach ($columns as $column){
+      $isHidden = $column['hidden'] ?? false;
+      if ($isHidden) continue;
       $header[] = $column['label'];
     }
     $sheetData[] = $header;
     foreach ($data as $d) {
       $row = [];
       foreach ($columns as $column){
+        $isHidden = $column['hidden'] ?? false;
+        if ($isHidden) continue;
         $row[] = $d[$column['field']] ?? '';
       }
       $sheetData[] = $row;
     }
-    
+
     $forceText = $this->settings['forceText'] ?? false;
     if ($forceText) {
       $sheet->getStyle('A1:AZ1000')
             ->getNumberFormat()
             ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
     }
-    
+
     $sheet->fromArray(
         $sheetData,  // The data to set
         NULL,        // Array values with this value will not be set
@@ -126,4 +130,3 @@ class SingleSheet
   }
 
 }
-

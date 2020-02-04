@@ -21,8 +21,10 @@ $app->group('/watch/exgarde', function(){
 
 $app->group('/watch/gym', function(){
 
-    $this->get('/all', '\Watch\Gym:allGET');
-    
+    $this->get('/all', '\Watch\Gym:allGet');
+    $this->get('/options', '\Watch\Gym:optionsGet');
+    $this->put('/entry/live', '\Watch\Gym:liveEntryPut');
+
 })->add("Authenticate");
 
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);
