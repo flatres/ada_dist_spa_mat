@@ -42,6 +42,12 @@ class Gym
           } else {
             $l['sessionTypeId'] = $adaRecord[0]['sessionTypeId'];
           }
+          $student = new \Entities\People\Student($this->ada, $l['ada_id']);
+          $l['gender'] = $student->gender;
+          $l['year'] = $student->NCYear;
+          $explode = explode(',', $l['entry_timestamp']);
+          $l['date'] = $explode[0];
+          $l['time'] = ltrim($explode[1]);
           $records[] = $l;
         }
       }

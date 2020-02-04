@@ -16,7 +16,7 @@ class Student
     public $id, $firstName, $lastName, $email, $boardingHouse, $gender, $displayName;
     public $misFamilyId;
     public $boardingHouseSafe; //has spaces replaced with _ for use in array keys
-    public $preName, $fullName, $fullPreName, $name;
+    public $preName, $fullName, $fullPreName, $name, $NCYear;
     public $misId;
 
     public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
@@ -55,7 +55,7 @@ class Student
     {
       $student = $this->sql->select(
         'stu_details',
-        'id, firstname, lastname, prename, email, boardingHouse, gender, mis_id, mis_family_id',
+        'id, firstname, lastname, prename, email, boardingHouse, gender, mis_id, mis_family_id, NCYear',
         'id=?',
         [$id]);
 
@@ -75,6 +75,7 @@ class Student
         $this->boardingHouse = $student['boardingHouse'];
         $this->boardingHouseSafe = str_replace(" ", '_', $student['boardingHouse']);
         $this->gender = $student['gender'];
+        $this->NCYear = $student['NCYear'];
       } else {
         return null;
       }

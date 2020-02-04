@@ -285,21 +285,7 @@ class Exgarde {
 
 		$student = new \Entities\People\Student();
 		return $student->byId($userID)->boardingHouse;
-
-		// $d = $sql->select('t_categories', 'id', 'name=? AND school=223', array('BOARDING'));
-		// $catID = $d[0]['id'];
-		//
-		// $d = $sql->select('t_tags', 'id, name', 'category=?', array($catID));
-		// foreach($d as $bhouse){
-		// 	$houses['h_'. $bhouse['id']]  = $bhouse['name'];
-		// }
-		//
-		// $d = $sql->select('t_tagmap', 'tag_id', 'user_id=?', array($userID));
-		// foreach($d as $tag){
-		// 	$tagID = $tag['tag_id'];
-		// 	if(isset($houses['h_'.$tagID])){ return $houses['h_'.$tagID];}
-		// }
-
+		
 		return '-';
 
 	}
