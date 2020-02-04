@@ -358,17 +358,10 @@ class Exgarde {
 			 $item['ada_id'] = $student->id ?? null;
 			 $item['name'] = $student->fullName ?? null;
 			 $item['lastName'] = $student->lastName ?? null;
-			 $item['type'] = 'Student';
+			 $item['type'] = $student->id ? 'Student' : 'error';
 			 $item['boarding'] = $student->boardingHouse ?? null;
 			 $item['style'] = 'PIN';
 			 $this->errorEvents[] = $item;
-	  ///commented out as some keypads are used for registering that the students don't actually have authorisation to access
-		// }elseif(strlen($item['ID_2'])>4 && ($item['EVENT_ID'] == 2009 || $item['EVENT_ID'] == 2002)){
-		// 	$item['name']='-';
-		// 	$item['boarding']='-';
-		// 	$item['style']='error';
-		// 	$this->errorEvents[] = $item;
-		// 	return;
 		}else{
 			if(isset($this->names[$key])){
 				//check to see if it's a known, matched student
