@@ -72,7 +72,7 @@ $app->group('/transport', function(){
     $this->post('/taxis/bookings', '\Transport\TbsExtTaxisBookings:bookingPost');
 
     $this->post('/taxis/summary', '\Transport\TbsExtTaxisBookings:summaryPost');
-    $this->get('/taxis/summary/{sessionId}/{taxiId}', '\Transport\TbsExtTaxisBookings:summaryGET');
+    $this->get('/taxis/summary/{sessionId}/{companyId}', '\Transport\TbsExtTaxisBookings:summaryGET');
 
     $this->put('/taxis/bookings', '\Transport\TbsExtTaxisBookings:bookingPut');
     $this->put('/taxis/assignment', '\Transport\TbsExtTaxisBookings:taxiAssigmentPut');
@@ -105,6 +105,9 @@ $app->group('/transport', function(){
     $this->post('/taxis/companies', '\Transport\TbsExtTaxisAdmin:companiesPost');
     $this->put('/taxis/companies', '\Transport\TbsExtTaxisAdmin:companiesPut');
     $this->delete('/taxis/companies/{id}', '\Transport\TbsExtTaxisAdmin:companiesDelete');
+
+    $this->put('/taxis/share/remove', '\Transport\TbsExtTaxisBookings:unsharePut');
+    $this->put('/taxis/share', '\Transport\TbsExtTaxisBookings:sharePut');
 
 
 })->add("Authenticate");

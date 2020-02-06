@@ -63,7 +63,7 @@ class TbsExtTaxisBookings
         $c['out'] = ['cancelled' => [], 'new' => [], 'pending' => [], 'confirmed' => []];
         $c['ret'] = ['cancelled' => [], 'new' => [], 'pending' => [], 'confirmed' => []];
 
-        $bookings = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND taxiId = ?', [$sessionId, $c['id']]);
+        $bookings = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND companyId = ?', [$sessionId, $c['id']]);
 
         foreach ($bookings as $booking){
           $journey = $booking['isReturn'] ? 'ret' : 'out';
@@ -87,8 +87,8 @@ class TbsExtTaxisBookings
     public function summaryGet($request, $response, $args)
     {
       $sessionId = $args['sessionId'];
-      $taxiId = $args['taxiId'];
-      $c = $this->adaModules->select('tbs_taxi_companies', 'id, name, phoneNumber, email', 'id=?', [$taxiId])[0];
+      $companyId = $args['companyId'];
+      $c = $this->adaModules->select('tbs_taxi_companies', 'id, name, phoneNumber, email', 'id=?', [$companyId])[0];
 
       // $c['out'] = ['cancelled' => [], 'new' => [], 'ammended' => [], 'confirmed' => []];
       // $c['ret'] = ['cancelled' => [], 'new' => [], 'ammended' => [], 'confirmed' => []];
@@ -97,7 +97,7 @@ class TbsExtTaxisBookings
       $c['outCount'] = 0;
       $c['retCount'] = 0;
 
-      $bookings = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND taxiId = ? ORDER BY statusId ASC', [$sessionId, $taxiId]);
+      $bookings = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND companyId = ? ORDER BY statusId ASC', [$sessionId, $companyId]);
       $c['bookings'] = $bookings;
       foreach ($bookings as &$booking){
         $journey = $booking['isReturn'] ? 'ret' : 'out';
@@ -237,15 +237,32 @@ class TbsExtTaxisBookings
 
     public function allBookingsGet($request, $response, $args)
     {
-      $sessID = $args['session'];
+      $sessId = $args['session'];
 
-      $data = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? ORDER BY id DESC', [$sessID]);
+      $taxisRaw = $this->adaModules->select('tbs_taxi_taxis', '*', 'sessionId=?', [$sessId]);
+      $taxis = [];
 
+      foreach($taxisRaw as $t) {
+        $t['bookings'] = [];
+        $t['count'] = 0;
+        $taxis['i_' . $t['id']] = $t;
+      }
+
+      $bookings = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? ORDER BY id DESC', [$sessId]);
       $status = $this->getAllStatus();
 
-      foreach ($data as &$booking) {
+      foreach ($bookings as &$booking) {
         $booking = $this->makeDisplayValues($booking);
+        $count = 1 + count($booking['passengers']);
+        if ($booking['taxiId']) {
+          $taxis['i_' . $booking['taxiId']]['bookings'][] = $booking;
+          $taxis['i_' . $booking['taxiId']]['count'] += $count;
+        }
       }
+      $data = [
+        'bookings'  => $bookings,
+        'taxis'     => array_values($taxis)
+      ];
       return emit($response, $data);
     }
 
@@ -307,8 +324,8 @@ class TbsExtTaxisBookings
       $booking['contact'] = new \Entities\People\iSamsUser($this->isams, $booking['contactIsamsUserId']);
 
       // taxi company
-      $taxiId = $booking['taxiId'];
-      $d = $this->adaModules->select('tbs_taxi_companies', 'name, phoneNumber', 'id=?', [$taxiId]);
+      $companyId = $booking['companyId'];
+      $d = $this->adaModules->select('tbs_taxi_companies', 'name, phoneNumber', 'id=?', [$companyId]);
       if (isset($d[0])) {
         $booking['companyName'] = $d[0]['name'];
         $booking['companyPhoneNumber'] = $d[0]['phoneNumber'];
@@ -319,6 +336,25 @@ class TbsExtTaxisBookings
       if (isset($d[0])){
         $date = $booking['isReturn'] ? $d[0]['dateRtn'] : $d[0]['dateOut'];
         $booking['date'] = convertToAdaDate($date);
+      }
+
+      //make display name of user that has actioned changed
+      $user = new \Entities\People\User($this->ada, $booking['actionedByUserId']);
+      $booking['actionedBy'] = $user->fullName;
+
+      $booking['revisions'] = [];
+      //get revisions
+      $revisions = $this->adaModules->select('tbs_taxi_bookings_archive', '*', 'bookingId=? ORDER BY id DESC', [$booking['id']]);
+      $flagRecent = true;
+      foreach($revisions as $r){
+        $booking['revisions'][] = [
+          'createdAt' => $r['createdAt'],
+          'pickupTime'  => $r['pickupTime'],
+          'displayFrom' => $r['displayFrom'],
+          'displayTo'   => $r['displayTo'],
+          'recent'      => $flagRecent,
+        ];
+        $flagRecent = false;
       }
 
       return $booking;
@@ -351,7 +387,7 @@ class TbsExtTaxisBookings
 
     public function bookingDelete($request, $response, $args)
     {
-      $this->adaModules->update('tbs_taxi_bookings', 'statusId=?', 'id = ?', [4, $args['id']]);
+      $this->adaModules->update('tbs_taxi_bookings', 'statusId=?, taxiId=?', 'id = ?', [4, null, $args['id']]);
       $this->publish($args['id']);
       $this->sendCancelledEmail($args['id']);
       return emit($response, []);
@@ -432,23 +468,77 @@ class TbsExtTaxisBookings
       $this->adaModules->update('tbs_taxi_bookings', 'statusId=?', 'id=?', array($statusId, $bookingId));
     }
 
-    public function taxiAssigmentPut($request, $response)
+    public function sharePut($request, $response)
     {
       $data = $request->getParsedBody();
 
-      $taxiId = $data['taxiId'];
+      $fromId = $data['fromId'];
+      $toId = $data['toId'];
+
+      $oldTaxiId = $this->adaModules->select('tbs_taxi_bookings', 'taxiId', 'id=?', [$fromId])[0]['taxiId'];
+
+      //get destination taxi
+      $taxiId = $this->adaModules->select('tbs_taxi_bookings', 'taxiId', 'id=?', [$toId])[0]['taxiId'];
+
+      $this->adaModules->update('tbs_taxi_bookings', 'taxiId=?', 'id=?', [$taxiId, $fromId]);
+
+      //if no other people in this taxi, delete it
+      $bookings = $this->adaModules->select('tbs_taxi_bookings', 'id', 'taxiId=?', [$oldTaxiId]);
+      if (count($bookings) == 0) $this->adaModules->delete('tbs_taxi_taxis', 'id=?', [$oldTaxiId]);
+
+      return emit($response, $data);
+    }
+
+    public function unsharePut($request, $response)
+    {
+      global $userId;
+      $booking = $request->getParsedBody();
+      $bookingId = $booking['id'];
+      $sessionId = $booking['sessionId'];
+      $companyId = $booking['companyId'];
+      $isReturn = $booking['isReturn'];
+      $taxiId = $this->adaModules->insert('tbs_taxi_taxis', 'sessionId, companyId, isReturn', [$sessionId, $companyId, $isReturn] );
+
+      $this->adaModules->update('tbs_taxi_bookings', 'taxiId=?', 'id=?', [$taxiId, $bookingId]);
+
+      return emit($response, $booking);
+    }
+
+    public function taxiAssigmentPut($request, $response)
+    {
+      global $userId;
+      $data = $request->getParsedBody();
+
+      $companyId = $data['companyId'];
       $cost = $data['cost'];
       $bookingId = $data['id'];
+      $sessionId = $data['sessionId'];
+      $taxiId = $data['taxiId'];
+      $isReturn = $data['isReturn'];
+      $sentToCompany = $data['sentToCompany'];
 
-      //get current taxi to look for changes
-      $oldTaxiId = $this->adaModules->select('tbs_taxi_bookings', 'taxiId', 'id=?', array($bookingId))[0]['taxiId'];
+      //get current taxi companyId to look for changes
+      $oldCompanyId = $this->adaModules->select('tbs_taxi_bookings', 'companyId', 'id=?', [$bookingId])[0]['companyId'];
 
-      if ($taxiId === $oldTaxiId) {
-        $this->adaModules->update('tbs_taxi_bookings', 'taxiId=?, cost=?', 'id=?', array($taxiId, $cost, $bookingId));
-      } else {
-        $this->setStatus($bookingId, 2);
-        $this->adaModules->update('tbs_taxi_bookings', 'taxiId=?, cost=?', 'id=?', array($taxiId, $cost, $bookingId));
+      if ($companyId !== $oldCompanyId) {
+          //company has changed so create a new taxi for this company and reset email flags
+          //first see if this booking's taxi is being shared with anyone else. If not then delete it.
+          $bookings = $this->adaModules->select('tbs_taxi_bookings', 'id', 'taxiId=?', [$taxiId]);
+          if (count($bookings) === 1) $this->adaModules->delete('tbs_taxi_taxis', 'id=?', $taxiId);
+
+          //make a new taxi for this booking
+          $taxiId = $this->adaModules->insert('tbs_taxi_taxis', 'sessionId, companyId, isReturn', [$sessionId, $companyId, $isReturn] );
+          $sentToCompany = 0;
+
       }
+
+      $this->setStatus($bookingId, 2);
+      $this->adaModules->update(
+        'tbs_taxi_bookings',
+        'companyId=?, cost=?, actionedByUserId=?, taxiId=?, sentToCompany=?',
+        'id=?',
+        [$companyId, $cost, $userId, $taxiId, $sentToCompany, $bookingId]);
+
       $this->publish($bookingId);
 
       return emit($response, $data);
@@ -691,25 +781,56 @@ class TbsExtTaxisBookings
 
       $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
 
+      $bookingFields = [
+        'pickupTime'    => $booking['pickupTime'],
+        'note'          => $note,
+        'journeyType'   => $booking['journeyType'],
+        'schoolLocation'=> $schoolLocation,
+        'address'       => $booking['address'],
+        'airportId'       => $booking['airport'] ?? null,
+        'flightNumber'  => $booking['flightNumber'],
+        'flightTime'    => $booking['flightTime'],
+        'stationId'       => $booking['station'] ?? null,
+        'trainTime'     => $booking['trainTime'],
+      ];
+
+      $revision = $this->archiveBooking($bookingId);
+
+      $bookingFields['isReturn'] = $isReturn ? 1 : 0;
+      $bookingFields['revision'] = $revision;
+      $bookingFields['statusId'] = 1;
+      $bookingFields['bookingId'] = $bookingId;
+
       $this->adaModules->update(
         'tbs_taxi_bookings',
-        'pickupTime=?, isReturn=?, note=?, journeyType=?, schoolLocation=?, address=?, airportId=?, flightNumber=?, flightTime=?, stationId=?, trainTime=?',
+        'pickupTime=?, note=?, journeyType=?, schoolLocation=?, address=?, airportId=?, flightNumber=?, flightTime=?, stationId=?, trainTime=?, isReturn=?, revision = ?, statusId = ?',
         'id=?',
+        array_values($bookingFields)
+      );
+
+    }
+
+    private function archiveBooking(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_taxi_bookings', '*', 'id=?', [$bookingId]);
+      if (!isset($booking[0])) return;
+      $b = $booking[0];
+      $b = $this->makeDisplayValues($b);
+
+      $this->adaModules->insert(
+        'tbs_taxi_bookings_archive',
+        'bookingId, studentId, pickupTime, displayFrom, displayTo',
         array(
-          $booking['pickupTime'],
-          $isReturn ? 1 : 0,
-          $note,
-          $booking['journeyType'],
-          $schoolLocation,
-          $booking['address'],
-          $booking['airport'] ?? null,
-          $booking['flightNumber'],
-          $booking['flightTime'],
-          $booking['station'] ?? null,
-          $booking['trainTime'],
-          $bookingId
+          $b['id'],
+          $b['studentId'],
+          $b['pickupTime'],
+          $b['displayFrom'],
+          $b['displayTo']
         )
       );
+
+      $revision = $b['revision'];
+      return $revision + 1;
 
     }
 
