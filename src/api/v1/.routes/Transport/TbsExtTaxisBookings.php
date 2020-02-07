@@ -12,10 +12,11 @@ class TbsExtTaxisBookings
 {
     protected $container;
     private $user, $email;
+    private $debug = true;
 
     public function __construct(\Slim\Container $container)
     {
-        $this->isams = $container->isams;
+      $this->isams = $container->isams;
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
        $this->student = new \Entities\People\Student($this->ada);
@@ -424,24 +425,6 @@ class TbsExtTaxisBookings
       return emit($response, $data);
     }
 
-    public function summaryPost($request, $response)
-    {
-      $summary = $request->getParsedBody();
-
-      $email = new \Utilities\Email\Email($this->email, 'Marlborough College Bookings');
-      $content = $summary['html'];
-      $email->send($content);
-
-      foreach($summary['bookings'] as $booking) {
-          $this->adaModules->update('tbs_taxi_bookings', 'sentToCompany=?', 'id=?', [1, $booking['id']]);
-      }
-      // use the id of the first booking to trigger a session update
-      $anId = $summary['bookings'][0]['id'];
-      $summary['anId'] = $anId;
-      $this->publish($anId);
-      return emit($response, $summary);
-    }
-
     public function bookingPut($request, $response)
     {
       $data = $request->getParsedBody();
@@ -617,14 +600,10 @@ class TbsExtTaxisBookings
 
       $booking = $this->makeDisplayValues($booking);
       $passengers = $this->getPassengerNames($bookingId);
-
       $passengerString = $this->makePassengerString($passengers);
 
-      $user = new \Entities\People\iSamsUser($this->isams, $booking['contactIsamsUserId']);
-
-      $email = new \Utilities\Email\Email('flatres@gmail.com', 'MC Taxi Booking Received');
       $fields = [
-        'name'    => $user->firstName,
+        'name'    => $booking['contact']['firstName'],
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'date'    => $booking['date'],
@@ -634,9 +613,7 @@ class TbsExtTaxisBookings
         'passengers'  => $passengerString,
         'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
-
-      $content = $email->template('TBS.ReceivedTaxi', $fields);
-      $res = $email->send($content);
+      $this->sendEmail($booking['contact']->email, 'MC Taxi Booking Received','TBS.ReceivedTaxi', $fields);
     }
 
     private function sendCancelledEmail(int $bookingId)
@@ -662,9 +639,8 @@ class TbsExtTaxisBookings
         $passengerString = '-';
       }
 
-      $email = new \Utilities\Email\Email($this->email, 'MC Taxi Booking Cancelled');
       $fields = [
-        'name'    => 'Simon',
+        'name'    => $booking['contact']['firstName'],
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'date'    => $booking['date'],
@@ -675,9 +651,8 @@ class TbsExtTaxisBookings
         'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
 
-      $content = $email->template('TBS.CancelledTaxi', $fields);
+      $this->sendEmail($booking['contact']->email, 'MC Taxi Booking Cancelled', 'TBS.CancelledTaxi', $fields);
 
-      $res = $email->send($content);
     }
 
     private function sendConfirmedEmail(int $bookingId)
@@ -703,9 +678,8 @@ class TbsExtTaxisBookings
         $passengerString = '-';
       }
 
-      $email = new \Utilities\Email\Email($this->email, 'MC Taxi Booking Confirmed');
       $fields = [
-        'name'    => 'Simon',
+        'name'    => $booking['contact']->firstName,
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'date'    => $booking['date'],
@@ -717,10 +691,26 @@ class TbsExtTaxisBookings
         'passengers'  => $passengerString,
         'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
+      $this->sendEmail($booking['contact']->email, 'MC Taxi Booking Confirmed', 'TBS.ConfirmedTaxi', $fields);
+    }
 
-      $content = $email->template('TBS.ConfirmedTaxi', $fields);
+    public function summaryEmailPost($request, $response)
+    {
+      $summary = $request->getParsedBody();
 
-      $res = $email->send($content);
+      $to = $this->debug === true ? $this->email : $summary['email'];
+      $email = new \Utilities\Email\Email($to, 'Marlborough College Bookings');
+      $content = $summary['html'];
+      $email->send($content);
+
+      foreach($summary['bookings'] as $booking) {
+          $this->adaModules->update('tbs_taxi_bookings', 'sentToCompany=?', 'id=?', [1, $booking['id']]);
+      }
+      // use the id of the first booking to trigger a session update
+      $anId = $summary['bookings'][0]['id'];
+      $summary['anId'] = $anId;
+      $this->publish($anId);
+      return emit($response, $summary);
     }
 
     private function getPassengerIds(int $bookingId)
@@ -832,6 +822,14 @@ class TbsExtTaxisBookings
       $revision = $b['revision'];
       return $revision + 1;
 
+    }
+
+    private function sendEmail($to, $subject, $template, $fields)
+    {
+      $to = $this->debug === true ? $this->email : $to;
+      $email = new \Utilities\Email\Email($email, $subject);
+      $content = $email->template($template, $fields);
+      $res = $email->send($content);
     }
 
     private function publish(int $bookingId) {

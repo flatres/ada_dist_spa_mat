@@ -13,6 +13,7 @@ class TbsExtCoachesBookings
     protected $container;
     private $user, $email;
     private $oldCoachId = false;
+    private $debug = true;
 
     public function __construct(\Slim\Container $container)
     {
@@ -401,151 +402,6 @@ class TbsExtCoachesBookings
       return $id;
     }
 
-    private function sendPendingEmail(int $bookingId)
-    {
-      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
-      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
-
-      $booking = $this->makeDisplayValues($booking);
-
-      $email = new \Utilities\Email\Email($this->email, 'MC Coach Booking Received');
-
-      if ($booking['isReturn'] == 0) {
-        $fields = [
-          'name'    => 'Simon',
-          'id'      => $bookingId,
-          'pupil'   => $booking['displayName'],
-          'date'    => $booking['date'],
-          'to'    => $booking['stop'],
-          'from'  => $booking['schoolLocation'],
-          'time'  => $booking['schoolTime']
-        ];
-      } else {
-        $fields = [
-          'name'    => 'Simon',
-          'id'      => $bookingId,
-          'pupil'   => $booking['displayName'],
-          'date'    => $booking['date'],
-          'time'=> $booking['stopTime'],
-          'from'    => $booking['stop'],
-          'to'  => $booking['schoolLocation'],
-        ];
-      }
-
-      $content = $email->template('TBS.ReceivedCoach', $fields);
-
-      $res = $email->send($content);
-    }
-
-    private function sendCancelledEmail(int $bookingId)
-    {
-      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
-      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
-
-      $booking = $this->makeDisplayValues($booking);
-
-      $email = new \Utilities\Email\Email($this->email, 'MC Coach Booking Cancelled');
-      if ($booking['isReturn'] === 1) {
-        $fields = [
-          'name'    => 'Simon',
-          'id'      => $bookingId,
-          'pupil'   => $booking['displayName'],
-          'date'    => $booking['date'],
-          'time'=> $booking['stopTime'],
-          'from'    => $booking['stop'],
-          'to'  => $booking['schoolLocation']
-        ];
-      } else {
-        $fields = [
-          'name'    => 'Simon',
-          'id'      => $bookingId,
-          'pupil'   => $booking['displayName'],
-          'date'    => $booking['date'],
-          'time'=> $booking['schoolTime'],
-          'from'    => $booking['schoolLocation'],
-          'to'      => $booking['stop']
-        ];
-      }
-
-      $content = $email->template('TBS.CancelledCoach', $fields);
-
-      $res = $email->send($content);
-    }
-
-    private function sendDeclinedEmail(int $bookingId)
-    {
-      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
-      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
-
-      $booking = $this->makeDisplayValues($booking);
-
-      $email = new \Utilities\Email\Email($this->email, 'MC Coach Booking Declined');
-      if ($booking['isReturn'] === 1) {
-        $fields = [
-          'name'    => 'Simon',
-          'id'      => $bookingId,
-          'pupil'   => $booking['displayName'],
-          'date'    => $booking['date'],
-          'time'=> $booking['stopTime'],
-          'from'    => $booking['stop'],
-          'to'  => $booking['schoolLocation']
-        ];
-      } else {
-        $fields = [
-          'name'    => 'Simon',
-          'id'      => $bookingId,
-          'pupil'   => $booking['displayName'],
-          'date'    => $booking['date'],
-          'time'=> $booking['schoolTime'],
-          'from'    => $booking['schoolLocation'],
-          'to'      => $booking['stop']
-        ];
-      }
-
-      $content = $email->template('TBS.DeclinedCoach', $fields);
-
-      $res = $email->send($content);
-    }
-
-    private function sendConfirmedEmail(int $bookingId)
-    {
-      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
-      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
-
-      $booking = $this->makeDisplayValues($booking);
-
-      $email = new \Utilities\Email\Email($this->email, 'MC Coach Booking Confirmed');
-      if ($booking['isReturn'] === 1) {
-        $fields = [
-          'name'    => 'Simon',
-          'id'      => $bookingId,
-          'pupil'   => $booking['displayName'],
-          'date'    => $booking['date'],
-          'time'    => $booking['stopTime'],
-          'from'    => $booking['stop'],
-          'to'      => $booking['schoolLocation'],
-          'cost'    => $booking['cost'],
-          'code'    => $booking['coachCode']
-        ];
-      } else {
-        $fields = [
-          'name'    => 'Simon',
-          'id'      => $bookingId,
-          'pupil'   => $booking['displayName'],
-          'date'    => $booking['date'],
-          'time'    => $booking['schoolTime'],
-          'from'    => $booking['schoolLocation'],
-          'to'      => $booking['stop'],
-          'cost'    => $booking['cost'],
-          'code'    => $booking['coachCode']
-        ];
-      }
-
-      $content = $email->template('TBS.ConfirmedCoach', $fields);
-
-      $res = $email->send($content);
-    }
-
     private function updateBooking(int $bookingId, array $booking, $isReturn = false)
     {
 
@@ -596,6 +452,7 @@ class TbsExtCoachesBookings
 
       $checklist['activeSession'] = $session['isActive'] == 1 ? true : false;
 
+      //get routes and make sure everything has been set up
       $routesOut = $sql->select('tbs_coaches_routes', 'id, isReturn', 'sessionId=? AND isReturn = 0', [$id]);
       foreach ($routesOut as $route) {
         $start = $sql->select('tbs_coaches_stops', 'id, time', 'routeId=? AND isSchoolLocation = 1 ORDER BY id ASC', [$route['id']]);
@@ -689,30 +546,136 @@ class TbsExtCoachesBookings
       }
     }
 
-//
-//
-// // COMPANIES -----------------------------------------------------------------------------
-//     public function companiesGet($request, $response, $args)
-//     {
-//       return emit($response, $this->adaModules->select('tbs_taxi_companies', '*'));
-//     }
-//
-//     public function companiesPost($request, $response)
-//     {
-//       $data = $request->getParsedBody();
-//       $data['id'] = $this->adaModules->insertObject('tbs_taxi_companies', $data);
-//       return emit($response, $data);
-//     }
-//
-//     public function companiesPut($request, $response)
-//     {
-//       $data = $request->getParsedBody();
-//       return emit($response, $this->adaModules->updateObject('tbs_taxi_companies', $data, 'id'));
-//     }
-//
-//     public function companiesDelete($request, $response, $args)
-//     {
-//       return emit($response, $this->adaModules->delete('tbs_taxi_companies', 'id=?', array($args['id'])));
-//     }
+    private function sendPendingEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      $booking = $this->makeDisplayValues($booking);
+
+      if ($booking['isReturn'] == 0) {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'to'      => $booking['stop'],
+          'from'    => $booking['schoolLocation'],
+          'time'   => $booking['schoolTime']
+        ];
+      } else {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'    => $booking['stopTime'],
+          'from'    => $booking['stop'],
+          'to'      => $booking['schoolLocation'],
+        ];
+      }
+      $this->sendEmail($booking['contact']->email, 'MC Coach Booking Received', 'TBS.ReceivedCoach', $fields);
+    }
+
+    private function sendCancelledEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      $booking = $this->makeDisplayValues($booking);
+
+      if ($booking['isReturn'] === 1) {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'=> $booking['stopTime'],
+          'from'    => $booking['stop'],
+          'to'  => $booking['schoolLocation']
+        ];
+      } else {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'=> $booking['schoolTime'],
+          'from'    => $booking['schoolLocation'],
+          'to'      => $booking['stop']
+        ];
+      }
+
+      $this->sendEmail($booking['contact']->email, 'MC Coach Booking Cancelled', 'TBS.CancelledCoach', $fields);
+    }
+
+    private function sendDeclinedEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      $booking = $this->makeDisplayValues($booking);
+
+      if ($booking['isReturn'] === 1) {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'=> $booking['stopTime'],
+          'from'    => $booking['stop'],
+          'to'  => $booking['schoolLocation']
+        ];
+      } else {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'=> $booking['schoolTime'],
+          'from'    => $booking['schoolLocation'],
+          'to'      => $booking['stop']
+        ];
+      }
+
+      $this->sendEmail($booking['contact']->email, 'MC Coach Booking Declined', 'TBS.DeclinedCoach', $fields);
+    }
+
+    private function sendConfirmedEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      $booking = $this->makeDisplayValues($booking);
+
+      if ($booking['isReturn'] === 1) {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'    => $booking['stopTime'],
+          'from'    => $booking['stop'],
+          'to'      => $booking['schoolLocation'],
+          'cost'    => $booking['cost'],
+          'code'    => $booking['coachCode']
+        ];
+      } else {
+        $fields = [
+          'name'    => 'Simon',
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'    => $booking['schoolTime'],
+          'from'    => $booking['schoolLocation'],
+          'to'      => $booking['stop'],
+          'cost'    => $booking['cost'],
+          'code'    => $booking['coachCode']
+        ];
+      }
+      $this->sendEmail($booking['contact']->email, 'MC Coach Booking Confirmed', 'TBS.ConfirmedCoach', $fields);
+    }
+
+    private function sendEmail($to, $subject, $template, $fields)
+    {
+      $to = $this->debug === true ? $this->email : $to;
+      echo $to;
+      $to = 'flatres@gmail.com';
+      $email = new \Utilities\Email\Email($email, $subject);
+      $content = $email->template($template, $fields);
+      $res = $email->send($content);
+    }
 
 }
