@@ -19,6 +19,7 @@ class Census
        $this->adaModules = $container->adaModules;
        $this->isams = $container->isams;
        $this->mcCustom= $container->mcCustom;
+       ini_set('max_execution_time', 240);
 
     }
 
@@ -33,6 +34,8 @@ class Census
       $subjects = [
         'GCE_M' => [
             'id'   => 'GCE_Male',
+            'a_13' => 0,
+            'a_14' => 0,
             'a_15' => 0,
             'a_16' => 0,
             'a_17' => 0,
@@ -40,6 +43,8 @@ class Census
           ],
         'GCE_F' => [
             'id'   => 'GCE_Female',
+            'a_13' => 0,
+            'a_14' => 0,
             'a_15' => 0,
             'a_16' => 0,
             'a_17' => 0,
@@ -47,6 +52,8 @@ class Census
           ],
         'GCSE_M' => [
             'id'   => 'GCSE_Male',
+            'a_13' => 0,
+            'a_14' => 0,
             'a_15' => 0,
             'a_16' => 0,
             'a_17' => 0,
@@ -54,6 +61,8 @@ class Census
           ],
         'GCSE_F' => [
             'id'   => 'GCSE_Female',
+            'a_13' => 0,
+            'a_14' => 0,
             'a_15' => 0,
             'a_16' => 0,
             'a_17' => 0,
@@ -74,6 +83,9 @@ class Census
       );
 
       $ages = [];
+      $count = 0;
+      $total = count($ageData);
+
       foreach ($ageData as $d) {
         if ((int)$d['age'] > 19) $d['age'] = 19; // top category is 19 and over
         $key = 'a_' . $d['age'];
@@ -96,6 +108,10 @@ class Census
         $level = $this->getHighestLevel($d['txtSchoolID']);
         $levelKey = $level . '_' . $d['txtGender'];
         $subjects[$levelKey][$key]++;
+
+        $text = $count . "/" . $total . " - " . $d['name'];
+        $this->console->publish($text);
+        $count++;
 
       }
 
@@ -144,6 +160,7 @@ class Census
 
     //A level and PreU are GCE. If none of these must be GCSE
     private function getHighestLevel($misId) {
+      // return "GCSE";
       $student = new \Entities\People\iSamsStudent($this->isams, $misId);
       $student->getSets();
       foreach($student->sets as $set) {
