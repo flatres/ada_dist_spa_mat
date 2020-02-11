@@ -3,7 +3,7 @@ namespace Entities\People;
 
 class iSamsStudent
 {
-  public $firstName, $lastName, $fullName, $initials, $gender, $dob, $enrolmentNVYear, $enrolmentSchoolYear, $boardingHouse, $mobile;
+  public $firstName, $lastName, $fullName, $initials, $gender, $dob, $enrolmentNVYear, $enrolmentSchoolYear, $NCYear, $boardingHouse, $mobile;
   public $familyId;
   public $adaId;
   public $contacts = [];
@@ -13,7 +13,7 @@ class iSamsStudent
 
   private $sql;
 
-  public function __construct(\Dependency\Databases\isams $msSql, int $id = null)
+  public function __construct(\Dependency\Databases\isams $msSql, string $id = null) //must be cast as string as isams id can start with 0
   {
     $this->sql= $msSql;
     if($id) $this->byId($id);
@@ -24,7 +24,7 @@ class iSamsStudent
     $this->id = $id;
     $d = $this->sql->select(
       'TblPupilManagementPupils',
-      'txtSchoolID, intFamily, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtMobileNumber',
+      'intNCYear, txtSchoolID, intFamily, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtMobileNumber',
       'txtSchoolID=?', [$id]);
 
     if(isset($d[0])){
@@ -41,6 +41,7 @@ class iSamsStudent
       $this->enrolmentNCYear = $d['intEnrolmentNCYear'];
       $this->enrolmentSchoolYear = $d['intEnrolmentSchoolYear'];
       $this->boardingHouse = $d['txtBoardingHouse'];
+      $this->NCYear = $d['intNCYear'];
       $this->getAdaId();
     }
   }

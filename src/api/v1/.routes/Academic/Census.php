@@ -76,7 +76,7 @@ class Census
       $ageData = $this->isams->query(
         "SELECT txtSchoolID, txtSurname + ', ' + txtForename as name, txtGender, intNCYear, convert(varchar, txtDOB, 106) as dob, Convert(integer,((DateDiff(day,txtDOB,?))/365.25)) as age, txtType
          FROM TblPupilManagementPupils
-         WHERE intSystemStatus=1
+         WHERE intSystemStatus=1 AND intNCYear=13
          AND intSystemStatus=1
          ORDER BY txtdob ASC",
          [$date]
@@ -160,12 +160,12 @@ class Census
 
     //A level and PreU are GCE. If none of these must be GCSE
     private function getHighestLevel($misId) {
-      // return "GCSE";
       $student = new \Entities\People\iSamsStudent($this->isams, $misId);
       $student->getSets();
       foreach($student->sets as $set) {
         if ($set->academicLevel == 'A' || $set->academicLevel == 'PreU') return "GCE";
       }
+
       return "GCSE";
     }
 
