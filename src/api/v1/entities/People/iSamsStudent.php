@@ -8,6 +8,8 @@ class iSamsStudent
   public $adaId;
   public $contacts = [];
   public $portalUserCodes = [];
+  // public $subjects = [];
+  // public $sets=[];
 
   private $sql;
 
@@ -167,6 +169,18 @@ class iSamsStudent
     } else {
       return false;
     }
+  }
+
+  public function getSets() {
+    $sets = $this->sql->select( 'TblTeachingManagerSetLists', 'intSetID', 'txtSchoolID=?', [$this->id]);
+    $this->sets = [];
+    foreach ($sets as $set) {
+      $this->sets[] = new \Entities\Academic\iSamsSet($set['intSetID']); 
+    }
+  }
+
+  public function getSubjects() {
+    $this->getSets();
   }
 }
 

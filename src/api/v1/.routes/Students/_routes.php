@@ -17,3 +17,6 @@ $app->group('/students', function(){
 });
 // ->add("Authenticate");
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);
+$app->group('/students/profile', function(){
+    $this->get('/subjects/{id}', '\Students\Profile:subjectsGet');
+})->add("Authenticate");
