@@ -9,11 +9,11 @@ class iSamsSubject
     public $name, $code;
     private $ada, $isams;
 
-    public function __construct($id = null)
+    public function __construct(\Dependency\Databases\isams $msSql, $id = null)
     {
        // $this->sql= $ada ?? new \Dependency\Databases\Ada();
-       $this->ada = new \Dependency\Databases\Ada();
-       $this->isams = new \Dependency\Databases\ISams();
+       // $this->ada = new \Dependency\Databases\Ada();
+       $this->isams = $msSql;
 
        if ($id) $this->byId($id);
        return $this;

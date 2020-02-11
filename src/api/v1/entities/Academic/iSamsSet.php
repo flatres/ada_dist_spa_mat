@@ -15,11 +15,11 @@ class iSamsSet
     private $adaModules;
     private $isams;
 
-    public function __construct($id = null) //intSetId
+    public function __construct(\Dependency\Databases\isams $msSql, $id = null) //intSetId
     {
        // $this->sql= $ada ?? new \Dependency\Databases\Ada();
        $this->adaModules = new \Dependency\Databases\AdaModules();
-       $this->isams = new \Dependency\Databases\ISams();
+       $this->isams = $msSql;
 
        if ($id) $this->byId($id);
        return $this;
@@ -39,7 +39,7 @@ class iSamsSet
 
       $this->setCode = $string = str_replace(' ', '', $set['txtSetCode']);
       $this->subjectId = (int)$set['intSubject'];
-      $subject = new \Entities\Academic\iSamsSubject($set['intSubject']);
+      $subject = new \Entities\Academic\iSamsSubject($this->isams, $set['intSubject']);
       $this->subjectName = $subject->name;
       $this->subjectCode = $subject->code;
 

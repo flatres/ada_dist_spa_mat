@@ -9,7 +9,7 @@ class iSamsStudent
   public $contacts = [];
   public $portalUserCodes = [];
   // public $subjects = [];
-  // public $sets=[];
+  public $sets=[];
 
   private $sql;
 
@@ -175,7 +175,7 @@ class iSamsStudent
     $sets = $this->sql->select( 'TblTeachingManagerSetLists', 'intSetID', 'txtSchoolID=?', [$this->id]);
     $this->sets = [];
     foreach ($sets as $set) {
-      $this->sets[] = new \Entities\Academic\iSamsSet($set['intSetID']); 
+      $this->sets[] = new \Entities\Academic\iSamsSet($this->sql, $set['intSetID']);
     }
   }
 
