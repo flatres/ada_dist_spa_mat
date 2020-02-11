@@ -76,7 +76,7 @@ class Census
       $ageData = $this->isams->query(
         "SELECT txtSchoolID, txtSurname + ', ' + txtForename as name, txtGender, intNCYear, convert(varchar, txtDOB, 106) as dob, Convert(integer,((DateDiff(day,txtDOB,?))/365.25)) as age, txtType
          FROM TblPupilManagementPupils
-         WHERE intSystemStatus=1 AND intNCYear=13
+         WHERE intSystemStatus=1
          AND intSystemStatus=1
          ORDER BY txtdob ASC",
          [$date]
@@ -165,7 +165,6 @@ class Census
       foreach($student->sets as $set) {
         if ($set->academicLevel == 'A' || $set->academicLevel == 'PreU') return "GCE";
       }
-
       return "GCSE";
     }
 
