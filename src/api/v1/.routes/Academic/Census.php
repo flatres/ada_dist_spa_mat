@@ -164,7 +164,7 @@ class Census
       $student = new \Entities\People\iSamsStudent($this->isams, $misId);
       $student->getSets();
       foreach($student->sets as $set) {
-        if ($set->academicLevel === 'A' || $set->academicLevel === 'PreU') return "GCSE";
+        if ($set->academicLevel === 'A' || $set->academicLevel === 'PreU') return "GCE";
       }
       return "GCSE";
     }
