@@ -19,9 +19,11 @@ $app->group('/lab', function(){
     $this->put('/sockets/table', '\Lab\Console:tablePut');
     $this->put('/sockets/favorite', '\Lab\Console:favoritePut');
     $this->delete('/sockets/table/{id}', '\Lab\Console:tableDelete');
-    
+
     $this->post('/email', '\Lab\Email:emailPost');
     $this->get('/email/templates', '\Lab\Email:templatesGet');
+
+    $this->get('/socs/teams', '\Lab\SOCS:teamsGet');
 
 })->add("Authenticate");
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);

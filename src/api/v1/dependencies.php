@@ -83,6 +83,12 @@ $container['exgarde'] = function($c)
     return $exgarde;
 };
 
+$container['socs'] = function($c)
+{
+    $socs = new Dependency\SOCS();
+    return $socs;
+};
+
 //allows sql object to be passed to middleware via the constructor
 $container['Authenticate'] = function($c) {
     return new Middleware\Authenticate($c['mysql'], $c['logger']);
