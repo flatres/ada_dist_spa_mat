@@ -1,0 +1,13 @@
+<?php
+
+use Crunz\Schedule;
+$path = __DIR__;
+$schedule = new Schedule();
+$task = $schedule->run(PHP_BINARY . ' basic.php');
+$task
+    ->in($path)
+    ->everyMinute()
+    ->description('Copying the project directory')
+    ->appendOutputTo('basic.log');;
+
+return $schedule;

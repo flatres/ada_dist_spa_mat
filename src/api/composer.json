@@ -15,7 +15,7 @@
         "wildbit/postmark-php": "^2.8",
         "guzzlehttp/guzzle": "~6.0",
         "phpmailer/phpmailer": "^6.1",
-        "lavary/crunz": "^2.0"
+        "lavary/crunz": "^2.1"
     },
 
     "autoload":{
@@ -23,6 +23,7 @@
           "Admin\\":"v1/.routes/Admin",
           "Aux\\":"v1/.routes/Aux",
           "Home\\":"v1/.routes/Home",
+          "Bookings\\":"v1/.routes/Bookings",
           "Academic\\":"v1/.routes/Academic",
           "Accounts\\":"v1/.routes/Accounts",
           "Auth\\":"v1/.routes/Auth",
