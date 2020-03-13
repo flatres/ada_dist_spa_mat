@@ -81,7 +81,7 @@ class Mysql {
       return $globalDB;
     }
 
-    public function updateObject($table, $object, $idField='id'){
+    public function updateObject($table, $object, $idField){
       $fieldString = '';
       $binding = array();
       $id = $object[$idField];
