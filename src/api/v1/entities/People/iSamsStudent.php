@@ -3,9 +3,9 @@ namespace Entities\People;
 
 class iSamsStudent
 {
-  public $firstName, $lastName, $fullName, $initials, $gender, $dob, $enrolmentNVYear, $enrolmentSchoolYear, $NCYear, $boardingHouse, $mobile;
-  public $familyId;
-  public $adaId;
+  public $firstName, $lastName, $fullName, $displayName, $initials, $gender, $dob, $enrolmentNVYear, $enrolmentSchoolYear, $NCYear, $boardingHouse, $mobile;
+  public $familyId, $year;
+  public $id, $adaId;
   public $contacts = [];
   public $portalUserCodes = [];
   // public $subjects = [];
@@ -22,6 +22,7 @@ class iSamsStudent
   public function byId($id)
   {
     $this->id = $id;
+
     $d = $this->sql->select(
       'TblPupilManagementPupils',
       'intNCYear, txtSchoolID, intFamily, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtMobileNumber',
@@ -32,6 +33,7 @@ class iSamsStudent
       $this->firstName = $d['txtForename'];
       $this->lastName = $d['txtSurname'];
       $this->fullName = $d['txtFullName'];
+      $this->displayName = $d['txtSurname'] . ", " . $d['txtForename'];
       $this->initials = $d['txtInitials'];
       $this->familyId = $d['intFamily'];
       $this->mobile = $d['txtMobileNumber'];
@@ -42,8 +44,20 @@ class iSamsStudent
       $this->enrolmentSchoolYear = $d['intEnrolmentSchoolYear'];
       $this->boardingHouse = $d['txtBoardingHouse'];
       $this->NCYear = $d['intNCYear'];
+      $this->year = $this->makeYear($d['intNCYear']);
       $this->getAdaId();
     }
+  }
+
+  private function makeYear($intYear) {
+    switch ($intYear) {
+      case 9: return 'Shell';
+      case 10: return 'Remove';
+      case 11: return 'Hundred';
+      case 12: return 'L6';
+      case 13: return 'U6';
+    }
+    return "";
   }
 
   //returns an array of \Entities\People\isamsParent s accociated with this pupil's family Id

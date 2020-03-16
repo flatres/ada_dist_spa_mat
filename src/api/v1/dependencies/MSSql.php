@@ -47,7 +47,7 @@ class MSSql {
 		public function connect($ip, $db,  $user, $pwd) {
        try {
          // https://stackoverflow.com/questions/36172117/pdo-sqlsrv-database-connection-timeout
-           $this->conn = new \PDO( "sqlsrv:server=$ip ; Database = $db; LoginTimeout=4", $user, $pwd);
+           $this->conn = new \PDO( "sqlsrv:server=$ip ; Database = $db; LoginTimeout=10", $user, $pwd);
         }
        catch(\PDOException $e) {
          throw $e;

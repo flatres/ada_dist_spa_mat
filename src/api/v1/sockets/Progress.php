@@ -32,7 +32,7 @@ class Progress
       if ($progress >= 1) {
         $progress = 1;
         $this->isComplete = true;
-        $this->send(100);
+        $this->send(1);
       }
       if ($progress < 0) {
         $progress = 0;
@@ -41,7 +41,7 @@ class Progress
 
       //only pubish every second to avoid madness
       if (time() - $this->lastPublishTime > 1){
-          $this->send($progress * 100);
+          $this->send($progress);
       }
     }
 

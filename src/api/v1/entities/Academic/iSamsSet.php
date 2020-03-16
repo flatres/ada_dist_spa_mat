@@ -12,8 +12,8 @@ class iSamsSet
     public $setCode;
     public $subjectId, $subjectName, $subjectCode, $isAcademic = false;
     public $academicLevel = '';
-    private $adaModules;
-    private $isams;
+    // private $adaModules;
+    // private $isams;
 
     public function __construct(\Dependency\Databases\isams $msSql, $id = null) //intSetId
     {
