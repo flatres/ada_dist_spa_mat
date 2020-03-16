@@ -48,10 +48,22 @@ class Results
                                 array()
                           );
       // convert numberical month to name
+      $year = (int)(new \DateTime)->format("Y");
+      $month = (int)(new \DateTime)->format("n"); //without leading zeros
+
       foreach($data as &$cycle){
         $monthNum = $cycle['intFormatMonth'];
         $monthName = date("F", mktime(0, 0, 0, $monthNum, 10));
         $cycle['month'] = $monthName;
+        $cycle['m']= $month;
+        $cycle['y']= $year - 1;
+        if ($year === (int)$cycle['intFormatYear'] && $month > 7) {
+          $cycle['intActive'] = '1';
+        } elseif ($year - 1 === (int)$cycle['intFormatYear'] && $month < 7) {
+          $cycle['intActive'] = '1';
+        } else {
+          $cycle['intActive'] = '0';
+        }
       }
       return emit($response, $data);
     }

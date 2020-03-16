@@ -63,6 +63,7 @@ class Authenticate
         $result = $sql->select('acs_roles_pages', $methodColumnName, 'role_id=? AND page_id=?', array($roleId, $pageId));
         //grant permission if method boolean set to true
         if($result){
+            $sql->insert('usr_page_log', 'userId, pageId', [$userId, $pageId]);
             $methodFlag = $result[0][$methodColumnName];
             if($methodFlag) return true;
         }
