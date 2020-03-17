@@ -3,7 +3,7 @@
 
 namespace Entities\Academic;
 
-class iSamsSet
+class iSamsForm
 {
 
     private $sql;
@@ -12,7 +12,7 @@ class iSamsSet
     public $setCode;
     public $subjectId, $subjectName, $subjectCode, $isAcademic = false;
     public $academicLevel = '';
-    public $isForm = false;
+    public $isForm = true;
     // private $adaModules;
     // private $isams;
 
@@ -31,9 +31,9 @@ class iSamsSet
       $this->id = (int)$id;
       // look up subject
       $set = $this->isams->select(
-        'TblTeachingManagerSets',
-        'TblTeachingManagerSetsID as id, intSubject, txtSetCode',
-        'TblTeachingManagerSetsID=?', [$id]);
+        'TblTeachingManagerSubjectForms',
+        'TblTeachingManagerSubjectFormsID as id, intSubject, txtTimetableCode as txtSetCode',
+        'TblTeachingManagerSubjectFormsID=?', [$id]);
 
       if (!isset($set[0])) return $this;
       $set = $set[0];
@@ -43,18 +43,6 @@ class iSamsSet
       $subject = new \Entities\Academic\iSamsSubject($this->isams, $set['intSubject']);
       $this->subjectName = $subject->name;
       $this->subjectCode = $subject->code;
-
-      //set anything with MA/X{number} as Further Maths eg L6-Ma/x5
-      //sure there is a more elegent way to do this. Probably RegEx
-      $xSet = explode('MA/X',  strtoupper($this->setCode));
-      if (isset($xSet[1])) {
-        if (strlen($xSet[1]) > 0) $this->subjectName = "Further Mathematics";
-      }
-
-      $ySet = explode('MA/Y',  strtoupper($this->setCode));
-      if (isset($ySet[1])) {
-        if (strlen($ySet[1]) > 0) $this->subjectName = "Further Mathematics";
-      }
 
       $this->isAcademicSubject($subject->name, $subject->code, $this->setCode);
 

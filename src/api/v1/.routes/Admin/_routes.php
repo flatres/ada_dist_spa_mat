@@ -26,6 +26,9 @@ $app->group('/admin', function(){
     $this->get('/sync/misstaff', '\Admin\Sync\Staff:misStaff_GET');
     $this->post('/sync/staff', '\Admin\Sync\Staff:StaffSync_POST');
 
+    $this->get('/sync/missubjects', '\Admin\Sync\Subjects:misSubjects_GET');
+    $this->post('/sync/subjects', '\Admin\Sync\Subjects:subjectsSync_POST');
+
 // ACCESS --------
     $this->get('/access/roles', '\Admin\Access\Roles:roles_GET');
     $this->delete('/access/roles/{id}', '\Admin\Access\Roles:role_DELETE');

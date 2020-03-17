@@ -4,7 +4,7 @@ namespace Entities\People;
 class iSamsStudent
 {
   public $firstName, $lastName, $fullName, $displayName, $initials, $gender, $dob, $enrolmentNVYear, $enrolmentSchoolYear, $NCYear, $boardingHouse, $mobile;
-  public $familyId, $year;
+  public $familyId, $year, $formId;
   public $id, $adaId;
   public $contacts = [];
   public $portalUserCodes = [];
@@ -25,17 +25,19 @@ class iSamsStudent
 
     $d = $this->sql->select(
       'TblPupilManagementPupils',
-      'intNCYear, txtSchoolID, intFamily, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtMobileNumber',
+      'intNCYear, txtSchoolID, intFamily, txtForename, txtSurname, txtForm, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtMobileNumber',
       'txtSchoolID=?', [$id]);
 
     if(isset($d[0])){
       $d = $d[0];
       $this->firstName = $d['txtForename'];
       $this->lastName = $d['txtSurname'];
+      $this->lastName = $d['txtSurname'];
       $this->fullName = $d['txtFullName'];
       $this->displayName = $d['txtSurname'] . ", " . $d['txtForename'];
       $this->initials = $d['txtInitials'];
       $this->familyId = $d['intFamily'];
+      $this->formId = $d['txtForm'];
       $this->mobile = $d['txtMobileNumber'];
       // $this->familyID = $d['txtFamily'];
       $this->gender = $d['txtGender'];
@@ -187,10 +189,17 @@ class iSamsStudent
   }
 
   public function getSets() {
+    // normal sets
     $sets = $this->sql->select( 'TblTeachingManagerSetLists', 'intSetID', 'txtSchoolID=?', [$this->id]);
     $this->sets = [];
     foreach ($sets as $set) {
       $this->sets[] = new \Entities\Academic\iSamsSet($this->sql, $set['intSetID']);
+    }
+    // now forms
+    $forms = $this->sql->select('TblTeachingManagerSubjectForms', 'TblTeachingManagerSubjectFormsID as id', 'txtForm=?', [$this->formId]);
+    // var_dump($forms);
+    foreach ($forms as $form) {
+      $this->sets[] = new \Entities\Academic\iSamsForm($this->sql, $form['id']);
     }
   }
 

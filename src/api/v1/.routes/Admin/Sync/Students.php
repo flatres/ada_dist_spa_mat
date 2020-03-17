@@ -156,6 +156,7 @@ class Students
         $this->disabledCount++;
       } else {
         $d = $student['misData'];
+        // echo $d['id'] . $d['txtSurname'] . PHP_EOL;
         $this->ada->update(
           'stu_details',
           'lastname=?, firstname=?, prename=?, initials=?, boardingHouse=?, NCYear = ?, email=?, mis_id=?, mis_family_id=?, gender=?, dob=?, enrolmentNCYear=?, enrolmentSchoolYear=?, disabled=?',

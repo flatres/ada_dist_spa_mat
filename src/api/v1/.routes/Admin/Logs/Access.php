@@ -25,7 +25,13 @@ class Access
       $users = [];
       $user = new \Entities\People\User($this->ada);
 
-      $log = $this->ada->query('SELECT id, userId, pageId, timeStamp FROM usr_page_log WHERE id > ? LIMIT 10000', [1]);
+      $log = $this->ada->query(
+        'SELECT id, userId, pageId, timeStamp
+        FROM usr_page_log
+        WHERE id > ?
+        ORDER BY timeStamp ASC
+        LIMIT 10000 ',
+      [1]);
       foreach ($log as &$l) {
           $id = $l['userId'];
           $pageId = $l['pageId'];

@@ -47,9 +47,8 @@ class Progress
 
     private function send (float $progress)
     {
-      $rounded = round($progress);
       $entryData = array(
-                           'progress'    => $rounded,
+                           'progress'    => $progress,
                            'when'       => time(),
                            'progressId' => $this->progressId,
                            'isComplete' => $this->isComplete,
