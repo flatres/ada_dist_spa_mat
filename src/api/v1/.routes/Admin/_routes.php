@@ -56,6 +56,8 @@ $app->group('/admin', function(){
     $this->get('/school/terms/{year}', '\Admin\School\Calendar:termsGet');
     $this->put('/school/terms', '\Admin\School\Calendar:termsPut');
     $this->get('/school/period/{date}/{time}', '\Admin\School\Calendar:periodGet');
+
+    $this->get('/logs/access/pages', '\Admin\Logs\Access:accessPages_GET');
     // $this->get('/logs/resources', '\Admin\Logs\Log:resources_GET');
     // $this->get('/logs/connections', '\Admin\Logs\Log:connections_GET');
 
