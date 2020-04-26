@@ -71,7 +71,7 @@ class Explorer
 
       $data = $this->convert_from_latin1_to_utf8_recursively($data);
       $userId = $request->getAttribute('userId');
-      $data['ad'] = $this->ad->connect('sdf', 'XX0misje1s.');
+      $data['ad'] = $this->ad->connect('sdf', 'XX0misje1s.mmondcol');
       return emit($response, $data);
     }
 

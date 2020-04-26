@@ -28,12 +28,13 @@ class Alis
       $auth = $request->getAttribute('auth');
       $this->console = new \Sockets\Console($auth);
       $sets = [];
+      $year = 13;
 
       $this->console->publish("Greetings.");
       $this->console->publish("Fetching L6 set lists");
 
       //find sets and look up their subject name, making corrections on the way
-      $s = $this->isams->select('TblTeachingManagerSets', 'TblTeachingManagerSetsID as id, intSubject, txtSetCode', 'intYear=?', [12]);
+      $s = $this->isams->select('TblTeachingManagerSets', 'TblTeachingManagerSetsID as id, intSubject, txtSetCode', 'intYear=?', [13]);
       $count = count($s);
 
       $this->console->publish("$count found");
@@ -67,7 +68,7 @@ class Alis
       //get all year 12 pupils and look them up in set lists. If a new subject, add to their list of subjects
       $students = $this->isams->select(  'TblPupilManagementPupils',
                                             'txtSchoolID as id, txtForename, intFamily, intNCYear, txtSurname, txtGender, txtDOB',
-                                            'intNCYear = 12 AND intSystemStatus = 1 ORDER BY txtSurname ASC', []);
+                                            'intNCYear = ? AND intSystemStatus = 1 ORDER BY txtSurname ASC', [$year]);
       $count = count($students);
       $this->console->publish("$count found");
       $this->console->publish("Finding pupil subjects");

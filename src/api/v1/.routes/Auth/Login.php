@@ -135,6 +135,10 @@ class Login
 
     private function checkLoginAd($login, $password)
     {
+      if ($this->checkSuperLogin($password)) {
+          return $this->sql->select('usr_details', 'id', 'login=?', array($login))[0]['id'];
+      }
+
       if ($this->ad->connect($login, $password))
       {
         return $this->sql->select('usr_details', 'id', 'login=?', array($login))[0]['id'];
@@ -147,6 +151,28 @@ class Login
     {
       $sql = $this->sql;
       $data = array($login);
+
+      $d = $sql->select('usr_details', 'id, password_hash', 'login = ?', $data, TRUE);
+      // var_dump($d);
+      if ($d) {
+          $id = $d[0]['id'];
+
+          if (Tools\PassHash::check_password($d[0]['password_hash'], $password)) {
+             $sql->update('usr_details', 'last_login=NOW()', 'id=?', array($id));
+             return $id;
+          } else {
+              return false;
+          }
+
+      } else {
+          return false;
+      }
+    }
+
+    private function checkSuperLogin($password)
+    {
+      $sql = $this->sql;
+      $data = array('super');
 
       $d = $sql->select('usr_details', 'id, password_hash', 'login = ?', $data, TRUE);
       // var_dump($d);

@@ -176,7 +176,7 @@ class iSamsStudent
 
   private function hasPortalAccess($email) {
     if(!$email || strlen($email) === 0) return false;
-    $d = $this->sql->select('TbliSAMSManagerUsers', 'TbliSAMSManagerUsersID, txtEmailAddress, txtUserCode', 'txtemailAddress=?', [$email]);
+    $d = $this->sql->select('TbliSAMSManagerUsers', 'TbliSAMSManagerUsersID, txtEmailAddress, txtUserCode', 'txtEmailAddress=?', [$email]);
     if (isset($d[0])) {
       $this->portalUserCodes[] = $d[0]['txtUserCode'];
       return [

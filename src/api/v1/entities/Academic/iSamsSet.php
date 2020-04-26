@@ -13,12 +13,14 @@ class iSamsSet
     public $subjectId, $subjectName, $subjectCode, $isAcademic = false;
     public $academicLevel = '';
     public $isForm = false;
+    public $NCYear;
+    public $students = [];
     // private $adaModules;
     // private $isams;
 
     public function __construct(\Dependency\Databases\isams $msSql, $id = null) //intSetId
     {
-       // $this->sql= $ada ?? new \Dependency\Databases\Ada();
+       $this->ada = new \Dependency\Databases\Ada();
        $this->adaModules = new \Dependency\Databases\AdaModules();
        $this->isams = $msSql;
 
@@ -58,6 +60,8 @@ class iSamsSet
 
       $this->isAcademicSubject($subject->name, $subject->code, $this->setCode);
 
+      $this->getNCYear();
+
       return $this;
     }
 
@@ -74,6 +78,23 @@ class iSamsSet
       }
       $this->academicLevel = $this->getAcademicLevel($subjectCode, $setCode);
       return true;
+    }
+
+    private function getNCYear(){
+      $letter = $this->setCode[0];
+      switch ($letter) {
+        case 'U':
+          $NCYear = 13; break;
+        case 'L':
+          $NCYear = 12; break;
+        case 'H':
+          $NCYear = 11; break;
+        case 'R':
+          $NCYear = 10; break;
+        case 'S':
+          $NCYear = 9; break;
+      }
+      $this->NCYear = $NCYear;
     }
 
     private function getAcademicLevel($subjectCode, $setCode)
@@ -96,6 +117,14 @@ class iSamsSet
       } else {
         return $s[0]['isAlevel'] == 1 ? 'A' : 'PreU';
       }
+    }
+
+    public function getStudents() {
+      $studentIds = $this->isams->select( 'TblTeachingManagerSetLists', 'txtSchoolID as id', 'intSetID=?', [$this->id]);
+      foreach($studentIds as $s) {
+        $this->students[] = (new \Entities\People\Student($this->ada))->byMISId($s['id']);
+      }
+      $this->students = sortObjects($this->students, 'lastName', 'ASC');
     }
 
 

@@ -13,12 +13,14 @@ class iSamsForm
     public $subjectId, $subjectName, $subjectCode, $isAcademic = false;
     public $academicLevel = '';
     public $isForm = true;
+    public $NCYear;
+    public $students = [];
     // private $adaModules;
     // private $isams;
 
     public function __construct(\Dependency\Databases\isams $msSql, $id = null) //intSetId
     {
-       // $this->sql= $ada ?? new \Dependency\Databases\Ada();
+       $this->ada =  new \Dependency\Databases\Ada();
        $this->adaModules = new \Dependency\Databases\AdaModules();
        $this->isams = $msSql;
 
@@ -46,6 +48,7 @@ class iSamsForm
 
       $this->isAcademicSubject($subject->name, $subject->code, $this->setCode);
 
+      $this->getNCYear();
       return $this;
     }
 
@@ -62,6 +65,23 @@ class iSamsForm
       }
       $this->academicLevel = $this->getAcademicLevel($subjectCode, $setCode);
       return true;
+    }
+
+    private function getNCYear(){
+      $letter = $this->setCode[0];
+      switch ($letter) {
+        case 'U':
+          $NCYear = 13; break;
+        case 'L':
+          $NCYear = 12; break;
+        case 'H':
+          $NCYear = 11; break;
+        case 'R':
+          $NCYear = 10; break;
+        case 'S':
+          $NCYear = 9; break;
+      }
+      $this->NCYear = $NCYear;
     }
 
     private function getAcademicLevel($subjectCode, $setCode)
@@ -84,6 +104,25 @@ class iSamsForm
       } else {
         return $s[0]['isAlevel'] == 1 ? 'A' : 'PreU';
       }
+    }
+
+    public function getStudents() {
+      $form = $this->isams->select('TblTeachingManagerSubjectForms', 'txtForm', 'TblTeachingManagerSubjectFormsID=?', [$this->id]);
+      if (isset($form[0])) {
+        $formId = $form[0]['txtForm'];
+        $studentIds = $this->isams->select(
+          'TblPupilManagementPupils',
+          'txtSchoolID as id',
+          'txtForm=? AND intSystemStatus=?',
+           [$formId, 1]);
+
+        foreach($studentIds as $s) {
+          $this->students[] = (new \Entities\People\Student($this->ada))->byMISId($s['id']);
+
+        }
+        // $this->students = sortObjects($this->students, 'lastName');
+      }
+
     }
 
 

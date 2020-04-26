@@ -18,6 +18,7 @@ class Student
     public $boardingHouseSafe; //has spaces replaced with _ for use in array keys
     public $preName, $fullName, $fullPreName, $name, $NCYear;
     public $misId;
+    public $metrics;
 
     public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
     {
@@ -48,7 +49,7 @@ class Student
           $this->byId($d[0]['id']);
           return $this;
       }
-      return null;
+      return $id;
     }
 
     public function bySchoolNumber($number)

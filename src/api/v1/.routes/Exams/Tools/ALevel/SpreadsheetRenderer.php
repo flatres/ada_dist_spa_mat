@@ -1020,7 +1020,7 @@ class SpreadsheetRenderer
     $lastYear =  $this->year - 1;
     $lastYear2 =  $this->year - 2;
     //generate array to be placed in spreadsheet
-    $fields = ['Subject', 'Board', 'Entries', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', '%A*', '%A*A','%A*AB', '%Pass', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", "UCAS Avg ($lastYear2)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls'];
+    $fields = ['Subject', 'Board', 'Entries', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', '%A*', '%A*A','%A*AB', '%Pass', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", "UCAS Avg ($lastYear2)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls', 'GCSE Avg', 'GCSE Avg Boys', 'GCSE Avg Girls'];
     $data[] = $fields;
     $data[] = []; //blank row
 
@@ -1056,7 +1056,10 @@ class SpreadsheetRenderer
                   $sum['pointsAvgBoys'],
                   $sum['pointsAvgGirls'],
                   $sum['ucasAvgBoys'],
-                  $sum['ucasAvgGirls']
+                  $sum['ucasAvgGirls'],
+                  $sum['gcseAvg'],
+                  $sum['gcseAvgBoys'],
+                  $sum['gcseAvgGirls']
                 ];
       $data[] = $values;
     }
@@ -1229,7 +1232,7 @@ class SpreadsheetRenderer
     $lastYear =  $this->year - 1;
     $lastYear2 =  $this->year - 2;
     //generate array to be placed in spreadsheet
-    $fields = ['Subject', 'Board', 'Entries', 'D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U', '%D', '%M', '%P', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", "UCAS Avg ($lastYear2)",  '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls'];
+    $fields = ['Subject', 'Board', 'Entries', 'D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U', '%D', '%M', '%P', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", "UCAS Avg ($lastYear2)",  '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls', 'GCSE Avg', 'GCSE Avg Boys', 'GCSE Avg Girls'];
     $data[] = $fields;
     $data[] = []; //blank row
     $count = 4;
@@ -1267,7 +1270,10 @@ class SpreadsheetRenderer
                   $sum['pointsAvgBoys'],
                   $sum['pointsAvgGirls'],
                   $sum['ucasAvgBoys'],
-                  $sum['ucasAvgGirls']
+                  $sum['ucasAvgGirls'],
+                  $sum['gcseAvg'],
+                  $sum['gcseAvgBoys'],
+                  $sum['gcseAvgGirls']
                 ];
       $data[] = $values;
     }

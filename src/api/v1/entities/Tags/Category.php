@@ -47,11 +47,11 @@ class Category {
     return $this;
   }
 
-  public function create(string $categoryName, int $ownerId = 0)
+  public function create(string $categoryName, bool $cumulative, int $ownerId = 0)
   {
     $this->isGlobal = $ownerId == 0 ? true : false;
     $this->ownerId = $ownerId;
-    $catId = $this->doesNameExist($categoryName) ? $this->byName($categoryName)->id : $this->newCategory($categoryName)->id;
+    $catId = $this->doesNameExist($categoryName) ? $this->byName($categoryName)->id : $this->newCategory($categoryName, $cumulative)->id;
     $this->byId($catId);
     return $this;
     // $tag = new \Entities\Tags\Tag($this->sql);
@@ -65,12 +65,12 @@ class Category {
 
   }
 
-  private function newCategory(string $name)
+  private function newCategory(string $name, $cumulative)
   {
     if ($this->isGlobal) {
-      $id = $this->sql->insert('tag_categories', 'name, userId', array($name, 0));
+      $id = $this->sql->insert('tag_categories', 'name, userId, cumulative', array($name, 0, $cumulative));
     } else {
-      $id = $this->sql->insert('tag_categories', 'name, userId', array($name, $this->ownerId));
+      $id = $this->sql->insert('tag_categories', 'name, userId, cumulative', array($name, $this->ownerId, $cumulative));
     }
     return $this->byId($id);
   }

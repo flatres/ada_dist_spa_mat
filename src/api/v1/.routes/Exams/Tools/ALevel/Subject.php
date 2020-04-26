@@ -72,6 +72,12 @@ class Subject
     public $surplus = 0;
     public $subjectName;
     public $boardName;
+    public $gcseAvg = 0;
+    public $gcseAvgCount = 0;
+    public $gcseAvgBoys = 0;
+    public $gcseAvgCountBoys = 0;
+    public $gcseAvgGirls = 0;
+    public $gcseAvgCountGirls = 0;
 
 
 
@@ -125,6 +131,8 @@ class Subject
       $this->ucasPoints += $result->ucasPoints;
       $this->resultCount++;
 
+      $this->getGcseAvg($result->txtSchoolID, $result->txtGender);
+
       $grade = $result->grade;
       if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
       $this->gradeCounts[$grade]++;
@@ -139,6 +147,23 @@ class Subject
         $this->resultCountGirls++;
       }
 
+    }
+
+    private function getGCSEAvg($txtSchoolID, $txtGender)
+    {
+      $sql = new \Dependency\Databases\AdaModules();
+      $d = $sql->select('exams_gcse_avg', 'gcseAvg', 'misId=?', [$txtSchoolID]);
+      if (isset($d[0])) {
+        $this->gcseAvg += $d[0]['gcseAvg'];
+        $this->gcseAvgCount++;
+        if ($txtGender == 'M') {
+          $this->gcseAvgBoys += $d[0]['gcseAvg'];
+          $this->gcseAvgCountBoys++;
+        } else {
+          $this->gcseAvgGirls += $d[0]['gcseAvg'];
+          $this->gcseAvgCountGirls++;
+        }
+      }
     }
 
     public function setStudent(\Exams\Tools\ALevel\Student &$student)
@@ -162,6 +187,12 @@ class Subject
     public function makeSummaryData(int $year)
     {
       $sD = array();
+
+      $sD['gcseAvg'] = $this->gcseAvgCount > 0 ? round($this->gcseAvg / $this->gcseAvgCount, 2) : 0;
+
+      $sD['gcseAvgBoys'] = $this->gcseAvgCountBoys > 0 ? round($this->gcseAvgBoys / $this->gcseAvgCountBoys, 2) : 0;
+
+      $sD['gcseAvgGirls'] = $this->gcseAvgCountGirls > 0 ? round($this->gcseAvgGirls / $this->gcseAvgCountGirls, 2) : 0;
 
       $this->sortResults();
 

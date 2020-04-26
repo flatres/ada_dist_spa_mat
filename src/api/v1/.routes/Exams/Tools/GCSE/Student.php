@@ -66,6 +66,7 @@ class Student
     public $count97 = 0;
     public $hasGCSE = false;
     public $hasIGCSE = false;
+    public $adaStudentId = null;
 
     public function __construct(array $result)
     {
@@ -79,6 +80,9 @@ class Student
       $this->isNewSixthForm = $result['isNewSixthForm'];
       $this->txtHouseCode = $result['txtHouseCode'];
       $this->txtDOB = $result['txtDOB'];
+
+      $adaStudent = (new \Entities\People\Student())->byMISId($this->txtSchoolID);
+      if ($adaStudent) $this->adaStudentId = $adaStudent->id;
 
     }
 
@@ -114,6 +118,15 @@ class Student
 
       if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
       $this->gradeCounts[$grade]++;
+
+      //write result to a tag if a current student
+      $tag = new \Entities\Tags\Tag();
+      //for some reason some subject codes are appearing with a . at then end
+      $subjectCode = str_replace(".", "", $result->subjectCode);
+      if ($this->adaStudentId) $tag->create('GCSE Results', $subjectCode, [
+        'studentId' => $this->adaStudentId,
+        'value'     => $result->grade
+      ]);
     }
 
     public function makeSummaryData()
@@ -234,7 +247,7 @@ class Student
       $summaryData[] = array('desc' => '7 (9-7)', 'val' => $As == 7 ? 1 : 0, 'type' => 'Students%');
       $summaryData[] = array('desc' => '6 (9-7)', 'val' => $As == 6 ? 1 : 0, 'type' => 'Students%');
       $this->summaryData = $summaryData;
-      
+
       $this->writeMetricsToAda();
 
     }
@@ -242,11 +255,16 @@ class Student
     private function writeMetricsToAda()
     {
       $tag = new \Entities\Tags\Tag();
-      $adaStudent = (new \Entities\People\Student())->byMISId($this->txtSchoolID);
-      if ($adaStudent) $tag->create('Metrics', 'GCSE Avg.', [
-        'studentId' => $adaStudent->id,
+
+      if ($this->adaStudentId) $tag->create('Metrics', 'GCSE Avg.', [
+        'studentId' => $this->adaStudentId,
         'value'     => $this->gradeAverage
       ]);
+
+      //covid 19 data. Need to do this as students from earlier years won't be in Ada
+      $sql = new \Dependency\Databases\AdaModules();
+      $sql->delete('exams_gcse_avg', 'misId=?', [$this->txtSchoolID]);
+      $sql->insert('exams_gcse_avg', 'misId, gcseAvg', [$this->txtSchoolID, $this->gradeAverage]);
     }
 
 }

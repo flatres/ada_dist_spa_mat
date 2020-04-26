@@ -61,22 +61,37 @@ class Tag {
 
   public function newMember(int $catId, int $tagId, int $studentId, string $value = null)
   {
+    global $userId;
     if (!$studentId || !$tagId || !$catId) return null;
-    $data = [$studentId, $tagId, $catId, $value];
-    // $isCumulative = $this->isCumulative($catId);
-    $isCumulative = false;
-    if(!$isCumulative) $this->sql->delete('tag_tagmap', 'studentId=? AND catId=?', [$studentId, $catId]);
-    return $this->sql->insert('tag_tagmap', 'studentId, tagId, catId, value', $data);
+    $data = [$studentId, $tagId, $catId, $value, $userId];
+    $isCumulative = $this->isCumulative($catId);
+
+    // if(!$isCumulative) $this->sql->delete('tag_tagmap', 'studentId=? AND catId=?', [$studentId, $catId]);
+    // correction: surely only want to delete other currerences of this user in the same TAG so that for example a student can appear multiple times in GCSE category
+    // but only have one result per subject
+    if(!$isCumulative) $this->sql->delete('tag_tagmap', 'studentId=? AND tagId=?', [$studentId, $tagId]);
+    return $this->sql->insert('tag_tagmap', 'studentId, tagId, catId, value, userId', $data);
   }
-  
-  public function value($catName, $tagName, $studentId, $ownerId = 0)
+
+  public function isCumulative($catId) {
+    $d = $this->sql->select('tag_categories', 'cumulative', 'id=?', [$catId]);
+    if (!isset($d[0])) return false;
+    $result = $d[0]['cumulative']  === 1 ? true : false;
+    return $result;
+  }
+
+  public function value($catName, $tagName, $studentId, $ownerId = 0, $userId = false)
   {
     $cat = new \Entities\Tags\Category($this->sql);
     $cat->byName($catName, $ownerId);
     if ($cat) {
       $tagResult = $this->byName($cat->id, $tagName);
       if ($tagResult) {
-        $mapResult = $this->sql->select('tag_tagmap', 'value', 'studentId=? AND catId=? AND tagId=?', [$studentId, $cat->id, $this->id]);
+        if ($userId) {
+            $mapResult = $this->sql->select('tag_tagmap', 'value', 'studentId=? AND catId=? AND tagId=? AND userId=? ORDER BY lastUpdate DESC', [$studentId, $cat->id, $this->id, $userId]);
+        } else {
+            $mapResult = $this->sql->select('tag_tagmap', 'value', 'studentId=? AND catId=? AND tagId=? ORDER BY lastUpdate DESC', [$studentId, $cat->id, $this->id]);
+        }
         return $mapResult[0]['value'] ??  "";
       } else {
         return "";
@@ -91,11 +106,12 @@ class Tag {
     $studentId = $options['studentId'] ?? null;
     $value = $options['value'] ?? null;
     $ownerId = $options['ownerId'] ?? 0;
-    
+    $cumulative = $options['cumulative'] ?? false;
+
 
     $cat = new \Entities\Tags\Category($this->sql);
     //create new category if doesn't exist
-    $cat->create($categoryName);
+    $cat->create($categoryName, $cumulative);
     $catId = $cat->id;
     if ($this->doesNameExist($catId, $tagName, $ownerId)) {
       $tagId = $this->byName((int)$catId, $tagName)->id;

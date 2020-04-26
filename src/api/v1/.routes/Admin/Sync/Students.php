@@ -125,7 +125,7 @@ class Students
           $d['txtPreName'],
           $d['txtInitials'],
           $d['txtBoardingHouse'],
-          $d['intNCYEar'],
+          $d['intNCYear'],
           $d['txtEmailAddress'],
           $d['id'],
           $d['intFamily'],
