@@ -67,6 +67,17 @@ class iSamsTeacher
       $this->sets[] = new \Entities\Academic\iSamsSet($this->sql, $set['id']);
     }
 
+    // secondary teacher
+    $d = $this->sql->select(
+      'TblTeachingManagerSetAssociatedTeachers',
+      'intSetID as id',
+      'txtTeacher=?', [$this->userCode]);
+
+    foreach($d as $set) {
+      $this->sets[] = new \Entities\Academic\iSamsSet($this->sql, $set['id']);
+    }
+
+    // form teachers
     $d = $this->sql->select(
       'TblTeachingManagerSubjectForms',
       'TblTeachingManagerSubjectFormsID as id',

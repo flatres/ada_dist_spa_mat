@@ -80,8 +80,9 @@ class Tag {
     return $result;
   }
 
-  public function value($catName, $tagName, $studentId, $ownerId = 0, $userId = false)
+  public function value($catName, $tagName, $studentId, $userId = false)
   {
+    $ownerId = 0;
     $cat = new \Entities\Tags\Category($this->sql);
     $cat->byName($catName, $ownerId);
     if ($cat) {
@@ -92,12 +93,12 @@ class Tag {
         } else {
             $mapResult = $this->sql->select('tag_tagmap', 'value', 'studentId=? AND catId=? AND tagId=? ORDER BY lastUpdate DESC', [$studentId, $cat->id, $this->id]);
         }
-        return $mapResult[0]['value'] ??  "";
+        return $mapResult[0]['value'] ??  null;
       } else {
-        return "";
+        return null;
       }
     } else {
-      return "";
+      return null;
     }
   }
 
