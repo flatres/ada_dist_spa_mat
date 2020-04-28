@@ -15,14 +15,24 @@ class iSamsSet
     public $isForm = false;
     public $NCYear;
     public $students = [];
-    // private $adaModules;
-    // private $isams;
+    public $isFurtherMaths = false;
+    public $isFurtherMathsSet = false; // eg. X5
+    public $furtherMathsOtherSet = null;
 
-    public function __construct(\Dependency\Databases\isams $msSql, $id = null) //intSetId
+
+    //a group of students doing further maths is registered under two sets eg U6-Ma/X and U6-Ma/X5
+    // the X5 indicates the teaching block that it is in.
+    // for this class, the Ma/X will be considered the normal set and Ma/X5 the further maths set
+
+
+
+
+    public function __construct(\Dependency\Databases\isams $msSql, $id = null, $isFurtherMaths = false) //intSetId
     {
        $this->ada = new \Dependency\Databases\Ada();
        $this->adaModules = new \Dependency\Databases\AdaModules();
        $this->isams = $msSql;
+       $this->isFurtherMaths = $isFurtherMaths; //setting this stops an infinite looks of finding further maths sets
 
        if ($id) $this->byId($id);
        return $this;
@@ -46,16 +56,9 @@ class iSamsSet
       $this->subjectName = $subject->name;
       $this->subjectCode = $subject->code;
 
-      //set anything with MA/X{number} as Further Maths eg L6-Ma/x5
-      //sure there is a more elegent way to do this. Probably RegEx
-      $xSet = explode('MA/X',  strtoupper($this->setCode));
-      if (isset($xSet[1])) {
-        if (strlen($xSet[1]) > 0) $this->subjectName = "Further Mathematics";
-      }
-
-      $ySet = explode('MA/Y',  strtoupper($this->setCode));
-      if (isset($ySet[1])) {
-        if (strlen($ySet[1]) > 0) $this->subjectName = "Further Mathematics";
+      if (strpos($this->setCode, 'Ma/x') !== false || strpos($this->setCode, 'Ma/y') !== false || strpos($this->setCode, 'Ma/z') !== false) {
+        //is a further maths set
+        $this->processFurtherMaths();
       }
 
       $this->isAcademicSubject($subject->name, $subject->code, $this->setCode);
@@ -63,6 +66,60 @@ class iSamsSet
       $this->getNCYear();
 
       return $this;
+    }
+
+    private function processFurtherMaths(){
+
+      //set anything with MA/X{number} as Further Maths eg L6-Ma/x5
+      //sure there is a more elegent way to do this. Probably RegEx
+      $setCode = $this->setCode;
+      $xSet = explode('MA/X',  strtoupper($this->setCode));
+      if (isset($xSet[1])) {
+        if (strlen($xSet[1]) > 0) {
+          $this->isFurtherMathsSet = true;
+          $setCode = $xSet[0] . 'Ma/x';
+          $this->setCode = $setCode . " (FM)";
+          $this->subjectName = "Further Mathematics";
+          $this->subjectCode = 'FM';
+        }
+      }
+
+      $ySet = explode('MA/Y',  strtoupper($this->setCode));
+      if (isset($ySet[1])) {
+        if (strlen($ySet[1]) > 0) {
+          $this->isFurtherMathsSet = true;
+          $setCode = $ySet[0] . 'Ma/y';
+          $this->setCode = $setCode . " (FM)";
+          $this->subjectName = "Further Mathematics";
+          $this->subjectCode = 'FM';
+        }
+      }
+
+      $xSet = explode('MA/Z',  strtoupper($this->setCode));
+      if (isset($xSet[1])) {
+        if (strlen($xSet[1]) > 0) {
+          $this->isFurtherMathsSet = true;
+          $setCode = $xSet[0] . 'Ma/z';
+          $this->setCode = $setCode . " (FM)";
+          $this->subjectName = "Further Mathematics";
+          $this->subjectCode = 'FM';
+        }
+      }
+
+      //find the other maths set and embed in this one
+      $set = $this->isams->query(
+        'SELECT * from TblTeachingManagerSets WHERE txtSetCode LIKE ? AND TblTeachingManagerSetsID <> ?',
+        ["$setCode%", $this->id]);
+
+      if ($this->isFurtherMaths) return true; //set must be created by the first further maths set
+
+      if (isset($set[0])){
+        $this->furtherMathsOtherSet = new \Entities\Academic\iSamsSet($this->isams, $set[0]['TblTeachingManagerSetsID'], true);
+      } else {
+        $this->furtherMathsOtherSet = $setCode;
+      }
+      $this->isFurtherMaths = true;
+      return true;
     }
 
     private function isAcademicSubject($subjectName, $subjectCode, $setCode)

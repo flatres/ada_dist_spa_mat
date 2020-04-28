@@ -64,7 +64,9 @@ class iSamsTeacher
       'txtTeacher=?', [$this->userCode]);
 
     foreach($d as $set) {
-      $this->sets[] = new \Entities\Academic\iSamsSet($this->sql, $set['id']);
+      $s  = new \Entities\Academic\iSamsSet($this->sql, $set['id']);
+      $this->sets[] = $s;
+      if ($s->furtherMathsOtherSet) $this->sets[] = $s->furtherMathsOtherSet;
     }
 
     // secondary teacher
@@ -74,7 +76,9 @@ class iSamsTeacher
       'txtTeacher=?', [$this->userCode]);
 
     foreach($d as $set) {
-      $this->sets[] = new \Entities\Academic\iSamsSet($this->sql, $set['id']);
+      $s  = new \Entities\Academic\iSamsSet($this->sql, $set['id']);
+      $this->sets[] = $s;
+      if ($s->furtherMathsOtherSet) $this->sets[] = $s->furtherMathsOtherSet;
     }
 
     // form teachers
