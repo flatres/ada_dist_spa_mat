@@ -97,7 +97,7 @@ class iSamsSet
 
       $xSet = explode('MA/Z',  strtoupper($this->setCode));
       if (isset($xSet[1])) {
-        if (strlen($xSet[1]) > 0) {
+        if (strlen($xSet[1]) == 0) {
           $this->isFurtherMathsSet = true;
           $setCode = $xSet[0] . 'Ma/z';
           $this->setCode = $setCode . " (FM)";
