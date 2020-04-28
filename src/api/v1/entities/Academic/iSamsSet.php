@@ -18,6 +18,7 @@ class iSamsSet
     public $isFurtherMaths = false;
     public $isFurtherMathsSet = false; // eg. X5
     public $furtherMathsOtherSet = null;
+    private $stop = false;
 
 
     //a group of students doing further maths is registered under two sets eg U6-Ma/X and U6-Ma/X5
@@ -27,12 +28,12 @@ class iSamsSet
 
 
 
-    public function __construct(\Dependency\Databases\isams $msSql, $id = null, $isFurtherMaths = false) //intSetId
+    public function __construct(\Dependency\Databases\isams $msSql, $id = null, $stop = true) //intSetId
     {
        $this->ada = new \Dependency\Databases\Ada();
        $this->adaModules = new \Dependency\Databases\AdaModules();
        $this->isams = $msSql;
-       $this->isFurtherMaths = $isFurtherMaths; //setting this stops an infinite looks of finding further maths sets
+       $this->stop = $stop; //setting this stops an infinite looks of finding further maths sets
 
        if ($id) $this->byId($id);
        return $this;
@@ -64,6 +65,7 @@ class iSamsSet
       $this->isAcademicSubject($subject->name, $subject->code, $this->setCode);
 
       $this->getNCYear();
+
 
       return $this;
     }
@@ -111,7 +113,7 @@ class iSamsSet
         'SELECT * from TblTeachingManagerSets WHERE txtSetCode LIKE ? AND TblTeachingManagerSetsID <> ?',
         ["$setCode%", $this->id]);
 
-      if ($this->isFurtherMaths) return true; //set must be created by the first further maths set
+      if ($this->stop) return true; //set must be created by the first further maths set
 
       if (isset($set[0])){
         $this->furtherMathsOtherSet = new \Entities\Academic\iSamsSet($this->isams, $set[0]['TblTeachingManagerSetsID'], true);

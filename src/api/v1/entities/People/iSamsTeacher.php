@@ -88,7 +88,9 @@ class iSamsTeacher
       'txtTeacher=?', [$this->userCode]);
 
     foreach($d as $set) {
-      $this->sets[] = new \Entities\Academic\iSamsForm($this->sql, $set['id']);
+      $s = new \Entities\Academic\iSamsForm($this->sql, $set['id'], false);
+      $this->sets[] = $s;
+      if ($s->englishLitSet) $this->sets[] = $s->englishLitSet;
     }
     $this->sets = sortObjects($this->sets, 'NCYear', "DESC");
     return $this->sets;

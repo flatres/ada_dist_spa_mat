@@ -46,10 +46,17 @@ class Classes
     public function formMLOGet($request, $response, $args)
     {
       $id = $args['id'];
+      global $userId;
+      $isEnLit = false;
+      if (strpos($id, '(LIT)') !== false) $isEnLit = true;
+      $id = str_replace('-','', $id);
       $class = new \Entities\Academic\iSamsForm($this->isams, $id);
+      if ($isEnLit) $class->subjectCode = 'ENLIT';
+
       $class->getStudents();
+      $MLO = new \Entities\Exams\MLO($this->ada);
       foreach($class->students as &$student) {
-        $student->mlo = null;
+        $student->mlo = $MLO->getSingleMLO($student->id, $class->subjectCode, $userId);
       }
       return emit($response, $class);
     }

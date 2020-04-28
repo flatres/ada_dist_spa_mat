@@ -15,15 +15,18 @@ class iSamsForm
     public $isForm = true;
     public $NCYear;
     public $students = [];
+    public $englishLitSet = null; //english take two exams
+    public $stop;
     // private $adaModules;
     // private $isams;
 
-    public function __construct(\Dependency\Databases\isams $msSql, $id = null) //intSetId
+    public function __construct(\Dependency\Databases\isams $msSql, $id = null, $stop = true) //intSetId
     {
        $this->ada =  new \Dependency\Databases\Ada();
        $this->adaModules = new \Dependency\Databases\AdaModules();
        $this->isams = $msSql;
 
+       $this->stop = $stop;
        if ($id) $this->byId($id);
        return $this;
     }
@@ -49,6 +52,16 @@ class iSamsForm
       $this->isAcademicSubject($subject->name, $subject->code, $this->setCode);
 
       $this->getNCYear();
+
+      //english take two exams
+      if ($this->NCYear < 12 && $this->subjectCode === 'EN' && !$this->stop) {
+        $this->englishLitSet = new \Entities\Academic\iSamsForm($this->isams, $this->id, true);
+        $this->englishLitSet->subjectCode = 'ENLIT';
+        $this->englishLitSet->id = $this->englishLitSet->id . '(LIT)';
+        $this->englishLitSet->setCode = $this->setCode . " (LIT)";
+        $this->setCode = $this->setCode . " (LAN)";
+      }
+
       return $this;
     }
 
