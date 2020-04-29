@@ -120,17 +120,16 @@ class iSamsSet
         }
       }
 
-      $xSet = explode('MA/Z',  strtoupper($this->setCode));
-      if (isset($xSet[1])) {
-        if (strlen($xSet[1]) == 0) {
+      $zSet = explode('MA/Z',  strtoupper($this->setCode));
+      if (isset($zSet[1])) {
+        if (strlen($zSet[1]) > 0) {
           $this->isFurtherMathsSet = true;
-          $setCode = $xSet[0] . 'Ma/z';
+          $setCode = $zSet[0] . 'Ma/z';
           $this->setCode = $setCode . " (FM)";
           $this->subjectName = "Further Mathematics";
           $this->subjectCode = 'FM';
         }
       }
-
       //find the other maths set and embed in this one
       $set = $this->isams->query(
         'SELECT * from TblTeachingManagerSets WHERE txtSetCode LIKE ? AND TblTeachingManagerSetsID <> ?',

@@ -66,7 +66,9 @@ class iSamsTeacher
     foreach($d as $set) {
       $s  = new \Entities\Academic\iSamsSet($this->sql, $set['id'], false);
       $this->sets[] = $s;
-      if ($s->furtherMathsOtherSet) $this->sets[] = $s->furtherMathsOtherSet;
+      if ($s->furtherMathsOtherSet) {
+        $this->sets[] = $s->furtherMathsOtherSet;
+      }
     }
 
     // secondary teacher
@@ -80,6 +82,7 @@ class iSamsTeacher
       $this->sets[] = $s;
       if ($s->furtherMathsOtherSet) $this->sets[] = $s->furtherMathsOtherSet;
     }
+
 
     // form teachers
     $d = $this->sql->select(

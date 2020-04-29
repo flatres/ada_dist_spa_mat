@@ -49,7 +49,7 @@ class Classes
       global $userId;
       $isEnLit = false;
       if (strpos($id, '(LIT)') !== false) $isEnLit = true;
-      $id = str_replace('-','', $id);
+      $id = str_replace('(LIT)','', $id);
       $class = new \Entities\Academic\iSamsForm($this->isams, $id);
       if ($isEnLit) $class->subjectCode = 'ENLIT';
 
