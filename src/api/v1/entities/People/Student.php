@@ -18,7 +18,8 @@ class Student
     public $boardingHouseSafe; //has spaces replaced with _ for use in array keys
     public $preName, $fullName, $fullPreName, $name, $NCYear;
     public $misId;
-    public $metrics;
+    public $metrics = [];
+    public $exams = [];
 
     public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
     {
@@ -49,7 +50,7 @@ class Student
           $this->byId($d[0]['id']);
           return $this;
       }
-      return $id;
+      return $this;
     }
 
     public function bySchoolNumber($number)
@@ -60,7 +61,7 @@ class Student
           $this->byId($d[0]['id']);
           return $this;
       }
-      return null;
+      return $this;
     }
 
     public function byId(int $id)
@@ -94,6 +95,10 @@ class Student
 
       $this->displayName();
       return $this;
+    }
+
+    public function getExams() {
+
     }
 
     public function sanitizeNames(){

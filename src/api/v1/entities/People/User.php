@@ -24,6 +24,7 @@ class User
        // $this->sql= $ada ?? new \Dependency\Databases\Ada();
        $this->sql= $ada ?? new \Dependency\Databases\Ada();
        if ($id) $this->byId($id);
+       return $this;
 
     }
 
@@ -45,6 +46,7 @@ class User
     {
       $d = $this->sql->select('usr_details', 'id', 'mis_id=?', [$id]);
       if($d) $this->byId($d[0]['id']);
+      return $this;
     }
 
     public function byId(int $id)

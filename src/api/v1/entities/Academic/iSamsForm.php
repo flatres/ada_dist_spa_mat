@@ -9,6 +9,7 @@ class iSamsForm
     private $sql;
 
     public $id; //isams set ID
+    public $formId;
     public $setCode;
     public $subjectId, $subjectName, $subjectCode, $isAcademic = false;
     public $academicLevel = '';
@@ -17,6 +18,7 @@ class iSamsForm
     public $students = [];
     public $englishLitSet = null; //english take two exams
     public $stop;
+    public $teachers=[];
     // private $adaModules;
     // private $isams;
 
@@ -37,7 +39,7 @@ class iSamsForm
       // look up subject
       $set = $this->isams->select(
         'TblTeachingManagerSubjectForms',
-        'TblTeachingManagerSubjectFormsID as id, intSubject, txtTimetableCode as txtSetCode',
+        'TblTeachingManagerSubjectFormsID as id, intSubject, txtTimetableCode as txtSetCode, txtTeacher',
         'TblTeachingManagerSubjectFormsID=?', [$id]);
 
       if (!isset($set[0])) return $this;
@@ -53,7 +55,7 @@ class iSamsForm
 
       $this->getNCYear();
 
-      //english take two exams
+      //english takes two exams
       if ($this->NCYear < 12 && $this->subjectCode === 'EN' && !$this->stop) {
         $this->englishLitSet = new \Entities\Academic\iSamsForm($this->isams, $this->id, true);
         $this->englishLitSet->subjectCode = 'ENLIT';
@@ -62,6 +64,10 @@ class iSamsForm
         $this->setCode = $this->setCode . " (LAN)";
       }
 
+      $this->formId = $this->isams->select('TblTeachingManagerSubjectForms', 'txtForm', 'TblTeachingManagerSubjectFormsID=?', [$this->id])[0]['txtForm'] ?? null;
+
+      $isamsTeacher = (new \Entities\People\iSamsTeacher($this->isams))->byUserCode($set['txtTeacher']);
+      $this->teachers[] = (new \Entities\People\User())->byMISId($isamsTeacher->id);
       return $this;
     }
 
@@ -120,22 +126,18 @@ class iSamsForm
     }
 
     public function getStudents() {
-      $form = $this->isams->select('TblTeachingManagerSubjectForms', 'txtForm', 'TblTeachingManagerSubjectFormsID=?', [$this->id]);
-      if (isset($form[0])) {
-        $formId = $form[0]['txtForm'];
-        $studentIds = $this->isams->select(
+      $formId = $this->formId;
+      $studentIds = $this->isams->select(
           'TblPupilManagementPupils',
           'txtSchoolID as id',
           'txtForm=? AND intSystemStatus=?',
            [$formId, 1]);
 
-        foreach($studentIds as $s) {
-          $this->students[] = (new \Entities\People\Student($this->ada))->byMISId($s['id']);
-
-        }
-        // $this->students = sortObjects($this->students, 'lastName');
+      foreach($studentIds as $s) {
+        $this->students[] = (new \Entities\People\Student($this->ada))->byMISId($s['id']);
       }
-
+      $this->students = sortObjects($this->students, 'lastName');
+      return $this->students;
     }
 
 

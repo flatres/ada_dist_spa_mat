@@ -27,6 +27,14 @@ class METRICS
       return emit($response, $subject);
     }
 
+    public function yearMLOGet($request, $response, $args)
+    {
+      $subject = new \Entities\Academic\iSamsSubject($this->isams);
+      $subject->byAdaId($args['subject'])->studentsByYear($args['year']);
+      // $subject->getSets($args['year']);
+      return emit($response, $subject);
+    }
+
 
 
 }

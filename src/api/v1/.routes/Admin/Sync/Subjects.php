@@ -57,8 +57,8 @@ class Subjects
       $allSubjects = array();
       foreach($adaSubjects as $subject)
       {
-        $misId = $subjects['misId'];
-        $adaId = $subjects['id'];
+        $misId = $subject['misId'];
+        $adaId = $subject['id'];
         $allSubjects["s_$misId"] = array(
           'adaId'   => $adaId,
           'misId'   => $misId,
@@ -117,6 +117,7 @@ class Subjects
           $d['code']
         )
       );
+      $this->updateClasses($subject);
 
       $this->newCount++;
     }
@@ -126,22 +127,79 @@ class Subjects
       if ($subject['disabled'] == true)
       {
         $this->sql->delete('sch_subjects', 'id=?', array($subject['adaId']));
+        $this->sql->delete('sch_classes', 'subjectId=?', array($subject['adaId']));
         $this->deletedCount++;
       } else {
         $d = $subject['misData'];
         $this->sql->update(
           'sch_subjects',
-          'midId, name=?, code=?',
+          'misId=?, name=?, code=?',
           'id=?',
-          array(
+          [
             $d['id'],
             $d['name'],
             $d['code'],
-            $subjects['adaId']
-          )
+            $subject['adaId']
+          ]
         );
+        $this->updateClasses($subject);
         $this->updatedCount++;
       }
+    }
+
+    private function updateClasses($subject){
+
+        $misSubjectId = $subject['misData']['id'];
+        $subjectId = $subject['adaId'];
+
+        // Will want to add a syncing routing to this eventually
+        $this->sql->delete('sch_classes', 'subjectId=?', [$subjectId]);
+        $this->sql->delete('sch_class_students', 'subjectId=?', [$subjectId]);
+        $this->sql->delete('sch_class_teachers', 'subjectId=?', [$subjectId]);
+
+        //isams sets
+        $sets = $this->isams->select(
+          'TblTeachingManagerSets',
+          'TblTeachingManagerSetsID as id',
+          'intSubject = ?', [$misSubjectId]);
+
+        foreach($sets as $s) {
+          $set = new \Entities\Academic\iSamsSet($this->isams, $s['id']);
+          $classId = $this->sql->insert(
+            'sch_classes',
+            'misId, subjectId, code, year, teacher1Id, teacher2Id, academicLevel',
+            [$s['id'], $subjectId, $set->setCode, $set->NCYear, $set->teachers[0]->id ?? null, $set->teachers[1]->id ?? null, $set->academicLevel] );
+          //teachers
+          foreach($set->teachers as $t){
+              if ($t->id) $this->sql->insert('sch_class_teachers', 'subjectId, classId, userId', [$subjectId, $classId, $t->id]);
+          }
+          //students
+          $students = $set->getStudents();
+          foreach($students as $s) {
+            if ($s->id) $this->sql->insert('sch_class_students', 'subjectId, classId, studentId', [$subjectId, $classId, $s->id]);
+          }
+        }
+
+
+        //isams forms
+        $forms = $this->isams->select('TblTeachingManagerSubjectForms', 'TblTeachingManagerSubjectFormsID as id', 'intSubject=?', [$subjectId]);
+
+        foreach($forms as $f) {
+          $form = new \Entities\Academic\iSamsForm($this->isams, $f['id']);
+          $classId = $this->sql->insert(
+            'sch_classes',
+            'misId, subjectId, code, year, teacher1Id, academicLevel, isForm, misFormId',
+            [$f['id'], $subjectId, $form->setCode, $form->NCYear, $form->teacher->id ?? null, $form->academicLevel, true, $form->formId]);
+          //teachers
+          foreach($form->teachers as $t){
+              if ($t->id) $this->sql->insert('sch_class_teachers', 'subjectId, classId, userId', [$subjectId, $classId, $t->id]);
+          }
+          //students
+          $students = $form->getStudents();
+          foreach($students as $s) {
+            if ($s->id) $this->sql->insert('sch_class_students', 'subjectId, classId, studentId', [$subjectId, $classId, $s->id]);
+          }
+        }
     }
 
 

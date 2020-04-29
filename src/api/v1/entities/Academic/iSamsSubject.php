@@ -46,6 +46,35 @@ class iSamsSubject
       return $this;
     }
 
+    public function getSets($year) {
+      // search for sets as primary teacher
+      $d = $this->isams->select(
+        'TblTeachingManagerSets',
+        'TblTeachingManagerSetsID as id',
+        'intSubject=? AND intYear=?', [$this->id, $year]);
+
+      foreach($d as $set) {
+        $s  = new \Entities\Academic\iSamsSet($this->isams, $set['id']);
+        $this->sets[] = $s;
+        if ($s->furtherMathsOtherSet) $this->sets[] = $s->furtherMathsOtherSet;
+      }
+      //
+      //
+      // // form teachers
+      // $d = $this->sql->select(
+      //   'TblTeachingManagerSubjectForms',
+      //   'TblTeachingManagerSubjectFormsID as id',
+      //   'txtTeacher=?', [$this->userCode]);
+      //
+      // foreach($d as $set) {
+      //   $s = new \Entities\Academic\iSamsForm($this->sql, $set['id'], false);
+      //   $this->sets[] = $s;
+      //   if ($s->englishLitSet) $this->sets[] = $s->englishLitSet;
+      // }
+      // $this->sets = sortObjects($this->sets, 'NCYear', "DESC");
+      return $this->sets;
+    }
+
     public function students($year = null)
     {
       $this->students = [];

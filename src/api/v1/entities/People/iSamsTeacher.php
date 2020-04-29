@@ -23,7 +23,7 @@ class iSamsTeacher
     $this->id = $id;
     $d = $this->sql->select(
       'TbliSAMSManagerUsers',
-      'txtUsername as userName, txtUserCode as userCode, txtTitle as title, txtFirstname as firstName, txtSurname as lastName, txtFullName as fullName, txtEmailAddress as email, txtPassword as passwordHash, txtUserType as userType',
+      'txtUsername as userName, txtUserCode as userCode, txtTitle as title, txtFirstname as firstName, txtSurname as lastName, txtFullName as fullName, txtEmailAddress as email, txtUserType as userType',
       'intPersonID=?', [$id]);
 
     if(isset($d[0])){
@@ -45,12 +45,12 @@ class iSamsTeacher
   {
     $d = $this->sql->select(
       'TbliSAMSManagerUsers',
-      'TbliSAMSManagerUsersID',
+      'TbliSAMSManagerUsersID, intPersonID',
       'txtUserCode=?',
       [$userCode]
     );
     if (isset($d[0])) {
-      $this->byId($d[0]['TbliSAMSManagerUsersID']);
+      $this->byId($d[0]['intPersonID']);
     }
 
     return $this;
@@ -64,7 +64,7 @@ class iSamsTeacher
       'txtTeacher=?', [$this->userCode]);
 
     foreach($d as $set) {
-      $s  = new \Entities\Academic\iSamsSet($this->sql, $set['id']);
+      $s  = new \Entities\Academic\iSamsSet($this->sql, $set['id'], false);
       $this->sets[] = $s;
       if ($s->furtherMathsOtherSet) $this->sets[] = $s->furtherMathsOtherSet;
     }
@@ -76,7 +76,7 @@ class iSamsTeacher
       'txtTeacher=?', [$this->userCode]);
 
     foreach($d as $set) {
-      $s  = new \Entities\Academic\iSamsSet($this->sql, $set['id']);
+      $s  = new \Entities\Academic\iSamsSet($this->sql, $set['id'], false);
       $this->sets[] = $s;
       if ($s->furtherMathsOtherSet) $this->sets[] = $s->furtherMathsOtherSet;
     }

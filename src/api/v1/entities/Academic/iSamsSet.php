@@ -19,6 +19,7 @@ class iSamsSet
     public $isFurtherMathsSet = false; // eg. X5
     public $furtherMathsOtherSet = null;
     private $stop = false;
+    public $teachers=[];
 
 
     //a group of students doing further maths is registered under two sets eg U6-Ma/X and U6-Ma/X5
@@ -45,7 +46,7 @@ class iSamsSet
       // look up subject
       $set = $this->isams->select(
         'TblTeachingManagerSets',
-        'TblTeachingManagerSetsID as id, intSubject, txtSetCode',
+        'TblTeachingManagerSetsID as id, intSubject, txtSetCode, txtTeacher',
         'TblTeachingManagerSetsID=?', [$id]);
 
       if (!isset($set[0])) return $this;
@@ -66,8 +67,30 @@ class iSamsSet
 
       $this->getNCYear();
 
+      $this->getTeachers($set['txtTeacher']);
+
 
       return $this;
+    }
+
+    private function getTeachers($txtTeacher) {
+      if (!$txtTeacher) return;
+
+      //primary teacher
+      $isamsTeacher = (new \Entities\People\iSamsTeacher($this->isams))->byUserCode($txtTeacher);
+      $this->teachers[] = (new \Entities\People\User())->byMISId($isamsTeacher->id);
+
+      //look for secondary teacher
+      $d = $this->isams->select(
+        'TblTeachingManagerSetAssociatedTeachers',
+        'txtTeacher',
+        'intSetID=?', [$this->id]);
+
+      if (isset($d[0])) {
+        $isamsTeacher = (new \Entities\People\iSamsTeacher($this->isams))->byUserCode($d[0]['txtTeacher']);
+        $adaUser = (new \Entities\People\User())->byMISId($isamsTeacher->id);
+      }
+
     }
 
     private function processFurtherMaths(){
@@ -152,6 +175,8 @@ class iSamsSet
           $NCYear = 10; break;
         case 'S':
           $NCYear = 9; break;
+        default:
+          $NCYear = 0;
       }
       $this->NCYear = $NCYear;
     }
@@ -181,9 +206,11 @@ class iSamsSet
     public function getStudents() {
       $studentIds = $this->isams->select( 'TblTeachingManagerSetLists', 'txtSchoolID as id', 'intSetID=?', [$this->id]);
       foreach($studentIds as $s) {
+
         $this->students[] = (new \Entities\People\Student($this->ada))->byMISId($s['id']);
       }
       $this->students = sortObjects($this->students, 'lastName', 'ASC');
+      return $this->students;
     }
 
 
