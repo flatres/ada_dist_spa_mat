@@ -84,7 +84,6 @@ class Subject
       $s->getClassesByExam($examId);
       foreach($s->classes as $c){
         foreach($c->teachers as $t){
-          $mloCount++;
           $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $exam->examCode, $t->id);
           $s->examData['mlo'][] = [
             'teacher' => $t,
@@ -92,6 +91,7 @@ class Subject
             'mlo'     => $mlo
           ];
           $s->{'mlo' . $mloCount} = $mlo;
+          $mloCount++;
         }
       }
       if ($mloCount > $maxMLOCount) $maxMLOCount = $mloCount;
