@@ -22,17 +22,21 @@ class METRICS
 // ROUTE -----------------------------------------------------------------------------
     public function yearGet($request, $response, $args)
     {
-      $subject = new \Entities\Academic\iSamsSubject($this->isams);
-      $subject->byAdaId($args['subject'])->studentsByYear($args['year']);
+      $subject = new \Entities\Academic\Subject($this->ada);
+      $subject->byId($args['subject'])->getStudentsByYear($args['year']);
       return emit($response, $subject);
     }
 
     public function yearMLOGet($request, $response, $args)
     {
-      $subject = new \Entities\Academic\iSamsSubject($this->isams);
-      $subject->byAdaId($args['subject'])->studentsByYear($args['year']);
+      $subjectId = $args['subject'];
+      $year = $args['year'];
+      $examId = $args['exam'];
+      $subject = new \Entities\Academic\Subject($this->ada);
+      $students = $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
+      // $subject->getExamData();
       // $subject->getSets($args['year']);
-      return emit($response, $subject);
+      return emit($response, $students);
     }
 
 

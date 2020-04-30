@@ -45,5 +45,9 @@ class MLO
       return $tag->value('MLO', $subjectCode, $studentId, $teacherId);
     }
 
+    public function getStudentMLO($studentId, $subjectId = null) {
+      // $isamsStudent = new
+    }
+
 
 }

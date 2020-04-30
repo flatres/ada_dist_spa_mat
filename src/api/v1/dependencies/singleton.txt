@@ -1,0 +1,4 @@
+https://stackoverflow.com/questions/7792974/global-variable-database-connection
+
+
+http://butunclebob.com/ArticleS.UncleBob.SingletonVsJustCreateOne

@@ -20,6 +20,7 @@ class iSamsSet
     public $furtherMathsOtherSet = null;
     private $stop = false;
     public $teachers=[];
+    public $examCodes=[];
 
 
     //a group of students doing further maths is registered under two sets eg U6-Ma/X and U6-Ma/X5
@@ -57,6 +58,7 @@ class iSamsSet
       $subject = new \Entities\Academic\iSamsSubject($this->isams, $set['intSubject']);
       $this->subjectName = $subject->name;
       $this->subjectCode = $subject->code;
+      $this->examCodes[] = $subject->code;
 
       if (strpos($this->setCode, 'Ma/x') !== false || strpos($this->setCode, 'Ma/y') !== false || strpos($this->setCode, 'Ma/z') !== false) {
         //is a further maths set
@@ -88,12 +90,14 @@ class iSamsSet
 
       if (isset($d[0])) {
         $isamsTeacher = (new \Entities\People\iSamsTeacher($this->isams))->byUserCode($d[0]['txtTeacher']);
-        $adaUser = (new \Entities\People\User())->byMISId($isamsTeacher->id);
+        $this->teachers[] = (new \Entities\People\User())->byMISId($isamsTeacher->id);
       }
 
     }
 
     private function processFurtherMaths(){
+
+      $this->examCodes[] = 'FM';
 
       //set anything with MA/X{number} as Further Maths eg L6-Ma/x5
       //sure there is a more elegent way to do this. Probably RegEx

@@ -101,6 +101,13 @@ class iSamsSubject
       }
     }
 
+    public function getExamData($year = null) {
+      if (count($this.students) === 0) $this->students($year);
+      foreach ($this->students as $s) {
+        $s->getExamData($this->id);
+      }
+    }
+
     public function studentsByYear($year) {
       $students = $this->students($year);
       return $students;
