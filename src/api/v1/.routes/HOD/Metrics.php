@@ -30,7 +30,7 @@ class METRICS
     public function classGet($request, $response, $args)
     {
       $adaClass = new \Entities\Academic\AdaClass($this->ada, $args['class']);
-      $adaClass->byId($args['subject'])->getStudentsMLO();
+      $adaClass->getStudentsMLO();
       return emit($response, $adaClass);
     }
 

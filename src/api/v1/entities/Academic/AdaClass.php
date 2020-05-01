@@ -56,6 +56,7 @@ class AdaClass
   }
 
   public function getStudents () {
+    $this->students = [];
     $students = $this->sql->select('sch_class_students', 'studentId',  'classId = ?', [$this->id]);
     foreach ($students as $student) {
       $s = new \Entities\People\Student($this->sql, $student['studentId']);
