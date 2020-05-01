@@ -108,6 +108,8 @@ class Subjects
     {
       $d = $subject['misData'];
 
+      if ($d['code'] === 'FM' || $d['name'] === 'ESS') return;
+
       $id = $this->sql->insert(
         'sch_subjects',
         'misId, name, code',
@@ -123,6 +125,7 @@ class Subjects
 
       //Ignore form for now as clashees with Further Maths
       if ($d['code'] === 'FM' || $d['name'] === 'ESS') {
+        return;
         $this->updateClasses($subject);
         $this->newCount++;
         return;
@@ -135,7 +138,7 @@ class Subjects
           $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode', [$id, 'Literature in English', 'ENLIT']);
           break;
         case 'MA' :
-          // $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode', [$id, 'Further Mathematics', 'FM']);
+          $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode', [$id, 'Further Mathematics', 'FM']);
           break;
       }
 
@@ -147,6 +150,8 @@ class Subjects
 
     private function updateSubjects($subject)
     {
+      $d = $subject['misData'];
+      if ($d['code'] === 'FM' || $d['name'] === 'ESS') return;
       if ($subject['disabled'] == true)
       {
         $this->sql->delete('sch_subjects', 'id=?', array($subject['adaId']));
@@ -154,7 +159,7 @@ class Subjects
         $this->sql->delete('sch_classes', 'subjectId=?', array($subject['adaId']));
         $this->deletedCount++;
       } else {
-        $d = $subject['misData'];
+
         $this->sql->update(
           'sch_subjects',
           'misId=?, name=?, code=?',
@@ -221,11 +226,22 @@ class Subjects
         $forms = $this->isams->select('TblTeachingManagerSubjectForms', 'TblTeachingManagerSubjectFormsID as id', 'intSubject=?', [$subjectId]);
 
         foreach($forms as $f) {
-          $form = new \Entities\Academic\iSamsForm($this->isams, $f['id']);
+          $form = new \Entities\Academic\iSamsForm($this->isams, $f['id'], false);
           $classId = $this->sql->insert(
             'sch_classes',
             'misId, subjectId, code, year, academicLevel, isForm, misFormId',
             [$f['id'], $subjectId, $form->setCode, $form->NCYear, $form->academicLevel, true, $form->formId]);
+
+          //exam types
+          foreach($form->examCodes as $examCode){
+            $ex = $this->sql->select('sch_subjects_exams', 'id', 'examCode=?', [$examCode]);
+            if (!isset($ex[0])) {
+              $exId = $this->sql->insert('sch_subjects_exams', 'subjectId, examCode', [$subjectId, $examCode]);
+            } else {
+              $exId = $ex[0]['id'];
+            }
+            $this->sql->insert('sch_class_exams', 'classId, examId', [$classId, $exId]);
+          }
           //teachers
           foreach($form->teachers as $t){
               if ($t->id) $this->sql->insert('sch_class_teachers', 'subjectId, classId, userId', [$subjectId, $classId, $t->id]);

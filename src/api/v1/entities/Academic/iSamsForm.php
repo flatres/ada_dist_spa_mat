@@ -19,6 +19,7 @@ class iSamsForm
     public $englishLitSet = null; //english take two exams
     public $stop;
     public $teachers=[];
+    public $examCodes=[];
     // private $adaModules;
     // private $isams;
 
@@ -50,6 +51,7 @@ class iSamsForm
       $subject = new \Entities\Academic\iSamsSubject($this->isams, $set['intSubject']);
       $this->subjectName = $subject->name;
       $this->subjectCode = $subject->code;
+      $this->examCodes[] = $subject->code;
 
       $this->isAcademicSubject($subject->name, $subject->code, $this->setCode);
 
@@ -57,11 +59,12 @@ class iSamsForm
 
       //english takes two exams
       if ($this->NCYear < 12 && $this->subjectCode === 'EN' && !$this->stop) {
+        $this->examCodes[] = 'ENLIT';
         $this->englishLitSet = new \Entities\Academic\iSamsForm($this->isams, $this->id, true);
         $this->englishLitSet->subjectCode = 'ENLIT';
         $this->englishLitSet->id = $this->englishLitSet->id . '(LIT)';
         $this->englishLitSet->setCode = $this->setCode . " (LIT)";
-        $this->setCode = $this->setCode . " (LAN)";
+        $this->setCode = $this->setCode;
       }
 
       $this->formId = $this->isams->select('TblTeachingManagerSubjectForms', 'txtForm', 'TblTeachingManagerSubjectFormsID=?', [$this->id])[0]['txtForm'] ?? null;

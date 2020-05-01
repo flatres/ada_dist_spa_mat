@@ -100,6 +100,7 @@ class Subject
           $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $exam->examCode, $t->id);
           $s->examData['mlo'][] = [
             'teacher' => $t,
+            'examId'  => $examId,
             'class'   => $c,
             'mlo'     => $mlo
           ];

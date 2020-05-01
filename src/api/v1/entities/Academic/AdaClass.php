@@ -83,6 +83,7 @@ class AdaClass
           $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $e->examCode, $t->id);
           $s->examData['mlo'][] = [
             'teacher' => $t,
+            'examId'  => $e->id,
             'mlo'     => $mlo
           ];
           $s->{'mlo' . $mloCount} = $mlo;

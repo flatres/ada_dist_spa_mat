@@ -69,6 +69,11 @@ class iSamsSet
 
       $this->getNCYear();
 
+      //english takes two exams
+      if ($this->NCYear < 12 && $this->subjectCode === 'EN' && !$this->stop) {
+        $this->examCodes[] = 'ENLIT';
+      }
+
       $this->getTeachers($set['txtTeacher']);
 
 
