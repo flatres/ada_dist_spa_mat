@@ -44,6 +44,16 @@ class Years
       return emit($response, $data);
     }
 
+    public function examClassesGet($request, $response, $args)
+    {
+      $year = $args['year'];
+      $subjectId = $args['subject'];
+      $examId = $args['exam'];
+      $subject = new \Entities\Academic\Subject($this->ada, $subjectId);
+      $data = $subject->getClassesByExam($year, $examId);
+      return emit($response, $data);
+    }
+
 
 
 }

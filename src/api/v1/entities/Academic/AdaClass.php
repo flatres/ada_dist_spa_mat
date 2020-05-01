@@ -64,10 +64,35 @@ class AdaClass
 
       $this->students[] = $s;
     }
+    $this->students = sortObjects($this->students, 'lastName', 'ASC');
     return $this->students;
   }
 
   public function getStudentMLO($studentId){}
+
+  public function getStudentsMLO() {
+    $students = count($this->students) > 0 ? $this->students : $this->getStudents();
+    $maxMLOCount = 0;
+    foreach($students as $s) {
+      $s->examData['mlo'] = [];
+      $mloCount = 0;
+      foreach ($this->exams as $e){
+        $exam = new \Entities\Academic\SubjectExam($this->sql, $e->id);
+        foreach($this->teachers as $t){
+          $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $e->examCode, $t->id);
+          $s->examData['mlo'][] = [
+            'teacher' => $t,
+            'mlo'     => $mlo
+          ];
+          $s->{'mlo' . $mloCount} = $mlo;
+          $mloCount++;
+        }
+      }
+      if ($mloCount > $maxMLOCount) $maxMLOCount = $mloCount;
+    }
+    $this->maxMLOCount = $maxMLOCount;
+    return $this;
+  }
 
 
 

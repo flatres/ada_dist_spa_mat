@@ -45,6 +45,19 @@ class Subject
     return $this->classes;
   }
 
+  public function getClassesByExam($year, $examId) {
+    $classIds = $this->sql->select('sch_class_exams', 'classId', 'examId=?', [$examId]);
+    $examClasses = [];
+    foreach($classIds as $c) {
+      $d = $this->sql->select('sch_classes', 'year', 'id=?', [$c['classId']]);
+      $classYear = $d[0]['year'] ?? -1;
+      if ($year == $classYear) $examClasses[] = new \Entities\Academic\AdaClass($this->sql, $c['classId']);
+    }
+
+    $this->classes = sortObjects($examClasses, 'code', 'ASC');
+    return $this->classes;
+  }
+
   public function getExamsByYear($year) {
     $classes = count($this->classes) == 0 ? $this->getClassesByYear($year) : $this->classes;
     $exams = [];

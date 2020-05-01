@@ -136,7 +136,7 @@ class iSamsForm
       foreach($studentIds as $s) {
         $this->students[] = (new \Entities\People\Student($this->ada))->byMISId($s['id']);
       }
-      $this->students = sortObjects($this->students, 'lastName');
+      $this->students = sortObjects($this->students, 'lastName', 'ASC');
       return $this->students;
     }
 

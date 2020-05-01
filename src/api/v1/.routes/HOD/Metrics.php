@@ -27,6 +27,13 @@ class METRICS
       return emit($response, $subject);
     }
 
+    public function classGet($request, $response, $args)
+    {
+      $adaClass = new \Entities\Academic\AdaClass($this->ada, $args['class']);
+      $adaClass->byId($args['subject'])->getStudentsMLO();
+      return emit($response, $adaClass);
+    }
+
     public function yearMLOGet($request, $response, $args)
     {
       $subjectId = $args['subject'];
