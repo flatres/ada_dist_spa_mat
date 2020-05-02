@@ -24,19 +24,20 @@ class Years
     {
       $years = [];
       $subjectId = $args['subject'];
-      $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 11]);
-      if (isset($d[0])) {
-        $yers[] =   [
-            'id'  => 11,
-            'name'  => 'Hundred'
-          ];
-      }
 
       $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 13]);
       if (isset($d[0])) {
-        $yers[] =   [
+        $years[] =   [
             'id'  => 13,
             'name'  => 'U6'
+          ];
+      }
+
+      $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 11]);
+      if (isset($d[0])) {
+        $years[] =   [
+            'id'  => 11,
+            'name'  => 'Hundred'
           ];
       }
 

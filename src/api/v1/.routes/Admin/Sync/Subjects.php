@@ -207,7 +207,7 @@ class Subjects
             } else {
               $exId = $ex[0]['id'];
             }
-            $this->sql->insert('sch_class_exams', 'classId, examId', [$classId, $exId]);
+            $this->sql->insert('sch_class_exams', 'classId, examId, subjectId', [$classId, $exId, $subjectId]);
           }
 
           //teachers
@@ -240,7 +240,7 @@ class Subjects
             } else {
               $exId = $ex[0]['id'];
             }
-            $this->sql->insert('sch_class_exams', 'classId, examId', [$classId, $exId]);
+            $this->sql->insert('sch_class_exams', 'classId, examId, subjectId', [$classId, $exId, $subjectId]);
           }
           //teachers
           foreach($form->teachers as $t){
