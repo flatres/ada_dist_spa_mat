@@ -22,17 +22,25 @@ class Years
 // ROUTE -----------------------------------------------------------------------------
     public function yearsGet($request, $response, $args)
     {
-      $data = [
-        [
-          'id'  => 13,
-          'name'  => 'U6'
-        ],
-        [
-          'id'  => 11,
-          'name'  => 'Hundred'
-        ]
-      ];
-      return emit($response, $data);
+      $years = [];
+      $subjectId = $args['subject'];
+      $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 11]);
+      if (isset($d[0])) {
+        $yers[] =   [
+            'id'  => 11,
+            'name'  => 'Hundred'
+          ];
+      }
+
+      $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 13]);
+      if (isset($d[0])) {
+        $yers[] =   [
+            'id'  => 13,
+            'name'  => 'U6'
+          ];
+      }
+
+      return emit($response, $years);
     }
 
     public function examsGet($request, $response, $args)
