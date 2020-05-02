@@ -155,7 +155,7 @@ class Subjects
       if ($subject['disabled'] == true)
       {
         $this->sql->delete('sch_subjects', 'id=?', array($subject['adaId']));
-        $this->sql->delete('sch_subjects_additional', 'subjectId=?', array($subject['adaId']));
+        $this->sql->delete('sch_subjects_exams', 'subjectId=?', array($subject['adaId']));
         $this->sql->delete('sch_classes', 'subjectId=?', array($subject['adaId']));
         $this->deletedCount++;
       } else {
@@ -223,7 +223,7 @@ class Subjects
 
 
         //isams forms
-        $forms = $this->isams->select('TblTeachingManagerSubjectForms', 'TblTeachingManagerSubjectFormsID as id', 'intSubject=?', [$subjectId]);
+        $forms = $this->isams->select('TblTeachingManagerSubjectForms', 'TblTeachingManagerSubjectFormsID as id', 'intSubject=?', [$misSubjectId]);
 
         foreach($forms as $f) {
           $form = new \Entities\Academic\iSamsForm($this->isams, $f['id'], false);
