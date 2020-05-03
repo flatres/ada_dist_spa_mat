@@ -43,6 +43,7 @@ class Result
     public $txtSchoolID;
     public $txtCandidateNumber;
     public $txtCandidateCode;
+    public $surplus;
     public $mark;
     public $total;
     public $title;
