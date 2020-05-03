@@ -24,8 +24,8 @@ class ExternalResult
       $misId = $result->txtSchoolID;
       $student = (new \Entities\People\Student($this->ada))->byMISId($misId);
 
-      if (!$student->id) return; //eg a member of staff taking an exam
-      
+      if (!$student->id && !$result->txtSchoolID) return; //eg a member of staff taking an exam
+
       $exam = (new \Entities\Academic\SubjectExam($this->ada))->byCode($result->subjectCode);
       $board = (new \Entities\Exams\Board($this->ada))->byCode($result->boardName);
       $level = (new \Entities\Exams\Level($this->ada))->byCode($result->level);
