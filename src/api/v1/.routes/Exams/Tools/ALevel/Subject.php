@@ -151,7 +151,7 @@ class Subject
 
     private function getGCSEAvg($txtSchoolID, $txtGender)
     {
-      $sql = new \Dependency\Databases\AdaModules();
+      $sql = new \Dependency\Databases\AdaData();
       $d = $sql->select('exams_gcse_avg', 'gcseAvg', 'misId=?', [$txtSchoolID]);
       if (isset($d[0])) {
         $this->gcseAvg += $d[0]['gcseAvg'];

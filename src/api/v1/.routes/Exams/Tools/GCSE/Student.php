@@ -262,7 +262,7 @@ class Student
       ]);
 
       //covid 19 data. Need to do this as students from earlier years won't be in Ada
-      $sql = new \Dependency\Databases\AdaModules();
+      $sql = new \Dependency\Databases\AdaData();
       $sql->delete('exams_gcse_avg', 'misId=?', [$this->txtSchoolID]);
       $sql->insert('exams_gcse_avg', 'misId, gcseAvg', [$this->txtSchoolID, $this->gradeAverage]);
     }
