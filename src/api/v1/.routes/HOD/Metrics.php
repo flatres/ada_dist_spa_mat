@@ -47,6 +47,20 @@ class Metrics
       return emit($response, $subject);
     }
 
+    public function yearHistoryGet($request, $response, $args)
+    {
+      $subjectId = $args['subject'];
+      $year = $args['year'];
+      $examId = $args['exam'];
+      $subject = new \Entities\Academic\Subject($this->ada);
+      $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
+      $subject->makeMLOProfile();
+      $subject->makeHistoryProfile($examId, $year);
+      // $subject->getExamData();
+      // $subject->getSets($args['year']);
+      return emit($response, $subject);
+    }
+
 
 
 }

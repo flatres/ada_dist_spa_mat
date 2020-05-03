@@ -13,5 +13,6 @@ $app->group('/hod', function(){
     $this->get('/{subject}/metrics/year/{year}', '\HOD\Metrics:yearGet');
     $this->get('/{subject}/metrics/class/{class}', '\HOD\Metrics:classGet');
     $this->get('/{subject}/metrics/year/{year}/MLO/{exam}', '\HOD\Metrics:yearMLOGet');
+    $this->get('/{subject}/metrics/year/{year}/history/{exam}', '\HOD\Metrics:yearHistoryGet');
 
 })->add("Authenticate");

@@ -16,11 +16,15 @@ class Subject
   public $exams=[];
   public $mloMaxGradeProfile=[];
   public $mloMinGradeProfile=[];
+  public $history=[];
+  public $stackedHistory=[];
+  public $grades=[];
 
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
   {
      // $this->sql= $ada ?? new \Dependency\Databases\Ada();
      $this->sql= $ada ?? new \Dependency\Databases\Ada();
+     $this->adaData= new \Dependency\Databases\AdaData();
      if ($id) $this->byId($id);
      return $this;
   }
@@ -91,6 +95,7 @@ class Subject
 
   public function getStudentsMLOByExam($year, $examId) {
     $students = $this->getStudentsByExam($year, $examId);
+    $this->year = (int)$year;
     $maxMLOCount = 0;
     $exam = new \Entities\Academic\SubjectExam($this->sql, $examId);
     foreach($students as $s) {
@@ -113,6 +118,7 @@ class Subject
       if ($mloCount > $maxMLOCount) $maxMLOCount = $mloCount;
     }
     $this->students = $students;
+    $this->maxMLOCount = $mloCount;
     return [
       'students'  => $students,
       'maxMLOCount' => $maxMLOCount
@@ -128,8 +134,30 @@ class Subject
       $this->countGrade($this->mloMinGradeProfile, $exam->mloMin, $s);
     }
 
+    //get gcse Avg
+    $count = 0;
+    $gcseAvg = 0;
+    foreach ($students as $s) {
+      $g = $this->adaData->select('exams_gcse_avg', 'gcseAvg', 'misId=?', [$s->misId]);
+      if ($g) {
+        $gcseAvg = $gcseAvg + $g[0]['gcseAvg'];
+        $count++;
+      }
+    }
+    if ($count > 0) $gcseAvg = round($gcseAvg / $count, 2);
+
     $this->mloMaxGradeProfile = array_values(sortArrays($this->mloMaxGradeProfile, 'grade', 'ASC'));
     $this->mloMinGradeProfile = array_values(sortArrays($this->mloMinGradeProfile, 'grade', 'ASC'));
+
+    $this->mloMaxGradeProfile[] = $results[] = [
+      'grade' => 'GCSE Avg',
+      'count' => $gcseAvg
+    ];
+
+    $this->mloMinGradeProfile[] = $results[] = [
+      'grade' => 'GCSE Avg',
+      'count' => $gcseAvg
+    ];
 
     return $this;
   }
@@ -164,6 +192,119 @@ class Subject
     $students = array_values($students);
     $students = sortObjects($students, 'lastName', 'ASC');
     return $students;
+  }
+
+  public function makeHistoryProfile($examId, $year)
+  {
+      $sql = $this->adaData;
+      $history = [];
+      if($this->maxMLOCount > 1) {
+        $mlo = [];
+        $mlo['results'] = $this->mloMaxGradeProfile;
+        $mlo['year'] = "Max MLO";
+        //create data for stacked chart
+        $stacked = [];
+        $stacked['year'] = 'Max';
+        foreach($mlo['results'] as $r){
+          $stacked[$r['grade']] = $r['count'];
+        }
+        $this->stackedHistory[] = $stacked;
+        $history[] = $mlo;
+
+
+        $mlo = [];
+        $mlo['results'] = $this->mloMinGradeProfile;
+        $mlo['year'] = "Min MLO";
+        $stacked = [];
+        $stacked['year'] = 'Min';
+        foreach($mlo['results'] as $r){
+          $stacked[$r['grade']] = $r['count'];
+        }
+        $this->stackedHistory[] = $stacked;
+        $history[] = $mlo;
+
+      } else {
+        $mlo = [];
+        $mlo['results'] = $this->mloMaxGradeProfile;
+        $mlo['year'] = "MLO";
+        //create data for stacked chart
+        $stacked = [];
+        $stacked['year'] = 'MLO';
+        foreach($mlo['results'] as $r){
+          $stacked[$r['grade']] = $r['count'];
+        }
+        $this->stackedHistory[] = $stacked;
+        $history[] = $mlo;
+      }
+      $sessions = $sql->select('exams_sessions', 'id, year', 'id > 0 ORDER BY year DESC', []);
+      foreach($sessions as $s){
+        $gcseAvg = 0;
+        $results = $sql->select('exams_results', 'misId', 'sessionId = ? AND examId=? AND NCYear=?', [$s['id'], $examId, $year]);
+        $count = count($results);
+        if ($count > 0 ) {
+          //reset count
+          $count = 0;
+          $gcseAvg = 0;
+          foreach ($results as $r) {
+            $g = $this->adaData->select('exams_gcse_avg', 'gcseAvg', 'misId=?', [$r['misId']]);
+            if ($g) {
+              $gcseAvg = $gcseAvg + $g[0]['gcseAvg'];
+              $count++;
+            }
+          }
+          if ($count > 0) $gcseAvg = round($gcseAvg / $count, 2);
+        } else {
+          $gcseAvg = 0;
+        }
+
+        // counts
+        $results = $sql->query(
+          'select result as grade, count(*) as count
+          FROM exams_results
+          WHERE sessionId = ? AND examId=? AND NCYear=?
+          GROUP BY result',
+          [$s['id'], $examId, $year]);
+        if (count($results) > 0) {
+          $results = sortArrays($results, 'grade', 'ASC');
+
+          //create data for stacked chart
+          $stacked = [];
+          $stacked['year'] = (string)$s['year'];
+          foreach($results as $r){
+            $stacked[$r['grade']] = $r['count'];
+          }
+          $this->stackedHistory[] = $stacked;
+
+          if ($year > 11) {
+            $results[] = [
+              'grade' => 'GCSE Avg',
+              'count' => $gcseAvg
+            ];
+          }
+          $history[] = [
+            'year'  =>  $s['year'],
+            'results' => $results
+          ];
+
+        }
+      }
+
+      //collect all grades
+      $grades = $sql->query(
+        'select result as grade, count(*) as count
+        FROM exams_results
+        WHERE examId=? AND NCYear=?
+        GROUP BY result',
+        [$examId, $year]);
+
+      $this->history = $history;
+      $this->grades = sortArrays($grades, 'grade', 'ASC');
+      if ($year > 11) {
+        $this->grades[] = [
+          'grade' => 'GCSE Avg',
+          'count' => 0
+        ];
+      }
   }
 
 
