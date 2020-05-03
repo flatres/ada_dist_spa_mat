@@ -39,8 +39,6 @@ class Subject
     return $this;
   }
 
-  public function byExamCode()
-
   public function getClassesByYear($year) {
     $classes = $this->sql->select('sch_classes', 'id', 'subjectId = ? AND year=?', [$this->id, $year]);
     foreach($classes as $c){
