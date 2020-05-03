@@ -21,6 +21,7 @@ class Student
     public $metrics = [];
     public $examData = [];
     public $classes = [];
+    public $boardingHouseId, $boardingHouseCode;
 
     public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
     {
@@ -69,12 +70,16 @@ class Student
     {
       $student = $this->sql->select(
         'stu_details',
-        'id, firstname, lastname, prename, email, boardingHouse, gender, mis_id, mis_family_id, NCYear',
+        'id, firstname, lastname, prename, email, boardingHouse, boardingHouseId, gender, mis_id, mis_family_id, NCYear',
         'id=?',
         [$id]);
 
       if (isset($student[0])) {
         $student = $student[0];
+        $bh = new \Entities\Houses\House($this->sql, $student['boardingHouseId']);
+        $this->boardingHouseCode = $bh->code;
+        $this->boardingHouseId = $bh->id;
+
         $this->id = $id;
         $this->preName = $student['prename'];
         $this->firstName = $student['firstname'];

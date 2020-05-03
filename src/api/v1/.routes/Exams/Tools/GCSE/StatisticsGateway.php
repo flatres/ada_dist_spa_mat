@@ -41,8 +41,8 @@ class StatisticsGateway
   public $otherStats;
   public $spreadsheet;
 
-  private $sql;
-  private $console;
+  // private $sql;
+  // private $console;
 
   public function __construct(\Dependency\Databases\ISams $sql, \Sockets\Console $console)
   {
@@ -53,7 +53,7 @@ class StatisticsGateway
 
   }
 
-  public function makeStatistics(array $session, array $results, \Exams\Tools\Cache $cache)
+  public function makeStatistics(array $session, array $results, \Exams\Tools\Cache $cache, $createSpreadsheets)
   {
     // return $this;
     $this->allResults = $results;
@@ -101,13 +101,13 @@ class StatisticsGateway
       $this->console->publish('No other results found', 2);
     }
 
-
-    $this->spreadsheet = new SpreadsheetRenderer('GCSE_Detailed_Report', 'GCSE Results', 'detailed', $session, $this->console, $this);
+    if ($createSpreadsheets) {
+      $this->spreadsheet = new SpreadsheetRenderer('GCSE_Detailed_Report', 'GCSE Results', 'detailed', $session, $this->console, $this);
       $this->spreadsheetSSS = new SpreadsheetRenderer('GCSE_SSS', 'Subject Surplus Scores', 'sss', $session, $this->console, $this);
       $this->spreadsheetHouseCandidates = new SpreadsheetRenderer('House_Candidate_Results', 'House Candidate Results', 'houseresults', $session, $this->console, $this);
       $this->spreadsheetSubjectCandidates = new SpreadsheetRenderer('Subject_Candidate_Results', 'Subject Candidate Results', 'subjectresults', $session, $this->console, $this);
-
-    $this->cemSpreadsheet = new CemSpreadsheetRenderer($session, $this->console, $this);
+      $this->cemSpreadsheet = new CemSpreadsheetRenderer($session, $this->console, $this);
+    }
     return $this;
   }
 

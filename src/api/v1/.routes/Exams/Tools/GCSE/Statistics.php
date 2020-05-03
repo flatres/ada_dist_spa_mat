@@ -128,7 +128,7 @@ class Statistics
 
       unset($this->console);
       unset($this->sql);
-      unset($this->results);
+      // unset($this->results);
       return $this;
     }
 

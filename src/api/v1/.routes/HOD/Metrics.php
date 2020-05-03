@@ -8,7 +8,7 @@
  */
 namespace HOD;
 
-class METRICS
+class Metrics
 {
     protected $container;
 
@@ -40,10 +40,11 @@ class METRICS
       $year = $args['year'];
       $examId = $args['exam'];
       $subject = new \Entities\Academic\Subject($this->ada);
-      $students = $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
+      $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
+      $subject->makeMLOProfile();
       // $subject->getExamData();
       // $subject->getSets($args['year']);
-      return emit($response, $students);
+      return emit($response, $subject);
     }
 
 

@@ -46,6 +46,12 @@ $container['adaModules'] = function($c)
     return $ada;
 };
 
+$container['adaData'] = function($c)
+{
+    $ada = new Dependency\Databases\AdaData();
+    return $ada;
+};
+
 
 $container['isams'] = function($c)
 {

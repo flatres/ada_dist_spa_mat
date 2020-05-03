@@ -68,9 +68,9 @@ class Category {
   private function newCategory(string $name, $cumulative)
   {
     if ($this->isGlobal) {
-      $id = $this->sql->insert('tag_categories', 'name, userId, cumulative', array($name, 0, $cumulative));
+      $id = $this->sql->insert('tag_categories', 'name, userId, cumulative', array($name, 0, $cumulative ? 1 : 0 ));
     } else {
-      $id = $this->sql->insert('tag_categories', 'name, userId, cumulative', array($name, $this->ownerId, $cumulative));
+      $id = $this->sql->insert('tag_categories', 'name, userId, cumulative', array($name, $this->ownerId, $cumulative ? 1 : 0 ));
     }
     return $this->byId($id);
   }

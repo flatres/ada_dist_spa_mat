@@ -15,7 +15,7 @@ class SubjectExam
   }
 
   public function byId($id) {
-    $this->id = $id;
+    $this->id = (int)$id;
     $exam = $this->sql->select('sch_subjects_exams', 'subjectId, examName, examCode, examLevelId', 'id=?', [$id]);
     if (isset($exam[0])){
       $exam = $exam[0];
@@ -28,6 +28,12 @@ class SubjectExam
       // $this->examLevel = $this->sql->select('sch_exam_levels', 'name', 'id=?', $this->examLevelId)[0]['name'] ?? null;
 
     }
+    return $this;
+  }
+
+  public function byCode($code) {
+    $exam = $this->sql->select('sch_subjects_exams', 'id', 'examCode=?', [$code]);
+    if ($exam) $this->byId($exam[0]['id']);
     return $this;
   }
 

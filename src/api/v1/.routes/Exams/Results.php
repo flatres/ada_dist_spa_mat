@@ -14,7 +14,7 @@ class Results
 
     private $houseCodes = array();
     private $error = false;
-    private $isGCSE;
+    public $isGCSE;
 
     public function __construct(\Slim\Container $container)
     {
@@ -41,6 +41,11 @@ class Results
      */
     public function getSessions($request, $response, $args)
     {
+      $this->fetchExamSessions();
+      return emit($response, $data);
+    }
+
+    public function fetchExamSessions() {
       $data = array();
       $data = $this->sql->select(  'TblExamManagerCycles',
                                 'TblExamManagerCyclesID, TblExamManagerCyclesID as id, intYear, intActive, intResultsActive, intFormatMonth, intFormatYear',
@@ -65,7 +70,7 @@ class Results
           $cycle['intActive'] = '0';
         }
       }
-      return emit($response, $data);
+      return $data;
     }
 
     public function getCachedGCSEResults($request, $response, $args)
@@ -124,11 +129,21 @@ class Results
       $this->console->publish('Getting Results');
       $console = $this->console;
 
+      $sessionId = $args['sessionId'];
+      $isGCSE = $args['isGCSE'];
+      $data = $this->getSessionResults($sessionId, $isGCSE, $this->console);
+      return emit($response, $data);
+      // return $this->error ? emitError($response,500, "Failure"): emit($response, $data);
+
+    }
+
+    public function getSessionResults($sessionId, $isGCSE, $console, $writeCache = true, $makeStatistics = true, $makeSpreadsheets = true)
+    {
       $data= array();
       $results = array();
-      $sessionId = $args['sessionId'];
       $data['sessionId'] = (int)$sessionId;
-      $isGCSE = $args['isGCSE'];
+      $this->console = $console; //may be given console from external source such as Ada syncing
+      $this->isGCSE = $isGCSE;
 
       //get session data
       $d = $this->sql->select(  'TblExamManagerCycles',
@@ -168,7 +183,7 @@ class Results
         $console->publish("Loading results file - id ".$resultFile['id']." [".$fileIndex."/".count($resultFiles)."]");
         $fileIndex++;
 
-        $s = $args['isGCSE'] ? "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')" : " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
+        $s = $isGCSE ? "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')" : " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
 
         //gather all results from this file and append student data to each result
         //certification type 'C' ensures that individual subject units are not included and we only get final grade
@@ -177,7 +192,7 @@ class Results
                                                   "intResultsID = ? AND $s AND txtCertificationType='C'",
                                                   array($resultFile['id']));
 
-        if (!$args['isGCSE']) {
+        if (!$isGCSE) {
           $moduleResults = $this->sql->select( 'TblExamManagerResultsStore',
                                                     'TblExamManagerResultsStoreID as id, txtSchoolID, txtLevel, txtQualification, txtOptionTitle, txtModuleCode, txtUniformMarkScale as mark, txtMaxMark as total, txtUniformGrade as grade',
                                                     "intResultsID = ? AND $s AND txtCertificationType <> 'C' ORDER BY txtLevel ASC",
@@ -189,53 +204,28 @@ class Results
 
         $this->processResults($resultsFileResults);
       }
-      $this->findEarlyTakerResults($args['isGCSE']);
+      $this->findEarlyTakerResults($isGCSE);
 
       $data['results'] = $this->results;
 
       if ($fileIndex > 1) {
-        $statistics = $this->isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $this->console) : new \Exams\Tools\ALevel\StatisticsGateway($this->sql, $this->console, $this->moduleResults) ;
-        $data['statistics'] = $statistics->makeStatistics($this->session, $this->results, $this->cache);
+        $statistics = $isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $console) : new \Exams\Tools\ALevel\StatisticsGateway($this->sql, $console, $this->moduleResults) ;
+        if ($makeStatistics) $data['statistics'] = $statistics->makeStatistics($this->session, $this->results, $this->cache, $makeSpreadsheets);
       }
       $this->error ? $console->error("Finished WITH ERRORS") : $console->publish("Finished");
 
-      $this->console->publish("Saving...", 1);
-      $this->cache->write($sessionId, $isGCSE, $data);
+      if ($writeCache) {
+        $console->publish("Saving...", 1);
+        $this->cache->write($sessionId, $isGCSE, $data);
+      }
+
+      foreach($data['results'] as &$r) {
+        $r['sql'] = null;
+      }
+
       $data['timestamp'] = date('Y-m-d H:i:s', time());
-      return emit($response, $data);
-      // return $this->error ? emitError($response,500, "Failure"): emit($response, $data);
-
+      return $data;
     }
-
-    // private function findEarlyTakerResults($isGCSE)
-    // {
-    //   $this->console->publish('Searching for results from early takers');
-    //   $studentsCount = count($this->studentData);
-    //   $startResultsCount = count($this->results);
-    //
-    //   $this->console->publish("Lowest File ID = " . $this->lowestFileID, 1);
-    //   $this->console->publish("ISGCSE = " . $isGCSE, 1);
-    //
-    //   $i = 0;
-    //   $this->console->publish('Students: 0 / ' . $studentsCount,1);
-    //
-    //   foreach($this->studentData as $student){
-    //     $i++;
-    //     if($i % 10 == 0) $this->console->replace("Students: $i / $studentsCount");
-    //
-    //     $s = $isGCSE ? "(txtQualification = 'FSMQ' OR txtQualification = 'GCSE')" : " txtQualification <> 'FSMQ' AND txtQualification <> 'GCSE'";
-    //     $resultsData = $this->sql->select(  'TblExamManagerResultsStore',
-    //                                         'TblExamManagerResultsStoreID as id, txtSchoolID, txtQualification, txtLevel, txtOptionTitle, txtModuleCode, txtFirstGrade as grade',
-    //                                         "$s AND txtCertificationType='C' AND txtSchoolID = ? AND intResultsID < ?",
-    //                                         array($student['txtSchoolID'], $this->lowestFileID));
-    //
-    //     $this->processResults($resultsData, true);
-    //   }
-    //   $this->console->replace("$studentsCount / $studentsCount");
-    //
-    //   $numberFound = count($this->results) - $startResultsCount;
-    //   $this->console->publish("$numberFound found.");
-    // }
 
     private function findEarlyTakerResults($isGCSE)
     {

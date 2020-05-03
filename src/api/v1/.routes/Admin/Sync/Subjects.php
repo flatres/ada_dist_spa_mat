@@ -110,6 +110,8 @@ class Subjects
 
       if ($d['code'] === 'FM' || $d['name'] === 'ESS') return;
 
+      //weirdly Computer Science is in isams as CO but comes out of the exams systems correctly as case
+      if ($d['code'] === 'CO') $d['code'] = 'CS';
       $id = $this->sql->insert(
         'sch_subjects',
         'misId, name, code',

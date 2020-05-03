@@ -23,7 +23,7 @@ class AdaClass
   }
 
   public function byId($id) {
-    $this->id = $id;
+    $this->id = (int)$id;
     $class = $this->sql->select('sch_classes', 'misId, subjectId, code, year, isForm, misFormId, academicLevel', 'id=?', [$id]);
     if (isset($class[0])){
       $class = $class[0];

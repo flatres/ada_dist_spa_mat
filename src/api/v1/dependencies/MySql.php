@@ -44,7 +44,7 @@ use \PDO;
 
 class Mysql {
 
-    private $conn;
+    public $conn;
 	  private $query;
 		private $queryType;
 		public $writeLog = TRUE;
@@ -55,6 +55,11 @@ class Mysql {
 
 		public function __construct() {
    	}
+
+    public function __sleep()
+    {
+       return array('dbName');
+    }
 
     public function connect($db) {
       global $DBCounter;

@@ -48,7 +48,7 @@ class StatisticsGateway
 
   }
 
-  public function makeStatistics(array $session, array &$results, \Exams\Tools\Cache $cache)
+  public function makeStatistics(array $session, array &$results, \Exams\Tools\Cache $cache, $createSpreadsheets)
   {
     if (count($results) === 0) return;
     $this->results = $results;
@@ -57,16 +57,19 @@ class StatisticsGateway
     unset($this->results);
     unset($this->moduleResults);
 
-    $this->spreadsheet = new SpreadsheetRenderer('Alevel_Detailed_Report', 'A Level Results', 'detailed', $session, $this->console, $this);
+    if ($createSpreadsheets) {
 
-    $this->spreadsheetSSS = new SpreadsheetRenderer('Alevel_SSS', 'Subject Surplus Scores', 'sss', $session, $this->console, $this);
+      $this->spreadsheet = new SpreadsheetRenderer('Alevel_Detailed_Report', 'A Level Results', 'detailed', $session, $this->console, $this);
 
-    $this->spreadsheetResults = new SpreadsheetRenderer('Alevel_Results', 'A Level Results', 'results', $session, $this->console, $this);
+      $this->spreadsheetSSS = new SpreadsheetRenderer('Alevel_SSS', 'Subject Surplus Scores', 'sss', $session, $this->console, $this);
 
-    $this->spreadsheetHouseCandidates = new SpreadsheetRenderer('House_Candidate_Results', 'House Candidate Results', 'houseresults', $session, $this->console, $this);
+      $this->spreadsheetResults = new SpreadsheetRenderer('Alevel_Results', 'A Level Results', 'results', $session, $this->console, $this);
 
-    $this->spreadsheetSubjectCandidates = new SpreadsheetRenderer('Subject_Candidate_Results', 'Subject Candidate Results', 'subjectresults', $session, $this->console, $this);
+      $this->spreadsheetHouseCandidates = new SpreadsheetRenderer('House_Candidate_Results', 'House Candidate Results', 'houseresults', $session, $this->console, $this);
 
+      $this->spreadsheetSubjectCandidates = new SpreadsheetRenderer('Subject_Candidate_Results', 'Subject Candidate Results', 'subjectresults', $session, $this->console, $this);
+
+    }
 
     // $this->cemSpreadsheet = new CemSpreadsheetRenderer($session, $this->console, $this);
     return $this;

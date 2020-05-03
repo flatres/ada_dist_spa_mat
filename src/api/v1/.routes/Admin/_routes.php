@@ -29,6 +29,10 @@ $app->group('/admin', function(){
     $this->get('/sync/missubjects', '\Admin\Sync\Subjects:misSubjects_GET');
     $this->post('/sync/subjects', '\Admin\Sync\Subjects:subjectsSync_POST');
 
+    $this->post('/sync/externalexams/session/{sessionId}', '\Admin\Sync\ExternalExams:externalExamsSync_POST');
+    $this->post('/sync/externalexams/sessions', '\Admin\Sync\ExternalExams:externalExamSessionsSync_POST');
+    $this->get('/sync/externalexams/sessions', '\Admin\Sync\ExternalExams:sessions_GET');
+
 // ACCESS --------
     $this->get('/access/roles', '\Admin\Access\Roles:roles_GET');
     $this->delete('/access/roles/{id}', '\Admin\Access\Roles:role_DELETE');

@@ -47,6 +47,8 @@ class Result
     public $total;
     public $title;
     public $isIGCSE;
+    public $boardName; //not currently set by anything
+    public $isNewSixthForm; //not currently set by anything
 
 
     public function __construct(array $result = null)

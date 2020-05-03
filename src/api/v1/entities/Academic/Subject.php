@@ -14,6 +14,8 @@ class Subject
   public $subjectId;
   public $classes=[];
   public $exams=[];
+  public $mloMaxGradeProfile=[];
+  public $mloMinGradeProfile=[];
 
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
   {
@@ -25,7 +27,7 @@ class Subject
 
   public function byId($id) {
 
-    $this->id = $id;
+    $this->id = (int)$id;
     $s = $this->sql->select('sch_subjects', 'misId, name, code, isForm', 'id=?', [$id]);
     if ($s[0]) {
       $s = $s[0];
@@ -36,6 +38,8 @@ class Subject
     }
     return $this;
   }
+
+  public function byExamCode()
 
   public function getClassesByYear($year) {
     $classes = $this->sql->select('sch_classes', 'id', 'subjectId = ? AND year=?', [$this->id, $year]);
@@ -110,10 +114,40 @@ class Subject
       }
       if ($mloCount > $maxMLOCount) $maxMLOCount = $mloCount;
     }
+    $this->students = $students;
     return [
       'students'  => $students,
       'maxMLOCount' => $maxMLOCount
       ];
+  }
+
+  public function makeMLOProfile($examId = null) {
+    $students = &$this->students;
+    $mlo = new \Entities\Exams\MLO($this->sql);
+    foreach ($students as &$s) {
+      $exam = $mlo->makeProfile($s, $examId);
+      $this->countGrade($this->mloMaxGradeProfile, $exam->mloMax, $s);
+      $this->countGrade($this->mloMinGradeProfile, $exam->mloMin, $s);
+    }
+
+    $this->mloMaxGradeProfile = array_values(sortArrays($this->mloMaxGradeProfile, 'grade', 'ASC'));
+    $this->mloMinGradeProfile = array_values(sortArrays($this->mloMinGradeProfile, 'grade', 'ASC'));
+
+    return $this;
+  }
+
+  private function countGrade(&$gradeStore, $grade, $student) {
+    if (!$grade) return $gradeStore;
+    $key = 'g' . $grade;
+    if (!isset($gradeStore[$key])) $gradeStore[$key] = [
+      'grade' => $grade,
+      'count' => 0,
+      'countM' => 0,
+      'countF'  => 0
+    ];
+    $gradeStore[$key]['count']++;
+    $gradeStore[$key]['count' . strtoupper($student->gender)]++;
+    return $gradeStore;
   }
 
   public function getStudentsByExam($year, $examId) {

@@ -2,6 +2,23 @@
 
 function emit($response, $data){
 
+  // foreach((array)$data as &$d){
+  //   if (is_object($d)){
+  //       if (property_exists($d, 'conn')) $d = null;
+  //   }
+  //   if (is_array($d)) {
+  //     foreach ($d as &$e) {
+  //       if (is_object($e)){
+  //           if (property_exists($e, 'conn')) $e = null;
+  //       }
+  //       if (is_object($d)){
+  //           if (property_exists($d, 'conn')) $d = null;
+  //       }
+  //     }
+  //   }
+  // }
+  // return;
+
   $packagedResponse = $response->withJson($data, 200, JSON_INVALID_UTF8_IGNORE);
   return $packagedResponse;
 

@@ -39,7 +39,7 @@ class SubjectCodes
 {
     public $subjectCode;
     public $level;
-    public $isIGCSE;
+    public $isIGCSE = false;
     private $console;
     // public $boardName;
     // public $boardDesc;
@@ -177,7 +177,8 @@ class SubjectCodes
       if($this->contains('history')) return array("HI", 'History');
 
       if($this->contains('english') && $this->contains('language')) return array('EN', 'English Language');
-      if($this->contains('english') && $this->contains('literature')) return array('ELI', 'Literature in English');
+      // if($this->contains('english') && $this->contains('literature')) return array('ELI', 'Literature in English');
+      if($this->contains('english') && $this->contains('literature')) return array('ENLIT', 'Literature in English');
 
       if($this->contains('music') && $this->contains('technology')) return array("MT", "Music Technology");
       if($this->contains('music')) return array("MU", 'Music');

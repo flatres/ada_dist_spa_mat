@@ -49,5 +49,36 @@ class MLO
       // $isamsStudent = new
     }
 
+    public function makeProfile(\Entities\People\Student &$student, $examId = null) {
+      //get a list of exams and collect MLO Grades
+      $exams = [];
+      $examsInfo = [];
+      $returnExam = [];
+      foreach($student->examData['mlo'] as $m){
+        $examId = $m['examId'];
+        $key = "id" . $examId;
+        if (!isset($exams[$key])) {
+          $exams[$key] = [];
+          $examsInfo[] = new \Entities\Academic\SubjectExam($this->sql, $examId);
+        }
+        if ($m['mlo']) {
+          $exams[$key][] = [
+            'points'  => (new \Entities\Exams\Grade($m['mlo']))->points,
+            'grade'   => $m['mlo']
+          ];
+        }
+      }
+      //extract the highest and lowest mlo for each exam
+      foreach($examsInfo as &$e) {
+        $key = "id" . $e->id;
+        $results = sortArrays($exams[$key], 'points');
+        $e->mloMax = $results[0]['grade'] ?? null ;
+        $e->mloMin = $results[count($results) - 1]['grade'] ?? null ;
+        if ($e->id == $examId) $returnExam = $e;
+      }
+      $student->exams = $examsInfo;
+      return $returnExam;
+    }
+
 
 }

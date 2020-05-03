@@ -162,7 +162,7 @@ class Statistics
 
       unset($this->console);
       unset($this->sql);
-      unset($this->results);
+      // unset($this->results);
       unset($this->moduleResults);
       return $this;
     }

@@ -116,15 +116,21 @@ class Students
     private function newStudent($student)
     {
       $d = $student['misData'];
+
+      //boardingHouseId
+      $bh = $this->ada->select('sch_houses', 'id', 'name=?', [$d['txtBoardingHouse']]);
+      $bhId = $bh[0]['id'] ?? null;
+
       $id = $this->ada->insert(
         'stu_details',
-        'lastname, firstname, prename, initials, boardingHouse, NCYear, email, mis_id, mis_family_id, gender, dob, enrolmentNCYear, EnrolmentSchoolYear',
+        'lastname, firstname, prename, initials, boardingHouse, boardingHouseId, NCYear, email, mis_id, mis_family_id, gender, dob, enrolmentNCYear, EnrolmentSchoolYear',
         array(
           $d['txtSurname'],
           $d['txtForename'],
           $d['txtPreName'],
           $d['txtInitials'],
           $d['txtBoardingHouse'],
+          $bhId,
           $d['intNCYear'],
           $d['txtEmailAddress'],
           $d['id'],
@@ -157,9 +163,13 @@ class Students
       } else {
         $d = $student['misData'];
         // echo $d['id'] . $d['txtSurname'] . PHP_EOL;
+        //boardingHouseId
+        $bh = $this->ada->select('sch_houses', 'id', 'name=?', [$d['txtBoardingHouse']]);
+        $bhId = $bh[0]['id'] ?? null;
+
         $this->ada->update(
           'stu_details',
-          'lastname=?, firstname=?, prename=?, initials=?, boardingHouse=?, NCYear = ?, email=?, mis_id=?, mis_family_id=?, gender=?, dob=?, enrolmentNCYear=?, enrolmentSchoolYear=?, disabled=?',
+          'lastname=?, firstname=?, prename=?, initials=?, boardingHouse=?, boardingHouseId=?, NCYear = ?, email=?, mis_id=?, mis_family_id=?, gender=?, dob=?, enrolmentNCYear=?, enrolmentSchoolYear=?, disabled=?',
           'id=?',
           array(
             $d['txtSurname'],
@@ -167,6 +177,7 @@ class Students
             $d['txtPreName'],
             $d['txtInitials'],
             $d['txtBoardingHouse'],
+            $bhId,
             $d['intNCYear'],
             $d['txtEmailAddress'],
             $d['id'],

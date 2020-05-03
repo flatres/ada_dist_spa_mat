@@ -74,6 +74,10 @@ class iSamsSet
         $this->examCodes[] = 'ENLIT';
       }
 
+      if ($this->NCYear > 11 && $this->subjectCode === 'CL') {
+        $this->examCodes[] = 'CG'; //classical greek
+      }
+
       $this->getTeachers($set['txtTeacher']);
 
 

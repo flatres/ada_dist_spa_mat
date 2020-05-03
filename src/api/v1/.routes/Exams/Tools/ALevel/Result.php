@@ -49,6 +49,8 @@ class Result
     public $mark;
     public $total;
     public $title;
+    public $boardName;
+    public $early;
 
     public function __construct(array $result)
     {
