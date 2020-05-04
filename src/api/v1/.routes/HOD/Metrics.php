@@ -49,15 +49,22 @@ class Metrics
 
     public function yearHistoryGet($request, $response, $args)
     {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.history');
+      $this->progress->publish(0.25);
+
       $subjectId = $args['subject'];
       $year = $args['year'];
       $examId = $args['exam'];
       $subject = new \Entities\Academic\Subject($this->ada);
       $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
+      $this->progress->publish(0.5);
       $subject->makeMLOProfile();
+      $this->progress->publish(0.75);
       $subject->makeHistoryProfile($examId, $year);
       // $subject->getExamData();
       // $subject->getSets($args['year']);
+      $this->progress->publish(1);
       return emit($response, $subject);
     }
 

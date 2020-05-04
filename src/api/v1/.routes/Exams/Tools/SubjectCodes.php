@@ -52,6 +52,18 @@ class SubjectCodes
        $this->console = $console;
        $this->txtModuleCode = $moduleCode;
        $this->txtOptionTitle = $subjectTitle;
+
+       switch($level) { //must be before codes
+           case 'A'  : $level = 'A'; break;
+           case 'ASB': $level = 'AS'; break;
+           case 'FC': $level = 'PreU'; break;
+           case 'B' : $level = 'EPQ'; break;
+           case 'GCSE': $level = 'GCSE'; break;
+           default: $level = '';
+       }
+
+       $this->level = $level;
+
        $codes = $this->getCodes();
        $this->subjectCode = $codes[0];
        $this->subjectName = $codes[1];
@@ -62,17 +74,6 @@ class SubjectCodes
          $this->boardDesc = '-';
          $this->boardName = '-';
        };
-
-       switch($level) {
-           case 'A'  : $level = 'A'; break;
-           case 'ASB': $level = 'AS'; break;
-           case 'FC': $level = 'PreU'; break;
-           case 'B' : $level = 'EPQ'; break;
-           case 'GCSE': $level = 'GCSE'; break;
-           default: $level = '';
-       }
-
-       $this->level = $level;
     }
 
     public function GCSEType(){
@@ -178,7 +179,8 @@ class SubjectCodes
 
       if($this->contains('english') && $this->contains('language')) return array('EN', 'English Language');
       // if($this->contains('english') && $this->contains('literature')) return array('ELI', 'Literature in English');
-      if($this->contains('english') && $this->contains('literature')) return array('ENLIT', 'Literature in English');
+      if($this->contains('english') && $this->contains('literature') && $this->level == 'GCSE') return array('ENLIT', 'Literature in English');
+      if($this->contains('english')) return array('EN', 'English');
 
       if($this->contains('music') && $this->contains('technology')) return array("MT", "Music Technology");
       if($this->contains('music')) return array("MU", 'Music');

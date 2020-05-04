@@ -17,8 +17,10 @@ class Subject
   public $mloMaxGradeProfile=[];
   public $mloMinGradeProfile=[];
   public $history=[];
+  public $bandedHistory = [];
   public $stackedHistory=[];
   public $grades=[];
+  public $bands=[];
 
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
   {
@@ -118,7 +120,7 @@ class Subject
       if ($mloCount > $maxMLOCount) $maxMLOCount = $mloCount;
     }
     $this->students = $students;
-    $this->maxMLOCount = $mloCount;
+    $this->maxMLOCount = $mloCount ?? 0;
     return [
       'students'  => $students,
       'maxMLOCount' => $maxMLOCount
@@ -149,15 +151,17 @@ class Subject
     $this->mloMaxGradeProfile = array_values(sortArrays($this->mloMaxGradeProfile, 'grade', 'ASC'));
     $this->mloMinGradeProfile = array_values(sortArrays($this->mloMinGradeProfile, 'grade', 'ASC'));
 
-    $this->mloMaxGradeProfile[] = $results[] = [
-      'grade' => 'GCSE Avg',
-      'count' => $gcseAvg
-    ];
+    if ($gcseAvg > 0) {
+      $this->mloMaxGradeProfile[] = $results[] = [
+        'grade' => 'GCSE Avg',
+        'count' => $gcseAvg
+      ];
 
-    $this->mloMinGradeProfile[] = $results[] = [
-      'grade' => 'GCSE Avg',
-      'count' => $gcseAvg
-    ];
+      $this->mloMinGradeProfile[] = $results[] = [
+        'grade' => 'GCSE Avg',
+        'count' => $gcseAvg
+      ];
+    }
 
     return $this;
   }
@@ -194,6 +198,7 @@ class Subject
     return $students;
   }
 
+  // TODO: Split this up and perhaps even move all of this stats business into its own class
   public function makeHistoryProfile($examId, $year)
   {
       $sql = $this->adaData;
@@ -236,10 +241,15 @@ class Subject
         $this->stackedHistory[] = $stacked;
         $history[] = $mlo;
       }
+      $sessionHistory = [];
+      $stackedHistory = [];
+      $multiYearHistory = [];
       $sessions = $sql->select('exams_sessions', 'id, year', 'id > 0 ORDER BY year DESC', []);
+      $yearCount = 0;
       foreach($sessions as $s){
         $gcseAvg = 0;
         $results = $sql->select('exams_results', 'misId', 'sessionId = ? AND examId=? AND NCYear=?', [$s['id'], $examId, $year]);
+
         $count = count($results);
         if ($count > 0 ) {
           //reset count
@@ -273,7 +283,7 @@ class Subject
           foreach($results as $r){
             $stacked[$r['grade']] = $r['count'];
           }
-          $this->stackedHistory[] = $stacked;
+          $stackedHistory[] = $stacked;
 
           if ($year > 11) {
             $results[] = [
@@ -281,7 +291,13 @@ class Subject
               'count' => $gcseAvg
             ];
           }
-          $history[] = [
+
+          if ($yearCount < 3) {
+            $multiYearHistory[] = $results;
+            $yearCount++;
+          }
+
+          $sessionHistory[] = [
             'year'  =>  $s['year'],
             'results' => $results
           ];
@@ -296,16 +312,162 @@ class Subject
         WHERE examId=? AND NCYear=?
         GROUP BY result',
         [$examId, $year]);
+      $this->grades = sortArrays($grades, 'grade', 'ASC', true); //need this in multiyear
 
-      $this->history = $history;
-      $this->grades = sortArrays($grades, 'grade', 'ASC');
+      //create averages of last three years
+      $multiYearHistory = $this->multiYearAverages($multiYearHistory, $year > 11);
+
+      //Keeps MLO and Multi year at the start for display purposes
+      $this->stackedHistory = array_merge($this->stackedHistory, $stackedHistory);
+      $this->history = array_merge($history, $multiYearHistory, $sessionHistory);
+
       if ($year > 11) {
         $this->grades[] = [
           'grade' => 'GCSE Avg',
           'count' => 0
         ];
       }
+      $this->bandedHistory = $this->gradeBands($this->history);
   }
 
+  // this has got to be some of the worst code I have written. Don't code in a rush!!!
+  private function multiYearAverages(Array $years, bool $hasGCSEAvg) {
+      $count = 0;
+      $avgCount;
+      $gcseAvg=0;
+      $gradeCounts = [];
+      $numericYears = 0;
+      $letterYears = 0; //takes into account depts that have switch grding systems. Yet another edge case
+      foreach($years as $y){
+        $yearCount = 0;
+        $haveCountedYearNumeric = false;
+        $haveCountedYearLetter = false;
+        foreach($y as $r){
+          $g = $r['grade'];
+          if ($g !== 'GCSE Avg') {
+            if (is_numeric($g) && !$haveCountedYearNumeric) {
+              $numericYears++;
+              $haveCountedYearNumeric = true;
+            }
+            if (!is_numeric($g) && !$haveCountedYearLetter) {
+              $letterYears++;
+              $haveCountedYearLetter = true;
+            }
+
+            if (!isset($gradeCounts[$g])) $gradeCounts[$g] = [
+              'grade' => $g,
+              'count' => 0
+            ];
+            $gradeCounts[$g]['count'] += $r['count'];
+            $count += $r['count'];
+            $yearCount += $r['count'];
+          }
+
+          if ($hasGCSEAvg && $g === 'GCSE Avg'){  //assume that GCSE avg is last so that counrt works. BOLD!
+            $gcseAvg += $yearCount * $r['count']; //rcount is the GCSE avg here
+          }
+        }
+      }
+      //average
+      foreach($this->grades as $g) {
+        $g = $g['grade'];
+        $countYears = is_numeric($g) ? $numericYears : $letterYears;
+        if (isset($gradeCounts[$g]) && $countYears > 0) $gradeCounts[$g]['count'] = round($gradeCounts[$g]['count'] / $countYears);
+      }
+      $gradeCounts = array_values($gradeCounts);
+      if ($hasGCSEAvg) {
+        if ($count > 0) $gcseAvg = round($gcseAvg / $count, 2);
+        $gradeCounts[] = [
+          'grade'  => 'GCSE Avg',
+          'count'  => $gcseAvg
+        ];
+      }
+      $result = [
+        'year'  => 'Avg Last 3 Yrs',
+        'results' => $gradeCounts
+      ];
+      return [$result];
+
+  }
+
+  private function gradeBands($history)
+  {
+      //determine what grade structure we have
+      $isPreU = false;
+      $isNumbers = false;
+      $isLetters = false;
+      $gradeBands = [];
+      foreach($this->grades as $g){
+        $g = $g['grade'];
+        if ($g == 'A' || $g == 'B' || $g == 'C' || $g == 'D') $isLetters = true;
+        if ($g == 'D1' || $g == 'D2' || $g == 'D3' || $g == 'M1' || $g == 'M2' || $g == 'M3') $isPreU = true;
+        if ((int)$g == 9 || (int)$g == 8 || (int)$g == 7 || (int)$g == 6 || (int)$g == 5)  $isNumbers = true;
+      }
+      // $this->h = $history;
+      foreach($history as $h) {
+        $results = $h['results'];
+        $gC = []; //grade counts
+        $totalGrades = 0;
+        foreach($results as $r) {
+          $grade = $r['grade'];
+          if ($grade == 'GCSE Avg') continue;
+          $key = is_numeric($grade) ? '_' . $grade : $grade;
+          // if (!isset($gC[$key])) $gC[$key] = 0;
+          $count = (int)$r['count'];
+          $gC[$key] = $count;
+          $totalGrades += $count;
+        }
+        // $this->gC = $gC;
+        $b1 = []; $b2 = []; $b3 = [];
+        if ($isNumbers) {
+          $b1 = [
+            ' 9' => $gC["_9"] ?? 0,
+            '9-8' => ($gC["_9"] ?? 0) + ($gC["_8"] ?? 0),
+            '9-7' => ($gC["_9"] ?? 0) + ($gC["_8"] ?? 0) + ($gC["_7"] ?? 0),
+            '9-6' => ($gC["_9"] ?? 0) + ($gC["_8"] ?? 0) + ($gC["_7"] ?? 0) + ($gC["_6"] ?? 0),
+            '9-4' => ($gC["_9"] ?? 0) + ($gC["_8"] ?? 0) + ($gC["_7"] ?? 0) + ($gC["_6"] ?? 0) + ($gC["_5"] ?? 0)  + ($gC["_4"] ?? 0)
+          ];
+        }
+        if ($isLetters) {
+          $b2 = [
+            'A*' => $gC["A*"] ?? 0,
+            'A*-A' => ($gC["A*"] ?? 0) + ($gC["A"] ?? 0),
+            'A*-B' => ($gC["A*"] ?? 0) + ($gC["A"] ?? 0) + ($gC["B"] ?? 0),
+            'A*-C' => ($gC["A*"] ?? 0) + ($gC["A"] ?? 0) + ($gC["B"] ?? 0) + ($gC["C"] ?? 0),
+            'A*-D' => ($gC["A*"] ?? 0) + ($gC["A"] ?? 0) + ($gC["B"] ?? 0) + ($gC["C"] ?? 0) + ($gC["D"] ?? 0),
+            'A*-E' => ($gC["A*"] ?? 0) + ($gC["A"] ?? 0) + ($gC["B"] ?? 0) + ($gC["C"] ?? 0) + ($gC["D"] ?? 0) + ($gC["E"] ?? 0),
+          ];
+        }
+        if ($isPreU) {
+          $b3 = [
+            'D1-D2' => ($gC["D1"] ?? 0) + ($gC["D2"] ?? 0),
+            'D1-D3' => ($gC["D1"] ?? 0) + ($gC["D2"] ?? 0) + ($gC["D3"] ?? 0),
+            'D1-M1' => ($gC["D1"] ?? 0) + ($gC["D2"] ?? 0) + ($gC["D3"] ?? 0) + ($gC["M1"] ?? 0),
+            'D1-M2' => ($gC["D1"] ?? 0) + ($gC["D2"] ?? 0) + ($gC["D3"] ?? 0) + ($gC["M1"] ?? 0) + ($gC["M2"] ?? 0),
+            'D1-M3' => ($gC["D1"] ?? 0) + ($gC["D2"] ?? 0) + ($gC["D3"] ?? 0) + ($gC["M1"] ?? 0) + ($gC["M2"] ?? 0) + ($gC["M3"] ?? 0),
+            'D1-P2' => ($gC["D1"] ?? 0) + ($gC["D2"] ?? 0) + ($gC["D3"] ?? 0) + ($gC["M1"] ?? 0) + ($gC["M2"] ?? 0) + ($gC["M3"] ?? 0) + ($gC["P1"] ?? 0) + ($gC["P2"] ?? 0)
+          ];
+        }
+        $b = array_merge($b1, $b2, $b3);
+        $bands = [];
+        foreach($b as $key => $value) {
+          $this->bands[$key] = $key;
+          $bands[] = [
+            'band'  => $key,
+            'abs'   => $value,
+            'pct'   => $totalGrades == 0 ? 0 : round(100 * $value / $totalGrades)
+          ];
+        }
+
+        $gradeBands[] = [
+          'year'  => $h['year'],
+          'results' => $bands
+        ];
+
+      }
+      $this->bands = array_values($this->bands);
+      return $gradeBands;
+
+  }
 
 }

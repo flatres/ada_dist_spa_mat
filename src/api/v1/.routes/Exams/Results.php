@@ -41,7 +41,7 @@ class Results
      */
     public function getSessions($request, $response, $args)
     {
-      $this->fetchExamSessions();
+      $data = $this->fetchExamSessions();
       return emit($response, $data);
     }
 
