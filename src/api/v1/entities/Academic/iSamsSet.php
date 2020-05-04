@@ -58,10 +58,11 @@ class iSamsSet
       $subject = new \Entities\Academic\iSamsSubject($this->isams, $set['intSubject']);
       $this->subjectName = $subject->name;
       $this->subjectCode = $subject->code;
-      $this->examCodes[] = $subject->code;
+
 
       if (strpos($this->setCode, 'Ma/x') !== false || strpos($this->setCode, 'Ma/y') !== false || strpos($this->setCode, 'Ma/z') !== false) {
         //is a further maths set
+        $this->examCodes[] = $subject->code;
         $this->processFurtherMaths();
       }
 
@@ -69,13 +70,36 @@ class iSamsSet
 
       $this->getNCYear();
 
+      $this->examCodes[] = $subject->code;
+
       //english takes two exams
       if ($this->NCYear < 12 && $this->subjectCode === 'EN') {
+        $this->examCodes[] = $subject->code;
         $this->examCodes[] = 'ENLIT';
       }
-
       if ($this->NCYear > 11 && $this->subjectCode === 'CL') {
+        $this->examCodes[] = $subject->code;
         $this->examCodes[] = 'CG'; //classical greek
+      }
+      if ($this->NCYear > 11 && $this->subjectCode === 'MA') {
+        if (strpos(strtoupper($this->setCode), 'MA/MC') !== false) {
+          $this->examCodes = [];
+          $this->examCodes[] = 'MC';
+        }
+      }
+      if ($this->NCYear < 12 && $this->NCYear > 9) { //double science sets 3 and 4 are double science only
+          if ($subject->code === 'PH' && (strpos($this->setCode, '/3') !== false || strpos($this->setCode, '/4') !== false)) {
+              $this->examCodes = [];
+              $this->examCodes[] = 'PHS2';
+          }
+          if ($subject->code === 'CH' && (strpos($this->setCode, '/3') !== false || strpos($this->setCode, '/4') !== false)) {
+            $this->examCodes = [];
+            $this->examCodes[] = 'CHS2';
+          }
+          if ($subject->code === 'BI' && (strpos($this->setCode, '/3') !== false || strpos($this->setCode, '/4') !== false)) {
+            $this->examCodes = [];
+            $this->examCodes[] = 'BIS2';
+          }
       }
 
       $this->getTeachers($set['txtTeacher']);

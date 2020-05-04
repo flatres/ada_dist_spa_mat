@@ -80,7 +80,7 @@ class AdaClass
       foreach ($this->exams as $e){
         $exam = new \Entities\Academic\SubjectExam($this->sql, $e->id);
         foreach($this->teachers as $t){
-          $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $e->examCode, $t->id);
+          $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $e->aliasCode ? $e->aliasCode : $e->examCode, $t->id);
           $s->examData['mlo'][] = [
             'teacher' => $t,
             'examId'  => $e->id,

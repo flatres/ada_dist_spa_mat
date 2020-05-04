@@ -20,6 +20,7 @@ class Subjects
     {
        $this->isams= $container->isams;
        $this->sql = $container->mysql;
+       $this->ada = $container->ada;
 
     }
 
@@ -39,6 +40,16 @@ class Subjects
       $this->progress = new \Sockets\Progress($auth, 'Admin/Sync/Subjects');
 
       $console->publish('Pulling iSAMS Subjects...');
+
+      //delete old subjects and classes
+      // TODO: Write sync routines for all of this
+      $this->ada->delete('sch_classes', 'id>0', []);
+      $this->ada->delete('sch_class_exams', 'id>0', []);
+      $this->ada->delete('sch_class_students', 'id>0', []);
+      $this->ada->delete('sch_class_teachers', 'id>0', []);
+      $this->ada->delete('sch_subjects', 'id>0', []);
+      $this->ada->delete('sch_subjects_exams', 'id>0', []);
+
       $misSubjects = $this->isams->select(
         'TblTeachingManagerSubjects',
         'TblTeachingManagerSubjectsID as id, txtSubjectName as name, txtSubjectCode as code',
@@ -139,8 +150,18 @@ class Subjects
         case 'EN' :
           $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode', [$id, 'Literature in English', 'ENLIT']);
           break;
+        case 'PH' :
+          $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode, aliasCode', [$id, 'Double Science', 'PHS2', 'PH']);
+          break;
+        case 'CH' :
+          $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode, aliasCode', [$id, 'Double Science', 'CHS2', 'CH']);
+          break;
+        case 'BI' :
+          $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode, aliasCode', [$id, 'Double Science', 'BIS2', 'BI']);
+          break;
         case 'MA' :
           $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode', [$id, 'Further Mathematics', 'FM']);
+          $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode', [$id, 'Maths in Context', 'MC']);
           break;
       }
 

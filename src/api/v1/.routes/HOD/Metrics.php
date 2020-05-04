@@ -36,12 +36,19 @@ class Metrics
 
     public function yearMLOGet($request, $response, $args)
     {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.mlo');
+      $this->progress->publish(0.25);
+
       $subjectId = $args['subject'];
       $year = $args['year'];
       $examId = $args['exam'];
       $subject = new \Entities\Academic\Subject($this->ada);
+      $this->progress->publish(0.5);
       $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
+      $this->progress->publish(0.75);
       $subject->makeMLOProfile();
+      $this->progress->publish(1);
       // $subject->getExamData();
       // $subject->getSets($args['year']);
       return emit($response, $subject);

@@ -6,6 +6,7 @@ class SubjectExam
 {
   public $id; //isams set ID
   public $examCode, $subjectId, $examName, $examLevelId, $examLevel;
+  public $aliasCode; //for dealing with this silly situation where MLOs have been put under wrong subject code
 
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
   {
@@ -16,13 +17,14 @@ class SubjectExam
 
   public function byId($id) {
     $this->id = (int)$id;
-    $exam = $this->sql->select('sch_subjects_exams', 'subjectId, examName, examCode, examLevelId', 'id=?', [$id]);
+    $exam = $this->sql->select('sch_subjects_exams', 'subjectId, examName, examCode, examLevelId, aliasCode', 'id=?', [$id]);
     if (isset($exam[0])){
       $exam = $exam[0];
       $this->subjectId = $exam['subjectId'];
       $this->examName = $exam['examName'];
       $this->examCode = $exam['examCode'];
       $this->examLevelId = $exam['examLevelId'];
+      $this->aliasCode = $exam['aliasCode'];
 
       //going to come back to this.
       // $this->examLevel = $this->sql->select('sch_exam_levels', 'name', 'id=?', $this->examLevelId)[0]['name'] ?? null;

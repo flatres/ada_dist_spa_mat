@@ -35,7 +35,7 @@ class Subject
 
     $this->id = (int)$id;
     $s = $this->sql->select('sch_subjects', 'misId, name, code, isForm', 'id=?', [$id]);
-    if ($s[0]) {
+    if ($s) {
       $s = $s[0];
       $this->misId = $s['misId'];
       $this->name = $s['name'];
@@ -106,7 +106,7 @@ class Subject
       $s->getClassesByExam($examId);
       foreach($s->classes as $c){
         foreach($c->teachers as $t){
-          $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $exam->examCode, $t->id);
+          $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $exam->aliasCode ? $exam->aliasCode : $exam->examCode, $t->id);
           $s->examData['mlo'][] = [
             'teacher' => $t,
             'examId'  => $examId,
@@ -209,7 +209,7 @@ class Subject
         $mlo['year'] = "Max MLO";
         //create data for stacked chart
         $stacked = [];
-        $stacked['year'] = 'Max';
+        $stacked['year'] = 'Max MLO';
         foreach($mlo['results'] as $r){
           $stacked[$r['grade']] = $r['count'];
         }
@@ -221,7 +221,7 @@ class Subject
         $mlo['results'] = $this->mloMinGradeProfile;
         $mlo['year'] = "Min MLO";
         $stacked = [];
-        $stacked['year'] = 'Min';
+        $stacked['year'] = 'Min MLO';
         foreach($mlo['results'] as $r){
           $stacked[$r['grade']] = $r['count'];
         }
