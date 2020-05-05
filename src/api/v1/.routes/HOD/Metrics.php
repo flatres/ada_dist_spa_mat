@@ -48,6 +48,9 @@ class Metrics
       $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
       $this->progress->publish(0.75);
       $subject->makeMLOProfile();
+      $subject->classes = null;
+      $subject->sql = null;
+      $subject->adaData = null;
       $this->progress->publish(1);
       // $subject->getExamData();
       // $subject->getSets($args['year']);
@@ -75,6 +78,7 @@ class Metrics
       $subject->students = null;
       $subject->sql = null;
       $subject->adaData = null;
+      $subject->examId = (int)$examId;
       $this->progress->publish(1);
       return emit($response, $subject);
     }
