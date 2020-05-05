@@ -59,8 +59,13 @@ class Subject
     foreach($classIds as $c) {
       $d = $this->sql->select('sch_classes', 'year', 'id=?', [$c['classId']]);
       $classYear = $d[0]['year'] ?? -1;
-      if ($year == $classYear) $examClasses[] = new \Entities\Academic\AdaClass($this->sql, $c['classId']);
+      if ($year == $classYear) {
+        $class = new \Entities\Academic\AdaClass($this->sql, $c['classId']);
+        $examClasses[$class->code] = $class;
+      }
     }
+
+    $examClasses = array_values($examClasses);
 
     $this->classes = sortObjects($examClasses, 'code', 'ASC');
     return $this->classes;

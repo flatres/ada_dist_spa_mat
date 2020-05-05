@@ -95,6 +95,7 @@ class Student
         $this->boardingHouseSafe = str_replace(" ", '_', $student['boardingHouse']);
         $this->gender = $student['gender'];
         $this->NCYear = $student['NCYear'];
+        $this->schoolNumber = explode('@', $this->email)[0] ?? null;
       } else {
         return null;
       }

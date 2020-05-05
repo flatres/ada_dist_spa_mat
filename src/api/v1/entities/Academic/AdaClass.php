@@ -76,18 +76,23 @@ class AdaClass
     $maxMLOCount = 0;
     foreach($students as $s) {
       $s->examData['mlo'] = [];
+      $mloBank = [];  //prevents double counting in some strange edge cases eg Further Maths
       $mloCount = 0;
       foreach ($this->exams as $e){
         $exam = new \Entities\Academic\SubjectExam($this->sql, $e->id);
         foreach($this->teachers as $t){
-          $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $e->aliasCode ? $e->aliasCode : $e->examCode, $t->id);
-          $s->examData['mlo'][] = [
-            'teacher' => $t,
-            'examId'  => $e->id,
-            'mlo'     => $mlo
-          ];
-          $s->{'mlo' . $mloCount} = $mlo;
-          $mloCount++;
+          $examCode = $e->aliasCode ? $e->aliasCode : $e->examCode;
+          if (!isset($mloBank[$e->id . '_' . $t->id])) {
+            $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $examCode, $t->id);
+            $s->examData['mlo'][] = [
+              'teacher' => $t,
+              'examId'  => $e->id,
+              'mlo'     => $mlo
+            ];
+            $s->{'mlo' . $mloCount} = $mlo;
+            $mloCount++;
+            $mloBank[$e->id . '_' . $t->id] = true;
+          }
         }
       }
       if ($mloCount > $maxMLOCount) $maxMLOCount = $mloCount;
