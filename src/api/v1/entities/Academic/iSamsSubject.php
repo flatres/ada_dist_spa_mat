@@ -34,6 +34,8 @@ class iSamsSubject
       $subject = $subject[0];
       $this->name = $subject['txtSubjectName'];
       $this->code = $subject['txtSubjectCode'];
+
+      if ($this->code === 'CO') $this->code = 'CS';
       return $this;
     }
 

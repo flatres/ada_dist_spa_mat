@@ -102,10 +102,11 @@ class Subject
 
   public function getStudentsMLOByExam($year, $examId) {
     $students = $this->getStudentsByExam($year, $examId);
+    $this->debug = $students;
     $this->year = (int)$year;
     $maxMLOCount = 0;
     $exam = new \Entities\Academic\SubjectExam($this->sql, $examId);
-    foreach($students as $s) {
+    foreach($students as &$s) {
       $s->examData['mlo'] = [];
       $mloCount = 0;
       $s->getClassesByExam($examId);
@@ -126,6 +127,7 @@ class Subject
     }
     $this->students = $students;
     $this->maxMLOCount = $mloCount ?? 0;
+    $this->debug2 = $students;
     return [
       'students'  => $students,
       'maxMLOCount' => $maxMLOCount
@@ -140,6 +142,8 @@ class Subject
       $this->countGrade($this->mloMaxGradeProfile, $exam->mloMax, $s);
       $this->countGrade($this->mloMinGradeProfile, $exam->mloMin, $s);
     }
+    
+    unset($s);
 
     //get gcse Avg
     $count = 0;
