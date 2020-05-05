@@ -154,10 +154,14 @@ class Subject
     if ($count > 0) $gcseAvg = round($gcseAvg / $count, 2);
 
     //calculate %
+    $countGrades = 0;
+    foreach($this->mloMaxGradeProfile as $g){
+      $countGrades += $g['count'];
+    }
     unset($g);
-    foreach($this->mloMaxGradeProfile as &$g) $g['pct'] = $count > 0 ? round(100*$g['count'] / $count): '';
+    foreach($this->mloMaxGradeProfile as &$g) $g['pct'] = $count > 0 ? round(100*$g['count'] / $countGrades): '';
     unset($g);
-    foreach($this->mloMinGradeProfile as &$g) $g['pct'] = $count > 0 ? round(100*$g['count'] / $count): '';
+    foreach($this->mloMinGradeProfile as &$g) $g['pct'] = $count > 0 ? round(100*$g['count'] / $countGrades): '';
     unset($g);
 
     $this->mloMaxGradeProfile = array_values(sortArrays($this->mloMaxGradeProfile, 'grade', 'ASC'));
