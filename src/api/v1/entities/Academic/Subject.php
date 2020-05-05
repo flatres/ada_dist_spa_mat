@@ -148,18 +148,28 @@ class Subject
     }
     if ($count > 0) $gcseAvg = round($gcseAvg / $count, 2);
 
+    //calculate %
+    unset($g);
+    foreach($this->mloMaxGradeProfile as &$g) $g['pct'] = $count > 0 ? round(100*$g['count'] / $count): '';
+    unset($g);
+    foreach($this->mloMinGradeProfile as &$g) $g['pct'] = $count > 0 ? round(100*$g['count'] / $count): '';
+    unset($g);
+
     $this->mloMaxGradeProfile = array_values(sortArrays($this->mloMaxGradeProfile, 'grade', 'ASC'));
     $this->mloMinGradeProfile = array_values(sortArrays($this->mloMinGradeProfile, 'grade', 'ASC'));
 
     if ($gcseAvg > 0) {
       $this->mloMaxGradeProfile[] = $results[] = [
         'grade' => 'GCSE Avg',
-        'count' => $gcseAvg
+        'count' => $gcseAvg,
+        'pct' => $gcseAvg
       ];
 
       $this->mloMinGradeProfile[] = $results[] = [
         'grade' => 'GCSE Avg',
-        'count' => $gcseAvg
+        'count' => $gcseAvg,
+        'pct'   => $gcseAvg
+
       ];
     }
 
@@ -275,20 +285,40 @@ class Subject
           GROUP BY result',
           [$s['id'], $examId, $year]);
         if (count($results) > 0) {
-          $results = sortArrays($results, 'grade', 'ASC');
+          $results = sortArrays($results, 'grade', 'ASC', true);
 
           //create data for stacked chart
           $stacked = [];
           $stacked['year'] = (string)$s['year'];
+
+          $countLetterGrades = 0;
+          $countNumberGrades = 0;
+
           foreach($results as $r){
-            $stacked[$r['grade']] = $r['count'];
+            //get totals. Oh god this code hurts
+            $g = $r['grade'];
+            $stacked[$g] = $r['count'];
+            if (is_numeric($g)) $countNumberGrades += $r['count'];
+            if (!is_numeric($g)) $countLetterGrades += $r['count'];
           }
           $stackedHistory[] = $stacked;
+
+          //make percentages
+          unset($r);
+          foreach($results as &$r){
+            $g = $r['grade'];
+            $countGrades = is_numeric($g) ? $countNumberGrades : $countLetterGrades;
+            if ($countGrades > 0) {
+              $r['pct'] = round(100 * $r['count'] / $countGrades);
+            }
+          }
+          unset($r);
 
           if ($year > 11) {
             $results[] = [
               'grade' => 'GCSE Avg',
-              'count' => $gcseAvg
+              'count' => $gcseAvg,
+              'pct'   => $gcseAvg
             ];
           }
 
@@ -310,7 +340,7 @@ class Subject
         'select result as grade, count(*) as count
         FROM exams_results
         WHERE examId=? AND NCYear=?
-        GROUP BY result',
+        GROUP BY grade',
         [$examId, $year]);
       $this->grades = sortArrays($grades, 'grade', 'ASC', true); //need this in multiyear
 
@@ -338,12 +368,15 @@ class Subject
       $gradeCounts = [];
       $numericYears = 0;
       $letterYears = 0; //takes into account depts that have switch grding systems. Yet another edge case
+      $countLetterGrades = 0;
+      $countNumberGrades = 0;
       foreach($years as $y){
         $yearCount = 0;
         $haveCountedYearNumeric = false;
         $haveCountedYearLetter = false;
         foreach($y as $r){
           $g = $r['grade'];
+          $key = '_' . $r['grade'];
           if ($g !== 'GCSE Avg') {
             if (is_numeric($g) && !$haveCountedYearNumeric) {
               $numericYears++;
@@ -354,13 +387,15 @@ class Subject
               $haveCountedYearLetter = true;
             }
 
-            if (!isset($gradeCounts[$g])) $gradeCounts[$g] = [
+            if (!isset($gradeCounts[$key])) $gradeCounts[$key] = [
               'grade' => $g,
               'count' => 0
             ];
-            $gradeCounts[$g]['count'] += $r['count'];
+            $gradeCounts[$key]['count'] += $r['count'];
             $count += $r['count'];
             $yearCount += $r['count'];
+            if (is_numeric($g)) $countNumberGrades += $r['count'];
+            if (!is_numeric($g)) $countLetterGrades += $r['count'];
           }
 
           if ($hasGCSEAvg && $g === 'GCSE Avg'){  //assume that GCSE avg is last so that counrt works. BOLD!
@@ -369,11 +404,20 @@ class Subject
         }
       }
       //average
+      $this->debug = [];
       foreach($this->grades as $g) {
         $g = $g['grade'];
+        $key = '_' . $g;
         $countYears = is_numeric($g) ? $numericYears : $letterYears;
-        if (isset($gradeCounts[$g]) && $countYears > 0) $gradeCounts[$g]['count'] = round($gradeCounts[$g]['count'] / $countYears);
+        $countGrades = is_numeric($g) ? $countNumberGrades : $countLetterGrades;
+
+        $this->debug[] = [$g, $countYears];
+        if (isset($gradeCounts[$key]) && $countYears > 0) {
+          $gradeCounts[$key]['count'] = round($gradeCounts[$key]['count'] / $countYears);
+          if ($countGrades > 0) $gradeCounts[$key]['pct'] = round(100 * $gradeCounts[$key]['count'] / $countGrades);
+        }
       }
+      $this->debug[] = $gradeCounts;
       $gradeCounts = array_values($gradeCounts);
       if ($hasGCSEAvg) {
         if ($count > 0) $gcseAvg = round($gcseAvg / $count, 2);
@@ -408,12 +452,21 @@ class Subject
         $results = $h['results'];
         $gC = []; //grade counts
         $totalGrades = 0;
+        $countNumberGrades = 0;
+        $countLetterGrades = 0;
+        $avgGCSE = 0;
         foreach($results as $r) {
           $grade = $r['grade'];
-          if ($grade == 'GCSE Avg') continue;
+          if ($grade == 'GCSE Avg') {
+            $avgGCSE = $r['count'];
+            continue;
+          }
           $key = is_numeric($grade) ? '_' . $grade : $grade;
-          // if (!isset($gC[$key])) $gC[$key] = 0;
+
           $count = (int)$r['count'];
+          if (is_numeric($grade)) $countNumberGrades += $count;
+          if (!is_numeric($grade)) $countLetterGrades += $count;
+
           $gC[$key] = $count;
           $totalGrades += $count;
         }
@@ -452,11 +505,20 @@ class Subject
         $bands = [];
         foreach($b as $key => $value) {
           $this->bands[$key] = $key;
+          $countGrades = strpos(strtoupper($key), '9') !== false ? $countNumberGrades : $countLetterGrades;
           $bands[] = [
             'band'  => $key,
             'abs'   => $value,
-            'pct'   => $totalGrades == 0 ? 0 : round(100 * $value / $totalGrades)
+            'pct'   => $countGrades == 0 ? 0 : round(100 * $value / $countGrades)
           ];
+        }
+        if ($this->year > 11) {
+          $bands[] = [
+            'band'  => 'GCSE Avg',
+            'abs'   => $avgGCSE,
+            'pct'   => $avgGCSE
+          ];
+          if (!isset($this->bands['Avg GCSE'])) $this->bands['Avg GCSE'] = 'GCSE Avg';
         }
 
         $gradeBands[] = [
@@ -467,6 +529,10 @@ class Subject
       }
       $this->bands = array_values($this->bands);
       return $gradeBands;
+  }
+
+
+  private function createBandPercentages($bands, $total) {
 
   }
 

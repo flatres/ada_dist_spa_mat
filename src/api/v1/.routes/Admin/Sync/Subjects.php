@@ -161,7 +161,7 @@ class Subjects
           break;
         case 'MA' :
           $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode', [$id, 'Further Mathematics', 'FM']);
-          $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode', [$id, 'Maths in Context', 'MC']);
+          $this->sql->insert('sch_subjects_exams', 'subjectId, examName, examCode, aliasCode', [$id, 'Maths in Context', 'MC', 'MA']);
           break;
       }
 
