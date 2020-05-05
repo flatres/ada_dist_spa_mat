@@ -71,6 +71,10 @@ class Metrics
       $subject->makeHistoryProfile($examId, $year);
       // $subject->getExamData();
       // $subject->getSets($args['year']);
+      $subject->classes = null;
+      $subject->students = null;
+      $subject->sql = null;
+      $subject->adaData = null;
       $this->progress->publish(1);
       return emit($response, $subject);
     }
