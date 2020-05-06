@@ -142,7 +142,7 @@ class Subject
       $this->countGrade($this->mloMaxGradeProfile, $exam->mloMax, $s);
       $this->countGrade($this->mloMinGradeProfile, $exam->mloMin, $s);
     }
-    
+
     unset($s);
 
     //get gcse Avg
@@ -417,17 +417,15 @@ class Subject
         }
       }
       //average
-      $this->debug = [];
       foreach($this->grades as $g) {
         $g = $g['grade'];
         $key = '_' . $g;
         $countYears = is_numeric($g) ? $numericYears : $letterYears;
         $countGrades = is_numeric($g) ? $countNumberGrades : $countLetterGrades;
-
         $this->debug[] = [$g, $countYears];
         if (isset($gradeCounts[$key]) && $countYears > 0) {
-          $gradeCounts[$key]['count'] = round($gradeCounts[$key]['count'] / $countYears);
           if ($countGrades > 0) $gradeCounts[$key]['pct'] = round(100 * $gradeCounts[$key]['count'] / $countGrades);
+          $gradeCounts[$key]['count'] = round($gradeCounts[$key]['count'] / $countYears);
         }
       }
       $this->debug[] = $gradeCounts;
