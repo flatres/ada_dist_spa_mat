@@ -33,6 +33,16 @@ $app->group('/admin', function(){
     $this->post('/sync/externalexams/sessions', '\Admin\Sync\ExternalExams:externalExamSessionsSync_POST');
     $this->get('/sync/externalexams/sessions', '\Admin\Sync\ExternalExams:sessions_GET');
 
+    $this->get('/sync/internalexams/sessions', '\Admin\Sync\InternalExams:sessions_GET');
+    $this->get('/sync/internalexams/exams', '\Admin\Sync\InternalExams:exams_GET');
+    $this->get('/sync/internalexams/exams/{id}', '\Admin\Sync\InternalExams:examResults_GET');
+    $this->post('/sync/internalexams/sync/{sessionId}', '\Admin\Sync\InternalExams:internalSessionSync_POST');
+
+    $this->get('/sync/u6mock/sessions', '\Admin\Sync\U6Mocks:sessions_GET');
+    $this->get('/sync/u6mock/exams', '\Admin\Sync\U6Mocks:exams_GET');
+    $this->get('/sync/u6mock/exams/{id}', '\Admin\Sync\U6Mocks:examResults_GET');
+    $this->post('/sync/u6mock/sync/{year}', '\Admin\Sync\U6Mocks:internalSessionSync_POST');
+
 // ACCESS --------
     $this->get('/access/roles', '\Admin\Access\Roles:roles_GET');
     $this->delete('/access/roles/{id}', '\Admin\Access\Roles:role_DELETE');

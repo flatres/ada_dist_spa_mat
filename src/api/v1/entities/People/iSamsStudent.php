@@ -6,6 +6,7 @@ class iSamsStudent
   public $firstName, $lastName, $fullName, $displayName, $initials, $gender, $dob, $enrolmentNVYear, $enrolmentSchoolYear, $NCYear, $boardingHouse, $mobile;
   public $familyId, $year, $formId;
   public $id, $adaId;
+  public $houseCode;
   public $contacts = [];
   public $portalUserCodes = [];
   // public $subjects = [];
@@ -25,7 +26,7 @@ class iSamsStudent
 
     $d = $this->sql->select(
       'TblPupilManagementPupils',
-      'intNCYear, txtSchoolID, intFamily, txtForename, txtSurname, txtForm, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtMobileNumber',
+      'intNCYear, txtSchoolID, intFamily, txtForename, txtSurname, txtForm, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtEnrolmentHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtMobileNumber',
       'txtSchoolID=?', [$id]);
 
     if(isset($d[0])){
@@ -44,7 +45,18 @@ class iSamsStudent
       $this->dob = $d['txtDOB'];
       $this->enrolmentNCYear = $d['intEnrolmentNCYear'];
       $this->enrolmentSchoolYear = $d['intEnrolmentSchoolYear'];
-      $this->boardingHouse = $d['txtBoardingHouse'];
+      $this->boardingHouse = $d['txtBoardingHouse'] ? $d['txtBoardingHouse'] : $d['txtLeavingBoardingHouse'];
+      $this->boardingHouse = $d['txtLeavingBoardingHouse'] ? $d['txtLeavingBoardingHouse'] :$d['txtEnrolmentHouse'];
+
+      //code
+      if (strpos($this->boardingHouse, ' ') !== false) {
+        //must be two worded house
+        $explode = explode(" ", $this->boardingHouse);
+        $this->houseCode = strtoupper(($explode[0][0] ?? '') . ($explode[1][0] ?? ''));
+      } else {
+        $this->houseCode = strtoupper(($this->boardingHouse[0] ?? '') . ($this->boardingHouse[1] ?? ''));
+      }
+
       $this->NCYear = $d['intNCYear'];
       $this->year = $this->makeYear($d['intNCYear']);
       $this->getAdaId();
@@ -72,7 +84,7 @@ class iSamsStudent
   {
     $ada = new \Dependency\Databases\Ada();
     $d = $ada->select('stu_details', 'id', 'mis_id=?', [$this->id]);
-    $this->adaId = $d[0]['id'] ?? false;
+    $this->adaId = $d[0]['id'] ?? null;
     return $this;
   }
 

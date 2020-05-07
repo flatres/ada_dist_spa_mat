@@ -40,6 +40,7 @@ class SubjectCodes
     public $subjectCode;
     public $level;
     public $isIGCSE = false;
+    public $error = false;
     private $console;
     // public $boardName;
     // public $boardDesc;
@@ -247,6 +248,10 @@ class SubjectCodes
       if($this->contains('drama')) return array("DR", "Theatre Studies");
       if($this->contains('extended')) return array("EPQ", "Extended Project");
       if($this->contains('physical')) return array("PE", "Physical Education");
+      if($this->contains('theatre')) return array("DR", "Theatre Studies");
+      if($this->contains('re')) return array("RE", "Religious Studies");
+      if($this->contains('sport')) return array("PE", "Sport Science");
+      $this->error = true;
       return array("-", "-");
     }
 

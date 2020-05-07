@@ -46,4 +46,19 @@ function sortObjects(array &$data, string $field, string $direction = 'DESC') {
   return $data;
 }
 
+function rankArray(array $data, string $rankByField, string $rankField)
+{
+  $data = sortArrays($data, $rankByField, 'DESC');
+  $rank = 0;
+  $previousPoint = 'nonsense';
+
+  foreach($data as &$d){
+    $point = $d[$rankByField];
+    if ($point !== $previousPoint) $rank++;
+    $d[$rankField] = $rank;
+    $previousPoint = $point;
+  }
+  return $data;
+}
+
 ?>
