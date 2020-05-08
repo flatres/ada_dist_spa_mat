@@ -36,7 +36,7 @@ class ExamMetricsSpreadsheet
     $this->spreadsheet = new Spreadsheet();
     $this->subject = $subject;
 
-    $filename = $subject->code . "_" $subject->year . '_' . date('d-m-y_H-i-s',time());
+    $filename = $subject->code . "_" . $subject->year . '_' . date('d-m-y_H-i-s',time());
 
     //delete the default sheet
     $sheetIndex = $this->spreadsheet->getIndex($this->spreadsheet->getSheetByName('Worksheet'));
