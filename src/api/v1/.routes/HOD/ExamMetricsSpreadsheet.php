@@ -31,10 +31,12 @@ class ExamMetricsSpreadsheet
   public $subject;
   public $rowsWithNotes=[6,7,12];
 
-  public function __construct($filename, $subject)
+  public function __construct($subject)
   {
     $this->spreadsheet = new Spreadsheet();
     $this->subject = $subject;
+
+    $filename = $subject->code . "_" $subject->year . '_' . date('d-m-y_H-i-s',time());
 
     //delete the default sheet
     $sheetIndex = $this->spreadsheet->getIndex($this->spreadsheet->getSheetByName('Worksheet'));

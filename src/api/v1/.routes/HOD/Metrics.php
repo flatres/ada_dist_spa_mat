@@ -85,11 +85,9 @@ class Metrics
 
       $this->progress->publish(0.5, 'Generating spreadsheet...');
       foreach($subject->students as &$s) $s->getHMNote();
-      $sheet = new \HOD\ExamMetricsSpreadsheet($examId, $subject);
+      $sheet = new \HOD\ExamMetricsSpreadsheet($subject);
 
       return emit($response, $sheet->package);
-
-      return emit($response, $subject);
     }
 
     private function getYearMetrics($subjectId, $year, $examId)
