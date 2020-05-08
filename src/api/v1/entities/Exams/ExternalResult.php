@@ -20,7 +20,8 @@ class ExternalResult
     public function save($result, $isGCSE, $sessionId) {
       $result->subjectCode = str_replace('.', '', $result->subjectCode);
 
-      if ($result->subjectCode === 'S1' || $result->subjectCode === 'S2') return;
+      if ($result->subjectCode === 'S1') return;
+      // if ($result->subjectCode === 'S1' || $result->subjectCode === 'S2') return;
       $misId = $result->txtSchoolID;
       $student = (new \Entities\People\Student($this->ada))->byMISId($misId);
 

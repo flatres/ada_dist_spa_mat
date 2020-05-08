@@ -25,8 +25,11 @@ class ExamMetrics
      $this->examId = $examId;
      $this->year = $year;
      $this->GCSEMock = new \Entities\Exams\Internal\GCSEMock($this->adaData);
-     $this->GCSE = new \Entities\Exams\External\GCSE($this->adaData);
+     $this->GCSE = new \Entities\Exams\External\GCSE($this->adaData, $this->ada);
      $this->ALevelMock = new \Entities\Exams\Internal\ALevelMock($this->adaData);
+
+     //get exam code
+     $this->examCode = $this->ada->select('sch_subjects_exams', 'examCode', 'id=?', [$examId])[0]['examCode'] ?? null;
 
      if ($this->students) $this->make();
      return $this;
@@ -50,7 +53,7 @@ class ExamMetrics
   {
     // echo $s->id . "-" . $this->examId . PHP_EOL;
     $examId = $this->year > 11 ? $this->exam->getGcseExamId($this->examId) : $this->examId;
-    $gcse = $this->GCSE->fetchStudentByExam($s->id, $examId);
+    $gcse = $this->GCSE->fetchStudentByExam($s->id, $examId, $this->examCode);
     $s->gcseGrade = null;
     if($gcse){
       $s->gcseGrade = $gcse->result;
