@@ -16,7 +16,6 @@ class Metrics
     {
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
-       $this->isams = $container->isams;
     }
 
 // ROUTE -----------------------------------------------------------------------------
@@ -37,7 +36,7 @@ class Metrics
     public function yearMLOGet($request, $response, $args)
     {
       $auth = $request->getAttribute('auth');
-      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.mlo');
+      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.mlo', '');
       $this->progress->publish(0.25);
 
       $subjectId = $args['subject'];
@@ -55,6 +54,65 @@ class Metrics
       // $subject->getExamData();
       // $subject->getSets($args['year']);
       return emit($response, $subject);
+    }
+
+    public function yearMetricsGet($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.metrics', 'Thinking... ');
+      $pg = $this->progress;
+
+      $subjectId = $args['subject'];
+      $year = $args['year'];
+      $examId = $args['exam'];
+
+      $subject = $this->getYearMetrics($subjectId, $year, $examId);
+      // $subject->getExamData();
+      // $subject->getSets($args['year']);
+      return emit($response, $subject);
+    }
+
+    public function yearMetricsSpreadsheetGet($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.metrics', 'Generating spreadsheet...');
+      $pg = $this->progress;
+
+      $subjectId = $args['subject'];
+      $year = $args['year'];
+      $examId = $args['exam'];
+      $subject = $this->getYearMetrics($subjectId, $year, $examId);
+
+      $this->progress->publish(0.5, 'Generating spreadsheet...');
+      foreach($subject->students as &$s) $s->getHMNote();
+      $sheet = new \HOD\ExamMetricsSpreadsheet($examId, $subject);
+
+      return emit($response, $sheet->package);
+
+      return emit($response, $subject);
+    }
+
+    private function getYearMetrics($subjectId, $year, $examId)
+    {
+      $this->progress->publish(0.1);
+      $subject = new \Entities\Academic\Subject($this->ada);
+
+      $this->progress->publish(0.25);
+      $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
+
+      $this->progress->publish(0.5);
+      $subject->makeMLOProfile();
+
+      $this->progress->publish(0.75);
+      $metrics = new \Entities\Metrics\ExamMetrics($examId, $subject->students, $year);
+      $subject->metrics = $metrics->metrics;
+      $subject->metricWeightings = $metrics->weightings;
+
+      $subject->classes = null;
+      $subject->sql = null;
+      $subject->adaData = null;
+      $this->progress->publish(1);
+      return $subject;
     }
 
     public function yearHistoryGet($request, $response, $args)

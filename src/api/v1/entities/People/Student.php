@@ -21,6 +21,7 @@ class Student
     public $metrics = [];
     public $examData = [];
     public $classes = [];
+    public $hmNote = '';
     public $boardingHouseId, $boardingHouseCode;
 
     public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
@@ -152,5 +153,9 @@ class Student
 
     public function sanitizeNames(){
 
+    }
+
+    public function getHMNote(){
+      
     }
 }

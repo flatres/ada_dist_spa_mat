@@ -28,7 +28,6 @@ class SubjectExam
 
       //going to come back to this.
       // $this->examLevel = $this->sql->select('sch_exam_levels', 'name', 'id=?', $this->examLevelId)[0]['name'] ?? null;
-
     }
     return $this;
   }
@@ -37,6 +36,24 @@ class SubjectExam
     $exam = $this->sql->select('sch_subjects_exams', 'id', 'examCode=?', [$code]);
     if ($exam) $this->byId($exam[0]['id']);
     return $this;
+  }
+
+  public function getGCSEExamId($aLevelExamId)
+  {
+    $newCode = null;
+    switch ($this->examCode) {
+      case 'EN' :
+        $newCode = 'ENLIT'; break;
+      case 'MC' :
+      case 'FM' :
+        $newCode = 'MA'; break;
+    }
+
+    if ($newCode) {
+      return $this->sql->select('sch_subjects_exams', 'id', 'subjectId=? AND examCode=?', [$this->subjectId, $newCode])[0]['id'] ?? $aLevelExamId;
+    } else {
+      return $aLevelExamId;
+    }
   }
 
 }

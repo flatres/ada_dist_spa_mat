@@ -67,8 +67,8 @@ class U6Mocks
           $houseId = (new \Entities\Houses\House($this->ada))->byCode($r->boarding)->id;
           $adaData->insert(
             'internal_exams_results',
-            'studentId, misId, houseId, gender, paperId, mark, grade, percentage, rank',
-            [$r->adaId, $r->studentId, $houseId, $r->gender, $adaPaperId, $r->mark, $r->grade, $r->percentage, $r->rank]
+            'studentId, misId, houseId, examId, typeId, gender, paperId, mark, grade, percentage, rank',
+            [$r->adaId, $r->studentId, $houseId, $p->examId, $session['typeId'], $r->gender, $adaPaperId, $r->mark, $r->grade, $r->percentage, $r->rank]
           );
         }
       };

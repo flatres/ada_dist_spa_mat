@@ -67,8 +67,8 @@ class InternalExams
           $houseId = (new \Entities\Houses\House($this->ada))->byCode($r->boarding)->id;
           $adaData->insert(
             'internal_exams_results',
-            'studentId, misId, houseId, gender, paperId, mark, grade, percentage, rank',
-            [$r->adaId, $r->studentId, $houseId, $r->gender, $adaPaperId, $r->mark, $r->grade, $r->percentage, $r->rank]
+            'studentId, misId, houseId, examId, typeId, gender, paperId, mark, grade, percentage, rank',
+            [$r->adaId, $r->studentId, $houseId, $p->examId, $session['typeId'], $r->gender, $adaPaperId, $r->mark, $r->grade, $r->percentage, $r->rank]
           );
         }
       };
@@ -119,7 +119,7 @@ class InternalExams
       $i = 0;
       foreach($exams as &$e){
         $i++;
-        $codes = new \Exams\Tools\SubjectCodes('', $e['name'], $this->isams);
+        $codes = new \Exams\Tools\SubjectCodes('', $e['name'], $this->isams, 'GCSE');
         $e['subjectName'] = $codes->subjectName;
         $e['subjectCode'] = $codes->subjectCode;
         if ($codes->error) $unmatched[] = $e;
@@ -230,7 +230,7 @@ class InternalExams
       $paper = $paper[0] ?? null;
       if ($paper) {
         // //get session
-        $codes = new \Exams\Tools\SubjectCodes('', $paper['name'], $this->isams);
+        $codes = new \Exams\Tools\SubjectCodes('', $paper['name'], $this->isams, 'GCSE');
         $paper['subjectName'] = $codes->subjectName;
         $paper['subjectCode'] = $codes->subjectCode;
         $paper['examId'] = $this->ada->select('sch_subjects_exams', 'id', 'examCode=?', [$codes->subjectCode])[0]['id'] ?? null;

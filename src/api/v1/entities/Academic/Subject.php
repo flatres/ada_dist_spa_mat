@@ -102,7 +102,6 @@ class Subject
 
   public function getStudentsMLOByExam($year, $examId) {
     $students = $this->getStudentsByExam($year, $examId);
-    $this->debug = $students;
     $this->year = (int)$year;
     $maxMLOCount = 0;
     $exam = new \Entities\Academic\SubjectExam($this->sql, $examId);
@@ -127,7 +126,6 @@ class Subject
     }
     $this->students = $students;
     $this->maxMLOCount = $mloCount ?? 0;
-    $this->debug2 = $students;
     return [
       'students'  => $students,
       'maxMLOCount' => $maxMLOCount
@@ -422,13 +420,11 @@ class Subject
         $key = '_' . $g;
         $countYears = is_numeric($g) ? $numericYears : $letterYears;
         $countGrades = is_numeric($g) ? $countNumberGrades : $countLetterGrades;
-        $this->debug[] = [$g, $countYears];
         if (isset($gradeCounts[$key]) && $countYears > 0) {
           if ($countGrades > 0) $gradeCounts[$key]['pct'] = round(100 * $gradeCounts[$key]['count'] / $countGrades);
           $gradeCounts[$key]['count'] = round($gradeCounts[$key]['count'] / $countYears);
         }
       }
-      $this->debug[] = $gradeCounts;
       $gradeCounts = array_values($gradeCounts);
       if ($hasGCSEAvg) {
         if ($count > 0) $gcseAvg = round($gcseAvg / $count, 2);

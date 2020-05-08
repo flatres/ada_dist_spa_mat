@@ -16,7 +16,6 @@ class Years
     {
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
-       $this->isams = $container->isams;
     }
 
 // ROUTE -----------------------------------------------------------------------------
