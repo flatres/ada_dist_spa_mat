@@ -47,8 +47,9 @@ class SubjectCodes
 
     private static $boardInfo = [];
 
-    public function __construct(string $moduleCode, string $subjectTitle, $sql, $level = null, $supressBoard = false, $console = false)
+    public function __construct(string $moduleCode = null, string $subjectTitle = null, $sql = null, $level = null, $supressBoard = false, $console = false)
     {
+       if (!$sql) return $this;
        $this->sql= $sql;
        $this->console = $console;
        $this->txtModuleCode = $moduleCode;
@@ -164,7 +165,7 @@ class SubjectCodes
       $this->boardName = $boardName;
 
     }
-    private function getCodes ()
+    public function getCodes ()
     {
       $data = $this->getBasic();
       // if($this->level === 'ASB') {
@@ -172,7 +173,7 @@ class SubjectCodes
       // }
       return $data;
     }
-    private function getBasic()
+    public function getBasic()
     {
 
       if($this->contains('history') && $this->contains('art')) return array('HX', 'Art History');
@@ -242,6 +243,7 @@ class SubjectCodes
       if($this->contains('biology')) return array("BI", "Biology");
 
       if($this->contains('comp') && $this->contains('sci')) return array("CS", 'Computer Science');
+      if($this->contains('computing')) return array("CS", 'Computer Science');
       if($this->contains('science')) return array("SC", "Science");
       if($this->contains('astronomy')) return array("AS", "Astronomy");
 

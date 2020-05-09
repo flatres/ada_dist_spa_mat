@@ -33,12 +33,13 @@ class InternalExams
       $adaData = $this->adaData;
       $adaData->delete('internal_exams_sessions', 'misId=? AND isIsamsInternal = ?', [$isamsSessionId, 1]);
 
+      $students = [];
       // fetch session and write to db
       $session = $this->isams->select(
         "TblInternalExamsSessions",
         'TblInternalExamsSessionsID as id, txtDescription as description',
-        'TblInternalExamsSessionsID > 0 ORDER BY txtStartDate DESC',
-        [])[0];
+        'TblInternalExamsSessionsID = ?',
+        [$isamsSessionId])[0];
 
       $this->processSession($session);
       //
@@ -70,9 +71,16 @@ class InternalExams
             'studentId, misId, houseId, examId, typeId, gender, paperId, mark, grade, percentage, rank',
             [$r->adaId, $r->studentId, $houseId, $p->examId, $session['typeId'], $r->gender, $adaPaperId, $r->mark, $r->grade, $r->percentage, $r->rank]
           );
+          $key = '_' . $r->adaId;
+          if (!isset($students[$key])) $students[$key] = $r->adaId;
         }
       };
 
+      //calculate mock gpa
+      $mock = new \Entities\Exams\Internal\GCSEMock();
+      foreach($students as $s) {
+        $mock->makeGcseMockGPA($s);
+      }
       $data = [$papers];
       return emit($response, $data);
     }

@@ -15,6 +15,10 @@
 //   ]
 // ]
 
+// =IF(LEN(Profile!C$21)>0,IF(F4<Profile!C$21,"9",IF(F4<Profile!C$22,"8",IF(F4<Profile!C$23,"7",IF(F4<Profile!C$24,"6",IF(F4<Profile!C$25,"5",IF(F4<Profile!C$26,"4",IF(F4<Profile!C$27,"3",IF(F4<Profile!C$28,"2",IF(F4<Profile!C$28,"1","U"))))))))), IF(LEN(Profile!E$22)>0,IF(F4<Profile!E$21,"A* ",IF(F4<Profile!E$22!,"A",IF(F4<Profile!E$23,"B",IF(F4<Profile!E$24,"C",IF(F4<Profile!E$25,"D",IF(F4<Profile!E$26,"E", "U")))))), IF(Profile!G$21>0,IF(F4<Profile!G$21,"D1",IF(F4<Profile!G$22,"D2",IF(F4<Profile!G$23,"D3",IF(F4<Profile!G$24,"M1",IF(F4<Profile!G$25,"M2",IF(F4<Profile!G$26,"M3",IF(F4<Profile!G$27,"P1",IF(F4<Profile!G$28,"P2",IF(F4<Profile!G$28,"P3","U"))))))))), "")))
+
+// https://stackoverflow.com/questions/55133722/how-to-protect-individual-cell-using-phpspreadsheet
+
 namespace HOD;
 
 use \PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -210,7 +214,7 @@ class ExamMetricsSpreadsheet
     $sheet->getStyle('A1:C2')->applyFromArray($styleArray);
 
     //hide score
-
+    $sheet->getRowDimension('1')->setRowHeight(50);
     //widths
     $sheet->getColumnDimension('A')->setWidth(25);
     $sheet->getColumnDimension('B')->setWidth(13);

@@ -8,25 +8,21 @@ use Slim\Http\UploadedFile;
  */
 namespace Academic;
 
-class Alis
+class Midyis
 {
     protected $container;
     private $console;
-    private $channel = 'academic.alis.upload';
+    private $channel = 'academic.midyis.upload';
 
     public function __construct(\Slim\Container $container)
     {
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
        $this->adaData = $container->adaData;
-       $this->isams = $container->isams;
-       $this->mcCustom= $container->mcCustom;
-
     }
 
-    public function alisGCSEUploadPost($request, $response, $args)
+    public function midyisUploadPost($request, $response, $args)
     {
-      $isFromTest = $args['isFromTest'];
       $auth = $request->getAttribute('auth');
       $this->progress = new \Sockets\Progress($auth, $this->channel);
 
@@ -38,10 +34,8 @@ class Alis
 
       $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
       $reader->setReadDataOnly(true);
-      $reader->setLoadSheetsOnly(['50th Percentile']);
       $spreadsheet = $reader->load($directory . $filename);
       $worksheet = $spreadsheet->getActiveSheet();
-
       $worksheetTitle     = $worksheet->getTitle();
       $highestRow         = $worksheet->getHighestRow(); // e.g. 10
       $highestColumn      = $worksheet->getHighestColumn(); // e.g 'F'
@@ -54,12 +48,13 @@ class Alis
       $errorSubjects = [];
       $errorStudents = [];
 
-      // UID	StudentName	Gender	DoB	baseline	A1-Biology	A1-Business Studies: Single	A1-Chemistry	A1-Computing	A1-DT Product Design	A1-Economics	A1-Geography	A1-Government And Politics	A1-Mathematics (Further)	A1-Mathematics	A1-Music	A1-Physical Education	A1-Physics	A1-Psychology	A2-Art and Design	A2-Biology	A2-Business Studies: Single	A2-Chemistry	A2-Classical Civilisation	A2-Classical Greek	A2-Computing	A2-Drama And Theatre Studies	A2-DT Product Design	A2-Economics	A2-Geography	A2-Government And Politics	A2-Italian	A2-Latin	A2-Mathematics (Further)	A2-Mathematics	A2-Music Technology	A2-Music	A2-Physical Education	A2-Physics	A2-Psychology	PUFC-Literature in English	PUFC-Mandarin Chinese
-      for ($col = 6; $col < $highestColumnIndex; ++$col) {
-        $cell = $worksheet->getCellByColumnAndRow($col, 1);
+      for ($col = 10; $col < $highestColumnIndex; ++$col) {
+        $cell = $worksheet->getCellByColumnAndRow($col, 7);
         $value = $cell->getValue();
         if (explode('-', $value)[0] == 'A1') continue; //As Level
         $subjectCodes->txtOptionTitle = $value;
+        $subjectCodes->level = 'GCSE';
+
         $codes = $subjectCodes->getCodes();
         $subject = [
           'name'  => $value,
@@ -74,29 +69,29 @@ class Alis
       }
 
 
-      for ($row = 2; $row < $highestRow; ++$row) {
+      for ($row = 8; $row < $highestRow; ++$row) {
         $rowData = [];
-        $name = explode(', ', $worksheet->getCellByColumnAndRow(2, $row)->getValue());
-        $baseline = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
-        $dob = explode('/', $worksheet->getCellByColumnAndRow(4, $row)->getValue()); //initially in format dd/mm/yy
-        $dob = '20' . $dob[2] . '-' . $dob[1] . '-' . $dob[0];
+        $lastName = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
+        $firstName = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
+        $score = $worksheet->getCellByColumnAndRow(8, $row)->getValue();
+        $band = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
 
-        $s = $this->ada->select('stu_details', 'id', 'lastname=? AND firstname=? AND dob = ?', [$name[0], $name[1], $dob]);
+        $s = $this->ada->select('stu_details', 'id', 'lastname=? AND firstname=?', [$lastName, $firstName]);
         $studentError = count($s) === 1 ? false : true;
 
         $id = $studentError ? null : $s[0]['id'];
 
         $student = [
-          'firstName'  => $name[1],
-          'lastName'   => $name[0],
-          'baseline'  => $baseline,
-          'dob' => $dob,
+          'firstName'  => $firstName,
+          'lastName'   => $lastName,
+          'band'  => $band,
+          'score' => $score,
           'id'  => $id,
           'error' => $studentError,
           'exams' => []
         ];
         if ($student['error']) $errorStudents[] = $student;
-        for ($col = 6; $col < $highestColumnIndex; ++$col) {
+        for ($col = 10; $col < $highestColumnIndex; ++$col) {
           $value = $worksheet->getCellByColumnAndRow($col, $row)->getValue();
           if (strlen($value) > 0) {
             $key = 'c_' . $col;
@@ -113,18 +108,20 @@ class Alis
       foreach ($students as $s){
         if (!$s->error){
           $id = $s->id;
-          $baseline = $s->baseline;
-          $this->adaData->delete('predictions_alis', 'studentId=? AND isFromTest=?', [$id, $isFromTest]);
+          $score = $s->score;
+          $band = $s->band;
+          $this->adaData->delete('predictions_midyis', 'studentId=?', [$id]);
           foreach ($s->exams as $e) {
             if (!$e->examId) continue;
             $this->adaData->insert(
-              'predictions_alis',
-              'studentId, examId, baseline, isFromTest, prediction',
-              [$id, $e->examId, $baseline, $isFromTest, $e->prediction]
+              'predictions_midyis',
+              'studentId, examId, baseline, band, prediction',
+              [$id, $e->examId, $score, $band, $e->prediction]
             );
           }
           $metrics = new \Entities\Metrics\Student($id);
-          $isFromTest ? $metrics->setAlisFromTest($baseline) : $metrics->setAlisFromGcse($baseline);
+          $metrics->setMidyisBand($band);
+          $metrics->setMidyisScore($score);
         }
       }
       $data = ['subjects' => $subjects, 'students'  => $students, 'errorSubjects' => $errorSubjects, 'errorStudents' => $errorStudents];

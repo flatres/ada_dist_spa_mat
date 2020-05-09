@@ -10,7 +10,9 @@ class ExamMetrics
     'GCSEMock'  => [],
     'GCSE' => [],
     'ALevelMock'  => [],
-    'IGDR'  => []
+    'IGDR'  => [],
+    'Midyis'  => [],
+    'Alis'  => []
   ];
   public $weightings = [];
   public $metricsList = [];
@@ -41,12 +43,52 @@ class ExamMetrics
       $this->getGCSEMock($s);
       $this->getGCSE($s);
       $this->getALevelMock($s);
+      $this->getAlis($s);
+      $this->getMidyis($s);
+
     }
     $this->makeCohortRanking();
     $this->makeInbandGCSEDeltaRank();
     $this->getWeightings();
     $this->moveDataToStudents();
     return $this->metrics;
+  }
+
+  private function getAlis(&$s)
+  {
+    $alis = new \Entities\Metrics\Alis($s->id, $this->examId);
+    $s->alisTestBaseline = $alis->testBaseline;
+    $s->alisTestPrediction = $alis->testPrediction;
+
+    $s->alisGcseBaseline = $alis->gcseBaseline;
+    $s->alisGcsePrediction = $alis->gcsePrediction;
+
+
+    if ($alis->gcseBaseline) {
+      $this->metrics['Alis'][] = [
+        'studentId' => $s->id,
+        'testBaseline' => $alis->testBaseline,
+        'testPrediction' => $alis->testPrediction,
+        'gcseBaseline' => $alis->gcseBaseline,
+        'gcsePrediction' => $alis->gcsePrediction
+      ];
+    }
+  }
+
+  private function getMidyis(&$s)
+  {
+    $midyis = new \Entities\Metrics\Midyis($s->id, $this->examId);
+    $s->midyisBaseline = $midyis->baseline;
+    $s->midyisBand = $midyis->band;
+    $s->midyisPrediction = $midyis->prediction;
+    if ($midyis->baseline) {
+      $this->metrics['Midyis'][] = [
+        'studentId' => $s->id,
+        'band'  => $midyis->band,
+        'baseline' => $midyis->baseline,
+        'prediction'  => $midyis->prediction
+      ];
+    }
   }
 
   private function getGCSE(&$s)
@@ -72,6 +114,7 @@ class ExamMetrics
     $s->gcseMockGrade = null;
     if($gcseMock) {
       $s->gcseMockGrade = $gcseMock->grade;
+      $s->gcseMockPercentage = $gcseMock->percentage;
       $this->metrics['GCSEMock'][] = [
         'studentId' => $s->id,
         'mark'  => $gcseMock->mark,
@@ -103,6 +146,8 @@ class ExamMetrics
   private function makeCohortRanking(){
       $this->metrics['GCSEMock'] = rankArray($this->metrics['GCSEMock'], 'mark', 'cohortRank');
       $this->metrics['ALevelMock'] = rankArray($this->metrics['ALevelMock'], 'mark', 'cohortRank');
+      $this->metrics['Midyis'] = rankArray($this->metrics['Midyis'], 'baseline', 'cohortRank');
+      $this->metrics['Alis'] = rankArray($this->metrics['Alis'], 'testPrediction', 'cohortRank');
   }
 
   //computes the difference between gcse actual and gcse mock and ranks these within each ALevel Mock Result Band
@@ -111,12 +156,19 @@ class ExamMetrics
     $mockBands = [];
     foreach($this->students as &$s) {
 
-      $gcseMockPoints = $gcse->processGrade($s->gcseMockGrade);
-      $gcsePoints = $gcse->processGrade($s->gcseGrade);
+      $metrics = new \Entities\Metrics\Student($s->id);
+
+      $gcseMockPoints = $metrics->gcseMockGpa();
+      $s->gcseMockGpa = $gcseMockPoints;
+      // $gcseMockPoints = $gcse->processGrade($s->gcseMockGrade);
+
+      // $gcsePoints = $gcse->processGrade($s->gcseGrade);
+      $gcsePoints = $metrics->gcseGpa();
+      $s->gcseGpa = $gcsePoints;
       if (!$gcseMockPoints || !$gcsePoints) continue;
 
       $gcseDelta = $gcsePoints - $gcseMockPoints;
-      $s->gcseDelta = $gcseDelta;
+      $s->gcseDelta = round($gcseDelta,1);
 
       $aLevelMockGrade = $s->aLevelMockGrade;
       if (!$aLevelMockGrade) continue;
@@ -146,21 +198,34 @@ class ExamMetrics
     }
   }
 
+  //for easuer front end use
   private function moveDataToStudents(){
     //put back into students
     $gcseMock = [];
+    $gcseMockMark = [];
     $alevelMock = [];
     $igdr = [];
+    $alis = [];
+    $midyis = [];
 
-    foreach($this->metrics['GCSEMock'] as $g) $gcseMock['_' . $g['studentId']] = $g['cohortRank'];
+    foreach($this->metrics['GCSEMock'] as $g) {
+      $gcseMock['_' . $g['studentId']] = $g['cohortRank'];
+      $gcseMockMark['_' . $g['studentId']] = $g['mark'];
+    }
     foreach($this->metrics['ALevelMock'] as $g) $alevelMock['_' . $g['studentId']] = $g['cohortRank'];
     foreach($this->metrics['IGDR'] as $g) $igdr['_' . $g['studentId']] = $g['IGDR'];
 
+    foreach($this->metrics['Alis'] as $g) $alis['_' . $g['studentId']] = $g['cohortRank'];
+    foreach($this->metrics['Midyis'] as $g) $midyis['_' . $g['studentId']] = $g['cohortRank'];
+
     foreach($this->students as &$s){
       $key = '_' . $s->id;
+      $s->gcseMockMark = $gcseMockMark[$key] ?? null;
       $s->gcseMockCohortRank = $gcseMock[$key] ?? null;
       $s->aLevelMockCohortRank = $alevelMock[$key] ?? null;
       $s->igdr = $igdr[$key] ?? null;
+      $s->alisCohortRank = $alis[$key] ?? null;
+      $s->midyisCohortRank = $midyis[$key] ?? null;
     }
   }
 

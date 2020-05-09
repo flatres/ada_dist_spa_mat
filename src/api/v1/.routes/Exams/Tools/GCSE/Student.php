@@ -265,6 +265,11 @@ class Student
       $sql = new \Dependency\Databases\AdaData();
       $sql->delete('exams_gcse_avg', 'misId=?', [$this->txtSchoolID]);
       $sql->insert('exams_gcse_avg', 'misId, gcseAvg', [$this->txtSchoolID, $this->gradeAverage]);
+
+      $student = (new \Entities\People\Student())->byMISId($this->txtSchoolID);
+      $metrics = new \Entities\Metrics\Student($student->id);
+      $metrics->setGcseGPA($this->gradeAverage);
+
     }
 
 }

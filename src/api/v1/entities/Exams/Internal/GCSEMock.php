@@ -31,8 +31,30 @@ class GCSEMock
               'studentId=? AND examId=? AND typeId=?',
               [$studentId, $examId, $this->typeId]);
 
-      if($results) return (object)$results[0];
+      if($results) {
+        $results[0]['percentage'] = round($results[0]['percentage'], 1);
+        return (object)$results[0];
+      }
       return null;
+    }
+
+    public function makeGcseMockGPA($studentId)
+    {
+      $results = $this->adaData->select('internal_exams_results', 'grade', 'studentId=? AND typeId =?', [$studentId, $this->typeId]);
+      $count = count($results);
+      $points = 0;
+      $resultObj = new \Exams\Tools\GCSE\Result();
+      foreach ($results as $r) {
+        $p = $resultObj->processGrade($r['grade']);
+        $points += $p;
+      }
+
+      if ($count > 0) {
+        $gpa = round($points / $count, 2);
+        $metrics = (new \Entities\Metrics\Student($studentId))->setGcseMockGPA($gpa);
+
+      }
+
     }
 
 
