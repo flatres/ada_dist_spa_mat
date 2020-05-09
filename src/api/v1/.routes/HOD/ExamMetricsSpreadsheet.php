@@ -167,7 +167,7 @@ class ExamMetricsSpreadsheet
         $this->WRA($i),
         $s->aLevelMockPercentage ?? '',
         $s->aLevelMockCohortRank ?? '',
-        $s->gpaUplift ?? '',
+        $s->gcseDelta ?? '',
         $s->igdr ?? '',
         $s->gcseGrade ?? '',
         $s->gcseGradeCohortRank ?? '',
