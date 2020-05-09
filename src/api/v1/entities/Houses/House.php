@@ -4,8 +4,9 @@ namespace Entities\Houses;
 
 class House
 {
-    public $id, $students, $name, $noSpaceName, $nameSafe, $code;
+    public $id, $name, $noSpaceName, $nameSafe, $code;
     public $studentIds = [];
+    public $students = [];
     private $sql;
 
     public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
@@ -24,7 +25,17 @@ class House
         $this->name = $d['name'];
         $this->hmEmail = $d['email'];
       }
+
       return $this;
+    }
+
+    public function getStudents() {
+      $ids = $this->sql->select('stu_details', 'id', 'boardingHouseId=? ORDER BY lastname ASC', [$this->id]);
+      $this->students = [];
+      foreach($ids as $id){
+        $this->students[] = new \Entities\People\Student($this->sql, $id['id']);
+      }
+      return $this->students;
     }
 
     public function byCode($code) {

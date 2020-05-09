@@ -151,11 +151,30 @@ class Student
       }
     }
 
-    public function sanitizeNames(){
-
+    public function setHmNote($note){
+      $adaData = new \Dependency\Databases\AdaData();
+      $d = $adaData->select('notes_hm_students', 'id, note', 'studentId=?', [$this->id]);
+      if ($d){
+        $id = $d[0]['id'];
+        $adaData->update('notes_hm_students', 'note=?', 'id=?', [$note, $id]);
+      }{
+        $adaData->insert('notes_hm_students', 'note, studentId', [$note, $this->id]);
+      }
+      return true;
     }
 
-    public function getHMNote(){
-      
+    public function getHmNote(){
+
+      $adaData = new \Dependency\Databases\AdaData();
+      $d = $adaData->select('notes_hm_students', 'id, note', 'studentId=?', [$this->id]);
+      if ($d) {
+        $this->hmNote = $d[0]['note'];
+        return $this->hmNote;
+      }
+      return null;
+    }
+
+    public function sanitizeNames(){
+
     }
 }
