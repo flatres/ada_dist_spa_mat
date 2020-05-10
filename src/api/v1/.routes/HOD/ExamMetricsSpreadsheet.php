@@ -152,7 +152,7 @@ class ExamMetricsSpreadsheet
       'Provisional Grade',
       'Provisional Rank',
       'Weighted Rank Average',
-      'U6 Mock Score',
+      'U6 Sub Mock %',
       'Rank',
       'GCSE GPA Uplift',
       'Rank',
