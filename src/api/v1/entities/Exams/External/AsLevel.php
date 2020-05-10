@@ -8,7 +8,7 @@
  */
 namespace Entities\Exams\External;
 
-class GCSE
+class AsLevel
 {
     private $adaData;
     private $ada;
@@ -17,7 +17,7 @@ class GCSE
     public function __construct(\Dependency\Databases\AdaData $adaData = null)
     {
        $this->adaData=  $adaData ?? new \Dependency\Databases\AdaData();
-       $this->typeId = $this->adaData->select('exams_levels', 'id', 'code=?', ['GCSE'])[0]['id'] ?? null;
+       $this->typeId = $this->adaData->select('exams_levels', 'id', 'code=?', ['AS'])[0]['id'] ?? null;
        // $examCode = $
        return $this;
     }

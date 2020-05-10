@@ -35,9 +35,6 @@ class ExamMetricsSpreadsheet
   public $subject;
   public $rowsWithNotes=[];
   public $hmNotes = [];
-  public $grades = [];
-  public $gradeBands = [];
-  public $gradesForCounting = []; //so that I can add a tilde to A*
 
   public function __construct($subject)
   {
@@ -51,8 +48,6 @@ class ExamMetricsSpreadsheet
     $this->spreadsheet->removeSheetByIndex($sheetIndex);
 
     $title = ';';
-
-    $this->getGrades($subject);
 
     //set metadata
     $this->spreadsheet->getProperties()
@@ -90,34 +85,6 @@ class ExamMetricsSpreadsheet
     return $this;
   }
 
-  private function getGrades($subject){
-
-    if ($subject->year < 11) {
-
-      $this->grades = [9, 8, 7, 6, 5, 4, 3, 2, 1, 'U'];
-      $this->gradesForCounting = $this->grades;
-      $this->gradeBands = ['9', '9-8', '9-7', '9-6', '9-5', '9-4', '9-3', '9-2', '9-1'];
-
-      return;
-
-    }
-    foreach($subject->students as $s) {
-      if ($s->aLevelMockGrade == 'D1' || $s->aLevelMockGrade == 'D3' || $s->aLevelMockGrade == 'M1' || $s->aLevelMockGrade == 'M2') { //that should catch all
-        $isPreU = true;
-        $this->grades = ['D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U'];
-        $this->gradeBands = ['D1', 'D1-D2', 'D1-D3', 'D1-M1', 'D1-M2', 'D1-M3', 'D1-P1', 'D1-P2', 'D1-P3', 'U' ];
-        $this->gradesForCounting = $this->grades;
-        return;
-      }
-    }
-
-    //must be A Level
-    $this->grades = ['A*', 'A', 'B', 'C', 'D', 'E', 'U'];
-    $this->gradeBands = ['A*', 'A*-A', 'A*-B', 'A*-C', 'A*-D', 'A*-E'];
-    $this->gradesForCounting = ['A~*', 'A', 'B', 'C', 'D', 'E', 'U'];
-  }
-
-
   private function generateStudentSheet($subject)
   {
     $title = 'Students';
@@ -149,8 +116,8 @@ class ExamMetricsSpreadsheet
       'U6 Mock Grade',
       'FINAL GRADE',
       'FINAL RANK',
-      'Provisional Grade',
-      'Provisional Rank',
+      'Provisional CAG',
+      'Provisional SCR',
       'Weighted Rank Average',
       'U6 Mock Score',
       'Rank',
@@ -203,7 +170,7 @@ class ExamMetricsSpreadsheet
         $s->gcseDelta ?? '',
         $s->igdr ?? '',
         $s->alisGCSEBaseline ?? '',
-        '=IF(LEN(X'.$i.') > 0,RANK(X'. $i . ',X$5:$X$200),0)',
+        $s->alisGCSECohortRank ??  '',
         $s->gcseCohortRank ?? '',
         $s->gcseMockPercentage ?? '',
         $s->gcseMockCohortRank ?? '',
@@ -211,6 +178,7 @@ class ExamMetricsSpreadsheet
         $s->alisCohortRank ?? '',
         $s->midyisBaseline,
         $s->midyisCohortRank,
+        '',
         '=IF(LEN(AD'.$i.') > 0,RANK(AD'. $i . ',AD$5:$AD$200),0)',
         '',
         '=IF(LEN(AF'.$i.') > 0,RANK(AF'. $i . ',AG$5:$AF$200),0)',
@@ -250,8 +218,8 @@ class ExamMetricsSpreadsheet
   }
 
   private function CAG($i) {
-    $original = '=IF(P5<=Profile!E$4, Profile!C$4, IF(P5<=Profile!E$5, Profile!C$5, IF(P5<=Profile!E$6, Profile!C$6, IF(P5<=Profile!E$7, Profile!C$7, IF(P5<=Profile!E$8, Profile!C$8, IF(P5<=Profile!E$9, Profile!C$9, IF(P5<=Profile!E$10, Profile!C$10, IF(P5<=Profile!E$11, Profile!C$11, IF(P5<=Profile!E$12, Profile!C$12, IF(P5<=Profile!E$13, Profile!C$13, IF(P5<=Profile!E$14, Profile!C$14, "U" ) ) ) ) ))) ))))';
-    return str_replace('P5', "P$i", $original);
+    $original = '=IF(LEN(Profile!D$4)>0,IF(N5<Profile!D$4,"9",IF(N5<Profile!D$5,"8",IF(N5<Profile!D$6,"7",IF(N5<Profile!D$7,"6",IF(N5<Profile!D$8,"5",IF(N5<Profile!D$9,"4",IF(N5<Profile!D$10,"3",IF(N5<Profile!D$11,"2",IF(N5<Profile!D$12,"1","U"))))))))), IF(LEN(Profile!G$4)>0,IF(N5<Profile!G$4,"A* ",IF(N5<Profile!G$5,"A",IF(N5<Profile!G$6,"B",IF(N5<Profile!G$7,"C",IF(N5<Profile!G$8,"D",IF(N5<Profile!G$9,"E", "U")))))), IF(Profile!J$4>0,IF(N5<Profile!J$4,"D1",IF(N5<Profile!J$5,"D2",IF(N5<Profile!J$6,"D3",IF(N5<Profile!J$7,"M1",IF(N5<Profile!J$8,"M2",IF(N5<Profile!J$9,"M3",IF(N5<Profile!J$10,"P1",IF(N5<Profile!J$11,"P2",IF(N5<Profile!J$12,"P3","U"))))))))), "")))';
+    return str_replace('(N5<', "(P$i<=", $original);
   }
 
   private function setMainStyle(&$sheet){
@@ -522,22 +490,111 @@ class ExamMetricsSpreadsheet
     $sheetData = [];
     //first row
     $sheetData[] = ['Final Grade Profile'];
-    $sheetData[] = ['All:', count($subject->students), '' , 'Boys', '', 'Girls'];
+    $sheetData[] = ['', 'All', '' , 'Boys', '', 'Girls'];
     $sheetData[] = ['Grades', '#', '%', '#', '%', '#', '%'];
+    $sheetData[] = [
+      '=IF(COUNTIF(V$4:W$300, "A*") > 0, "A*", IF(COUNTIF(V$4:W$300, "D1") > 0, "D1", IF(COUNTIF(V$4:W$300, 9),9,"") ))',
+      '=IF(LEN($M4) = 0,"", COUNTIF(Students!M$5:M$445,$M4))',
+      '=IF(LEN($M4) = 0,"", ROUND(100 * COUNTIF(Students!M$5:M$445, $M4) / COUNTA(Students!M$5:M$445),1))',
+      '=IF(LEN($M4) = 0,"", COUNTIF(V$4:V$300,$M4))',
+      '=IF(LEN($M4) = 0,"", ROUND(100 * COUNTIF(V$4:V$300, $M4) / COUNTIF(Students!D$5:D$445,"M"),1))',
+      '=IF(LEN($M4) = 0,"", COUNTIF(W$4:W$300,$M4))',
+      '=IF(LEN($M4) = 0,"", ROUND(100 * COUNTIF(W$4:W$300, $M4) / COUNTIF(Students!D$5:D$445,"F"),1))'
+    ];
 
-    $i = 4;
-    foreach($this->gradesForCounting as $g){
-      $sheetData[] = [
-        $g,
-        str_replace('$M4', '$M'.$i, '=COUNTIF(Students!M$5:M$445,$M4)'),
-        '= IF(N'.$i.'>0, ROUND(100 * COUNTIF(Students!M$5:M$445, $M'.$i.') / COUNTA(Students!M$5:M$445),1), 0)',
-        '=COUNTIF(V$4:V$300,$M'.$i.')',
-        '=ROUND(100 * COUNTIF(V$4:V$300, $M'.$i.') / COUNTIF(Students!D$5:D$445,"M"),1)',
-        '=COUNTIF(W$4:W$300,$M'.$i.')',
-        '=ROUND(100 * COUNTIF(W$4:W$300, $M4) / COUNTIF(Students!D$5:D$445,"F"),1)'
-      ];
-      $i++;
-    }
+    $sheetData[] = [
+      '=IF(COUNTIF(V$4:W$300, "A") > 0, "A", IF(COUNTIF(V$4:W$300, "D2") > 0, "D2", IF(COUNTIF(V$4:W$300, 8),8,"") ))',
+      '=IF(LEN($M5) = 0,"", COUNTIF(Students!M$5:M$445,$M5))',
+      '=IF(LEN($M5) = 0,"", ROUND(100 * COUNTIF(Students!M$5:M$445, $M5) / COUNTA(Students!M$5:M$445),1))',
+      '=IF(LEN($M5) = 0,"", COUNTIF(V$4:V$300,$M5))',
+      '=IF(LEN($M5) = 0,"", ROUND(100 * COUNTIF(V$4:V$300, $M5) / COUNTIF(Students!D$5:D$445,"M"),1))',
+      '=IF(LEN($M5) = 0,"", COUNTIF(W$4:W$300,$M5))',
+      '=IF(LEN($M5) = 0,"", ROUND(100 * COUNTIF(W$4:W$300, $M5) / COUNTIF(Students!D$5:D$445,"F"),1))'
+
+    ];
+    //
+    $sheetData[] = [
+      '=IF(COUNTIF(V$4:W$300, "B") > 0, "B", IF(COUNTIF(V$4:W$300, "D3") > 0, "D3", IF(COUNTIF(V$4:W$300, 7),7,"") ))',
+      '=IF(LEN($M6) = 0,"", COUNTIF(Students!M$5:M$445,$M6))',
+      '=IF(LEN($M6) = 0,"", ROUND(100 * COUNTIF(Students!M$5:M$445, $M6) / COUNTA(Students!M$5:M$445),1))',
+      '=IF(LEN($M6) = 0,"", COUNTIF(V$4:V$300,$M6))',
+      '=IF(LEN($M6) = 0,"", ROUND(100 * COUNTIF(V$4:V$300, $M6) / COUNTIF(Students!D$5:D$445,"M"),1))',
+      '=IF(LEN($M6) = 0,"", COUNTIF(W$4:W$300,$M6))',
+      '=IF(LEN($M6) = 0,"", ROUND(100 * COUNTIF(W$4:W$300, $M6) / COUNTIF(Students!D$5:D$445,"F"),1))'
+    ];
+
+    $sheetData[] = [
+      '=IF(COUNTIF(V$4:W$300, "C") > 0, "C", IF(COUNTIF(V$4:W$300, "M1") > 0, "M1", IF(COUNTIF(V$4:W$300, 6),6,"") ))',
+      '=IF(LEN($M7) = 0,"", COUNTIF(Students!M$5:M$445,$M7))',
+      '=IF(LEN($M7) = 0,"", ROUND(100 * COUNTIF(Students!M$5:M$445, $M7) / COUNTA(Students!M$5:M$445),1))',
+      '=IF(LEN($M7) = 0,"", COUNTIF(V$4:V$300,$M7))',
+      '=IF(LEN($M7) = 0,"", ROUND(100 * COUNTIF(V$4:V$300, $M7) / COUNTIF(Students!D$5:D$445,"M"),1))',
+      '=IF(LEN($M7) = 0,"", COUNTIF(W$4:W$300,$M7))',
+      '=IF(LEN($M7) = 0,"", ROUND(100 * COUNTIF(W$4:W$300, $M7) / COUNTIF(Students!D$5:D$445,"F"),1))'
+    ];
+
+    $sheetData[] = [
+      '=IF(COUNTIF(V$4:W$300, "D") > 0, "D", IF(COUNTIF(V$4:W$300, "M2") > 0, "M2", IF(COUNTIF(V$4:W$300, 5),5,"") ))',
+      '=IF(LEN($M8) = 0,"", COUNTIF(Students!M$5:M$445,$M8))',
+      '=IF(LEN($M8) = 0,"", ROUND(100 * COUNTIF(Students!M$5:M$445, $M8) / COUNTA(Students!M$5:M$445),1))',
+      '=IF(LEN($M8) = 0,"", COUNTIF(V$4:V$300,$M8))',
+      '=IF(LEN($M8) = 0,"", ROUND(100 * COUNTIF(V$4:V$300, $M8) / COUNTIF(Students!D$5:D$445,"M"),1))',
+      '=IF(LEN($M8) = 0,"", COUNTIF(W$4:W$300,$M8))',
+      '=IF(LEN($M8) = 0,"", ROUND(100 * COUNTIF(W$4:W$300, $M8) / COUNTIF(Students!D$5:D$445,"F"),1))'
+    ];
+
+    $sheetData[] = [
+      '=IF(COUNTIF(V$4:W$300, "E") > 0, "E", IF(COUNTIF(V$4:W$300, "M3") > 0, "M3", IF(COUNTIF(V$4:W$300, 4),4,"") ))',
+      '=IF(LEN($M9) = 0,"", COUNTIF(Students!M$5:M$445,$M9))',
+      '=IF(LEN($M9) = 0,"", ROUND(100 * COUNTIF(Students!M$5:M$445, $M9) / COUNTA(Students!M$5:M$445),1))',
+      '=IF(LEN($M9) = 0,"", COUNTIF(V$4:V$300,$M9))',
+      '=IF(LEN($M9) = 0,"", ROUND(100 * COUNTIF(V$4:V$300, $M9) / COUNTIF(Students!D$5:D$445,"M"),1))',
+      '=IF(LEN($M9) = 0,"", COUNTIF(W$4:W$300,$M9))',
+      '=IF(LEN($M9) = 0,"", ROUND(100 * COUNTIF(W$4:W$300, $M9) / COUNTIF(Students!D$5:D$445,"F"),1))'
+    ];
+    //
+    $sheetData[] = [
+      '=IF(COUNTIF(V$4:W$300, "P1") > 0, "P1", IF(COUNTIF(V$4:W$300, 3),3,""))',
+      '=IF(LEN($M10) = 0,"", COUNTIF(Students!M$5:M$445,$M10))',
+      '=IF(LEN($M10) = 0,"", ROUND(100 * COUNTIF(Students!M$5:M$445, $M10) / COUNTA(Students!M$5:M$445),1))',
+      '=IF(LEN($M10) = 0,"", COUNTIF(V$4:V$300,$M10))',
+      '=IF(LEN($M10) = 0,"", ROUND(100 * COUNTIF(V$4:V$300, $M10) / COUNTIF(Students!D$5:D$445,"M"),1))',
+      '=IF(LEN($M10) = 0,"", COUNTIF(W$4:W$300,$M10))',
+      '=IF(LEN($M10) = 0,"", ROUND(100 * COUNTIF(W$4:W$300, $M10) / COUNTIF(Students!D$5:D$445,"F"),1))'
+    ];
+    //
+    $sheetData[] = [
+      '=IF(COUNTIF(V$4:W$300, "P2") > 0, "P2", IF(COUNTIF(V$4:W$300, 2),2,""))',
+      '=IF(LEN($M11) = 0,"", COUNTIF(Students!M$5:M$445,$M11))',
+      '=IF(LEN($M11) = 0,"", ROUND(100 * COUNTIF(Students!M$5:M$445, $M11) / COUNTA(Students!M$5:M$445),1))',
+      '=IF(LEN($M11) = 0,"", COUNTIF(V$4:V$300,$M11))',
+      '=IF(LEN($M11) = 0,"", ROUND(100 * COUNTIF(V$4:V$300, $M11) / COUNTIF(Students!D$5:D$445,"M"),1))',
+      '=IF(LEN($M11) = 0,"", COUNTIF(W$4:W$300,$M11))',
+      '=IF(LEN($M11) = 0,"", ROUND(100 * COUNTIF(W$4:W$300, $M11) / COUNTIF(Students!D$5:D$445,"F"),1))'
+    ];
+    //
+    $sheetData[] = [
+      '=IF(COUNTIF(V$4:W$300, "P3") > 0, "P3", IF(COUNTIF(V$4:W$300, 1),1,""))',
+      '=IF(LEN($M12) = 0,"", COUNTIF(Students!M$5:M$445,$M12))',
+      '=IF(LEN($M12) = 0,"", ROUND(100 * COUNTIF(Students!M$5:M$445, $M12) / COUNTA(Students!M$5:M$445),1))',
+      '=IF(LEN($M12) = 0,"", COUNTIF(V$4:V$300,$M12))',
+      '=IF(LEN($M12) = 0,"", ROUND(100 * COUNTIF(V$4:V$300, $M12) / COUNTIF(Students!D$5:D$445,"M"),1))',
+      '=IF(LEN($M12) = 0,"", COUNTIF(W$4:W$300,$M12))',
+      '=IF(LEN($M12) = 0,"", ROUND(100 * COUNTIF(W$4:W$300, $M12) / COUNTIF(Students!D$5:D$445,"F"),1))'
+    ];
+    //
+    $sheetData[] = [
+      '=IF(COUNTIF(V$4:W$300, "U") > 0, "U", "")',
+      '=IF(LEN($M13) = 0,"", COUNTIF(Students!M$5:M$445,$M13))',
+      '=IF(LEN($M13) = 0,"", ROUND(100 * COUNTIF(Students!M$5:M$445, $M13) / COUNTA(Students!M$5:M$445),1))',
+      '=IF(LEN($M13) = 0,"", COUNTIF(V$4:V$300,$M13))',
+      '=IF(LEN($M13) = 0,"", ROUND(100 * COUNTIF(V$4:V$300, $M13) / COUNTIF(Students!D$5:D$445,"M"),1))',
+      '=IF(LEN($M13) = 0,"", COUNTIF(W$4:W$300,$M13))',
+      '=IF(LEN($M13) = 0,"", ROUND(100 * COUNTIF(W$4:W$300, $M13) / COUNTIF(Students!D$5:D$445,"F"),1))'
+
+
+
+    ];
 
 
     $sheet->fromArray(
@@ -568,25 +625,16 @@ class ExamMetricsSpreadsheet
     //CAG Profile
     $cag = [];
     $cag[] = ['Cag Profile'];
-    $cag[] = ['Band', 'Grade', '%', 'Count'];
-
-    $i = 4;
-    foreach($this->gradeBands as $b) {
-      if ($i == 4) {
-        $cell = '=IF(COUNT(D'.$i.')>0, ROUND(D'.$i.'*N$2/100,0), "")';
-      } else {
-        $j = $i - 1;
-        $cell = '=IF(COUNT(D'.$i.')>0, ROUND(D'.$i.'*N$2/100,0) + E' . $j .', "")';
-      }
-      $cag[] = [
-        $b,
-        $this->grades[$i-4],
-        0,
-        $cell
-      ];
-      $i++;
-    }
-    $cag[] = ["", "U"]; //needed for correct display of last grades
+    $cag[] = ['Band', 'Grade', 'Count', 'Band', 'Grade', 'Count', 'Band', 'Grade', 'Count'];
+    $cag[] = ['9', 9, '', 'A*', 'A*', '', 'D1', 'D1'];
+    $cag[] = ['9-8', 8, '', 'A*-A', 'A', '', 'D1-D2', 'D1'];
+    $cag[] = ['9-7', 7, '', 'A*-B', 'B', '', 'D1-D3', 'D2'];
+    $cag[] = ['9-6', 6, '', 'A*-C', 'C', '', 'D1-M1', 'D3'];
+    $cag[] = ['9-5', 5, '', 'A*-D', 'D', '', 'D1-M2', 'M1'];
+    $cag[] = ['9-4', 4, '', 'A*-E', 'E', '', 'D1-M3', 'M2'];
+    $cag[] = ['9-3', 3, '', '', '', '', 'D1-P1', 'P1'];
+    $cag[] = ['9-2', 2, '', '', '', '', 'D1-P2', 'P2'];
+    $cag[] = ['9-1', 1, '', '', '', '', 'D1-P3', 'P3'];
 
     $sheet->fromArray(
         $cag,  // The data to set
@@ -617,16 +665,15 @@ class ExamMetricsSpreadsheet
       ]
     ];
     $sheet->getStyle('B2:C12')->applyFromArray($styleArray);
-    $sheet->getStyle('B2:D3')->applyFromArray($styleArray);
+    $sheet->getStyle('D2:J3')->applyFromArray($styleArray);
+    $sheet->getStyle('E4:F9')->applyFromArray($styleArray);
+    $sheet->getStyle('H4:I12')->applyFromArray($styleArray);
 
     $sheet->getColumnDimension('C')->setVisible(false);
-    $sheet->getColumnDimension('E')->setVisible(false);
     $sheet->getColumnDimension('F')->setVisible(false);
-    $sheet->getColumnDimension('G')->setVisible(false);
-    $sheet->getColumnDimension('H')->setVisible(false);
     $sheet->getColumnDimension('I')->setVisible(false);
 
-    $sheet->mergeCells('B2:D2');
+    $sheet->mergeCells('B2:J2');
     $sheet->mergeCells('M1:O1');
 
 
@@ -672,6 +719,7 @@ class ExamMetricsSpreadsheet
     ];
     $sheet->getStyle('R2:S3')->applyFromArray($styleArray);
 
+    $sheet->mergeCells('N2:O2');
     $sheet->mergeCells('P2:Q2');
     $sheet->mergeCells('R2:S2');
 
@@ -684,7 +732,8 @@ class ExamMetricsSpreadsheet
           // 'size' => 18
       ]
     ];
-    $sheet->getStyle('B2:C12')->applyFromArray($styleArray);
+    $sheet->getStyle('B1:B13')->applyFromArray($styleArray);
+    $sheet->getStyle('C2:H3')->applyFromArray($styleArray);
 
   }
 

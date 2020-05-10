@@ -9,6 +9,7 @@ class ExamMetrics
   public $metrics = [
     'GCSEMock'  => [],
     'GCSE' => [],
+    'AsLevel' => [],
     'ALevelMock'  => [],
     'IGDR'  => [],
     'Midyis'  => [],
@@ -28,6 +29,7 @@ class ExamMetrics
      $this->year = $year;
      $this->GCSEMock = new \Entities\Exams\Internal\GCSEMock($this->adaData);
      $this->GCSE = new \Entities\Exams\External\GCSE($this->adaData, $this->ada);
+     $this->AsLevel = new \Entities\Exams\External\AsLevel($this->adaData, $this->ada);
      $this->ALevelMock = new \Entities\Exams\Internal\ALevelMock($this->adaData);
 
      //get exam code
@@ -42,6 +44,7 @@ class ExamMetrics
     foreach($this->students as &$s){
       $this->getGCSEMock($s);
       $this->getGCSE($s);
+      $this->getAsLevel($s);
       $this->getALevelMock($s);
       $this->getAlis($s);
       $this->getMidyis($s);
@@ -57,7 +60,7 @@ class ExamMetrics
   private function getAlis(&$s)
   {
     $alis = new \Entities\Metrics\Alis($s->id, $this->examId);
-    $s->alisTestBaseline = $alis->testBaseline;
+    $s->alisTestBaseline = (new \Entities\Metrics\Student($s->id))->alisBaselineTest();
     $s->alisTestPrediction = $alis->testPrediction;
 
     $s->alisGcseBaseline = $alis->gcseBaseline;
@@ -67,7 +70,7 @@ class ExamMetrics
     if ($alis->gcseBaseline) {
       $this->metrics['Alis'][] = [
         'studentId' => $s->id,
-        'testBaseline' => $alis->testBaseline,
+        'testBaseline' => $s->alisTestBaseline,
         'testPrediction' => $alis->testPrediction,
         'gcseBaseline' => $alis->gcseBaseline,
         'gcsePrediction' => $alis->gcsePrediction
@@ -97,11 +100,29 @@ class ExamMetrics
     $examId = $this->year > 11 ? $this->exam->getGcseExamId($this->examId) : $this->examId;
     $gcse = $this->GCSE->fetchStudentByExam($s->id, $examId, $this->examCode);
     $s->gcseGrade = null;
+    // $s->gcseExamId = $gcse->examId;
+    // $s->typeId = $this->gcse->levelId;
     if($gcse){
       $s->gcseGrade = $gcse->result;
       $this->metrics['GCSE'][] = [
         'studentId' => $s->id,
         'grade' => $gcse->result
+      ];
+    }
+  }
+
+  private function getAsLevel(&$s)
+  {
+    // echo $s->id . "-" . $this->examId . PHP_EOL;
+    $asLevel = $this->AsLevel->fetchStudentByExam($s->id, $this->examId, $this->examCode);
+    $s->asGrade = null;
+    // $s->gcseExamId = $gcse->examId;
+    // $s->typeId = $this->gcse->levelId;
+    if($asLevel){
+      $s->asGrade = $asLevel->result;
+      $this->metrics['AsLevel'][] = [
+        'studentId' => $s->id,
+        'grade' => $asLevel->result
       ];
     }
   }
@@ -144,6 +165,7 @@ class ExamMetrics
   }
 
   private function makeCohortRanking(){
+      $this->metrics['GCSE'] = rankArray($this->metrics['GCSE'], 'grade', 'cohortRank');
       $this->metrics['GCSEMock'] = rankArray($this->metrics['GCSEMock'], 'mark', 'cohortRank');
       $this->metrics['ALevelMock'] = rankArray($this->metrics['ALevelMock'], 'mark', 'cohortRank');
       $this->metrics['Midyis'] = rankArray($this->metrics['Midyis'], 'baseline', 'cohortRank');
@@ -165,7 +187,7 @@ class ExamMetrics
       // $gcsePoints = $gcse->processGrade($s->gcseGrade);
       $gcsePoints = $metrics->gcseGpa();
       $s->gcseGpa = $gcsePoints;
-      if (!$gcseMockPoints || !$gcsePoints) continue;
+      if ($gcseMockPoints == 0 && $gcsePoints == 0) continue;
 
       $gcseDelta = $gcsePoints - $gcseMockPoints;
       $s->gcseDelta = round($gcseDelta,1);
@@ -201,6 +223,7 @@ class ExamMetrics
   //for easuer front end use
   private function moveDataToStudents(){
     //put back into students
+    $gcse = [];
     $gcseMock = [];
     $gcseMockMark = [];
     $alevelMock = [];
@@ -212,6 +235,7 @@ class ExamMetrics
       $gcseMock['_' . $g['studentId']] = $g['cohortRank'];
       $gcseMockMark['_' . $g['studentId']] = $g['mark'];
     }
+    foreach($this->metrics['GCSE'] as $g) $gcse['_' . $g['studentId']] = $g['cohortRank'];
     foreach($this->metrics['ALevelMock'] as $g) $alevelMock['_' . $g['studentId']] = $g['cohortRank'];
     foreach($this->metrics['IGDR'] as $g) $igdr['_' . $g['studentId']] = $g['IGDR'];
 
@@ -220,6 +244,7 @@ class ExamMetrics
 
     foreach($this->students as &$s){
       $key = '_' . $s->id;
+      $s->gcseCohortRank = $gcse[$key] ?? null;
       $s->gcseMockMark = $gcseMockMark[$key] ?? null;
       $s->gcseMockCohortRank = $gcseMock[$key] ?? null;
       $s->aLevelMockCohortRank = $alevelMock[$key] ?? null;
