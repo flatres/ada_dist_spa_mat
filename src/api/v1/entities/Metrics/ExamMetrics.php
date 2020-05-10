@@ -63,7 +63,7 @@ class ExamMetrics
     $s->alisTestBaseline = (new \Entities\Metrics\Student($s->id))->alisBaselineTest();
     $s->alisTestPrediction = $alis->testPrediction;
 
-    $s->alisGcseBaseline = $alis->gcseBaseline;
+    $s->alisGcseBaseline = (new \Entities\Metrics\Student($s->id))->alisBaselineGcse();
     $s->alisGcsePrediction = $alis->gcsePrediction;
 
 
@@ -169,7 +169,7 @@ class ExamMetrics
       $this->metrics['GCSEMock'] = rankArray($this->metrics['GCSEMock'], 'mark', 'cohortRank');
       $this->metrics['ALevelMock'] = rankArray($this->metrics['ALevelMock'], 'mark', 'cohortRank');
       $this->metrics['Midyis'] = rankArray($this->metrics['Midyis'], 'baseline', 'cohortRank');
-      $this->metrics['Alis'] = rankArray($this->metrics['Alis'], 'testPrediction', 'cohortRank');
+      $this->metrics['Alis'] = rankArray($this->metrics['Alis'], 'testBaseline', 'cohortRank');
   }
 
   //computes the difference between gcse actual and gcse mock and ranks these within each ALevel Mock Result Band

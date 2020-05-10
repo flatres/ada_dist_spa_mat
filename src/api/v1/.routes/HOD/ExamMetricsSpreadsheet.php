@@ -92,7 +92,7 @@ class ExamMetricsSpreadsheet
 
   private function getGrades($subject){
 
-    if ($subject->year < 11) {
+    if ($subject->year < 12) {
 
       $this->grades = [9, 8, 7, 6, 5, 4, 3, 2, 1, 'U'];
       $this->gradesForCounting = $this->grades;
@@ -158,7 +158,7 @@ class ExamMetricsSpreadsheet
       'Rank',
       'GCSE Avg.',
       'Rank',
-      'GCSE Mock Results',
+      'GCSE Mock %',
       'Rank',
       'Alis Score',
       'Rank',
@@ -202,15 +202,15 @@ class ExamMetricsSpreadsheet
         $s->aLevelMockCohortRank ?? '',
         $s->gcseDelta ?? '',
         $s->igdr ?? '',
-        $s->alisGCSEBaseline ?? '',
-        '=IF(LEN(X'.$i.') > 0,RANK(X'. $i . ',X$5:$X$200),0)',
-        $s->gcseCohortRank ?? '',
+        $s->alisGcseBaseline ?? '',
+        '=IF(LEN(V'.$i.') > 0,RANK(V'. $i . ',V$5:$V$200),0)',
         $s->gcseMockPercentage ?? '',
         $s->gcseMockCohortRank ?? '',
         $s->alisTestBaseline ?? '',
         $s->alisCohortRank ?? '',
         $s->midyisBaseline,
         $s->midyisCohortRank,
+        '',
         '=IF(LEN(AD'.$i.') > 0,RANK(AD'. $i . ',AD$5:$AD$200),0)',
         '',
         '=IF(LEN(AF'.$i.') > 0,RANK(AF'. $i . ',AG$5:$AF$200),0)',
@@ -616,7 +616,8 @@ class ExamMetricsSpreadsheet
           'argb' => 'FF#E1C4FF',
       ]
     ];
-    $sheet->getStyle('B2:C12')->applyFromArray($styleArray);
+    $count = count($this->grades) + 3;
+    $sheet->getStyle('B2:C'. $count)->applyFromArray($styleArray);
     $sheet->getStyle('B2:D3')->applyFromArray($styleArray);
 
     $sheet->getColumnDimension('C')->setVisible(false);
