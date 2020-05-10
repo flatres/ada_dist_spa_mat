@@ -63,8 +63,11 @@ class ExamMetricsSpreadsheet
     $sheetTitle = 'Students';
     $color = $settings['sheetColor'] ?? null;
 
+    $this->generateHistorySheet($subject);
     $this->generateStudentSheet($subject);
     $this->generateProfileSheet($subject);
+
+    $this->setProtections();
     //
     //
     // //generate file path and save sheet
@@ -152,7 +155,7 @@ class ExamMetricsSpreadsheet
       'Provisional Grade',
       'Provisional Rank',
       'Weighted Rank Average',
-      'U6 Sub Mock %',
+      'U6 Mock Exam %',
       'Rank',
       'GCSE GPA Uplift',
       'Rank',
@@ -207,7 +210,7 @@ class ExamMetricsSpreadsheet
         $s->gcseMockPercentage ?? '',
         $s->gcseMockCohortRank ?? '',
         $s->alisTestBaseline ?? '',
-        $s->alisCohortRank ?? '',
+        '=IF(LEN(V'.$i.') > 0,RANK(V'. $i . ',V$5:$V$200),0)',
         $s->midyisBaseline,
         $s->midyisCohortRank,
         '',
@@ -229,18 +232,7 @@ class ExamMetricsSpreadsheet
 
     $this->setMainStyle($sheet);
 
-
-    // $styleArray = [
-    //   'font' => [
-    //       'bold' => true
-    //       // 'size' => 18
-    //   ]
-    // ];
-    // $sheet->getStyle('A1:AZ1')->applyFromArray($styleArray);
-    //
-    // foreach (range('A','AZ') as $col) {
-    //   $sheet->getColumnDimension($col)->setAutoSize(true);
-    // }
+    // http://davidp.net/phpexcel-lock-cells/
 
   }
 
@@ -252,6 +244,25 @@ class ExamMetricsSpreadsheet
   private function CAG($i) {
     $original = '=IF(P5<=Profile!E$4, Profile!C$4, IF(P5<=Profile!E$5, Profile!C$5, IF(P5<=Profile!E$6, Profile!C$6, IF(P5<=Profile!E$7, Profile!C$7, IF(P5<=Profile!E$8, Profile!C$8, IF(P5<=Profile!E$9, Profile!C$9, IF(P5<=Profile!E$10, Profile!C$10, IF(P5<=Profile!E$11, Profile!C$11, IF(P5<=Profile!E$12, Profile!C$12, IF(P5<=Profile!E$13, Profile!C$13, IF(P5<=Profile!E$14, Profile!C$14, "U" ) ) ) ) ))) ))))';
     return str_replace('P5', "P$i", $original);
+  }
+
+  private function setProtections() {
+
+    $sheet = $this->spreadsheet->getSheetByName('Students');
+    $sheet->getStyle('M3:N200')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
+
+
+    $sheet = $this->spreadsheet->getSheetByName('Profile');
+    $sheet->getStyle('D4:D15')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
+    $sheet->getStyle('M4:S13')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_PROTECTED);
+
+    $this->spreadsheet->getSheetByName('Students')->getProtection()->setSheet(true);
+    $this->spreadsheet->getSheetByName('Profile')->getProtection()->setSheet(true);
+    // $sheet->getProtection()->setSheet(true);
+
+    // $this->spreadsheet->getActiveSheet()->getProtection()->setSheet(true);
+    $this->spreadsheet->getDefaultStyle()->getProtection()->setLocked(false);
+
   }
 
   private function setMainStyle(&$sheet){
@@ -296,6 +307,7 @@ class ExamMetricsSpreadsheet
     $sheet->getColumnDimension('C')->setWidth(6);
     $sheet->getColumnDimension('D')->setWidth(3);
     $sheet->getColumnDimension('E')->setWidth(5);
+    $sheet->getColumnDimension('Q')->setWidth(10);
 
     $width = 4;
     foreach (range('F','Z') as $col) $sheet->getColumnDimension($col)->setWidth($width);
@@ -319,20 +331,6 @@ class ExamMetricsSpreadsheet
          ],
      ];
      $sheet->getStyle('M3:N' . $maxRow)->applyFromArray($styleArray);
-
-     // //background colors
-     // $styleArray = [
-     // 'borders' => [
-     //     'left' => [
-     //         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-     //          'color' => ['argb' => '00000000'],
-     //         ],
-     //     'right' => [
-     //         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-     //          'color' => ['argb' => '00000000'],
-     //         ]
-     //     ]
-     // ];
 
      $styleArray = [];
      //final rank / grade
@@ -424,31 +422,6 @@ class ExamMetricsSpreadsheet
        $sheet->getComment("E$r")->setWidth("200px");
      }
 
-     // $styleArray = [];
-     // //blank where weightings wont go
-     // // gray alternate background
-     // $styleArray['fill'] = [
-     //   'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
-     //   'startColor' => [
-     //       'argb' => 'FF000000',
-     //   ],
-     //   'endColor' => [
-     //       'argb' => 'FF000000',
-     //   ],
-     // ];
-     // $sheet->getStyle('L1:L1')->applyFromArray($styleArray);
-     // $sheet->getStyle('N1:N1')->applyFromArray($styleArray);
-     // $sheet->getStyle('P1:P1')->applyFromArray($styleArray);
-     // $sheet->getStyle('R1:S1')->applyFromArray($styleArray);
-     // $sheet->getStyle('U1:V1')->applyFromArray($styleArray);
-     // $sheet->getStyle('X1:X1')->applyFromArray($styleArray);
-     // $sheet->getStyle('Z1:Z1')->applyFromArray($styleArray);
-     // $sheet->getStyle('AB1:AB1')->applyFromArray($styleArray);
-     // $sheet->getStyle('AD1:AD1')->applyFromArray($styleArray);
-     // $sheet->getStyle('AF1:AF1')->applyFromArray($styleArray);
-
-
-
      if ($this->subject->year < 12) {
        //hide some columns if GCSE
        $sheet->getColumnDimension('G')->setVisible(false);
@@ -471,42 +444,53 @@ class ExamMetricsSpreadsheet
        $sheet->getColumnDimension('F')->setVisible(false);
        $sheet->getColumnDimension('AB')->setVisible(false);
        $sheet->getColumnDimension('AC')->setVisible(false);
+
+       $sheet->getColumnDimension('X')->setVisible(false);
+       $sheet->getColumnDimension('Y')->setVisible(false);
+
+       $sheetData = [0]; //set weighting to zero
+       $sheet->fromArray(
+           $sheetData,  // The data to set
+           NULL,        // Array values with this value will not be set
+           'Y1'         // Top left coordinate of the worksheet range where
+       );
      }
 
      //filters
-     $sheet->setAutoFilter('A4:AG' . $maxRow);
+     $sheet->setAutoFilter('A4:AI' . $maxRow);
 
-     return;
+     $sheet->getColumnDimension('Q')->setWidth(10);
+     $sheet->getColumnDimension('Q')->setAutoSize(true);
 
      //instructions
-     $sheet->getComment('A1')->getText()->createTextRun('The weightings control how important each metric is in deciding the weighted ranking. A metric with twice the weighting will have twice the influence.');
+     $sheet->getComment('N1')->getText()->createTextRun('The weightings control how important each metric is in deciding the weighted ranking. A metric with twice the weighting will have twice the influence.');
      $sheet->getComment("A1")->setHeight("300px");
      $sheet->getComment("A1")->setWidth("200px");
 
-     $sheet->getComment('H2')->getText()->createTextRun('Rank order according the the weighted score. A lower score means a higher rank.');
-     $sheet->getComment("H2")->setHeight("300px");
-     $sheet->getComment("H2")->setWidth("200px");
+     $sheet->getComment('P2')->getText()->createTextRun('Rank order according the the weighted score. A lower score means a higher rank.');
+     $sheet->getComment("P2")->setHeight("300px");
+     $sheet->getComment("P2")->setWidth("200px");
 
-     $sheet->getComment('I2')->getText()->createTextRun('This average of each ranking multipled by the weighting for that metric.');
-     $sheet->getComment("I2")->setHeight("300px");
-     $sheet->getComment("I2")->setWidth("200px");
+     $sheet->getComment('Q2')->getText()->createTextRun('This average of each ranking multipled by the weighting for that metric.');
+     $sheet->getComment("Q2")->setHeight("300px");
+     $sheet->getComment("Q2")->setWidth("200px");
 
-     $sheet->getComment('M2')->getText()->createTextRun('Midyis score ranked within this subject.');
-     $sheet->getComment("M2")->setHeight("300px");
-     $sheet->getComment("M2")->setWidth("200px");
+     $sheet->getComment('AC2')->getText()->createTextRun('Midyis score ranked within this subject.');
+     $sheet->getComment("AC2")->setHeight("300px");
+     $sheet->getComment("AC2")->setWidth("200px");
 
-     $sheet->getComment('O2')->getText()->createTextRun('Alis score ranked within this subject.');
-     $sheet->getComment("O2")->setHeight("300px");
-     $sheet->getComment("O2")->setWidth("200px");
+     $sheet->getComment('AA2')->getText()->createTextRun('Alis score ranked within this subject.');
+     $sheet->getComment("AA2")->setHeight("300px");
+     $sheet->getComment("AA2")->setWidth("200px");
 
 
-     $sheet->getComment('S2')->getText()->createTextRun('The difference (delta) between the actual GSCE points scored and that scored in the mock.');
+     $sheet->getComment('S2')->getText()->createTextRun('The difference between the overall GCSE GPA and the mock GPA');
      $sheet->getComment("S2")->setHeight("300px");
      $sheet->getComment("S2")->setWidth("200px");
 
-     $sheet->getComment('T2')->getText()->createTextRun('Interband GCSE Delta Rank: U6 Mock results are ordered by grade. Within each grade band, the pupils are ranked according to their GCSE delta i.e how much they improved from GCSE mock to actual. A bigger improvement is ranked higher. This may give an indication of how they are likely to improve between U6 mock and actual.');
-     $sheet->getComment("T2")->setHeight("300px");
-     $sheet->getComment("T2")->setWidth("200px");
+     // $sheet->getComment('T2')->getText()->createTextRun('Interband GCSE Delta Rank: U6 Mock results are ordered by grade. Within each grade band, the pupils are ranked according to their GCSE delta i.e how much they improved from GCSE mock to actual. A bigger improvement is ranked higher. This may give an indication of how they are likely to improve between U6 mock and actual.');
+     // $sheet->getComment("T2")->setHeight("300px");
+     // $sheet->getComment("T2")->setWidth("200px");
   }
 
   private function generateProfileSheet($subject)
@@ -515,6 +499,9 @@ class ExamMetricsSpreadsheet
     $spreadsheet = $this->spreadsheet;
     $worksheet = new Worksheet($spreadsheet, $title);
     $spreadsheet->addSheet($worksheet, 0);
+
+    $color = '7850C8';
+    $worksheet->getTabColor()->setRGB($color);
 
     // //sheet title
     $sheet = $spreadsheet->getSheetByName($title);
@@ -567,24 +554,22 @@ class ExamMetricsSpreadsheet
 
     //CAG Profile
     $cag = [];
-    $cag[] = ['Cag Profile'];
-    $cag[] = ['Band', 'Grade', '%', 'Count'];
+    $cag[] = ['Provisional Profile'];
+    $cag[] = ['', 'Grade', '%', 'Count'];
 
     $i = 4;
+    $div = round(100 / count($this->gradeBands), 0);
+    $pct = 10;
     foreach($this->gradeBands as $b) {
-      if ($i == 4) {
-        $cell = '=IF(COUNT(D'.$i.')>0, ROUND(D'.$i.'*N$2/100,0), "")';
-      } else {
-        $j = $i - 1;
-        $cell = '=IF(COUNT(D'.$i.')>0, ROUND(D'.$i.'*N$2/100,0) + E' . $j .', "")';
-      }
+      $cell = '=IF(COUNT(D'.$i.')>0, ROUND(D'.$i.'*N$2/100,0), "")';
       $cag[] = [
         $b,
         $this->grades[$i-4],
-        0,
+        $i == count($this->gradeBands) + 3 ? 100 : $pct,
         $cell
       ];
       $i++;
+      $pct = $pct + $div;
     }
     $cag[] = ["", "U"]; //needed for correct display of last grades
 
@@ -605,8 +590,20 @@ class ExamMetricsSpreadsheet
       'font' => [
           'bold' => true
           // 'size' => 18
+      ],
+      'alignment' => [
+        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
       ]
     ];
+    $sheet->getStyle('B2:B15')->applyFromArray($styleArray);
+
+    $styleArray = [
+      'font' => [
+          'bold' => true
+          // 'size' => 18
+      ]
+    ];
+
     $styleArray['fill'] = [
       'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
       'startColor' => [
@@ -630,7 +627,6 @@ class ExamMetricsSpreadsheet
     $sheet->mergeCells('B2:D2');
     $sheet->mergeCells('M1:O1');
 
-
     $styleArray = [
       'font' => [
           'bold' => true
@@ -647,7 +643,8 @@ class ExamMetricsSpreadsheet
           'argb' => 'FFC7EA46',
       ]
     ];
-    $sheet->getStyle('M3:M13')->applyFromArray($styleArray);
+    $count = count($this->grades)+3;
+    $sheet->getStyle('M3:M' . $count)->applyFromArray($styleArray);
     $sheet->getStyle('M2:O3')->applyFromArray($styleArray);
     $sheet->getStyle('M1:O1')->applyFromArray($styleArray);
 
@@ -686,6 +683,87 @@ class ExamMetricsSpreadsheet
       ]
     ];
     $sheet->getStyle('B2:C12')->applyFromArray($styleArray);
+
+    $styleArray = [
+      'alignment' => [
+        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+      ],
+      'borders' => [
+        'outline' => [
+            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+            'color' => ['argb' => '00000000']
+            ]
+      ]
+    ];
+    $sheet->getStyle('B2:D2')->applyFromArray($styleArray);
+    $sheet->getStyle('M1:O1')->applyFromArray($styleArray);
+
+  }
+
+  private function generateHistorySheet($subject){
+    $title = 'History';
+    $spreadsheet = $this->spreadsheet;
+    $worksheet = new Worksheet($spreadsheet, $title);
+    $spreadsheet->addSheet($worksheet, 0);
+
+    $color = 'E05A00';
+    $worksheet->getTabColor()->setRGB($color);
+
+    // //sheet title
+    $sheet = $spreadsheet->getSheetByName($title);
+
+    $bands = $subject->bands;
+    $history = $subject->bandedHistory;
+
+    $sheetData = [];
+    //first row
+    //header row
+    $header = [];
+    $header[] = '%';
+    foreach($bands as $b) $header[] = $b;
+    $sheetData[] = $header;
+
+    //data
+    foreach($history as $h) {
+      $row = [$h['year']];
+      foreach($h['results'] as $r) $row[] = $r['pct'];
+      $sheetData[] = $row;
+    }
+
+    $sheet->fromArray(
+        $sheetData,  // The data to set
+        NULL,        // Array values with this value will not be set
+        'B2'         // Top left coordinate of the worksheet range where
+    );
+
+    $sheet->getColumnDimension('B')->setWidth(18);
+
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+      ],
+      'alignment' => [
+        'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT,
+      ]
+    ];
+    // Ranking Backgrounds
+    $styleArray['fill'] = [
+      'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
+      'startColor' => [
+          'argb' => 'FFf9b247',
+      ],
+      'endColor' => [
+          'argb' => 'FFf9b247',
+      ],
+    ];
+
+    $cols = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
+
+    $maxRow = count($subject->bandedHistory);
+    $maxCol = $cols[count($bands) + 2];
+
+    $sheet->getStyle('B2:B' . $maxRow)->applyFromArray($styleArray);
+    $sheet->getStyle('B2:'. $maxCol.'2')->applyFromArray($styleArray);
 
   }
 

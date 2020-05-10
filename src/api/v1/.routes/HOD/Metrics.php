@@ -67,8 +67,11 @@ class Metrics
       $examId = $args['exam'];
 
       $subject = $this->getYearMetrics($subjectId, $year, $examId);
-      // $subject->getExamData();
-      // $subject->getSets($args['year']);
+
+      $subject->classes = null;
+      $subject->sql = null;
+      $subject->adaData = null;
+      
       return emit($response, $subject);
     }
 
@@ -81,11 +84,19 @@ class Metrics
       $subjectId = $args['subject'];
       $year = $args['year'];
       $examId = $args['exam'];
+
+      $this->progress->publish(0.25, 'Gathering data...');
       $subject = $this->getYearMetrics($subjectId, $year, $examId);
+      $subject->makeMLOProfile();
+      $subject->makeHistoryProfile($examId, $year);
 
       $this->progress->publish(0.5, 'Generating spreadsheet...');
       foreach($subject->students as &$s) $s->getHMNote();
       $sheet = new \HOD\ExamMetricsSpreadsheet($subject);
+
+      $subject->classes = null;
+      $subject->sql = null;
+      $subject->adaData = null;
 
       return emit($response, $sheet->package);
     }
@@ -106,9 +117,6 @@ class Metrics
       $subject->metrics = $metrics->metrics;
       $subject->metricWeightings = $metrics->weightings;
 
-      $subject->classes = null;
-      $subject->sql = null;
-      $subject->adaData = null;
       $this->progress->publish(1);
       return $subject;
     }
