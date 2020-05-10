@@ -64,8 +64,8 @@ class ExamMetricsSpreadsheet
     $color = $settings['sheetColor'] ?? null;
 
     $this->generateHistorySheet($subject);
-    $this->generateStudentSheet($subject);
     $this->generateProfileSheet($subject);
+    $this->generateStudentSheet($subject);
 
     $this->setProtections();
     //
@@ -135,7 +135,7 @@ class ExamMetricsSpreadsheet
     //
     $sheetData = [];
     //first row
-    $sheetData[] = ['','','','','','','','','','','','','','Weightings:', 1,'',1,'',1,'',1,'',1, '', 1, '', 1, '', 1, '', 1];
+    $sheetData[] = [$subject->name,'','','','','','','','','','','','','Weightings:', 1,'',1,'',1,'',1,'',1, '', 1, '', 1, '', 1, '', 1];
     $sheetData[] = ['','','','','','','','','Contextual Data','','','','','', '','',"Ranked Data"];
     $sheetData[] = [
       'Name',
@@ -230,10 +230,24 @@ class ExamMetricsSpreadsheet
         'A1'         // Top left coordinate of the worksheet range where
     );
 
+    $sheet = $this->spreadsheet->getSheetByName('Students');
+    $maxRow = count($this->subject->students)+4;
+    $sheet->setAutoFilter('A4:AI' . $maxRow);
+
     $this->setMainStyle($sheet);
+    $this->reset($sheet);
 
     // http://davidp.net/phpexcel-lock-cells/
 
+  }
+
+  private function reset($sheet) {
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+      ]
+    ];
+    $sheet->getStyle('A1:A1')->applyFromArray($styleArray);
   }
 
   private function WRA($i) {
@@ -248,18 +262,52 @@ class ExamMetricsSpreadsheet
 
   private function setProtections() {
 
+    return;
+
+    // couldn't get it to work
+
     $sheet = $this->spreadsheet->getSheetByName('Students');
+
+    $this->spreadsheet->getDefaultStyle()->getProtection()->setLocked(false);
+
     $sheet->getStyle('M3:N200')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
+    $sheet->getStyle('A4:ZZ4')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
+
+    $sheet->getStyle('Q5:Q200')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_PROTECTED);
+
+    $sheet->getStyle('A4:ZZ4')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
+    $maxRow = count($this->subject->students)+4;
+    $sheet->setAutoFilter('A4:AI' . $maxRow);
+    $sheet->getProtection()->setSheet(true);
+    $sheet->getProtection()->setSelectLockedCells(false);
+    $sheet->getProtection()->setSelectUnlockedCells(false);
+    $sheet->getProtection()->setFormatCells(false);
+    $sheet->getProtection()->setFormatRows(false);
+    $sheet->getProtection()->setInsertColumns(false);
+    $sheet->getProtection()->setInsertRows(false);
+    $sheet->getProtection()->setInsertHyperlinks(false);
+    $sheet->getProtection()->setDeleteColumns(false);
+    $sheet->getProtection()->setDeleteRows(false);
+    $sheet->getProtection()->setSort(false);
+    $sheet->getProtection()->setAutofilter(false);
+
+
+
+    $sheet->getProtection()->setObjects(false);
+    $sheet->getProtection()->setScenarios(false);
+
+    return
+
 
 
     $sheet = $this->spreadsheet->getSheetByName('Profile');
     $sheet->getStyle('D4:D15')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
     $sheet->getStyle('M4:S13')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_PROTECTED);
 
-    $this->spreadsheet->getSheetByName('Students')->getProtection()->setSheet(true);
     $this->spreadsheet->getSheetByName('Profile')->getProtection()->setSheet(true);
-    // $sheet->getProtection()->setSheet(true);
 
+    // $sheet->getProtection()->setSheet(true);
+    // https://stackoverflow.com/questions/7749584/sorting-protected-cells-using-phpexcel
     // $this->spreadsheet->getActiveSheet()->getProtection()->setSheet(true);
     $this->spreadsheet->getDefaultStyle()->getProtection()->setLocked(false);
 
@@ -268,6 +316,10 @@ class ExamMetricsSpreadsheet
   private function setMainStyle(&$sheet){
 
     $maxRow = count($this->subject->students)+4;
+
+    //filters
+
+
 
     $sheet->mergeCells('N1:R1');
     $sheet->mergeCells('F2:L2');
@@ -456,8 +508,6 @@ class ExamMetricsSpreadsheet
        );
      }
 
-     //filters
-     $sheet->setAutoFilter('A4:AI' . $maxRow);
 
      $sheet->getColumnDimension('Q')->setWidth(10);
      $sheet->getColumnDimension('Q')->setAutoSize(true);
@@ -467,26 +517,26 @@ class ExamMetricsSpreadsheet
      $sheet->getComment("A1")->setHeight("300px");
      $sheet->getComment("A1")->setWidth("200px");
 
-     $sheet->getComment('P2')->getText()->createTextRun('Rank order according the the weighted score. A lower score means a higher rank.');
-     $sheet->getComment("P2")->setHeight("300px");
-     $sheet->getComment("P2")->setWidth("200px");
+     $sheet->getComment('P3')->getText()->createTextRun('Rank order according the the weighted score. A lower score means a higher rank.');
+     $sheet->getComment("P3")->setHeight("300px");
+     $sheet->getComment("P3")->setWidth("200px");
 
-     $sheet->getComment('Q2')->getText()->createTextRun('This average of each ranking multipled by the weighting for that metric.');
-     $sheet->getComment("Q2")->setHeight("300px");
-     $sheet->getComment("Q2")->setWidth("200px");
+     $sheet->getComment('Q3')->getText()->createTextRun('This average of each ranking multipled by the weighting for that metric.');
+     $sheet->getComment("Q3")->setHeight("300px");
+     $sheet->getComment("Q3")->setWidth("200px");
 
-     $sheet->getComment('AC2')->getText()->createTextRun('Midyis score ranked within this subject.');
-     $sheet->getComment("AC2")->setHeight("300px");
-     $sheet->getComment("AC2")->setWidth("200px");
+     $sheet->getComment('AC3')->getText()->createTextRun('Midyis score ranked within this subject.');
+     $sheet->getComment("AC3")->setHeight("300px");
+     $sheet->getComment("AC3")->setWidth("200px");
 
-     $sheet->getComment('AA2')->getText()->createTextRun('Alis score ranked within this subject.');
-     $sheet->getComment("AA2")->setHeight("300px");
-     $sheet->getComment("AA2")->setWidth("200px");
+     $sheet->getComment('AA3')->getText()->createTextRun('Alis score ranked within this subject.');
+     $sheet->getComment("AA3")->setHeight("300px");
+     $sheet->getComment("AA3")->setWidth("200px");
 
 
-     $sheet->getComment('S2')->getText()->createTextRun('The difference between the overall GCSE GPA and the mock GPA');
-     $sheet->getComment("S2")->setHeight("300px");
-     $sheet->getComment("S2")->setWidth("200px");
+     $sheet->getComment('S3')->getText()->createTextRun('The difference between the overall GCSE GPA and the mock GPA');
+     $sheet->getComment("S3")->setHeight("300px");
+     $sheet->getComment("S3")->setWidth("200px");
 
      // $sheet->getComment('T2')->getText()->createTextRun('Interband GCSE Delta Rank: U6 Mock results are ordered by grade. Within each grade band, the pupils are ranked according to their GCSE delta i.e how much they improved from GCSE mock to actual. A bigger improvement is ranked higher. This may give an indication of how they are likely to improve between U6 mock and actual.');
      // $sheet->getComment("T2")->setHeight("300px");
@@ -581,7 +631,18 @@ class ExamMetricsSpreadsheet
 
     $this->setProfileStyle($sheet);
 
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+      ]
+    ];
+    $sheet->getStyle('A1:AI3')->applyFromArray($styleArray);
+
+    $this->reset($sheet);
+
   }
+
+
 
   private function setProfileStyle($sheet){
 
@@ -698,6 +759,19 @@ class ExamMetricsSpreadsheet
     $sheet->getStyle('B2:D2')->applyFromArray($styleArray);
     $sheet->getStyle('M1:O1')->applyFromArray($styleArray);
 
+    $styleArray = [
+    'borders' => [
+        'outline' => [
+            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
+                'color' => ['argb' => '00000000'],
+            ],
+        ],
+    ];
+
+    $row = count($this->grades) + 3;
+    $sheet->getStyle('B2:D' . $row)->applyFromArray($styleArray);
+
+
   }
 
   private function generateHistorySheet($subject){
@@ -759,12 +833,19 @@ class ExamMetricsSpreadsheet
 
     $cols = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
 
-    $maxRow = count($subject->bandedHistory);
+    $maxRow = count($subject->bandedHistory)+2;
     $maxCol = $cols[count($bands) + 2];
 
     $sheet->getStyle('B2:B' . $maxRow)->applyFromArray($styleArray);
     $sheet->getStyle('B2:'. $maxCol.'2')->applyFromArray($styleArray);
 
+    $styleArray = [
+      'font' => [
+          'bold' => true,
+      ]
+    ];
+    $sheet->getStyle('A1:AI3')->applyFromArray($styleArray);
+    $this->reset($sheet);
   }
 
 }
