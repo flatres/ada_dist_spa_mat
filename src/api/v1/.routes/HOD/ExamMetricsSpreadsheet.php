@@ -204,7 +204,7 @@ class ExamMetricsSpreadsheet
         $s->aLevelMockPercentage ?? '',
         $s->aLevelMockCohortRank ?? '',
         $s->gcseDelta ?? '',
-        $s->igdr ?? '',
+        '=IF(LEN(T'.$i.') > 0,RANK(T'.$i.', T$5:T$200), 0)', ///$s->igdr ?? '',
         $s->alisGcseBaseline ?? '',
         '=IF(LEN(V'.$i.') > 0,RANK(V'. $i . ',V$5:$V$200),0)',
         $s->gcseMockPercentage ?? '',
@@ -216,7 +216,7 @@ class ExamMetricsSpreadsheet
         '',
         '=IF(LEN(AD'.$i.') > 0,RANK(AD'. $i . ',AD$5:$AD$200),0)',
         '',
-        '=IF(LEN(AF'.$i.') > 0,RANK(AF'. $i . ',AG$5:$AF$200),0)',
+        '=IF(LEN(AF'.$i.') > 0,RANK(AF'. $i . ',AF$5:$AF$200),0)',
         '',
         '=IF(LEN(AH'.$i.') > 0,RANK(AH'. $i . ',AH$5:$AH$200),0)'
       ];
@@ -268,35 +268,35 @@ class ExamMetricsSpreadsheet
 
     $sheet = $this->spreadsheet->getSheetByName('Students');
 
-    $this->spreadsheet->getDefaultStyle()->getProtection()->setLocked(false);
-
-    $sheet->getStyle('M3:N200')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
-    $sheet->getStyle('A4:ZZ4')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
-
-    $sheet->getStyle('Q5:Q200')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_PROTECTED);
-
-    $sheet->getStyle('A4:ZZ4')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
-    $maxRow = count($this->subject->students)+4;
-    $sheet->setAutoFilter('A4:AI' . $maxRow);
-    $sheet->getProtection()->setSheet(true);
-    $sheet->getProtection()->setSelectLockedCells(false);
-    $sheet->getProtection()->setSelectUnlockedCells(false);
-    $sheet->getProtection()->setFormatCells(false);
-    $sheet->getProtection()->setFormatRows(false);
-    $sheet->getProtection()->setInsertColumns(false);
-    $sheet->getProtection()->setInsertRows(false);
-    $sheet->getProtection()->setInsertHyperlinks(false);
-    $sheet->getProtection()->setDeleteColumns(false);
-    $sheet->getProtection()->setDeleteRows(false);
-    $sheet->getProtection()->setSort(false);
-    $sheet->getProtection()->setAutofilter(false);
-
-
-
-    $sheet->getProtection()->setObjects(false);
-    $sheet->getProtection()->setScenarios(false);
-
-    return
+    // $this->spreadsheet->getDefaultStyle()->getProtection()->setLocked(false);
+    //
+    // $sheet->getStyle('M3:N200')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
+    // $sheet->getStyle('A4:ZZ4')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
+    //
+    // $sheet->getStyle('Q5:Q200')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_PROTECTED);
+    //
+    // $sheet->getStyle('A4:ZZ4')->getProtection()->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
+    // $maxRow = count($this->subject->students)+4;
+    // $sheet->setAutoFilter('A4:AI' . $maxRow);
+    // $sheet->getProtection()->setSheet(true);
+    // $sheet->getProtection()->setSelectLockedCells(false);
+    // $sheet->getProtection()->setSelectUnlockedCells(false);
+    // $sheet->getProtection()->setFormatCells(false);
+    // $sheet->getProtection()->setFormatRows(false);
+    // $sheet->getProtection()->setInsertColumns(false);
+    // $sheet->getProtection()->setInsertRows(false);
+    // $sheet->getProtection()->setInsertHyperlinks(false);
+    // $sheet->getProtection()->setDeleteColumns(false);
+    // $sheet->getProtection()->setDeleteRows(false);
+    // $sheet->getProtection()->setSort(false);
+    // $sheet->getProtection()->setAutofilter(false);
+    //
+    //
+    //
+    // $sheet->getProtection()->setObjects(false);
+    // $sheet->getProtection()->setScenarios(false);
+    //
+    // return
 
 
 
@@ -534,9 +534,9 @@ class ExamMetricsSpreadsheet
      $sheet->getComment("AA3")->setWidth("200px");
 
 
-     $sheet->getComment('S3')->getText()->createTextRun('The difference between the overall GCSE GPA and the mock GPA');
-     $sheet->getComment("S3")->setHeight("300px");
-     $sheet->getComment("S3")->setWidth("200px");
+     $sheet->getComment('T3')->getText()->createTextRun('The difference between the overall GCSE GPA and the mock GPA');
+     $sheet->getComment("T3")->setHeight("300px");
+     $sheet->getComment("T3")->setWidth("200px");
 
      // $sheet->getComment('T2')->getText()->createTextRun('Interband GCSE Delta Rank: U6 Mock results are ordered by grade. Within each grade band, the pupils are ranked according to their GCSE delta i.e how much they improved from GCSE mock to actual. A bigger improvement is ranked higher. This may give an indication of how they are likely to improve between U6 mock and actual.');
      // $sheet->getComment("T2")->setHeight("300px");

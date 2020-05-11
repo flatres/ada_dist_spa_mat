@@ -71,7 +71,7 @@ class Metrics
       $subject->classes = null;
       $subject->sql = null;
       $subject->adaData = null;
-      
+
       return emit($response, $subject);
     }
 
@@ -87,7 +87,7 @@ class Metrics
 
       $this->progress->publish(0.25, 'Gathering data...');
       $subject = $this->getYearMetrics($subjectId, $year, $examId);
-      $subject->makeMLOProfile();
+      // $subject->makeMLOProfile();
       $subject->makeHistoryProfile($examId, $year);
 
       $this->progress->publish(0.5, 'Generating spreadsheet...');
@@ -98,6 +98,7 @@ class Metrics
       $subject->sql = null;
       $subject->adaData = null;
 
+      // return emit($response, $subject);
       return emit($response, $sheet->package);
     }
 
