@@ -135,7 +135,9 @@ class ExamMetricsSpreadsheet
     //
     $sheetData = [];
     //first row
-    $sheetData[] = [$subject->name,'','','','','','','','','','','','','Weightings:', 1,'',1,'',1,'',1,'',1, '', 1, '', 1, '', 1, '', 1];
+    $gcseMockWeight = $subject->year > 11 ? 0 : 1;
+    $gpaUpliftWeight = $subject->year > 11 ? 1 : 0;
+    $sheetData[] = [$subject->name,'','','','','','','','','','','','','Weightings:', '', '', '', '', 1,'',$gpaUpliftWeight,'',1,'',$gcseMockWeight,'',1, '', 1, '', 1, '', 1, '', 1];
     $sheetData[] = ['','','','','','','','','Contextual Data','','','','','', '','',"Ranked Data"];
     $sheetData[] = [
       'Name',
@@ -251,7 +253,7 @@ class ExamMetricsSpreadsheet
   }
 
   private function WRA($i) {
-    $original = '=ROUND((S5*S$1+U5*U$1+W5*W$1+Y5*Y$1+AA5*AA$1+AC5*AC$1+AE5*AE$1+AG5*AG$1+AI5*AI$1)/COUNTA(S5,U5,W5,Y5,AA5,AC5,AE5,AG5,AI5),2)';
+    $original = '=ROUND((S5*S$1+U5*U$1+W5*W$1+Y5*Y$1+AA5*AA$1+AC5*AC$1+AE5*AE$1+AG5*AG$1+AI5*AI$1)/COUNTA(R5,T5,V5,X5,Z5,AB5,AD5,AF5,AH5),2)';
     return str_replace('5', $i, $original);
   }
 
@@ -493,19 +495,19 @@ class ExamMetricsSpreadsheet
        $sheet->getColumnDimension('Z')->setVisible(false);
        $sheet->getColumnDimension('AA')->setVisible(false);
      } else {
+       // $sheetData = []; //set weighting to zero
+       // $sheetData[] = [0, ''];
+       // $sheet->fromArray(
+       //     $sheetData,  // The data to set
+       //     NULL,        // Array values with this value will not be set
+       //     'Y1'         // Top left coordinate of the worksheet range where
+       // );
        $sheet->getColumnDimension('F')->setVisible(false);
        $sheet->getColumnDimension('AB')->setVisible(false);
        $sheet->getColumnDimension('AC')->setVisible(false);
 
        $sheet->getColumnDimension('X')->setVisible(false);
        $sheet->getColumnDimension('Y')->setVisible(false);
-
-       $sheetData = [0]; //set weighting to zero
-       $sheet->fromArray(
-           $sheetData,  // The data to set
-           NULL,        // Array values with this value will not be set
-           'Y1'         // Top left coordinate of the worksheet range where
-       );
      }
 
 
