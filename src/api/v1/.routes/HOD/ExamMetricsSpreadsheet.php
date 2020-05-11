@@ -571,7 +571,7 @@ class ExamMetricsSpreadsheet
         '=COUNTIF(V$4:V$300,$M'.$i.')',
         '=ROUND(100 * COUNTIF(V$4:V$300, $M'.$i.') / COUNTIF(Students!D$5:D$445,"M"),1)',
         '=COUNTIF(W$4:W$300,$M'.$i.')',
-        '=ROUND(100 * COUNTIF(W$4:W$300, $M4) / COUNTIF(Students!D$5:D$445,"F"),1)'
+        '=ROUND(100 * COUNTIF(W$4:W$300, $M'.$i.') / COUNTIF(Students!D$5:D$445,"F"),1)'
       ];
       $i++;
     }
