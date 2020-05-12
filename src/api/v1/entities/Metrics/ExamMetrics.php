@@ -81,7 +81,7 @@ class ExamMetrics
   private function getMidyis(&$s)
   {
     $midyis = new \Entities\Metrics\Midyis($s->id, $this->examId);
-    $s->midyisBaseline = $midyis->baseline;
+    $s->midyisBaseline = (new \Entities\Metrics\Student($s->id))->midyisScore();
     $s->midyisBand = $midyis->band;
     $s->midyisPrediction = $midyis->prediction;
     if ($midyis->baseline) {

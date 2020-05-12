@@ -176,6 +176,10 @@ class SubjectCodes
     public function getBasic()
     {
 
+      if($this->contains('chemistry') && $this->contains('dual')) return array('CHS2', 'Chemistry (Dual Award)');
+      if($this->contains('physics') && $this->contains('dual')) return array('PHS2', 'Physics (Dual Award)');
+      if($this->contains('biology') && $this->contains('dual')) return array('BIS2', 'Biology (Dual Award)');
+
       if($this->contains('history') && $this->contains('art')) return array('HX', 'Art History');
       if($this->contains('history')) return array("HI", 'History');
 
@@ -253,6 +257,9 @@ class SubjectCodes
       if($this->contains('theatre')) return array("DR", "Theatre Studies");
       if($this->contains('re')) return array("RE", "Religious Studies");
       if($this->contains('sport')) return array("PE", "Sport Science");
+
+
+
       $this->error = true;
       return array("-", "-");
     }
