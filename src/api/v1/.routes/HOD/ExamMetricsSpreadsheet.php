@@ -137,7 +137,7 @@ class ExamMetricsSpreadsheet
     //first row
     $gcseMockWeight = $subject->year > 11 ? 0 : 1;
     $gpaUpliftWeight = $subject->year > 11 ? 1 : 0;
-    $sheetData[] = [$subject->name,'','','','','','','','','','','','','Weightings:', '', '', '', '', 1,'',$gpaUpliftWeight,'',1,'',$gcseMockWeight,'',1, '', 1, '', 1, '', 1, '', 1];
+    $sheetData[] = [$subject->name,'','','','','','','','','','','','','Weightings:', '', '', '=sum(S1:AO1)', '', 1,'',$gpaUpliftWeight,'',1,'',$gcseMockWeight,'',1, '', 1, '', 1, '', 1, '', 1];
     $sheetData[] = ['','','','','','','','','Contextual Data','','','','','', '','',"Ranked Data"];
     $sheetData[] = [
       'Name',
@@ -320,10 +320,8 @@ class ExamMetricsSpreadsheet
     $maxRow = count($this->subject->students)+4;
 
     //filters
-
-
-
-    $sheet->mergeCells('N1:R1');
+    $sheet->mergeCells('N1:P1');
+    // $sheet->mergeCells('Q1:R1');
     $sheet->mergeCells('F2:L2');
     $sheet->mergeCells('Q2:AI2');
 
