@@ -214,7 +214,7 @@ class ExamMetricsSpreadsheet
         $s->alisTestBaseline ?? '',
         '=IF(LEN(V'.$i.') > 0,RANK(V'. $i . ',V$5:$V$200),0)',
         $s->midyisBaseline,
-        $s->midyisCohortRank,
+        '=IF(LEN(AB'.$i.') > 0,RANK(AB'.$i.',AB$5:$AB$200),0)',
         '',
         '=IF(LEN(AD'.$i.') > 0,RANK(AD'. $i . ',AD$5:$AD$200),0)',
         '',
