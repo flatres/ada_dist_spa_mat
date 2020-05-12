@@ -253,7 +253,9 @@ class ExamMetricsSpreadsheet
   }
 
   private function WRA($i) {
-    $original = '=ROUND((S5*S$1+U5*U$1+W5*W$1+Y5*Y$1+AA5*AA$1+AC5*AC$1+AE5*AE$1+AG5*AG$1+AI5*AI$1)/COUNTA(R5,T5,V5,X5,Z5,AB5,AD5,AF5,AH5),2)';
+    // $original = '=ROUND((S5*S$1+U5*U$1+W5*W$1+Y5*Y$1+AA5*AA$1+AC5*AC$1+AE5*AE$1+AG5*AG$1+AI5*AI$1)/COUNTA(R5,T5,V5,X5,Z5,AB5,AD5,AF5,AH5),2)';
+    $original = '=ROUND((S5*S$1+U5*U$1+W5*W$1+Y5*Y$1+AA5*AA$1+AC5*AC$1+AE5*AE$1+AG5*AG$1+AI5*AI$1)/COUNTIFS(R5:AI5,">0",$R$1:$AI$1,">0"),2)';
+    ///COUNTIFS(R5:AI5,">0",$R$1:$AI$1,">0")
     return str_replace('5', $i, $original);
   }
 
