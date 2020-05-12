@@ -320,7 +320,7 @@ class ExamMetricsSpreadsheet
     $maxRow = count($this->subject->students)+4;
 
     //filters
-    $sheet->mergeCells('N1:X1');
+    $sheet->mergeCells('N1:Q1');
     // $sheet->mergeCells('Q1:R1');
     $sheet->mergeCells('F2:L2');
     $sheet->mergeCells('Q2:AI2');
