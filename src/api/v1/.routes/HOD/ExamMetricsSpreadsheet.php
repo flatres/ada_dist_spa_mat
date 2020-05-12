@@ -513,9 +513,9 @@ class ExamMetricsSpreadsheet
      $sheet->getColumnDimension('Q')->setAutoSize(true);
 
      //instructions
-     $sheet->getComment('N1')->getText()->createTextRun('The weightings control how important each metric is in deciding the weighted ranking. A metric with twice the weighting will have twice the influence.');
-     $sheet->getComment("A1")->setHeight("300px");
-     $sheet->getComment("A1")->setWidth("200px");
+     $sheet->getComment('N1')->getText()->createTextRun('The weightings control how important each metric is in deciding the weighted ranking. A metric with twice the weighting will have twice the influence. Use whole numbers rather than decimals.');
+     $sheet->getComment("N1")->setHeight("300px");
+     $sheet->getComment("N1")->setWidth("200px");
 
      $sheet->getComment('P3')->getText()->createTextRun('Rank order according the the weighted score. A lower score means a higher rank.');
      $sheet->getComment("P3")->setHeight("300px");
