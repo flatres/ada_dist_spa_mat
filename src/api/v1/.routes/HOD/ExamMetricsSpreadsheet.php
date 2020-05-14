@@ -212,7 +212,7 @@ class ExamMetricsSpreadsheet
         $s->gcseMockPercentage ?? '',
         $s->gcseMockCohortRank ?? '',
         $s->alisTestBaseline ?? '',
-        '=IF(LEN(V'.$i.') > 0,RANK(V'. $i . ',V$5:$V$200),0)',
+        '=IF(LEN(V'.$i.') > 0,RANK(Z'. $i . ',Z$5:$Z$200),0)',
         $s->midyisBaseline,
         '=IF(LEN(AB'.$i.') > 0,RANK(AB'.$i.',AB$5:$AB$200),0)',
         '',
