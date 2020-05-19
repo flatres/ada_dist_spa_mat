@@ -35,8 +35,10 @@ class Prizes
         $prize = array_merge($prize, $prizeData[0]);
 
         $pupil = new \Entities\People\iSamsStudent($this->isams, $pupilID);
+        $adaPupil = (new \Entities\People\Student($this->ada))->byMISId($pupilID);
         $prize['firstName']= $pupil->firstName;
         $prize['lastName'] = $pupil->lastName;
+        $prize['pupilEmail']= $adaPupil->email;
         $prize['gender'] = $pupil->gender;
         $contacts = $pupil->getContacts();
         $i = 1;
