@@ -25,7 +25,7 @@ class Prizes
     {
       $i = 1;
       $data = ['yo'];
-      $prizes = $this->mcCustom->select('TblPrizesPupils', '*', 'dtePrizeAwarded=?', ['2019-05-25']);
+      $prizes = $this->mcCustom->select('TblPrizesPupils', '*', 'dtePrizeAwarded=?', ['2020-05-23']);
       foreach($prizes as &$prize){
         $prize['id'] = $i;
         $i++;
@@ -44,7 +44,7 @@ class Prizes
           $prize["email$i"] = $c['email'];
           $i++;
         }
-      
+
 
       }
       return emit($response, $prizes);
