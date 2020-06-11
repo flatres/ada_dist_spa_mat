@@ -20,6 +20,6 @@ $app->group('/hod', function(){
 
     // meetings
     $this->get('/meetings/{subject}/{year}/{exam}', '\HOD\Meetings:meetingClassesGet');
-    $this->post('/meetings/{subject}/{exam}/{studentId}/{userId}', '\HOD\Meetings:meetingPost');
+    $this->post('/meetings/{subject}/{exam}/{studentId}/{userId}/{classId}', '\HOD\Meetings:meetingPost');
 
 })->add("Authenticate");

@@ -35,8 +35,8 @@ class Meetings
           $student->meetingBeakId = $this->adaModules->select(
             'hod_parent_meeting_appointments',
             'userId',
-            'subjectId=? AND examId=? AND studentId=?',
-            [$subjectId, $examId, $student->id]
+            'subjectId=? AND examId=? AND studentId=? AND classId=?',
+            [$subjectId, $examId, $student->id, $c->id]
             )[0]['userId'] ?? null;
         }
         $data[] = $class;
@@ -51,9 +51,10 @@ class Meetings
       $examId = $args['exam'];
       $studentId = $args['studentId'];
       $userId = $args['userId'];
+      $classId = $args['classId'];
 
-      $this->adaModules->delete('hod_parent_meeting_appointments', 'subjectId=? AND examId=? AND studentId=?', [$subjectId, $examId, $studentId]);
-      $this->adaModules->insert('hod_parent_meeting_appointments', 'subjectId, examId, studentId, userId', [$subjectId, $examId, $studentId, $userId]);
+      $this->adaModules->delete('hod_parent_meeting_appointments', 'subjectId=? AND examId=? AND studentId=? AND classId=?', [$subjectId, $examId, $studentId, $classId]);
+      $this->adaModules->insert('hod_parent_meeting_appointments', 'subjectId, examId, studentId, userId, classId', [$subjectId, $examId, $studentId, $userId, $classId]);
 
       return emit($response, true);
     }
