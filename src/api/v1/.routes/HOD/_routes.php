@@ -6,6 +6,7 @@ use Slim\Http\Response;
 
 $app->group('/hod', function(){
 
+    // metrics
     $this->get('/years/{subject}', '\HOD\Years:yearsGet');
     $this->get('/years/{subject}/exams/{year}', '\HOD\Years:examsGet');
     $this->get('/years/{subject}/examclasses/{year}/{exam}', '\HOD\Years:examClassesGet');
@@ -16,5 +17,9 @@ $app->group('/hod', function(){
     $this->get('/{subject}/metrics/year/{year}/metrics/{exam}', '\HOD\Metrics:yearMetricsGet');
     $this->get('/{subject}/metrics/year/{year}/metrics/{exam}/spreadsheet', '\HOD\Metrics:yearMetricsSpreadSheetGet');
     $this->get('/{subject}/metrics/year/{year}/history/{exam}', '\HOD\Metrics:yearHistoryGet');
+
+    // meetings
+    $this->get('/meetings/{subject}/{year}/{exam}', '\HOD\Meetings:meetingClassesGet');
+    $this->post('/meetings/{subject}/{exam}/{studentId}/{userId}', '\HOD\Meetings:meetingPost');
 
 })->add("Authenticate");

@@ -32,6 +32,14 @@ class Years
           ];
       }
 
+      // $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 12]);
+      // if (isset($d[0])) {
+      //   $years[] =   [
+      //       'id'  => 12,
+      //       'name'  => 'L6'
+      //     ];
+      // }
+
       $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 11]);
       if (isset($d[0])) {
         $years[] =   [
