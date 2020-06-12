@@ -5,7 +5,8 @@
 //   'filename' => //or autogenerate
 //   'path' => eg 'exams/gcse/' default: spreadsheets
 //   'sheetTitle' => default Sheet1
-//   'sheetColor'
+//   'sheetColor',
+     // 'timeStamp'  => default false
 // ]
 
 // $columns = [
@@ -54,6 +55,7 @@ class SingleSheet
     //generate file path and save sheet
 
     $path = $settings['path'] ?? 'spreadsheets/';
+    if ($settings['filename'] && $settings['timestamp']) $settings['filename'] .= ' (' . date('d-m-y@H.i.s',time()) . ')';
     $filename = $settings['filename'] ?? uniqid() . '(' . date('d-m-y@H.i.s',time()) . ')' . '.xlsx';;
 
     $filepath = FILESTORE_PATH . "$path$filename";
@@ -86,12 +88,15 @@ class SingleSheet
 
     $sheetData = [];
     $header = [];
+    $colCount = 0;
     foreach ($columns as $column){
       $isHidden = $column['hidden'] ?? false;
       if ($isHidden) continue;
       $header[] = $column['label'];
+      $colCount++;
     }
     $sheetData[] = $header;
+    // $sheetData[] = []; //black row for the filter buttons
     foreach ($data as $d) {
       $row = [];
       foreach ($columns as $column){
@@ -122,10 +127,15 @@ class SingleSheet
       ]
     ];
     $sheet->getStyle('A1:AZ1')->applyFromArray($styleArray);
+    $alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $maxCol = $alphabet[$colCount - 1];
 
-    foreach (range('A','AZ') as $col) {
+    foreach (range('A',$maxCol) as $col) {
       $sheet->getColumnDimension($col)->setAutoSize(true);
     }
+
+    $maxRow = count($data)+2;
+    $sheet->setAutoFilter('A1:' . $maxCol . $maxRow);
 
   }
 

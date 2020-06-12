@@ -45,6 +45,51 @@ class Meetings
       return emit($response, $data);
     }
 
+    public function meetingClassesDownloadGet($request, $response, $args)
+    {
+      $year = $args['year'];
+      $subjectId = $args['subject'];
+      $examId = $args['exam'];
+      $subject = new \Entities\Academic\Subject($this->ada, $subjectId);
+      $classes = $subject->getClassesByExam($year, $examId);
+      $data = [];
+
+      foreach($classes as $c) {
+        $class = new \Entities\Academic\AdaClass($this->ada, $c->id);
+        foreach($class->students as &$student) {
+          $student->meetingBeakId = $this->adaModules->select(
+            'hod_parent_meeting_appointments',
+            'userId',
+            'subjectId=? AND examId=? AND studentId=? AND classId=?',
+            [$subjectId, $examId, $student->id, $c->id]
+          )[0]['userId'] ?? null;
+          $booking = [
+            'firstName' => $student->firstName,
+            'lastName'  => $student->lastName,
+            'code'      => $c->code,
+            'beak'      => (new \Entities\People\User($this->ada, $student->meetingBeakId))->login ?? ''
+          ];
+          $data[] = $booking;
+        }
+      }
+
+      $settings = [
+        'title' => 'L6 Parents Meeting',
+        'sheetTitle' => 'Appointments',
+        'filename'  => 'L6 Parents Meeting',
+        'timestamp' => true
+      ];
+      $columns = [
+        ['field' => 'firstName', 'label' => 'First Name'],
+        ['field' => 'lastName', 'label' => 'Last Name'],
+        ['field' => 'code', 'label' => 'Class'],
+        ['field' => 'beak', 'label' => 'Beak'],
+      ];
+      $package = (new \Utilities\Spreadsheet\SingleSheet($columns, $data, $settings))->package;
+
+      return emit($response, $package);
+    }
+
     public function meetingPost($request, $response, $args)
     {
       $subjectId = $args['subject'];
