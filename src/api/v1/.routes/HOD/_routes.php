@@ -22,5 +22,7 @@ $app->group('/hod', function(){
     $this->get('/meetings/{subject}/{year}/{exam}', '\HOD\Meetings:meetingClassesGet');
     $this->get('/meetings/download/{subject}/{year}/{exam}', '\HOD\Meetings:meetingClassesDownloadGet');
     $this->post('/meetings/{subject}/{exam}/{studentId}/{userId}/{classId}', '\HOD\Meetings:meetingPost');
+    $this->get('/meetings/all/{year}', '\HOD\Meetings:meetingsAllGet');
+    $this->get('/meetings/schoolscloud/{year}', '\HOD\Meetings:meetingsSchoolsCloudGet');
 
 })->add("Authenticate");

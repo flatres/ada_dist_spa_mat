@@ -15,10 +15,113 @@ class Meetings
     public function __construct(\Slim\Container $container)
     {
        $this->ada = $container->ada;
+       $this->isams = $container->isams;
        $this->adaModules = $container->adaModules;
     }
 
 // ROUTE ----------------------------------------------------------------------------
+
+    public function meetingsAllGet($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'academic.meetings', '');
+      $this->progress->publish(0);
+
+      $year = $args['year'];
+
+      $data = [];
+      $students = $this->ada->select('stu_details', 'id', 'NCYear=?', [$year]);
+      $i = 1;
+      $maxApt = 0;
+      foreach($students as $s) {
+        $this->progress->publish($i / count($students));
+        $i++;
+        // if ($i == 10) break;
+        $id = $s['id'];
+        $student = new \Entities\People\Student($this->ada, $id);
+        $student->contacts = (new \Entities\People\iSamsStudent($this->isams, $student->misId))->getContacts();
+
+        //get meetings
+        $meetings = $this->adaModules->select('hod_parent_meeting_appointments', 'subjectId, userId', 'studentId=?', [$student->id]);
+        if (count($meetings) > $maxApt) $maxApt = count($meetings);
+
+        for ($sc = 1; $sc < 6; $sc++) {
+          $student->{"subject$sc"} = null;
+          $student->{"beak$sc"} = null;
+        }
+
+        $meetingCount = 1;
+        foreach($meetings as $m) {
+          $u = new \Entities\People\User($this->ada, $m['userId']);
+          $m['beakName'] = "{$u->title} {$u->login[1]} {$u->lastName}";
+          $sub = new \Entities\Academic\Subject($this->ada, $m['subjectId']);
+          $m['subject'] = $sub->name;
+          $student->{"subject$meetingCount"} = $sub->name;
+          $student->{"beak$meetingCount"} = $m['beakName'];
+          $meetingCount++;
+        }
+        $student->meetings = $meetings;
+        $data[] = $student;
+      }
+
+      $r = [
+        'maxAppointments' => $maxApt,
+        'appointments'  => $data
+      ];
+
+      return emit($response, $r);
+    }
+
+    public function meetingsSchoolsCloudGet($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'academic.meetings', '');
+      $this->progress->publish(0);
+
+      $year = $args['year'];
+
+      $data = [];
+      $students = $this->ada->select('stu_details', 'id', 'NCYear=?', [$year]);
+      $i = 1;
+      $maxApt = 0;
+      foreach($students as $s) {
+        $this->progress->publish($i / count($students));
+        $i++;
+        // if ($i == 10) break;
+        $id = $s['id'];
+        $student = new \Entities\People\Student($this->ada, $id);
+        $student->contacts = (new \Entities\People\iSamsStudent($this->isams, $student->misId))->getContacts();
+
+        //get meetings
+        $meetings = $this->adaModules->select('hod_parent_meeting_appointments', 'subjectId, userId', 'studentId=?', [$student->id]);
+        if (count($meetings) > $maxApt) $maxApt = count($meetings);
+
+        for ($sc = 1; $sc < 6; $sc++) {
+          $student->{"subject$sc"} = null;
+          $student->{"beak$sc"} = null;
+        }
+
+        $meetingCount = 1;
+        foreach($meetings as $m) {
+          $u = new \Entities\People\User($this->ada, $m['userId']);
+          $m['beakName'] = "{$u->title} {$u->login[1]} {$u->lastName}";
+          $sub = new \Entities\Academic\Subject($this->ada, $m['subjectId']);
+          $m['subject'] = $sub->name;
+          $student->{"subject$meetingCount"} = $sub->name;
+          $student->{"beak$meetingCount"} = $m['beakName'];
+          $meetingCount++;
+        }
+        $student->meetings = $meetings;
+        $data[] = $student;
+      }
+
+      $r = [
+        'maxAppointments' => $maxApt,
+        'appointments'  => $data
+      ];
+
+      return emit($response, $r);
+    }
 
     public function meetingClassesGet($request, $response, $args)
     {

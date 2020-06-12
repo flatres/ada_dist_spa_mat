@@ -55,7 +55,7 @@ class SingleSheet
     //generate file path and save sheet
 
     $path = $settings['path'] ?? 'spreadsheets/';
-    if ($settings['filename'] && $settings['timestamp']) $settings['filename'] .= ' (' . date('d-m-y@H.i.s',time()) . ').xlsx';
+    if (isset($settings['filename']) && isset($settings['timestamp'])) $settings['filename'] .= ' (' . date('d-m-y@H.i.s',time()) . ').xlsx';
     $filename = $settings['filename'] ?? uniqid() . '(' . date('d-m-y@H.i.s',time()) . ')' . '.xlsx';
 
     $filepath = FILESTORE_PATH . "$path$filename";

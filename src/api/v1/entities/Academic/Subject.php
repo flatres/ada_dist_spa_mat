@@ -7,6 +7,7 @@ class Subject
   public $id;
   public $code;
   public $year;
+  public $name;
   public $isForm;
   public $misFormId;
   public $academicLevel;

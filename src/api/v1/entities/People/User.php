@@ -61,6 +61,7 @@ class User
         $s = $s[0];
         $this->id = $id;
         $this->preName = $s['prename'];
+        $this->title = $s['title'];
         $this->login = strtoupper($s['login']);
         $this->firstName = $s['firstname'];
         $this->lastName = $s['lastname'];
