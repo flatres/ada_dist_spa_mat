@@ -89,7 +89,7 @@ class Meetings
         $subject = new \Entities\Academic\Subject($this->ada, $class->subjectId);
         $user = new \Entities\People\User($this->ada, $a['userId']);
         $data[] = [
-          'firstName' => $user->firstName,
+          'firstName' => $user->preName,
           'lastName'  => $user->lastName,
           'subject'   => $subject->name,
           'code'      => $class->code,
