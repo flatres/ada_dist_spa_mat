@@ -69,7 +69,7 @@ class Staff
       {
         //so pre name isn't actually stored for staff here. You only see it in tblStaff
         // try to get prename here
-        $staff['txtPreName'] = $this->isams->select('TblStaff', 'PreName', 'User_Code=?', [$staff['txtUserCode']])[0]['PreName'] ?? $staff['txtFirstName'];
+        $staff['txtPreName'] = $this->isams->select('TblStaff', 'PreName', 'User_Code=?', [$staff['txtUserCode']])[0]['PreName'] ?? $staff['txtFirstname'];
         $misId = $staff['id'];
         if (isset($allStaff["s_$misId"])) //already exists, just needs updating
         {
