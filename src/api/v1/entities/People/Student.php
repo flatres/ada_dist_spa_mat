@@ -15,6 +15,7 @@ class Student
 
     public $id, $firstName, $lastName, $email, $boardingHouse, $gender, $displayName;
     public $misFamilyId;
+    public $dob;
     public $boardingHouseSafe; //has spaces replaced with _ for use in array keys
     public $preName, $fullName, $fullPreName, $name, $NCYear;
     public $misId;
@@ -71,7 +72,7 @@ class Student
     {
       $student = $this->sql->select(
         'stu_details',
-        'id, firstname, lastname, prename, email, boardingHouse, boardingHouseId, gender, mis_id, mis_family_id, NCYear',
+        'id, firstname, lastname, prename, email, boardingHouse, boardingHouseId, gender, mis_id, mis_family_id, NCYear, dob',
         'id=?',
         [$id]);
 
@@ -97,6 +98,8 @@ class Student
         $this->gender = $student['gender'];
         $this->NCYear = $student['NCYear'];
         $this->schoolNumber = explode('@', $this->email)[0] ?? null;
+        $dob = strtotime($student['dob']);
+        $this->dob = date('d/m/Y', $dob);
       } else {
         return null;
       }

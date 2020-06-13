@@ -4,7 +4,8 @@ namespace Entities\Academic;
 
 class AdaClass
 {
-  public $id; //isams set ID
+  public $id;
+  public $misId;
   public $code;
   public $year;
   public $isForm;
@@ -27,7 +28,9 @@ class AdaClass
     $class = $this->sql->select('sch_classes', 'misId, subjectId, code, year, isForm, misFormId, academicLevel', 'id=?', [$id]);
     if (isset($class[0])){
       $class = $class[0];
+      $this->misId = $class['misId'];
       $this->code = $class['code'];
+      $this->subjectId = $class['subjectId'];
       $this->year = $class['year'];
       $this->isForm = $class['isForm'] == 1 ? true : false;
       $this->misFormId = $class['misFormId'];
