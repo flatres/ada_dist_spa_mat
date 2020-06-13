@@ -67,6 +67,9 @@ class Staff
       //staff not appearing in the MIS will keep their disable flag (i.e not longer active)
       foreach($misStaff as $staff)
       {
+        //so pre name isn't actually stored for staff here. You only see it in tblStaff
+        // try to get prename here
+        $staff['txtPreName'] = $this->isams->select('TblStaff', 'PreName', 'User_Code=?', [$staff['txtUserCode']])[0]['PreName'] ?? $staff['txtFirstName'];
         $misId = $staff['id'];
         if (isset($allStaff["s_$misId"])) //already exists, just needs updating
         {
