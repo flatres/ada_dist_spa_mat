@@ -53,7 +53,7 @@ class Meetings
         $meetingCount = 1;
         foreach($meetings as $m) {
           $u = new \Entities\People\User($this->ada, $m['userId']);
-          $m['beakName'] = "{$u->title} {$u->login[1]} {$u->lastName}";
+          $m['beakName'] = "{$u->title} {$u->login[0]} {$u->lastName}";
           $sub = new \Entities\Academic\Subject($this->ada, $m['subjectId']);
           $m['subject'] = $sub->name;
           $student->{"subject$meetingCount"} = $sub->name;
