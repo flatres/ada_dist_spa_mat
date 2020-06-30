@@ -39,6 +39,7 @@ class Prizes
         $prize['firstName']= $pupil->firstName;
         $prize['lastName'] = $pupil->lastName;
         $prize['pupilEmail']= $adaPupil->email;
+        $prize['NCYear'] = $adaPupil->NCYear;
         $prize['gender'] = $pupil->gender;
         $contacts = $pupil->getContacts();
         $i = 1;
