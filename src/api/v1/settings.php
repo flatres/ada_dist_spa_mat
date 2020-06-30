@@ -14,7 +14,7 @@ return [
             'template_path' => __DIR__ . '/../templates/',
         ],
 
-        // Monolog settings
+      //  Monolog settings
         'logger' => [
             'name' => 'ada',
             'path' => __DIR__ . '/logs/app.log',
