@@ -56,7 +56,7 @@ class Cache {
 
 	  public function write(int $sessionId, bool $isGCSE, array $data)
     {
-				return;
+				// return;
 		    // $data = base64_encode(serialize($data));
 				// $data = base64_encode(json_encode($data));
 				$data = json_encode($data);
