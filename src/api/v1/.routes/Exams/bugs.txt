@@ -1,0 +1,25 @@
+H Smith Art history results appearing in Art
+Maths in context results listed under biology AS
+Ben Place Physics (early?) under PE
+English historical ucas avg not showing
+
+PR (Hawthorn) - POL (MAG), GEO (RGDR), pembroke
+MacKillop, C T G [5815]
+Mackenzie, H C A [2038]
+
+Dixon, T E [2529]
+Dixon-Clarke, T J [5315]
+
+BH, DH (MBA, DIA, Wheatland, Owen, JFL)
+
+James, O C [2034]
+James, O P L [5301]
+
+COX, GIM, conlen
+
+
+More than Pru A* eqiv showing too high
+
+Need to count number of total candidates properly. Find the number that are doing PreU only. Useful for checking.
+
+FOr some reason, some with preu have weird gpa. Incorrectly allocating 12 points to D3?
