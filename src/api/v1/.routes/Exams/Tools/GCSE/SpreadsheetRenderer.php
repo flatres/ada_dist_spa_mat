@@ -1343,20 +1343,23 @@ class SpreadsheetRenderer
     );
 
 
-    $d = [];
-    foreach($subjectsOnly as $key => $subject){
-          $d[] = $key;
-    }
+
     $lastRow = count($students) + 2;
     $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($fields));
     $w = $lastRow - 2;
     $sheet->setAutoFilter("A2:$col". $w);
-    $lastRow++;
-    $sheet->fromArray(
-        $d,  // The data to set
-        NULL,        // Array values with this value will not be set
-        'G' . $lastRow        // Top left coordinate of the worksheet range where
-    );
+
+    // code for adding subject codes to the end. Messed up the counting so removed
+    // $d = [];
+    // foreach($subjectsOnly as $key => $subject){
+    //       $d[] = $key;
+    // }
+    // $lastRow++;
+    // $sheet->fromArray(
+    //     $d,  // The data to set
+    //     NULL,        // Array values with this value will not be set
+    //     'G' . $lastRow        // Top left coordinate of the worksheet range where
+    // );
 
     //make totals and averages
     $lastRow = count($students) + 3;
