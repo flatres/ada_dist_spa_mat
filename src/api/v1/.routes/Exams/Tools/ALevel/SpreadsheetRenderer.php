@@ -104,9 +104,6 @@ class SpreadsheetRenderer
 
     // $this->makeHouseSheets();
     //
-
-
-
     //generate file path and save sheet
 
     $fileName = $filename . '_' . $session['month'] . $session['year'] . '_' . date('d-m-y_H-i-s',time()) . '.xlsx';
@@ -498,12 +495,27 @@ class SpreadsheetRenderer
     $countP = 0;
     $countPB = 0;
     $countPG = 0;
+
     $threeOrMoreAstar = 0;
+    $threeOrMoreAstarBoys = 0;
+    $threeOrMoreAstarGirls = 0;
+
     $threeOrMoreAstarEquiv = 0;
+    $threeOrMoreAstarEquivBoys = 0;
+    $threeOrMoreAstarEquivGirls = 0;
+
+    $threeOrMoreD1D2 = 0;
+    $threeOrMoreD1D2Boys = 0;
+    $threeOrMoreD1D2Girls = 0;
+
+    $doesALOnly = 0;
+    $doesPUOnly = 0;
+
     foreach($students as $student){
       if($student->NCYear !== 13) continue;
       $AstarCount = 0;
       $AstarEquivCount = 0;
+      $D1D2Count = 0;
       $isAL = false;
       $isALG = false;
       $isALB = false;
@@ -527,11 +539,27 @@ class SpreadsheetRenderer
           if($result->txtGender==='F') $isPUG = true;
           if($result->grade === 'D1' || $result->grade === 'D2') {
             $AstarEquivCount++;
+            $D1D2Count++;
           }
         }
       }
-      if ($AstarCount > 2) $threeOrMoreAstar++;
-      if ($AstarEquivCount > 2) $threeOrMoreAstarEquiv++;
+      if ($AstarCount > 2) {
+        $threeOrMoreAstar++;
+        if($result->txtGender==='M') $threeOrMoreAstarBoys++;
+        if($result->txtGender==='F') $threeOrMoreAstarGirls++;
+      }
+      if ($AstarEquivCount > 2) {
+          $threeOrMoreAstarEquiv++;
+          if($result->txtGender==='M') $threeOrMoreAstarEquivBoys++;
+          if($result->txtGender==='F') $threeOrMoreAstarEquivGirls++;
+      }
+
+      if ($D1D2Count > 2) {
+          $threeOrMoreD1D2++;
+          if($result->txtGender==='M') $threeOrMoreD1D2Boys++;
+          if($result->txtGender==='F') $threeOrMoreD1D2Girls++;
+      }
+
       if ($isALB) $countAB++;
       if ($isALG) $countAG++;
       if ($isAL) $countA++;
@@ -540,8 +568,13 @@ class SpreadsheetRenderer
       if ($isPU) $countP++;
 
     }
+    if ($isPU && !$isAL) $doesPUOnly++;
+    if (!$isPU && $isAL) $doesALOnly++;
 
     $countAAB = 0;
+    $countAABBoys = 0;
+    $countAABGirls = 0;
+
     $test = [];
     //calculate how many have AAB or better (or equivalent). Take three best results and the qualify if the score is 26 or more
     foreach($students as $student){
@@ -570,6 +603,8 @@ class SpreadsheetRenderer
       $total = $first + $second + $third;
       if ($total > 25) {
         $countAAB++;
+        if($student->txtGender==='M') $countAABBoys++;
+        if($student->txtGender==='F') $countAABGirls++;
       }
     }
 
@@ -578,12 +613,28 @@ class SpreadsheetRenderer
     $data[] = ['# A Level Candidates Boys', $countAB];
     $data[] = ['# A Level Candidates Girls', $countAG];
     $data[] = ['# A Level Candidates', $countA];
+    $data[] = ['# A Level Only Candidates', $doesALOnly];
+    $data[] = [];
     $data[] = ['> 2 A*', $threeOrMoreAstar];
+    $data[] = ['> 2 A* Boys', $threeOrMoreAstarBoys];
+    $data[] = ['> 2 A* Girls', $threeOrMoreAstarGirls];
+    $data[] = [];
     $data[] = ['# Pre U Level Candidates Boys', $countPB];
     $data[] = ['# Pre U  Level Candidates Girls', $countPG];
     $data[] = ['# Pre U Level Candidates', $countP];
+    $data[] = ['# Pre U Level Only Candidates', $doesPUOnly];
+    $data[] = [];
+    $data[] = ['> 2 D1 D2', $threeOrMoreD1D2];
+    $data[] = ['> 2 D1 D2 Boys', $threeOrMoreD1D2Boys];
+    $data[] = ['> 2 D1 D2 Girls', $threeOrMoreD1D2Girls];
+    $data[] = [];
     $data[] = ['>2 A* Equiv (D1, D2)', $threeOrMoreAstarEquiv];
+    $data[] = ['>2 A* Equiv (D1, D2) Boys', $threeOrMoreAstarEquivBoys];
+    $data[] = ['>2 A* Equiv (D1, D2) Girls', $threeOrMoreAstarEquivGirls];
+    $data[] = [];
     $data[] = ['>AAB or Equiv', $countAAB];
+    $data[] = ['>AAB or Equiv Boys', $countAABBoys];
+    $data[] = ['>AAB or Equiv Girls', $countAABGirls];
 
     $sheet->fromArray(
         $data,  // The data to set

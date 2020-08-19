@@ -1,6 +1,5 @@
 
 More than Pru A* eqiv showing too high. Really?
+FOr some reason, some with preu have weird gpa. Incorrectly allocating 12 points to D3?
 
 Need to count number of total candidates properly. Find the number that are doing PreU only. Useful for checking.
-
-FOr some reason, some with preu have weird gpa. Incorrectly allocating 12 points to D3?
