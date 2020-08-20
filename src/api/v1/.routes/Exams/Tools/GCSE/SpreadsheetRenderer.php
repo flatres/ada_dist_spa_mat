@@ -456,9 +456,25 @@ class SpreadsheetRenderer
         $this->statistics->hundredStats->hasGCSECount
       ],
       [
+        '#GCSE Boys',
+        $this->statistics->hundredStats->hasGCSECountBoys
+      ],
+      [
+        '#GCSE Girls',
+        $this->statistics->hundredStats->hasGCSECountGirls
+      ],
+      [
         '#IGCSE',
         $this->statistics->hundredStats->hasIGCSECount
       ],
+      [
+        '#IGCSE Boys',
+        $this->statistics->hundredStats->hasIGCSECountBoys
+      ],
+      [
+        '#IGCSE Girls',
+        $this->statistics->hundredStats->hasIGCSECountGirls
+      ]
     ];
 
     $sheet->fromArray(
