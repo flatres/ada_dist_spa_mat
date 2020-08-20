@@ -45,9 +45,10 @@ class Email {
 				// https://pepipost.com/tutorials/phpmailer-smtp-error-could-not-connect-to-smtp-host/
 				$mail->SMTPOptions = array(
 					'ssl' => array(
-					'verify_peer' => false,
-					'verify_peer_name' => false,
-					'allow_self_signed' => true
+						'verify_peer' => false,
+						'verify_peer_name' => false,
+						'allow_self_signed' => true
+						)
 					);
 					//Server settings
 					// $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
@@ -78,7 +79,8 @@ class Email {
 
 			} catch (Exception $e) {
 					$res = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-					echo $res;
+					echo 'err' . $res;
+					var_dump($e);
 			}
 
     }
