@@ -74,7 +74,7 @@ class Email {
 					$mail->isHTML(true);                                  // Set email format to HTML
 					$mail->Subject = $this->subject;
 					$mail->Body = $htmlbody;
-
+					echo $this->to;
 					$mail->send();
 
 			} catch (Exception $e) {
