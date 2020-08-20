@@ -320,6 +320,8 @@ class TbsExtRoutes
      $id = $args['id'];
      $this->adaModules->delete('tbs_coaches_coaches', 'id=?', [$id]);
      $this->adaModules->delete('tbs_coaches_coach_stops', 'coachId=?', [$id]);
+     //un assign any bookings
+     $this->adaModules->update('tbs_coaches_bookings', 'coachId=?', 'coachId=?', [null, $id]);
      $this->publishByCoach($id);
      return emit($response, $id);
  }
@@ -335,10 +337,12 @@ class TbsExtRoutes
     $sessionId = $args['sessionId'];
     $routes = $this->adaModules->select('tbs_coaches_routes', 'id', 'sessionId=?', [$sessionId]);
     foreach ($routes as $route) {
-      $coaches = $this->adaModules->select('tbs_coaches_coaches', 'id', 'routeId=? AND registerSent = 0', [$route['id']]);
+      $coaches = $this->adaModules->select('tbs_coaches_coaches', 'id, supervisorId', 'routeId=? AND registerSent = 0', [$route['id']]);
       foreach ($coaches as $coach) {
-        $this->sendRegisterEmail($coach['id']);
-        $this->adaModules->update('tbs_coaches_coaches', 'registerSent=?', 'routeId=?', [1, $route['id']]);
+        if ($coach['supervisorId']) {
+          $this->sendRegisterEmail($coach['id']);
+          $this->adaModules->update('tbs_coaches_coaches', 'registerSent=?', 'routeId=?', [1, $route['id']]);
+        }
       }
     }
     return emit($response, $sessionId);

@@ -432,11 +432,12 @@ class TbsExtCoachesBookings
         'stops'           => false,
         'supervisors'     => true,
         'unsupervisedCoaches' => [],
+        'notEmailedCoaches' => [],
         'activeSession'   => false,
         'allocations'        => false,
         'confirmations'   => false,
         'selfService'     => false,
-        'registers'       => false
+        'registers'       => true
 
       ];
       $sql = $this->adaModules;
@@ -501,8 +502,11 @@ class TbsExtCoachesBookings
               $checklist['supervisors'] = false;
               $checklist['registers'] = false;
               $checklist['unsupervisedCoaches'][] = $coach['code'];
-          } else {
-              if(!$coach['registerSent']) $checklist['registers'] = false;
+          }
+
+          if(!$coach['registerSent']) {
+            $checklist['registers'] = false;
+            $checklist['notEmailedCoaches'][] = $coach['code'];
           }
         }
       }
