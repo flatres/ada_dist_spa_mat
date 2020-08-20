@@ -51,7 +51,7 @@ class Email {
 						)
 					);
 					//Server settings
-					// $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
+					$mail->SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
 					$mail->isSMTP();                                            // Send using SMTP
 					$mail->Host = '192.168.2.4';                    // Set the SMTP server to send through
 					$mail->Port = 25;
