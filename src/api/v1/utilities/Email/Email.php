@@ -18,7 +18,7 @@ class Email {
 		private $debug = false;
 		private $userEmail;
 
-		public function __construct($to = null, $subject = null, $from = 'noreply@marlboroughcollege.org', array $cc = [], array $bcc = [])
+		public function __construct($to = null, $subject = null, $from = 'sdf@marlboroughcollege.org', array $cc = [], array $bcc = [])
 		{
 			$this->to = $to;
 			$this->subject = $subject;
