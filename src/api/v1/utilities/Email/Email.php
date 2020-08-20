@@ -48,7 +48,6 @@ class Email {
 					'verify_peer' => false,
 					'verify_peer_name' => false,
 					'allow_self_signed' => true
-					)
 					);
 					//Server settings
 					// $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
@@ -74,7 +73,7 @@ class Email {
 					$mail->isHTML(true);                                  // Set email format to HTML
 					$mail->Subject = $this->subject;
 					$mail->Body = $htmlbody;
-					echo $this->to;
+					echo 'to' . $this->to;
 					$mail->send();
 
 			} catch (Exception $e) {
