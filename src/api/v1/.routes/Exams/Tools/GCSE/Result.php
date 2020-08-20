@@ -114,7 +114,7 @@ class Result
 
     }
 
-    public function processGrade($grade)
+    public function processGrade(string $grade)
     {
       if(!$grade) return;
 

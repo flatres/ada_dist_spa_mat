@@ -15,6 +15,7 @@ class SpreadsheetRenderer
   private $year;
   private $keyL = 'Grade Points: A* = 8.5, A = 7, B = 5.5, C = 4, D = 3, E = 2';
   private $keyN = 'Grade Points: 9 = 9, 8 = 8, 7 = 7, 6 = 6, 5 = 5, 4 = 4, 3 = 3, 2 = 2, 1 = 1';
+  private $actualGPA = [];
 
   public function __construct($filename, $title, $type, array $session, \Sockets\Console $console, \Exams\Tools\GCSE\StatisticsGateway $statistics)
   {
@@ -46,8 +47,8 @@ class SpreadsheetRenderer
       //generate the data sheets
       $this->makeISCSummary();
       $this->makeOverview();
-      $this->makeStudentsSheet('Midyis', $this->statistics->hundredStats, false, true, true);
       $this->makeStudentsSheet('Hundred Stats', $this->statistics->hundredStats, false, true);
+      $this->makeStudentsSheet('Midyis', $this->statistics->hundredStats, false, true, true);
       // $this->makeHouseSheets();
       $this->makeHouseSummary($this->statistics->hundredStats->hasLetterGrades);
       $this->makeCombinedSubjects();
@@ -1220,7 +1221,7 @@ class SpreadsheetRenderer
 
     //make columns
     $subjectColumnIndex = array();
-    $fields = ['Name', 'Gender', 'House', 'Yr', "#", "Grade. Avg"];
+    $fields = $midyis ? ['Name', 'Gender', 'House', 'Yr', "#", "Actual Avg", "Grade. Avg"] : ['Name', 'Gender', 'House', 'Yr', "#", "Grade. Avg"];
     $usedSubjects = [];
     $columnIndex = 3;
 
@@ -1287,7 +1288,8 @@ class SpreadsheetRenderer
               $student->txtHouseCode,
               $student->NCYear,
               $student->resultCount,
-              $student->gradeAverage
+              $student->gradeAverage,
+              ''
             ];
       $count = 0;
       $points = 0;
@@ -1295,15 +1297,19 @@ class SpreadsheetRenderer
 
       foreach($subjects as $key => $subject){
           if(isset($student->{$key})){
-            $count++;
+
             if ($midyis && $student->adaStudentId) {
                 $grade = (new \Entities\Metrics\Midyis($student->adaStudentId))->byExamCode($key)->prediction;
-                $points += (new \Exams\Tools\GCSE\Result())->processGrade($grade);
-                if ($grade) $midyisStudent->setGrade($grade);
+                if ($grade) {
+                  $midyisStudent->setGrade(is_numeric($grade) ? round($grade) : $grade);
+                  $points += (new \Exams\Tools\GCSE\Result())->processGrade(is_numeric($grade) ? round($grade) : $grade);
+                  $count++;
+                }
                 $d[] = $grade;
             } else {
                 $d[] = $isSSS ? $student->subjects[$key]->surplus : $student->{$key};
                 $points += $student->subjects[$key]->points ?? 0;
+                $count++;
             }
 
           } else {
@@ -1311,7 +1317,14 @@ class SpreadsheetRenderer
           }
       }
       $d[4] = $count;
-      $d[5] = $count == 0 ? 0 : round($points / $count, 1);
+      $gpaCol = $midyis ? 6 : 5;
+      $d[$gpaCol] = $count == 0 ? 0 : round($points / $count, 1);
+
+      if ($midyis) {
+        $d[5] = $this->actualGPA['s_' . $student->txtSchoolID] ?? '';
+      } elseif (!$midyis && !$isSSS) {
+        $this->actualGPA['s_' . $student->txtSchoolID] = $count == 0 ? 0 : round($points / $count, 1);
+      }
 
       $g = $midyis ? $midyisStudent->gradeCounts : $student->gradeCounts;
       if ($detailed){
@@ -1382,8 +1395,9 @@ class SpreadsheetRenderer
 
     // $sheet->setCellValueByColumnAndRow(5, $dataRow, "=count(A2:A$lastRow)");
     $sheet->setCellValueByColumnAndRow(6, $dataRow, "=Round(Average(F2:F$lastRow),2)");
+    if ($midyis) $sheet->setCellValueByColumnAndRow(7, $dataRow, "=Round(Average(G2:G$lastRow),2)");
 
-    $subjectCount = 7; //first column containing a subject
+    $subjectCount = $midyis ? 8 : 7; //first column containing a subject
     foreach($subjects as $subject){
         $col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($subjectCount);
         if ($isSSS) {
@@ -1421,7 +1435,11 @@ class SpreadsheetRenderer
     $sheet->getStyle('B1:ZZ1')->applyFromArray($styleArray);
     $count = count($data) + 1;
 
-    $sheet->freezePane('G3');
+    if ($midyis) {
+      $sheet->freezePane('H3');
+    } else {
+      $sheet->freezePane('G3');
+    }
 
     // $sheet->freezePane('G' . $count);
 
