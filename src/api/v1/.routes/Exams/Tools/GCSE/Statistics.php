@@ -48,8 +48,8 @@ class Statistics
     public $gradeCounts = [];
     public $gradeCountsGCSE = [];
     public $gradeCountsIGCSE = [];
-    public $hasGCSECount = 0;
-    public $hasIGCSECount = 0;
+    public $hasGCSECount = 0, $hasGCSECountBoys = 0, $hasGCSECountGirls = 0;
+    public $hasIGCSECount = 0, $hasIGCSECountBoys = 0, $hasIGCSECountGirls = 0;
 
     private $error = false;
 
@@ -283,8 +283,16 @@ class Statistics
       $this->gradeCountsIGCSE = $gradeCountsIGCSE;
 
       foreach($this->allStudents as $student){
-        if ($student->hasGCSE) $this->hasGCSECount++;
-        if ($student->hasIGCSE) $this->hasIGCSECount++;
+        if ($student->hasGCSE) {
+          $this->hasGCSECount++;
+          if ($student->txtGender == 'M') $this->hasGCSECountBoys++;
+          if ($student->txtGender == 'F') $this->hasGCSECountGirls++;
+        }
+        if ($student->hasIGCSE) {
+          $this->hasIGCSECount++;
+          if ($student->txtGender == 'M') $this->hasIGCSECountBoys++;
+          if ($student->txtGender == 'F') $this->hasIGCSECountGirls++;
+        }
       }
 
       // $sD = [];
