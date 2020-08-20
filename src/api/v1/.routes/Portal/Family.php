@@ -24,12 +24,12 @@ class Family
     public function studentsGet($request, $response, $args)
     {
       $familyId = $args['id'];
-      $d = $this->ada->select('stu_details', 'id', 'mis_family_id=? ORDER BY prename', [$familyId]);
+      $d = $this->ada->select('stu_details', 'id', 'mis_family_id=? disabled = 0 ORDER BY prename', [$familyId]);
       $students = [];
       foreach($d as $s){
         $students[] = new \Entities\People\Student($this->ada, $s['id']);
       }
-      
+
       return emit($response, $students);
     }
 

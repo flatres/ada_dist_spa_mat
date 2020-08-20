@@ -79,6 +79,7 @@ class Email {
 
 			} catch (Exception $e) {
 					$res = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+					echo $res;
 			}
 
     }
