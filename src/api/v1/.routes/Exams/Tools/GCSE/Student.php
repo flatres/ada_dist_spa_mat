@@ -68,8 +68,10 @@ class Student
     public $hasIGCSE = false;
     public $adaStudentId = null;
 
-    public function __construct(array $result)
+    public function __construct(array $result = null)
     {
+      if (!$result) return;
+
       $this->txtSchoolID = $result['txtSchoolID'];
       $this->txtGender = $result['txtGender'];
       $this->txtInitialedName = $result['txtInitialedName'];
@@ -83,6 +85,15 @@ class Student
 
       $adaStudent = (new \Entities\People\Student())->byMISId($this->txtSchoolID);
       if ($adaStudent) $this->adaStudentId = $adaStudent->id;
+
+    }
+
+    //used in the spreadsheet generator for keeping track of midyis grades
+    public function setGrade(string $grade) {
+      $grade = is_numeric($grade) ? "#" . $grade : strtoupper($grade);
+
+      if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
+      $this->gradeCounts[$grade]++;
 
     }
 
@@ -104,20 +115,15 @@ class Student
       $this->points += $result->points;
       $this->resultCount++;
 
-      $grade = is_numeric($result->grade) ? "#" . $result->grade : strtoupper($result->grade);
+      $this->setGrade($result->grade);
 
-      if( is_numeric($result->grade) ){
+      if(is_numeric($result->grade) ){
         $this->numericPoints += $result->points;
         $this->numericResultCount++;
-
       } else{
         $this->letterPoints += $result->points;
         $this->letterResultCount++;
       }
-
-
-      if(!isset($this->gradeCounts[$grade])) $this->gradeCounts[$grade] = 0;
-      $this->gradeCounts[$grade]++;
 
       //write result to a tag if a current student
       $tag = new \Entities\Tags\Tag();

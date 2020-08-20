@@ -40,5 +40,12 @@ class Midyis
     return $this;
   }
 
+  public function byExamCode($examCode) {
+    $sql = new \Dependency\Databases\Ada();
+    $examId = $sql->select('sch_subjects_exams', 'id', 'examCode=?', [$examCode])[0]['id'] ?? null;
+    if ($examId) $this->byExamId($examId);
+    return $this;
+  }
+
 
 }

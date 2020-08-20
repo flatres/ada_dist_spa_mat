@@ -46,6 +46,7 @@ class SpreadsheetRenderer
       //generate the data sheets
       $this->makeISCSummary();
       $this->makeOverview();
+      $this->makeStudentsSheet('Midyis', $this->statistics->hundredStats, false, true, true);
       $this->makeStudentsSheet('Hundred Stats', $this->statistics->hundredStats, false, true);
       // $this->makeHouseSheets();
       $this->makeHouseSummary($this->statistics->hundredStats->hasLetterGrades);
@@ -97,6 +98,7 @@ class SpreadsheetRenderer
 
     return $this;
   }
+
 
   private function makeSummary()
   {
@@ -1185,8 +1187,11 @@ class SpreadsheetRenderer
     }
   }
 
+  private function findMidyis($subjectCode, $isamsPupil) {
 
-  private function makeStudentsSheet(string $title, $yearStats, $isSSS = false, $detailed = false)
+  }
+
+  private function makeStudentsSheet(string $title, $yearStats, $isSSS = false, $detailed = false, $midyis = false)
   {
     if(!$yearStats) return;
 
@@ -1286,11 +1291,21 @@ class SpreadsheetRenderer
             ];
       $count = 0;
       $points = 0;
+      $midyisStudent = new \Exams\Tools\GCSE\Student();
+
       foreach($subjects as $key => $subject){
           if(isset($student->{$key})){
             $count++;
-            $points += $student->subjects[$key]->points ?? 0;
-            $d[] = $isSSS ? $student->subjects[$key]->surplus : $student->{$key};
+            if ($midyis && $student->adaStudentId) {
+                $grade = (new \Entities\Metrics\Midyis($student->adaStudentId))->byExamCode($key)->prediction;
+                $points += (new \Exams\Tools\GCSE\Result())->processGrade($grade);
+                if ($grade) $midyisStudent->setGrade($grade);
+                $d[] = $grade;
+            } else {
+                $d[] = $isSSS ? $student->subjects[$key]->surplus : $student->{$key};
+                $points += $student->subjects[$key]->points ?? 0;
+            }
+
           } else {
             $d[] = null;
           }
@@ -1298,7 +1313,7 @@ class SpreadsheetRenderer
       $d[4] = $count;
       $d[5] = $count == 0 ? 0 : round($points / $count, 1);
 
-      $g = $student->gradeCounts;
+      $g = $midyis ? $midyisStudent->gradeCounts : $student->gradeCounts;
       if ($detailed){
         $d = array_merge($d, [
             $g['#1'],
@@ -1405,6 +1420,9 @@ class SpreadsheetRenderer
     ];
     $sheet->getStyle('B1:ZZ1')->applyFromArray($styleArray);
     $count = count($data) + 1;
+
+    $sheet->freezePane('G3');
+
     // $sheet->freezePane('G' . $count);
 
     //set filters
