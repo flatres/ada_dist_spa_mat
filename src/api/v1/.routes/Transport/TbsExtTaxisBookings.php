@@ -828,7 +828,7 @@ class TbsExtTaxisBookings
     {
       $to = $this->debug === true ? $this->email : $to;
       $to = 'flatres@gmail.com';
-      $email = new \Utilities\Email\Email($email, $subject);
+      $email = new \Utilities\Email\Email($to, $subject);
       $content = $email->template($template, $fields);
       $res = $email->send($content);
     }
