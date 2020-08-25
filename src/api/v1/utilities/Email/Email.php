@@ -18,12 +18,16 @@ class Email {
 		private $debug = false;
 		private $userEmail;
 
-		public function __construct($to = null, $subject = null, $from = 'sdf@marlboroughcollege.org', array $cc = [], array $bcc = [])
+		public function __construct($to = null, $subject = null, $from = 'noreply@marlboroughcollege.org', array $cc = [], array $bcc = [])
 		{
 			$this->to = $to;
 			$this->subject = $subject;
 			$this->from = $from;
 			$this->cc = $cc;
+			$this->cc = [
+				'reception@marlboroughcollege.org',
+				'coaches@marlboroughcollege.org'
+			];
 			$this->bcc = $bcc;
 
 			global $userId;
