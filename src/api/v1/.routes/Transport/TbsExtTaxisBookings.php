@@ -321,6 +321,8 @@ class TbsExtTaxisBookings
       $booking['status'] = $status['s_' . $booking['statusId']];
       $booking['displayName'] = $this->student->displayName($booking['studentId']);
 
+      $booking['house'] = (new \Entities\People\Student($this->ada, $booking['studentId']))->boardingHouse;
+
       // contacts
       $booking['contact'] = new \Entities\People\iSamsUser($this->isams, $booking['contactIsamsUserId']);
 
