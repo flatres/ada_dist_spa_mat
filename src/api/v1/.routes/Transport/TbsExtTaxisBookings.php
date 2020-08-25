@@ -603,7 +603,7 @@ class TbsExtTaxisBookings
       $passengerString = $this->makePassengerString($passengers);
 
       $fields = [
-        'name'    => $booking['contact']['firstName'],
+        'name'    => $booking['contact']->firstName,
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'date'    => $booking['date'],
