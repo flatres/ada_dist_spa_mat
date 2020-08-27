@@ -2,10 +2,10 @@
 
 namespace Dependency\Databases;
 
-define('ISAMS_TEST_IP', $_ENV["ISAMS_TEST_IP"]);
-define('ISAMS_TEST_DB', $_ENV["ISAMS_TEST_DB"]);
-define('ISAMS_TEST_USER', $_ENV["ISAMS_TEST_USER"]);
-define('ISAMS_TEST_PWD', $_ENV["ISAMS_TEST_PWD"]);
+define('ISAMS_TEST_IP', $_SERVER["ISAMS_TEST_IP"]);
+define('ISAMS_TEST_DB', $_SERVER["ISAMS_TEST_DB"]);
+define('ISAMS_TEST_USER', $_SERVER["ISAMS_TEST_USER"]);
+define('ISAMS_TEST_PWD', $_SERVER["ISAMS_TEST_PWD"]);
 
 class ISams_Test extends \Dependency\MSSql
 {

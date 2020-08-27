@@ -1,10 +1,10 @@
 <?php
 namespace Dependency\Databases;
 
-define('MCCUSTOM_IP', $_ENV["MCCUSTOM_IP"]);
-define('MCCUSTOM_DB', $_ENV["MCCUSTOM_DB"]);
-define('MCCUSTOM_USER', $_ENV["MCCUSTOM_USER"]);
-define('MCCUSTOM_PWD', $_ENV["MCCUSTOM_PWD"]);
+define('MCCUSTOM_IP', $_SERVER["MCCUSTOM_IP"]);
+define('MCCUSTOM_DB', $_SERVER["MCCUSTOM_DB"]);
+define('MCCUSTOM_USER', $_SERVER["MCCUSTOM_USER"]);
+define('MCCUSTOM_PWD', $_SERVER["MCCUSTOM_PWD"]);
 
 class MCCustom extends \Dependency\MSSql
 {

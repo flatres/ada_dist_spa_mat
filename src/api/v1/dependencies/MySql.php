@@ -5,12 +5,12 @@ $url = 'https://www.mybrix.world/';
 
 // var_dump($_ENV);
 
-define('DB_USERNAME', $_ENV["ADA_USER"]);
-define('DB_PASSWORD', $_ENV["ADA_PWD"]);
-define('DB_HOST', $_ENV["ADA_IP"]);
-define('DB_NAME', $_ENV["ADA_DB"]);
-define('DB_SALT', $_ENV["ADA_SALT"]);
-define('DB_SALT_ID', $_ENV["ADA_SALT_ID"]);
+define('DB_USERNAME', $_SERVER["ADA_USER"]);
+define('DB_PASSWORD', $_SERVER["ADA_PWD"]);
+define('DB_HOST', $_SERVER["ADA_IP"]);
+define('DB_NAME', $_SERVER["ADA_DB"]);
+define('DB_SALT', $_SERVER["ADA_SALT"]);
+define('DB_SALT_ID', $_SERVER["ADA_SALT_ID"]);
 
 $DBCounter = 0;
 $globalDB;

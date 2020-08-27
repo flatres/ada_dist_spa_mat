@@ -2,10 +2,10 @@
 namespace Dependency;
 use \PDO;
 
-define('EXGARDE_IP', $_ENV["EXGARDE_IP"]);
-define('EXGARDE_DB', $_ENV["EXGARDE_DB"]);
-define('EXGARDE_USER', $_ENV["EXGARDE_USER"]);
-define('EXGARDE_PWD', $_ENV["EXGARDE_PWD"]);
+define('EXGARDE_IP', $_SERVER["EXGARDE_IP"]);
+define('EXGARDE_DB', $_SERVER["EXGARDE_DB"]);
+define('EXGARDE_USER', $_SERVER["EXGARDE_USER"]);
+define('EXGARDE_PWD', $_SERVER["EXGARDE_PWD"]);
 
 class Exgarde {
 

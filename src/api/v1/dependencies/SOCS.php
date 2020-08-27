@@ -1,8 +1,8 @@
 <?php
 namespace Dependency;
 
-define('SOCS_KEY', getenv("SOCS_KEY"));
-define('SOCS_ID', getenv("SOCS_ID"));
+define('SOCS_KEY', $_SERVER["SOCS_KEY"]);
+define('SOCS_ID', $_SERVER["SOCS_ID"]);
 
 use \PDO;
 // "https://www.schoolssports.com/school/xml/mso-sport.ashx?ID=178&key=CD3A8825-7D17-4B89-B7F1-4575CD3AEE17&data=fixtures" //ste

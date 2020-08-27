@@ -1,10 +1,10 @@
 <?php
 namespace Dependency\Databases;
 
-define('MCCUSTOM_TEST_IP', $_ENV["MCCUSTOM_TEST_IP"]);
-define('MCCUSTOM_TEST_DB', $_ENV["MCCUSTOM_TEST_DB"]);
-define('MCCUSTOM_TEST_USER', $_ENV["MCCUSTOM_TEST_USER"]);
-define('MCCUSTOM_TEST_PWD', $_ENV["MCCUSTOM_TEST_PWD"]);
+define('MCCUSTOM_TEST_IP', $_SERVER["MCCUSTOM_TEST_IP"]);
+define('MCCUSTOM_TEST_DB', $_SERVER["MCCUSTOM_TEST_DB"]);
+define('MCCUSTOM_TEST_USER', $_SERVER["MCCUSTOM_TEST_USER"]);
+define('MCCUSTOM_TEST_PWD', $_SERVER["MCCUSTOM_TEST_PWD"]);
 
 class MCCustomTest extends \Dependency\MSSql
 {

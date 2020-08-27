@@ -1,10 +1,10 @@
 <?php
 namespace Dependency\Databases;
 
-define('ISAMS_IP', $_ENV["ISAMS_IP"]);
-define('ISAMS_DB', $_ENV["ISAMS_DB"]);
-define('ISAMS_USER', $_ENV["ISAMS_USER"]);
-define('ISAMS_PWD', $_ENV["ISAMS_PWD"]);
+define('ISAMS_IP', $_SERVER["ISAMS_IP"]);
+define('ISAMS_DB', $_SERVER["ISAMS_DB"]);
+define('ISAMS_USER', $_SERVER["ISAMS_USER"]);
+define('ISAMS_PWD', $_SERVER["ISAMS_PWD"]);
 
 class ISams extends \Dependency\MSSql
 {
