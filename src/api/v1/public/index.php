@@ -9,6 +9,8 @@ use \Psr\Http\Message\ResponseInterface as Response;
 const FILESTORE_PATH = __DIR__ . '/filestore/';
 const FILESTORE_URL = 'filestore/';
 
+
+
 if($showErrors){
   ini_set('display_errors', 1);
   ini_set('display_startup_errors', 1);
@@ -27,6 +29,13 @@ require __DIR__ . '/../../vendor/autoload.php';
 
 session_start();
 
+// load environmental variables
+$dotenv = \Dotenv\Dotenv::createImmutable(dirname(__FILE__). '/../');
+$dotenv->load();
+
+// echo dirname(__FILE__);
+// var_dump($_ENV);
+
 // Instantiate the app
 $settings = require __DIR__ . '/../settings.php';
 $app = new \Slim\App($settings);
@@ -36,6 +45,7 @@ require __DIR__ . '/../dependencies.php';
 
 // Register middleware
 require __DIR__ . '/../middleware.php';
+
 
 //load helpers
 foreach (glob(dirname(__FILE__). '/../helpers/*.php') as $filename)

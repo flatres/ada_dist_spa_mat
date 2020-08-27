@@ -6,6 +6,14 @@ use Slim\Http\Response;
 
 $app->group('/admin', function(){
 
+// JOBS
+    $this->get('/jobs/status/{unix}', '\Admin\Jobs\Job:statusGet');
+    $this->get('/jobs/scripts', '\Admin\Jobs\Job:scriptsGet');
+    $this->post('/jobs/job', '\Admin\Jobs\Job:jobPost');
+    $this->put('/jobs/job', '\Admin\Jobs\Job:jobPut');
+    $this->delete('/jobs/job/{id}', '\Admin\Jobs\Job:jobDelete');
+    $this->get('/jobs', '\Admin\Jobs\Job:jobsGet');
+
 // TAGS
     $this->get('/tags', '\Admin\Tags\Tags:globalTags_Get');
     $this->get('/tags/tree/students/{id}', '\Admin\Tags\Tags:studentsTree_Get');

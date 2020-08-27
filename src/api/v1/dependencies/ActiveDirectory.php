@@ -8,7 +8,7 @@
  */
 namespace Dependency;
 
-define('LDAP_IP', getenv("LDAP_IP"));
+define('LDAP_IP', $_ENV["LDAP_IP"]);
 
 class ActiveDirectory
 {

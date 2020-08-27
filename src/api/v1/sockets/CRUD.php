@@ -46,7 +46,8 @@ class CRUD
        // http://socketo.me/docs/push
        try{
          $socket = $context->getSocket(\ZMQ::SOCKET_PUSH);
-         $socket->connect(ZMQ_SERVER);
+         // $socket->connect(ZMQ_SERVER);
+         $socket->connect("tcp://127.0.0.1:5555");
 
        }catch(\ZMQSocketException $e){
 

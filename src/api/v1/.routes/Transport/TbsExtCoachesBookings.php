@@ -513,7 +513,7 @@ class TbsExtCoachesBookings
 
       if ($atLeastOneCoach == false) {
         $checklist['supervisors'] = false;
-        $checklist['registers'] = false;
+        $checklist['registers'] = false; 
       }
 
       $bookingsCount = count($sql->select('tbs_coaches_bookings', 'id', 'sessionId=? AND statusId < 4', [$id]));

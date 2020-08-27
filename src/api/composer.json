@@ -16,7 +16,8 @@
         "guzzlehttp/guzzle": "~6.0",
         "phpmailer/phpmailer": "^6.1",
         "monolog/monolog": "^2.1",
-        "lavary/crunz": "^2.2"
+        "lavary/crunz": "^2.2",
+        "vlucas/phpdotenv": "^5.1"
     },
 
     "autoload":{
