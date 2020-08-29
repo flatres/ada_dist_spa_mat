@@ -10,5 +10,11 @@ $app->group('/aux', function(){
     $this->put('/bookings/coach/register', '\Aux\Bookings:registerPut');
     $this->get('/period/{date}/{time}', '\Admin\School\Calendar:periodGet');
 
+    $this->get('/covid/staff/{hash}', '\Aux\Covid:staffDetailsGet');
+    $this->get('/covid/student/{hash}', '\Aux\Covid:studentDetailsGet');
+
+    $this->post('/covid/student', '\Aux\Covid:studentResponsePost');
+    $this->post('/covid/staff', '\Aux\Covid:staffResponsePost');
+
 });
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);
