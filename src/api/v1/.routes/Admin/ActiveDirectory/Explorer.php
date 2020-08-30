@@ -8,6 +8,8 @@
  */
 namespace Admin\ActiveDirectory;
 
+define('LDAP_IP', $_SERVER["LDAP_IP"]);
+
 class Explorer
 {
     protected $container;
@@ -27,8 +29,8 @@ class Explorer
 
     private function connect()
     {
-      $adServer = "ldaps://192.168.2.5";
-      $ldap = ldap_connect($adServer);
+      $adServer = LDAP_IP;
+      $ldap = \ldap_connect($adServer);
       $this->ldap = $ldap;
 
       $username = 'sdf';
