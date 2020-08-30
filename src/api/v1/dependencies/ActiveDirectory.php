@@ -8,8 +8,6 @@
  */
 namespace Dependency;
 
-define('LDAP_IP', $_SERVER["LDAP_IP"]);
-
 class ActiveDirectory
 {
     public function __construct()

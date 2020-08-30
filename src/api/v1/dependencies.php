@@ -2,6 +2,7 @@
 // DIC configuration
 
 define('ZMQ_SERVER', $_SERVER["ZMQ_SERVER"]);
+define('LDAP_IP', $_SERVER["LDAP_IP"]);
 
 $container = $app->getContainer();
 
