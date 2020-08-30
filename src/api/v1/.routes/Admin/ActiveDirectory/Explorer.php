@@ -8,8 +8,6 @@
  */
 namespace Admin\ActiveDirectory;
 
-define('LDAP_IP', $_SERVER["LDAP_IP"]);
-
 class Explorer
 {
     protected $container;
