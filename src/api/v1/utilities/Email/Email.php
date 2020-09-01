@@ -24,10 +24,10 @@ class Email {
 			$this->subject = $subject;
 			$this->from = $from;
 			$this->cc = $cc;
-			$this->cc = [
-				'reception@marlboroughcollege.org',
-				'coaches@marlboroughcollege.org'
-			];
+			// $this->cc = [
+			// 	'reception@marlboroughcollege.org',
+			// 	'coaches@marlboroughcollege.org'
+			// ];
 			$this->bcc = $bcc;
 
 			global $userId;
@@ -78,7 +78,6 @@ class Email {
 					$mail->isHTML(true);                                  // Set email format to HTML
 					$mail->Subject = $this->subject;
 					$mail->Body = $htmlbody;
-					echo 'to' . $this->to;
 					$mail->send();
 
 			} catch (Exception $e) {
