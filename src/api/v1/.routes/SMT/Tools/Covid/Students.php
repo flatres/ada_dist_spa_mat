@@ -49,7 +49,7 @@ class Students
       $today = date("Y-m-d", time());
       $pendingStudents = [];
       foreach($this->students as $s) {
-        $exists = $this->adaModules->select('covid_answers_students', 'id', 'user_id=? AND date=?', [$s->id, $today])[0] ?? null;
+        $exists = $this->adaModules->select('covid_answers_students', 'id', 'student_id=? AND date=?', [$s->id, $today])[0] ?? null;
         // echo 'y';
         if (!$exists) {
           $hash = bin2hex(random_bytes(32));
