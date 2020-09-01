@@ -11,6 +11,8 @@ $app->group('/smt', function(){
     $this->get('/watch/privs/{date}', '\SMT\Privs:privsGet');
 
     $this->get('/covid/students', '\SMT\Covid:studentsGet');
+    $this->get('/covid/house/{id}', '\SMT\Covid:houseStudentsGet');
+
     $this->get('/covid/staff', '\SMT\Covid:staffGet');
     $this->put('/covid/control/switch', '\SMT\Covid:controlSwitchPut');
     $this->post('/covid/students', '\SMT\Covid:studentEmailsPost');

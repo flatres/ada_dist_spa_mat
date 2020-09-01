@@ -30,6 +30,13 @@ class Covid
       return emit($response, $staff);
     }
 
+    public function houseStudentsGet($request, $response, $args)
+    {
+      $id = $args['id'];
+      $students = (new \SMT\Tools\Covid\Students())->getHouse($id);
+      return emit($response, $students);
+    }
+
     public function studentEmailsPost($request, $response, $args)
     {
       $staff = (new \SMT\Tools\Covid\Students())->sendTodayEmails();

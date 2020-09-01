@@ -37,6 +37,7 @@ class Staff
     }
 
     public function sendTodayEmails() {
+
       $this->getAll();
       $today = date("Y-m-d", time());
       $pendingStaff = [];
@@ -50,8 +51,7 @@ class Staff
         }
       }
       foreach($pendingStaff as $s) {
-        echo 'x';
-        // $email = new \Utilities\Email\Emails\Covid\CovidStaff($s->email, $s->prename, $hash);
+        $email = new \Utilities\Email\Emails\Covid\CovidStaff($s->email, $s->prename, $hash);
         $this->adaModules->insert('covid_answers_staff', 'user_id, hash, date', [$s->id, $hash, $today]);
         break;
       }
