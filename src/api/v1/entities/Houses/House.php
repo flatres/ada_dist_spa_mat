@@ -30,7 +30,7 @@ class House
     }
 
     public function getStudents() {
-      $ids = $this->sql->select('stu_details', 'id', 'boardingHouseId=? ORDER BY lastname ASC', [$this->id]);
+      $ids = $this->sql->select('stu_details', 'id', 'boardingHouseId=? and disabled=? ORDER BY lastname ASC', [$this->id, 0]);
       $this->students = [];
       foreach($ids as $id){
         $this->students[] = new \Entities\People\Student($this->sql, $id['id']);
