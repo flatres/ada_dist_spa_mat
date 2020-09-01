@@ -11,7 +11,7 @@ class CovidStaff {
 
       $url = "http://".$_SERVER['SERVER_NAME']."/aux/c19staff?h=" . $hash;
 
-      $content = $email->template('covid_staff', array("name"=>$name, "action_url" => $url));
+      $content = $email->template('covid.staff', array("name"=>$name, "action_url" => $url));
 
       $email->send("MC Covid-19 Check In", $content);
 
