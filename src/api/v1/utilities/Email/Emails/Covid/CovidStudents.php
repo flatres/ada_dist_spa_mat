@@ -9,7 +9,7 @@ class CovidStaff {
       $to = 'flatres@gmail.com';
       $email = new \Utilities\Email\Email($to, "MC Covid-19 Check In");
 
-      $url = "http://".$_SERVER['SERVER_NAME']."/aux/c19students?h=" . $hash;
+      $url = "http://".$_SERVER['SERVER_NAME']."/aux/covid/students?h=" . $hash;
 
       $content = $email->template('covid.students', array("name"=>$name, "action_url" => $url));
 
