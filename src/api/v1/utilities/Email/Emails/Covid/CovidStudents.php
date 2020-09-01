@@ -13,7 +13,7 @@ class CovidStaff {
 
       $content = $email->template('covid.students', array("name"=>$name, "action_url" => $url));
 
-      $email->send("MC Covid-19 Check In", $content);
+      $email->send($content);
 
 		}
 
