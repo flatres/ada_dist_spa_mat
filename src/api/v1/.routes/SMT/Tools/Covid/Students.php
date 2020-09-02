@@ -94,7 +94,7 @@ class Students
             $alertNames[] = $s->displayName;
           }
         }
-        $email = new \Utilities\Email\Emails\Covid\CovidHMS("HM" . $h['code'], $hod->firstName, $alertNames, $notAnsweredNames);
+        $email = new \Utilities\Email\Emails\Covid\CovidHMS("HM" . $h['code'], 'HM', $alertNames, $notAnsweredNames);
         $emails[] = [
           'hod' => 'HM',
           'subs' => $subs,
