@@ -38,7 +38,7 @@ class CovidHODS {
 
       $content = $email->template('covid.hods', array("name"=>$name, "notAnswered" => $notAnsweredHTML));
 
-      // $email->send($content);
+      $email->send($content);
 			return [
 				'alert' => $alertNames,
 				'notAnswered' => $notAnsweredNames,
