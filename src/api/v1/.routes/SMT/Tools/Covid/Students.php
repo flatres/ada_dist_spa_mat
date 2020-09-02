@@ -63,10 +63,49 @@ class Students
       foreach($pendingStudents as $s) {
         $email = new \Utilities\Email\Emails\Covid\CovidStudents($s->email, $s->prename, $s->hash);
         $this->adaModules->insert('covid_answers_students', 'student_id, hash, date', [$s->id, $s->hash, $today]);
-        break;
       }
       return true;
     }
+
+    public function sendHMEmails() {
+
+      $status = $this->getStatus();
+      if ($status == 0) return false;
+      $today = date("Y-m-d", time());
+      $emails = [];
+      $hms = $this->ada->select('sch_houses', 'id, code', 'id>?', [0]);
+      foreach($hms as $h) {
+        $subs = $this->adaModules->select('covid_hod_subscriptions', 'user_id', 'hod_user_id=?', [$h['id']]);
+        $house = new \Entities\Houses\House($this->ada, $h['id']);
+        $house->getStudents();
+
+        $alertNames = [];
+        $notAnsweredNames = [];
+        $notInWorkNames = [];
+
+        foreach($house->students as $s) {
+          $answer = $this->adaModules->select('covid_answers_students', '*', 'student_id = ? AND date=?', [$s->id, $today])[0] ?? null;
+          if (!$answer) continue;
+          if ($answer['hasAnswered'] == 0) {
+            $notAnsweredNames[] = $s->displayName;
+            continue;
+          }
+          if ($answer['isHealthy'] == 0) {
+            $alertNames[] = $s->displayName;
+          }
+        }
+        $email = new \Utilities\Email\Emails\Covid\CovidHMS("HM" . $h['code'], $hod->firstName, $alertNames, $notAnsweredNames);
+        $emails[] = [
+          'hod' => 'HM',
+          'subs' => $subs,
+  				'alert' => $alertNames,
+  				'notAnswered' => $notAnsweredNames
+  			];
+      }
+
+      return $emails;
+    }
+
 
     public function changeStatus($isActive)
     {
