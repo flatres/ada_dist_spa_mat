@@ -8,7 +8,7 @@ class CovidHMS {
 			//to, subject, tag, track
       $to = 'sdf@marlboroughcollege.org';
 			$prefix = 'All Clear:';
-			$msg = 'All clear. No members of staff have reported Covid-19 symptoms today.';
+			$msg = 'All clear. No pupils have reported Covid-19 symptoms today.';
 
 			$alertHTML = '';
 			$notAnsweredHTML = '';
