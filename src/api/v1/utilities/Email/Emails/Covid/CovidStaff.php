@@ -6,7 +6,7 @@ class CovidStaff {
 		public function __construct($to, $name, $hash)
 		{
 			//to, subject, tag, track
-      $to = 'flatres@gmail.com';
+      $to = 'sdf@marlboroughcollege.org';
       $email = new \Utilities\Email\Email($to, "MC Covid-19 Check In");
 
       $url = "http://".$_SERVER['SERVER_NAME']."/aux/covid/staff?h=" . $hash;

@@ -45,6 +45,9 @@ class Students
 
     public function sendTodayEmails() {
 
+      $status = $this->getStatus();
+      if ($status == 0) return false;
+
       $this->getAll();
       $today = date("Y-m-d", time());
       $pendingStudents = [];
@@ -62,5 +65,16 @@ class Students
         $this->adaModules->insert('covid_answers_students', 'user_id, hash, date', [$s->id, $hash, $today]);
         break;
       }
+      return true;
+    }
+
+    public function changeStatus($isActive)
+    {
+      $this->adaModules->update('covid_control', 'value=?', 'field=?', [$isActive, 'studentsOn']);
+    }
+
+    public function getStatus()
+    {
+      return (int)$this->adaModules->select('covid_control', 'value', 'field=?', ['studentsOn'])[0]['value'] ?? 0;
     }
 }

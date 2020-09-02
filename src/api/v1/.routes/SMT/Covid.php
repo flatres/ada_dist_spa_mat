@@ -39,21 +39,57 @@ class Covid
 
     public function studentEmailsPost($request, $response, $args)
     {
-      $staff = (new \SMT\Tools\Covid\Students())->sendTodayEmails();
-      return emit($response, $staff);
+      $students = (new \SMT\Tools\Covid\Students())->sendTodayEmails();
+      return emit($response, $students);
     }
 
     public function staffEmailsPost($request, $response, $args)
     {
       $staff = (new \SMT\Tools\Covid\Staff())->sendTodayEmails();
-      return emit($response, ['jkj']);
-    }
-
-    public function hodsStaffGet($request, $response, $args)
-    {
-      $staff = (new \SMT\Tools\Covid\Staff())->getByUser();
       return emit($response, $staff);
     }
+
+    public function housesEmailsPost($request, $response, $args)
+    {
+      // $staff = (new \SMT\Tools\Covid\Staff())->sendTodayEmails();
+      return emit($response, true);
+    }
+
+    public function hodsEmailsPost($request, $response, $args)
+    {
+      $hods = (new \SMT\Tools\Covid\Staff())->sendHODSEmails();
+      return emit($response, $hods);
+    }
+
+    public function studentsStatusPut($request, $response)
+    {
+      $data = $request->getParsedBody();
+      $isActive = $data['active'];
+      $status = (new \SMT\Tools\Covid\Students())->changeStatus($isActive);
+      return emit($response, $data);
+    }
+
+    public function staffStatusPut($request, $response)
+    {
+      $data = $request->getParsedBody();
+      $isActive = $data['active'];
+      $status = (new \SMT\Tools\Covid\Staff())->changeStatus($isActive);
+      return emit($response, $data);
+    }
+
+    public function statusGet($request, $response)
+    {
+      $data = $request->getParsedBody();
+      $staffStatus = (new \SMT\Tools\Covid\Staff())->getStatus();
+      $studentsStatus = (new \SMT\Tools\Covid\Students())->getStatus();
+      $data = [
+        'staff' => ['active' => $staffStatus],
+        'students' => ['active' => $studentsStatus]
+      ];
+      return emit($response, $data);
+    }
+
+
 
     // public function ROUTEPost($request, $response)
     // {

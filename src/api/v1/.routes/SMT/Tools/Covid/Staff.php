@@ -44,6 +44,9 @@ class Staff
 
     public function sendTodayEmails() {
 
+      $status = $this->getStatus();
+      if ($status == 0) return false;
+
       $this->getAll();
       $today = date("Y-m-d", time());
       $pendingStaff = [];
@@ -61,5 +64,60 @@ class Staff
         $this->adaModules->insert('covid_answers_staff', 'user_id, hash, date', [$s->id, $hash, $today]);
         break;
       }
+
+      return true;
+    }
+
+    public function sendHODSEmails() {
+
+      $status = $this->getStatus();
+      if ($status == 0) return false;
+      $today = date("Y-m-d", time());
+      $emails = [];
+      $hods = $this->adaModules->query('SELECT count(*) as count, hod_user_id as id FROM covid_hod_subscriptions GROUP BY hod_user_id', []);
+      foreach($hods as $h) {
+        $subs = $this->adaModules->select('covid_hod_subscriptions', 'user_id', 'hod_user_id=?', [$h['id']]);
+        $hod = new \Entities\People\User($this->ada, $h['id']);
+        $alertNames = [];
+        $notAnsweredNames = [];
+        $notInWorkNames = [];
+
+        foreach($subs as $s) {
+          $user = new \Entities\People\User($this->ada, $s['user_id']);
+          $answer = $this->adaModules->select('covid_answers_staff', '*', 'user_id = ? AND date=?', [$s['user_id'], $today])[0] ?? null;
+          if (!$answer) continue;
+          if ($answer['hasAnswered'] == 0) {
+            $notAnsweredNames[] = $user->displayName;
+            continue;
+          }
+          if ($answer['isNotInWork'] == 1) {
+            $notInWorkNames[] = $user->displayName;
+            continue;
+          }
+          if ($answer['isHealthy'] == 0) {
+            $alertNames[] = $user->displayName;
+          }
+        }
+        $email = new \Utilities\Email\Emails\Covid\CovidHODS($hod->email, $hod->firstName, $alertNames, $notAnsweredNames, $notInWorkNames);
+        $emails[] = [
+          'hod' => $hod->displayName,
+          'subs' => $subs,
+  				'alert' => $alertNames,
+  				'notAnswered' => $notAnsweredNames,
+  				'notInWorkNames' => $notInWorkNames
+  			];
+      }
+
+      return $emails;
+    }
+
+    public function changeStatus($isActive)
+    {
+      $this->adaModules->update('covid_control', 'value=?', 'field=?', [$isActive, 'staffOn']);
+    }
+
+    public function getStatus()
+    {
+      return (int)$this->adaModules->select('covid_control', 'value', 'field=?', ['staffOn'])[0]['value'] ?? 0;
     }
 }
