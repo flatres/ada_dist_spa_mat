@@ -35,7 +35,7 @@ class Job
           'path' => str_replace($file, '', $p)
         ];
       }
-      $scripts = sortObjects($scripts, 'file');
+      // $scripts = sortObjects((object)$scripts, 'file');
       return emit($response, $scripts);
     }
 
