@@ -49,6 +49,12 @@ class Covid
       return emit($response, ['jkj']);
     }
 
+    public function hodsStaffGet($request, $response, $args)
+    {
+      $staff = (new \SMT\Tools\Covid\Staff())->getByUser();
+      return emit($response, $staff);
+    }
+
     // public function ROUTEPost($request, $response)
     // {
     //   $data = $request->getParsedBody();

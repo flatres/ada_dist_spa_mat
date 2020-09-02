@@ -30,6 +30,12 @@ class Staff
       return $this;
     }
 
+    public function getByUser($userId) {
+      $staff = $this->adaModules->select('covid_hod_subscriptions', 'user_id', 'hod_user_id = ?', [$userId]);
+      foreach($staff as $s) $this->staff[] = $this->getStaff($s['user_id']);
+      return $this;
+    }
+
     public function getStaff(int $id) {
       $staff = (object)$this->ada->select('usr_details', 'id, login, email, lastname, firstname, prename', 'disabled = ? AND id=? ORDER BY lastname ASC', [0, $id])[0] ?? null;
       $staff->answers = $this->adaModules->select('covid_answers_staff', '*', 'user_id = ? ORDER BY date DESC LIMIT 7', [$id]);

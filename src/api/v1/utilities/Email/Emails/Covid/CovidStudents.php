@@ -1,7 +1,7 @@
 <?php
 namespace Utilities\Email\Emails\Covid;
 
-class CovidStaff {
+class CovidStudents {
 
 		public function __construct($to, $name, $hash)
 		{
