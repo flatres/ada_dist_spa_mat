@@ -51,7 +51,7 @@ class Covid
 
     public function housesEmailsPost($request, $response, $args)
     {
-      $staff = (new \SMT\Tools\Covid\Staff())->sendHMEmails();
+      $staff = (new \SMT\Tools\Covid\Students())->sendHMEmails();
       return emit($response, $staff);
     }
 
