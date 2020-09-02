@@ -62,7 +62,7 @@ class Staff
       foreach($pendingStaff as $s) {
         $email = new \Utilities\Email\Emails\Covid\CovidStaff($s->email, $s->prename, $hash);
         $this->adaModules->insert('covid_answers_staff', 'user_id, hash, date', [$s->id, $hash, $today]);
-        break;
+        // break;
       }
 
       return true;
