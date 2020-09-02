@@ -61,8 +61,8 @@ class Students
         }
       }
       foreach($pendingStudents as $s) {
-        $email = new \Utilities\Email\Emails\Covid\CovidStudents($s->email, $s->prename, $hash);
-        $this->adaModules->insert('covid_answers_students', 'user_id, hash, date', [$s->id, $hash, $today]);
+        $email = new \Utilities\Email\Emails\Covid\CovidStudents($s->email, $s->prename, $s->hash);
+        $this->adaModules->insert('covid_answers_students', 'user_id, hash, date', [$s->id, $s->hash, $today]);
         break;
       }
       return true;
