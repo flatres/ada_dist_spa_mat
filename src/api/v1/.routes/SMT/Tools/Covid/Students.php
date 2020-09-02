@@ -38,7 +38,7 @@ class Students
     }
 
     public function getStudent(int $id) {
-      $students = (object)$this->ada->select('stu_details', 'id, lastname, firstname, prename, boardingHouse, NCYear', 'disabled = ? AND id=? ORDER BY lastname ASC', [0, $id])[0] ?? null;
+      $students = (object)$this->ada->select('stu_details', 'id, lastname, firstname, prename, boardingHouse, NCYear, email', 'disabled = ? AND id=? ORDER BY lastname ASC', [0, $id])[0] ?? null;
       $students->answers = $this->adaModules->select('covid_answers_students', '*', 'student_id = ? ORDER BY date DESC LIMIT 7', [$id]);
       return $students;
     }
