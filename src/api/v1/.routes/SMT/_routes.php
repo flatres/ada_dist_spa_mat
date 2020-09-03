@@ -26,4 +26,6 @@ $app->group('/smt', function(){
     $this->get('/covid/status', '\SMT\Covid:statusGet');
 
 })->add("Authenticate");
+
+$app->get('/smt/covid/house/{id}', '\SMT\Covid:houseStudentsGet');
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);
