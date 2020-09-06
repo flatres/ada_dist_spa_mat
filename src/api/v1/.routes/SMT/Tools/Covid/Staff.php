@@ -44,7 +44,7 @@ class Staff
 
     public function sendTodayEmails() {
 
-      if (date('N') == 7) return; //dont run on a Sundays
+      // if (date('N') == 7) return; //dont run on a Sundays
 
       $status = $this->getStatus();
       if ($status == 0) return false;
@@ -72,7 +72,7 @@ class Staff
 
     public function sendHODSEmails() {
 
-      if (date('N') == 7) return; //dont run on a Sundays
+      // if (date('N') == 7) return; //dont run on a Sundays
 
       $status = $this->getStatus();
       if ($status == 0) return false;
