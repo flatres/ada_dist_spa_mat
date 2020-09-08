@@ -69,7 +69,7 @@ class Email {
 					}
 
 					foreach ($this->cc as $ccAddress) {
-						$mail->addCC($this->debug === true ? $this->userEmail : $ccAddress);
+						$mail->addCC("git@marlboroughcollege.org");
 					}
 					// Attachments
 					// $mail->addAttachment(dirname(__FILE__). '/img/logo.jpg', 'logo');         // Add attachments
