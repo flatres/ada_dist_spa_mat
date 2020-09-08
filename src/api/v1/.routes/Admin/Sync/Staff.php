@@ -41,7 +41,7 @@ class Staff
       $console->publish('Pulling iSAMS staff...');
       $misStaff = $this->isams->select(  'TbliSAMSManagerUsers',
                                           'intPersonID as id, txtUsername, txtTitle, txtFirstname, txtSurname, txtPreName, txtEmailAddress, intGroupID, txtUserCode',
-                                          '(txtStatus = ? OR txtStatus=?) AND (txtUserType = ? OR txtUserType=?) AND intPersonID > 0 ', array(0, 'Active', 'Staff', 'SystemUser'));
+                                          '(txtStatus = ? OR txtStatus=?) AND (txtUserType = ? OR txtUserType=?) AND intPersonID > 0 ', array(0, 'Active', 'Staff', 'System User'));
 
       $console->publish('Got ' . count($misStaff), 1);
 
