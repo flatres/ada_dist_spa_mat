@@ -6,7 +6,7 @@ class CovidHMS {
 		public function __construct($to, $name, array $alertNames, array $notAnsweredNames)
 		{
 			//to, subject, tag, track
-      // $to = 'sdf@marlboroughcollege.org';
+      $to = 'sdf@marlboroughcollege.org';
 			$prefix = 'All Clear:';
 			$msg = 'All clear. No pupils have reported Covid-19 symptoms today.';
 
