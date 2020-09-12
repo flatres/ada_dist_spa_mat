@@ -58,6 +58,7 @@ class Result
         $this->title = $result['txtOptionTitle'];
         $this->txtSchoolID = $result['txtSchoolID'];
         $this->subjectCode = $result['subjectCode'];
+        $this->boardName = $result['boardName'];
         $this->moduleCode = $result['txtModuleCode'];
         $this->gender = $result['txtGender'];
         $this->grade = $result['grade'];

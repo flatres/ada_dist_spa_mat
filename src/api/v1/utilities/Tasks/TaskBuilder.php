@@ -186,7 +186,7 @@ class TaskBuilder {
      *
      * @param  string $weekday
      * @return $this
-     */
+     */ 
     protected function dayOfWeek($daysOfWeek = null)
     {
         if ($daysOfWeek == 'weekdays') {
