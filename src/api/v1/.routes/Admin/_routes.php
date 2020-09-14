@@ -78,11 +78,10 @@ $app->group('/admin', function(){
     $this->delete('/access/structure/module/page/{id}', '\Admin\Access\Structure:page_DELETE');
     $this->post('/access/structure/module/color', '\Admin\Access\Structure:moduleColor_POST');
 
-    $this->get('/school/terms/{year}', '\Admin\School\Calendar:termsGet');
-    $this->put('/school/terms', '\Admin\School\Calendar:termsPut');
-    $this->get('/school/period/{date}/{time}', '\Admin\School\Calendar:periodGet');
 
+    $this->put('/school/terms', '\Admin\School\Calendar:termsPut');
     $this->get('/logs/access/pages', '\Admin\Logs\Access:accessPages_GET');
+
     // $this->get('/logs/resources', '\Admin\Logs\Log:resources_GET');
     // $this->get('/logs/connections', '\Admin\Logs\Log:connections_GET');
 
@@ -92,6 +91,8 @@ $app->group('/admin', function(){
   $this->get('/logs', '\Admin\Logs\Log:log_GET');
   $this->get('/logs/resources', '\Admin\Logs\Log:resources_GET');
   $this->get('/logs/connections', '\Admin\Logs\Log:connections_GET');
+  $this->get('/school/terms/{year}', '\Admin\School\Calendar:termsGet');
+  $this->get('/school/period/{date}/{time}', '\Admin\School\Calendar:periodGet');
 })
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);
 ?>
