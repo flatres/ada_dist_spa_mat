@@ -139,13 +139,13 @@ class Alis
       $auth = $request->getAttribute('auth');
       $this->console = new \Sockets\Console($auth);
       $sets = [];
-      $year = 13;
+      $year = 12;
 
       $this->console->publish("Greetings.");
       $this->console->publish("Fetching L6 set lists");
 
       //find sets and look up their subject name, making corrections on the way
-      $s = $this->isams->select('TblTeachingManagerSets', 'TblTeachingManagerSetsID as id, intSubject, txtSetCode', 'intYear=?', [12]);
+      $s = $this->isams->select('TblTeachingManagerSets', 'TblTeachingManagerSetsID as id, intSubject, txtSetCode', 'intYear=?', [$year]);
       $count = count($s);
 
       $this->console->publish("$count found");
