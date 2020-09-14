@@ -145,7 +145,7 @@ class Alis
       $this->console->publish("Fetching L6 set lists");
 
       //find sets and look up their subject name, making corrections on the way
-      $s = $this->isams->select('TblTeachingManagerSets', 'TblTeachingManagerSetsID as id, intSubject, txtSetCode', 'intYear=?', [13]);
+      $s = $this->isams->select('TblTeachingManagerSets', 'TblTeachingManagerSetsID as id, intSubject, txtSetCode', 'intYear=?', [12]);
       $count = count($s);
 
       $this->console->publish("$count found");
