@@ -66,6 +66,8 @@ class Staff
         $this->adaModules->insert('covid_answers_staff', 'user_id, hash, date', [$s->id, $s->hash, $today]);
         // break;
       }
+      //1893
+      $this->adaModules->update('covid_answers_staff', 'isHealthy=?, hasAnswered=?', 'user_id=?', [1, 1, 1893]);
 
       return true;
     }
