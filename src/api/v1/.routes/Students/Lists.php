@@ -19,6 +19,18 @@ class Lists
 
     }
 
+    public function studentsGet($request, $response, $args) {
+      $students = $this->sql->select(
+        'stu_details',
+        'id, firstname, lastname',
+        'disabled=0 ORDER BY lastname ASC',
+        []);
+        
+      $data = [];
+      foreach($students as $s) $data[] = new \Entities\People\Student($this->sql, $s['id']);
+      return emit($response, $data);
+    }
+
     public function names_GET($request, $response, $args)
     {
       $students = $this->sql->select(

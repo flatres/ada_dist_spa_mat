@@ -11,6 +11,7 @@ $app->group('/students', function(){
     $this->get('/portal/names', '\Students\Lists:portalNames_GET');
     // $this->get('/lists/tags/all', '\Lists\Students\Lists:tags_GET');
     // $this->get('/lists/houses/all', '\Lists\Students\Lists:houses_GET');
+    $this->get('/all', '\Students\Lists:studentsGet');
 
     $this->get('/details/{id}', '\Students\Student:details_GET');
 

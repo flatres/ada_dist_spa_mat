@@ -32,19 +32,35 @@ class Years
           ];
       }
 
-      // $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 12]);
-      // if (isset($d[0])) {
-      //   $years[] =   [
-      //       'id'  => 12,
-      //       'name'  => 'L6'
-      //     ];
-      // }
+      $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 12]);
+      if (isset($d[0])) {
+        $years[] =   [
+            'id'  => 12,
+            'name'  => 'L6'
+          ];
+      }
 
       $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 11]);
       if (isset($d[0])) {
         $years[] =   [
             'id'  => 11,
             'name'  => 'Hundred'
+          ];
+      }
+      
+      $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 10]);
+      if (isset($d[0])) {
+        $years[] =   [
+            'id'  => 10,
+            'name'  => 'Remove'
+          ];
+      }
+      
+      $d = $this->ada->select('sch_classes', 'id', 'subjectId=? AND year=?', [$subjectId, 9]);
+      if (isset($d[0])) {
+        $years[] =   [
+            'id'  => 9,
+            'name'  => 'Shell'
           ];
       }
 

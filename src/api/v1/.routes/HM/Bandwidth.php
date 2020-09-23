@@ -23,7 +23,8 @@ class Bandwidth
     public function allHousesGet($request, $response, $args)
     {
       $client = new \GuzzleHttp\Client(['verify' => false]);
-      $days = $args['days'];
+      $days = 2;
+      // $days = $args['days'];
       // $url = $this->baseURL . 'pupilBW/All/All/2';
       $url = $this->baseURL . 'pupilBW/All/All/' . $days;
       
@@ -36,7 +37,8 @@ class Bandwidth
       $status =  $res->getStatusCode();           // 200
       // echo $res->getHeader('content-type'); // 'application/json; charset=utf8'
       // echo $res->getBody();                 // {"type":"User"...'
-      // var_export($res->json());
+      // var_dump($res->json());
+      //   var_export($res->json());
       $body = $res->getBody()->getContents();
       $body = json_decode($body);
       $data = [

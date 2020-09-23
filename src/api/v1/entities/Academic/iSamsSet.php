@@ -6,7 +6,7 @@ namespace Entities\Academic;
 class iSamsSet
 {
 
-    private $sql;
+    private $sql, $ada, $adaModules, $isams;
 
     public $id; //isams set ID
     public $setCode;
@@ -21,7 +21,7 @@ class iSamsSet
     private $stop = false;
     public $teachers=[];
     public $examCodes=[];
-
+    
 
     //a group of students doing further maths is registered under two sets eg U6-Ma/X and U6-Ma/X5
     // the X5 indicates the teaching block that it is in.

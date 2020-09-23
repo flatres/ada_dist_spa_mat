@@ -95,6 +95,8 @@ class Students
           }
         }
         $email = new \Utilities\Email\Emails\Covid\CovidHMS("HM" . $h['code'] . '@marlboroughcollege.org', 'HM', $alertNames, $notAnsweredNames);
+        $email = new \Utilities\Email\Emails\Covid\CovidHMS("D" . $h['code'] . '@marlboroughcollege.org', 'Dame', $alertNames, $notAnsweredNames);
+        $email = new \Utilities\Email\Emails\Covid\CovidHMS("RHT" . $h['code'] . '@marlboroughcollege.org', 'RHT', $alertNames, $notAnsweredNames);
         $emails[] = [
           'hs' => $h['code'],
           'subs' => $subs,
