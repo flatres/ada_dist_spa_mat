@@ -15,12 +15,27 @@ class Covid
     public function __construct(\Slim\Container $container)
     {
        $this->ada = $container->ada;
+       $this->adaModules = $container->adaModules;
     }
 
 // ROUTE -----------------------------------------------------------------------------
     public function staffGet($request, $response, $args)
     {
       $staff = (new \SMT\Tools\Covid\Staff())->getAll();
+      return emit($response, $staff);
+    }
+
+    public function staffWatchersGet($request, $response, $args)
+    {
+      $staff = (new \SMT\Tools\Covid\Staff())->getAll();
+      foreach($staff->staff as &$s) {
+        $s->watchers = [];
+        $watchers = $this->adaModules->select('covid_hod_subscriptions', 'hod_user_id', 'user_id=?', [$s->id]);
+        foreach($watchers as $w) {
+          $s->watchers[] =  new \Entities\People\User($this->ada, $w['hod_user_id']);
+        }
+        $s->watchCount = count($s->watchers); 
+      }
       return emit($response, $staff);
     }
 

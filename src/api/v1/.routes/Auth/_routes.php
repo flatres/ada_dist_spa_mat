@@ -9,7 +9,8 @@ $app->group('/auth', function(){
     $this->get('/test', '\Auth\TestClass:testGet')->add("Authenticate");
     $this->post('/bug', '\Auth\Bug:report')->add("Authenticate");
     $this->post('/login/dark', '\Auth\Login:darkPost');
+});
 
-})
+$app->get('/auth/permissions', '\Auth\Login:permissionsGet')->add("Authenticate");
 
 ?>

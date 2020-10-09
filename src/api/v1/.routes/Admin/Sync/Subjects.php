@@ -47,8 +47,8 @@ class Subjects
       $this->ada->delete('sch_class_exams', 'id>0', []);
       $this->ada->delete('sch_class_students', 'id>0', []);
       $this->ada->delete('sch_class_teachers', 'id>0', []);
-      $this->ada->delete('sch_subjects', 'id>0', []);
-      $this->ada->delete('sch_subjects_exams', 'id>0', []);
+      // $this->ada->delete('sch_subjects', 'id>0', []);
+      // $this->ada->delete('sch_subjects_exams', 'id>0', []);
 
       $misSubjects = $this->isams->select(
         'TblTeachingManagerSubjects',
@@ -60,7 +60,7 @@ class Subjects
 
       // get ada Subjects to get comparison for syncing
       $console->publish('Pulling ADA Subjects');
-      $adaSubjects = $this->sql->select('sch_subjects', 'id, misId', '1=1 ORDER BY name ASC', []);
+      $adaSubjects = $this->sql->select('sch_subjects', 'id, misId', 'isDisabled = ? ORDER BY name ASC', [0]);
       $console->publish('Got ' . count($adaSubjects), 1);
 
 
@@ -177,8 +177,8 @@ class Subjects
       if ($d['code'] === 'FM' || $d['name'] === 'ESS') return;
       if ($subject['disabled'] == true)
       {
-        $this->sql->delete('sch_subjects', 'id=?', array($subject['adaId']));
-        $this->sql->delete('sch_subjects_exams', 'subjectId=?', array($subject['adaId']));
+        $this->sql->update('sch_subjects', 'isDisabled=?', 'id=?', array(1, $subject['adaId']));
+        // $this->sql->delete('sch_subjects_exams', 'subjectId=?', array($subject['adaId']));
         $this->sql->delete('sch_classes', 'subjectId=?', array($subject['adaId']));
         $this->deletedCount++;
       } else {
@@ -204,7 +204,7 @@ class Subjects
         $misSubjectId = $subject['misData']['id'];
         $subjectId = $subject['adaId'];
 
-        // Will want to add a syncing routing to this eventually
+        // Todo: ill want to add a syncing routing to this eventually
         $this->sql->delete('sch_classes', 'subjectId=?', [$subjectId]);
         $this->sql->delete('sch_class_students', 'subjectId=?', [$subjectId]);
         $this->sql->delete('sch_class_teachers', 'subjectId=?', [$subjectId]);

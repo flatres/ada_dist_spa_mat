@@ -71,14 +71,20 @@ class ExternalExams
       $this->console->publish("<--------- FETCHING GCSE --------->");
       $data = $this->results->getSessionResults($sessionId, $isGCSE, $this->console, false, true, false);
 
-      $session['gcse_hundred'] = $data['statistics']->hundredStats->results;
-      $this->saveResults($session['gcse_hundred'], $isGCSE);
+      if (isset($data['statistics']->hundredStats)) {
+        $session['gcse_hundred'] = $data['statistics']->hundredStats->results;
+        $this->saveResults($session['gcse_hundred'], $isGCSE);
+      }
 
-      $session['gcse_remove'] = $data['statistics']->removeStats->results;
-      $this->saveResults($session['gcse_remove'], $isGCSE);
+      if (isset($data['statistics']->removeStats)) {
+        $session['gcse_remove'] = $data['statistics']->removeStats->results;
+        $this->saveResults($session['gcse_remove'], $isGCSE);
+      }
 
-      $session['gcse_shell'] = $data['statistics']->shellStats->results;
-      $this->saveResults($session['gcse_shell'], $isGCSE);
+      if (isset($data['statistics']->shellStats)) {
+        $session['gcse_shell'] = $data['statistics']->shellStats->results;
+        $this->saveResults($session['gcse_shell'], $isGCSE);
+      }
 
       $session['gcse_other'] = $data['statistics']->otherStats->results;
       $this->saveResults($session['gcse_other'], $isGCSE);

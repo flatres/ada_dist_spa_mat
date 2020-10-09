@@ -191,6 +191,11 @@ class Login
       }
     }
 
+    public function permissionsGet($request, $response, $args) {
+      global $userId;
+      return emit($response, $this->loginReturnObject($userId));
+    }
+
     private function loginReturnObject($id)
     {
       $sql = $this->sql;
