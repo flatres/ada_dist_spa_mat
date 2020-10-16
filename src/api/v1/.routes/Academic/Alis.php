@@ -195,7 +195,7 @@ class Alis
             if (!isset($student['subjects'][$foundSet['txtSubjectCode']])) {
               $student['subjects'][$foundSet['txtSubjectCode']] = $foundSet['txtSubjectName'];
               //maths and FM under same set code so if in a FM set, also add maths
-              if ($foundSet['txtSubjectName'] == 'Further Mathemetics') {
+              if ($foundSet['txtSubjectName'] == 'A2;Further Mathemetics') {
                 $student['subjects']['MA2'] = 'Mathematics';
                 $this->console->publish('   -- ' . 'Mathematics');
               }

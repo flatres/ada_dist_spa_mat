@@ -46,6 +46,8 @@ function sortObjects(array &$data, string $field, string $direction = 'DESC') {
   return $data;
 }
 
+// https://blog.martinhujer.cz/clever-way-to-sort-php-arrays-by-multiple-values/
+
 function rankArray(array $data, string $rankByField, string $rankField)
 {
   $data = sortArrays($data, $rankByField, 'DESC');
