@@ -20,8 +20,10 @@ $app->group('/hod', function(){
 
     // wyaps
     $this->get('/{subject}/wyaps/{year}/{exam}', '\HOD\Wyaps:wyapsGet');
-    $this->post('/{subject}/wyaps/{year}/{exam}', '\HOD\Wyaps:wyapsPost');
-    $this->put('/{subject}/wyaps/{year}/{exam}', '\HOD\Wyaps:wyapsPut');
+    $this->post('/{subject}/wyaps/{year}/{exam}', '\HOD\Wyaps:wyapPost');
+    $this->put('/{subject}/wyaps/{id}', '\HOD\Wyaps:wyapPut');
+    $this->delete('/{subject}/wyaps/{id}', '\HOD\Wyaps:wyapDelete');
+    $this->get('/{subject}/wyaps/{id}', '\HOD\Wyaps:wyapsResultsGet');
 
     // meetings
     $this->get('/meetings/{subject}/{year}/{exam}', '\HOD\Meetings:meetingClassesGet');

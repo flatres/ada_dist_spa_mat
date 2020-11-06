@@ -27,35 +27,44 @@ class Wyaps
       $subjectId = $args['subject'];
       $year = $args['year'];
       $examId = $args['exam'];
-
-      $subject = $this->getYearWyaps($subjectId, $year, $examId);
-      $subject = [];
-      // $subject->classes = null;
-      // $subject->sql = null;
-      // $subject->adaData = null;
-
-      return emit($response, $subject);
+      $wyaps = (new \Entities\Academic\Subject($this->ada, $subjectId))->getWYAPsByExam($year, $examId);
+      // $classes = (new \Entities\Academic\Subject($this->ada, $subjectId))->getStudentsByExam($)
+      return emit($response, $wyaps);
     }
 
-    private function getYearWyaps($subjectId, $year, $examId)
+    public function wyapPost($request, $response, $args) {
+      $subjectId = $args['subject'];
+      $year = $args['year'];
+      $examId = $args['exam'];
+      $data = $request->getParsedBody();
+      $wyap = new \Entities\Metrics\WYAP();
+      $wyap->create($subjectId, $examId, $year, $data['name'], $data['marks']);
+      return emit($response, $wyap);
+    }
+
+    public function wyapPut($request, $response, $args) {
+      $data = $request->getParsedBody();
+
+      $wyap = new \Entities\Metrics\WYAP($args['id']);
+      $wyap->edit($data['name'], $data['marks'], $data['results']);
+    }
+
+    public function wyapDelete($request, $response, $args) {
+      $id = $args['id'];
+      $wyap = new \Entities\Metrics\WYAP();
+      $wyap->delete($id);
+    }
+
+    public function wyapsResultsGet($request, $response, $args)
     {
-      // $this->progress->publish(0.1);
-      // $subject = new \Entities\Academic\Subject($this->ada);
-      //
-      // $this->progress->publish(0.25);
-      // $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
-      //
-      // $this->progress->publish(0.5);
-      // $subject->makeMLOProfile();
-      //
-      // $this->progress->publish(0.75);
-      // $metrics = new \Entities\Metrics\ExamMetrics($examId, $subject->students, $year);
-      // $subject->metrics = $metrics->metrics;
-      // $subject->metricWeightings = $metrics->weightings;
-      //
-      // $this->progress->publish(1);
-      // return $subject;
-    }
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'hod.wyaps.results', 'Thinking... ');
+      $pg = $this->progress;
+      $id = $args['id'];
 
+      $wyap = new \Entities\Metrics\WYAP($id);
+      // $classes = (new \Entities\Academic\Subject($this->ada, $subjectId))->getStudentsByExam($)
+      return emit($response, $wyap->results());
+    }
 
 }

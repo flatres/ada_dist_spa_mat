@@ -101,6 +101,27 @@ class Subject
     return $this->students;
   }
 
+  // return a list of wyaps (whole year assessment points) taken by this year group (including those taken in previous year)
+  public function getWYAPsByExam($year, $examId) {
+      $students = $this->getStudentsByExam($year, $examId);
+      $wyaps = [];
+      // should be able to get all wyaps using the first 50 students
+      $count = 0;
+      //dont want to pick up GCSE wyaps from an upper school class
+      $yearMin = $year > 11 ? 12 : 9;
+      foreach ($students as $s) {
+        $count++;
+        $results = $this->adaData->select('wyap_results', 'wyap_id', 'exam_id=? AND student_id=?', [$examId, $s->id]);
+        foreach ($results as $r) {
+          $key = 'w_' . $r['wyap_id'];
+          $wyap = new \Entities\Metrics\WYAP($r['wyap_id']);
+          if (!isset($wyaps[$key]) && $wyap->year > $yearMin) $wyaps[$key] = $wyap;
+         }
+      }
+      $wyaps = array_values($wyaps);
+      return sortObjects($wyaps, 'created_at');
+  }
+
   public function getStudentsMLOByExam($year, $examId) {
     $students = $this->getStudentsByExam($year, $examId);
     $this->year = (int)$year;

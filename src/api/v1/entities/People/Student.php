@@ -17,7 +17,7 @@ class Student
     public $misFamilyId;
     public $dob;
     public $boardingHouseSafe; //has spaces replaced with _ for use in array keys
-    public $preName, $fullName, $fullPreName, $name, $NCYear;
+    public $preName, $fullName, $fullPreName, $name, $NCYear, $schoolNumber;
     public $misId;
     public $metrics = [];
     public $examData = [];
@@ -31,6 +31,22 @@ class Student
        $this->sql= $ada ?? new \Dependency\Databases\Ada();
        if ($id) $this->byId($id);
        return $this;
+    }
+
+    public function basic() {
+      return [
+        'student_id'        => $this->id,
+        'firstName' => $this->firstName,
+        'preName'   => $this->preName,
+        'lastName'  => $this->lastName,
+        'name'      => $this->displayName,
+        'NCYear'    => $this->NCYear,
+        'gender'    => $this->gender,
+        'dob'       => $this->dob,
+        'email'     => $this->email,
+        'schoolNumber'    => $this->schoolNumber,
+        'boarding'  => $this->boardingHouseCode
+      ];
     }
 
     public function displayName(int $id = null)

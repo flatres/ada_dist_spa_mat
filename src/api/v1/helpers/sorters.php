@@ -62,5 +62,29 @@ function rankArray(array $data, string $rankByField, string $rankField)
   }
   return $data;
 }
+// https://stackoverflow.com/questions/38369597/rank-calculation-in-php
+// function rankEqualArray(array $data, string $rankByField, string $rankField) {
+//
+//     $data = sortArrays($data, $rankByField, 'DESC');
+//
+//     $arr = $arr1 = array();
+//
+//     foreach ($data as $key => $value) {
+//         $arr[$value][] = $value;
+//     }
+//
+//     $i = $j = 1;
+//
+//     foreach ($arr as $key => $value) {
+//
+//         foreach ($value as $key1 => $value1) {
+//             echo $key."- Rank".$i;
+//             echo "<br>";
+//             $j++;
+//         }
+//     $i = $j;
+//
+//     }
+// }
 
 ?>
