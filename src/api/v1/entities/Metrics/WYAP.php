@@ -120,8 +120,8 @@ class WYAP
 
     return [
       'count' => $nonBlank,
-      'mean'  => $mean,
-      'sd'    => $stdDev
+      'mean'  => round($mean,1),
+      'sd'    => round($stdDev,1)
     ];
 
   }
