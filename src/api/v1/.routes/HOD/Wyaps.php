@@ -51,7 +51,7 @@ class Wyaps
 
     public function wyapDelete($request, $response, $args) {
       $id = $args['id'];
-      $wyap = new \Entities\Metrics\WYAP();
+      $wyap = new \Entities\Metrics\WYAP($id);
       $wyap->delete($id);
     }
 
