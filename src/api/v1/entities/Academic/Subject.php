@@ -115,7 +115,7 @@ class Subject
         foreach ($results as $r) {
           $key = 'w_' . $r['wyap_id'];
           $wyap = new \Entities\Metrics\WYAP($r['wyap_id']);
-          if (!isset($wyaps[$key]) && $wyap->year > $yearMin) $wyaps[$key] = $wyap;
+          if (!isset($wyaps[$key]) && $wyap->year >= $yearMin) $wyaps[$key] = $wyap;
          }
       }
       $wyaps = array_values($wyaps);
