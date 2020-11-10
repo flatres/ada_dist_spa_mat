@@ -84,13 +84,12 @@ class WYAP
     foreach ($results as &$r) {
       if (is_null($r['mark'])) continue;
       if (strlen($r['mark']) == 0) continue;
-      echo '[' . $r['mark'] . ']' . PHP_EOL;
       $r['percentage'] = $marks > 0 ? round(100 * $r['mark'] / $marks, 1) : null;
       $this->adaData->update(
         'wyap_results',
-        'mark=?, percentage=?, rank=?, hasUnderperformed=?',
+        'mark=?, percentage=?, rank=?, hasUnderperformed=?, comment=?',
         'id=?',
-        [$r['mark'], $r['percentage'], $r['rank'], $r['hasUnderperformed'], $r['id']]);
+        [$r['mark'], $r['percentage'], $r['rank'], $r['hasUnderperformed'], $r['comment'], $r['id']]);
     }
   }
 
