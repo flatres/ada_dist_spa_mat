@@ -82,9 +82,14 @@ class WYAP
     $this->id = $this->adaData->update('wyaps', 'name=?, marks=?', 'id=?', [$name, $marks, $this->id]);
     $results = rankArray($results, 'mark', 'rank');
     foreach ($results as &$r) {
-      if (is_null($r['mark'])) continue;
-      if (strlen($r['mark']) == 0) continue;
-      $r['percentage'] = $marks > 0 ? round(100 * $r['mark'] / $marks, 1) : null;
+      $mark = is_null($r['mark']) ? "" : $r['mark'];
+
+      if (strlen($r['mark']) == 0) {
+        $r['mark'] = null;
+        $r['percentage'] = null;
+      } else {
+        $r['percentage'] = $marks > 0 ? round(100 * $r['mark'] / $marks, 1) : null;
+      }
       $this->adaData->update(
         'wyap_results',
         'mark=?, percentage=?, rank=?, hasUnderperformed=?, comment=?',
@@ -102,7 +107,9 @@ class WYAP
     $sd = 0;
 
     //count and find sum of non blank marks
-    foreach($results as $r) if (!is_null($r['mark'])) { $nonBlank++; $markSum += $r['mark']; }
+    foreach($results as $r) if (!is_null($r['mark']) && strlen($r['mark']) > 0) {
+      $nonBlank++; $markSum += $r['mark'];
+    }
     unset($r);
 
     if ($nonBlank > 0) $mean = $markSum / $nonBlank;
@@ -111,13 +118,13 @@ class WYAP
     $variance = 0;
     foreach($results as $r) {
       $i = $r['mark'];
-      if (!is_null($i)) $variance += pow(($i - $mean), 2);
+      if (!is_null($i) && strlen($i) > 0) $variance += pow(($i - $mean), 2);
     }
     unset($r);
     $stdDev = $nonBlank > 0 ? sqrt($variance/$nonBlank) : 0;
 
     //calculate the distance away from the standard deviation for each result
-    foreach($results as &$r) if (!is_null($r['mark'])) { $r['sdDelta'] = $r['mark'] - $stdDev; }
+    foreach($results as &$r) if (!is_null($r['mark']) && strlen($r['mark']) > 0) { $r['sdDelta'] = $r['mark'] - $stdDev; }
 
     return [
       'count' => $nonBlank,

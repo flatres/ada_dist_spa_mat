@@ -55,6 +55,10 @@ function rankArray(array $data, string $rankByField, string $rankField)
   $previousPoint = 'nonsense';
 
   foreach($data as &$d){
+    if (is_null($d[$rankByField]) || strlen($d[$rankByField]) === 0) {
+      $d[$rankField] = null;
+      continue;
+    }
     $point = $d[$rankByField];
     if ($point !== $previousPoint) $rank++;
     $d[$rankField] = $rank;
