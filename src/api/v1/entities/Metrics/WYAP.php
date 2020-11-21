@@ -74,6 +74,8 @@ class WYAP
 
     $statistics = $this->statistics($allResults);
 
+    $this->results = $allResults;
+
     return [
         'results' => $allResults,
         'statistics' => $statistics
@@ -82,8 +84,8 @@ class WYAP
 
   public function edit($name, $marks, $results) {
     if (!$this->id) return;
-    $this->id = $this->adaData->update('wyaps', 'name=?, marks=?', 'id=?', [$name, $marks, $this->id]);
-    $results = rankArray($results, 'mark', 'rank');
+    $this->adaData->update('wyaps', 'name=?, marks=?', 'id=?', [$name, $marks, $this->id]);
+    // return;
     foreach ($results as &$r) {
       $mark = is_null($r['mark']) ? "" : $r['mark'];
 
@@ -95,10 +97,28 @@ class WYAP
       }
       $this->adaData->update(
         'wyap_results',
-        'mark=?, percentage=?, rank=?, hasUnderperformed=?, comment=?',
+        'mark=?, percentage=?, hasUnderperformed=?, comment=?',
         'id=?',
-        [$r['mark'], $r['percentage'], $r['rank'], $r['hasUnderperformed'], $r['comment'], $r['id']]);
+        [$r['mark'], $r['percentage'], $r['hasUnderperformed'], $r['comment'], $r['id']]);
     }
+    $this->rankResults();
+  }
+
+  private function rankResults() {  
+    if (!$this->id) return;
+
+    $results = $this->results()['results'];
+    var_dump($results);
+    $results = rankArray($results, 'mark', 'rank');
+    var_dump($results);
+    foreach ($results as &$r) {
+      $this->adaData->update(
+        'wyap_results',
+        'rank=?',
+        'id=?',
+        [$r['rank'], $r['id']]);
+    }
+    return true;
   }
 
   // https://www.geeksforgeeks.org/php-program-find-standard-deviation-array/
