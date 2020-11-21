@@ -57,9 +57,6 @@ class Wyaps
 
     public function wyapsResultsGet($request, $response, $args)
     {
-      $auth = $request->getAttribute('auth');
-      $this->progress = new \Sockets\Progress($auth, 'hod.wyaps.results', 'Thinking... ');
-      $pg = $this->progress;
       $id = $args['id'];
 
       $wyap = new \Entities\Metrics\WYAP($id);
