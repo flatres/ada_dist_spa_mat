@@ -17,19 +17,35 @@ class Classes
     {
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
-       $this->isams = $container->isams;
-       $this->mcCustom = $container->mcCustom;
-       global $userId;
-       $this->teacher = (new \Entities\People\iSamsTeacher($this->isams))->byAdaId($userId);
+       // $this->isams = $container->isams;
+       // $this->mcCustom = $container->mcCustom;
+       // global $userId;
+       // $this->teacher = (new \Entities\People\iSamsTeacher($this->isams))->byAdaId($userId);
     }
 
 // ROUTE -----------------------------------------------------------------------------
     public function classesGet($request, $response, $args)
     {
-      $this->teacher->getSets();
-      return emit($response, $this->teacher->sets);
+      global $userId;
+      $teacher = new \Entities\People\User($this->ada, $userId);
+      $classes = $teacher->getClasses();
+      return emit($response, $teacher->classes);
+      // $this->teacher->getSets();
+      // return emit($response, $this->teacher->sets);
     }
 
+    public function wyapsGet($request, $response, $args)
+    {
+        $classId = $args['classId'];
+        $class = new \Entities\Academic\AdaClass($this->ada, $classId);
+        $wyaps = [];
+        $subject = new \Entities\Academic\Subject($this->ada, $class->subjectId);
+        foreach($class->exams as $e) {
+          $wyaps = array_merge($wyaps, $subject->getWYAPsByExam($class->year, $e->id));
+        }
+        // $wyaps = $class;
+        return emit($response, $wyaps);
+    }
     public function setMLOGet($request, $response, $args)
     {
       $id = $args['id'];

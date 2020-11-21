@@ -7,6 +7,7 @@ class SubjectExam
   public $id; //isams set ID
   public $examCode, $subjectId, $examName, $examLevelId, $examLevel;
   public $aliasCode; //for dealing with this silly situation where MLOs have been put under wrong subject code
+  private $sql;
 
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
   {

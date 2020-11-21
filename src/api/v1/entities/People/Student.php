@@ -24,6 +24,7 @@ class Student
     public $classes = [];
     public $hmNote = '';
     public $boardingHouseId, $boardingHouseCode;
+    public $isDisabled; //if account is disabled. i.e they have left
 
     public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
     {
@@ -45,7 +46,8 @@ class Student
         'dob'       => $this->dob,
         'email'     => $this->email,
         'schoolNumber'    => $this->schoolNumber,
-        'boarding'  => $this->boardingHouseCode
+        'boarding'  => $this->boardingHouseCode,
+        'isDisabled' => $this->isDisabled
       ];
     }
 
@@ -88,7 +90,7 @@ class Student
     {
       $student = $this->sql->select(
         'stu_details',
-        'id, firstname, lastname, prename, email, boardingHouse, boardingHouseId, gender, mis_id, mis_family_id, NCYear, dob',
+        'id, firstname, lastname, prename, email, boardingHouse, boardingHouseId, gender, mis_id, mis_family_id, NCYear, dob, disabled',
         'id=?',
         [$id]);
 
@@ -116,6 +118,7 @@ class Student
         $this->schoolNumber = explode('@', $this->email)[0] ?? null;
         $dob = strtotime($student['dob']);
         $this->dob = date('d/m/Y', $dob);
+        $this->isDisabled = $student['disabled'] == 1 ? true : false;
       } else {
         return null;
       }

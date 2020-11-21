@@ -6,7 +6,7 @@ class AdaClass
 {
   public $id;
   public $misId;
-  public $code;
+  public $code, $plainCode; //without eg (FM) for futher maths
   public $year;
   public $isForm;
   public $misFormId;
@@ -15,6 +15,7 @@ class AdaClass
   public $students=[];
   public $subjectId;
   public $exams = [];
+  private $sql;
 
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
   {
@@ -30,6 +31,7 @@ class AdaClass
       $class = $class[0];
       $this->misId = $class['misId'];
       $this->code = $class['code'];
+      $this->plainCode = str_replace('(FM)', '', $this->code);
       $this->subjectId = $class['subjectId'];
       $this->year = $class['year'];
       $this->isForm = $class['isForm'] == 1 ? true : false;
@@ -44,9 +46,12 @@ class AdaClass
 
   public function getExams () {
     $exams = $this->sql->select('sch_class_exams', 'examId', 'classId=?', [$this->id]);
+    $this->exams = [];
     foreach ($exams as $e) {
-      $this->exams[] = new \Entities\Academic\SubjectExam($this->sql, $e['examId']);
+      $key = 'e_' . $e['examId'];
+      if (!isset($this->exams[$key])) $this->exams[$key] = new \Entities\Academic\SubjectExam($this->sql, $e['examId']);
     }
+    $this->exams = array_values($this->exams);
     return $this->exams;
   }
 

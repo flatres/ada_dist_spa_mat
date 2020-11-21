@@ -6,6 +6,10 @@ use Slim\Http\Response;
 $app->get('/home/almanac', '\Home\Almanac:almanacGet');
 $app->group('/home', function(){
   $this->get('/classes', '\Home\Classes:classesGet');
+
+  $this->get('/classes/wyaps/{classId}', '\Home\Classes:wyapsGet');
+  $this->put('/classes/wyaps/{id}', '\HOD\Wyaps:wyapPut');
+
   $this->get('/classes/mlo/form/{id}', '\Home\Classes:formMLOGet');
   $this->get('/classes/mlo/set/{id}', '\Home\Classes:setMLOGet');
   $this->post('/classes/mlo', '\Home\Classes:MLOPost');

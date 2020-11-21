@@ -18,6 +18,7 @@ class User
     public $misFamilyId, $title;
     public $fullName, $name;
     public $misId, $login;
+    public $classes = [];
 
     public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
     {
@@ -75,6 +76,12 @@ class User
 
       $this->displayName();
       return $this;
+    }
+
+    public function getClasses () {
+      $classes = $this->sql->select('sch_class_teachers', 'classId', 'userId=?', [$this->id]);
+      foreach ($classes as $c) $this->classes[] = new \Entities\Academic\AdaClass($this->sql, $c['classId']);
+      return $this->classes;
     }
 
 }

@@ -22,6 +22,7 @@ class Subject
   public $stackedHistory=[];
   public $grades=[];
   public $bands=[];
+  private $sql;
 
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
   {
@@ -117,6 +118,7 @@ class Subject
           $wyap = new \Entities\Metrics\WYAP($r['wyap_id']);
           if (!isset($wyaps[$key]) && $wyap->year >= $yearMin) $wyaps[$key] = $wyap;
          }
+         if ($count > 50) break;
       }
       $wyaps = array_values($wyaps);
       return sortObjects($wyaps, 'created_at');
