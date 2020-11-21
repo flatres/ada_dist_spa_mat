@@ -63,17 +63,19 @@ class WYAP
       [$this->id]
     );
 
+    $allResults = [];
     foreach ($results as &$r) {
       $student = (new \Entities\People\Student($this->ada, $r['student_id']))->basic();
       if ($student['isDisabled']) continue;
       $r = array_merge($r, $student);
       if (isset($students['s_' . $student['student_id']])) $r['classCode'] = str_replace(' (FM)', '', $students['s_' . $student['student_id']]->classCode);
+      $allResults[] = $r;
     }
 
-    $statistics = $this->statistics($results);
+    $statistics = $this->statistics($allResults);
 
     return [
-        'results' => $results,
+        'results' => $allResults,
         'statistics' => $statistics
     ];
   }
