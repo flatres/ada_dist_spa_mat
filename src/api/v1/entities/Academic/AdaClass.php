@@ -30,8 +30,7 @@ class AdaClass
     if (isset($class[0])){
       $class = $class[0];
       $this->misId = $class['misId'];
-      $this->code = $class['code'];
-      $this->plainCode = str_replace('(FM)', '', $this->code);
+      $this->code = str_replace(' (FM)', '', $class['code']);
       $this->subjectId = $class['subjectId'];
       $this->year = $class['year'];
       $this->isForm = $class['isForm'] == 1 ? true : false;

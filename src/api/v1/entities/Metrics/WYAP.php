@@ -67,7 +67,7 @@ class WYAP
       $student = (new \Entities\People\Student($this->ada, $r['student_id']))->basic();
       if ($student['isDisabled']) continue;
       $r = array_merge($r, $student);
-      if (isset($students['s_' . $student['student_id']])) $r['classCode'] = str_replace('(FM)', '', $students['s_' . $student['student_id']]->classCode);
+      if (isset($students['s_' . $student['student_id']])) $r['classCode'] = str_replace(' (FM)', '', $students['s_' . $student['student_id']]->classCode);
     }
 
     $statistics = $this->statistics($results);
