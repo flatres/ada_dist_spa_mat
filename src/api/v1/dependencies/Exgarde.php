@@ -232,6 +232,7 @@ class Exgarde {
 		 $item['entry_time'] = date('G:i', $unix);
 		 $item['entry_unix'] = $unix;
 		 $item['name'] = $this->makeName($item);
+		 $item['date_pretty'] = date('D M j G:i', $unix);
 	 }
 
 	 return $events;
