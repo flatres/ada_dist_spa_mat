@@ -37,8 +37,10 @@ class Staff
     }
 
     public function getStaff(int $id) {
-      $staff = (object)$this->ada->select('usr_details', 'id, login, email, lastname, firstname, prename', 'disabled = ? AND id=? ORDER BY lastname ASC', [0, $id])[0] ?? null;
-      $staff->answers = $this->adaModules->select('covid_answers_staff', '*', 'user_id = ? ORDER BY date DESC LIMIT 7', [$id]);
+      $staff = (object)$this->ada->select('usr_details', 'id, login, email, lastname, firstname, prename', 'disabled = ? AND id=? ORDER BY lastname ASC', [0, $id]);
+      if (isset($staff[0])) {
+        $staff = (object)$staff[0];$staff->answers = $this->adaModules->select('covid_answers_staff', '*', 'user_id = ? ORDER BY date DESC LIMIT 7', [$id]);
+      }
       return $staff;
     }
 
