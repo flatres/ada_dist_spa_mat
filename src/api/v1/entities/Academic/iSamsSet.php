@@ -21,7 +21,7 @@ class iSamsSet
     private $stop = false;
     public $teachers=[];
     public $examCodes=[];
-    
+
 
     //a group of students doing further maths is registered under two sets eg U6-Ma/X and U6-Ma/X5
     // the X5 indicates the teaching block that it is in.
@@ -121,11 +121,15 @@ class iSamsSet
         'txtTeacher',
         'intSetID=?', [$this->id]);
 
-      if (isset($d[0])) {
-        $isamsTeacher = (new \Entities\People\iSamsTeacher($this->isams))->byUserCode($d[0]['txtTeacher']);
+      foreach ($d as $teacher) {
+        $isamsTeacher = (new \Entities\People\iSamsTeacher($this->isams))->byUserCode($teacher['txtTeacher']);
         $this->teachers[] = (new \Entities\People\User())->byMISId($isamsTeacher->id);
       }
 
+      // if (isset($d[0])) {
+      //   $isamsTeacher = (new \Entities\People\iSamsTeacher($this->isams))->byUserCode($d[0]['txtTeacher']);
+      //   $this->teachers[] = (new \Entities\People\User())->byMISId($isamsTeacher->id);
+      // }
     }
 
     private function processFurtherMaths(){
