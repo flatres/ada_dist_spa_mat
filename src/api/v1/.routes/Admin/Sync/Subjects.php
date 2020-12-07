@@ -204,7 +204,7 @@ class Subjects
         $misSubjectId = $subject['misData']['id'];
         $subjectId = $subject['adaId'];
 
-        // Todo: ill want to add a syncing routing to this eventually
+        // Todo: ill want to add a syncing routine to this eventually
         $this->sql->delete('sch_classes', 'subjectId=?', [$subjectId]);
         $this->sql->delete('sch_class_students', 'subjectId=?', [$subjectId]);
         $this->sql->delete('sch_class_teachers', 'subjectId=?', [$subjectId]);

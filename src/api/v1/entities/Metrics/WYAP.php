@@ -6,6 +6,7 @@ class WYAP
 {
   public $subjectId, $examId, $year, $name, $marks, $created_at;
   public $results;
+  public $missingStudents = [];
   private $ada, $adaData;
 
   public function __construct(int $wyapId = null)
@@ -50,7 +51,9 @@ class WYAP
     return true;
   }
 
+  // studentsToMerge used when compiling all metrics for a pupil
   public function results (array &$studentsToMerge = null) {
+    global $userId;
     if (!$this->id) return;
 
     $studentMap = [];
@@ -78,6 +81,26 @@ class WYAP
       [$this->id]
     );
 
+    //if someone has been added to the subject since, identify them and add them to wyap
+    $wyapStudents = [];
+    $missing = [];
+    foreach($results as $r) $wyapStudents['s_' . $r['student_id']] = true;
+    foreach($students as $s) {
+      if (!isset($wyapStudents['s_' . $s->id])) $missing[] = $s;
+    }
+
+    $this->missingStudents = $missing;
+    if (count($missing) > 0) {
+      foreach ($missing as $m) $this->adaData->insert('wyap_results', 'wyap_id, student_id, exam_id, updated_by_id', [$this->id, $m->id, $this->examId, $userId]);
+      $results = $this->adaData->select(
+        'wyap_results',
+        'id, student_id, mark, percentage, rank, standard_deviation_delta, hasUnderperformed, comment, last_updated',
+        'wyap_id=?',
+        [$this->id]
+      );
+    }
+
+    unset($r);
     $allResults = [];
     foreach ($results as &$r) {
       //try to find in map and update if found
@@ -108,7 +131,8 @@ class WYAP
 
     return [
         'results' => $allResults,
-        'statistics' => $statistics
+        'statistics' => $statistics,
+        'missing' => $missing
     ];
   }
 
