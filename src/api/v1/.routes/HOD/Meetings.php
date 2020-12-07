@@ -21,6 +21,38 @@ class Meetings
 
 // ROUTE ----------------------------------------------------------------------------
 
+    public function meetingsSchoolsCloudFairGet($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'academic.meetings', '');
+      $this->progress->publish(0);
+      $data = [];
+      $appointments = $this->adaModules->select('hod_parent_meeting_appointments', 'userId, classId, studentId', 'id>?', [0]);
+      $i = 0;
+      foreach($appointments as $a) {
+        $this->progress->publish($i / count($appointments));
+        $i++;
+        // if ($i==10) break;
+        $student = new \Entities\People\Student($this->ada, $a['studentId']);
+        $class = new \Entities\Academic\AdaClass($this->ada, $a['classId']);
+        $subject = new \Entities\Academic\Subject($this->ada, $class->subjectId);
+        $user = new \Entities\People\User($this->ada, $a['userId']);
+        $data[] = [
+          'firstName' => $user->preName,
+          'lastName'  => $user->lastName,
+          'subject'   => $subject->name,
+          'code'      => $class->code,
+          'misId'     => $class->misId,
+          'studentFirstName'  => $student->preName,
+          'studentLastName'   => $student->lastName,
+          'registration'      => '',
+          'dob'               => $student->dob
+        ];
+      }
+
+      return emit($response, $data);
+    }
+
     public function meetingsAllGet($request, $response, $args)
     {
       $auth = $request->getAttribute('auth');

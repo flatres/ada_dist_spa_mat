@@ -48,8 +48,6 @@ class Metrics
       $this->progress->publish(0.75);
       $subject->makeMLOProfile();
       $subject->classes = null;
-      $subject->sql = null;
-      $subject->adaData = null;
       $this->progress->publish(1);
       // $subject->getExamData();
       // $subject->getSets($args['year']);
@@ -69,8 +67,6 @@ class Metrics
       $subject = $this->getYearMetrics($subjectId, $year, $examId);
 
       $subject->classes = null;
-      $subject->sql = null;
-      $subject->adaData = null;
 
       return emit($response, $subject);
     }
@@ -95,8 +91,6 @@ class Metrics
       $sheet = new \HOD\ExamMetricsSpreadsheet($subject);
 
       $subject->classes = null;
-      $subject->sql = null;
-      $subject->adaData = null;
 
       // return emit($response, $subject);
       return emit($response, $sheet->package);
@@ -104,20 +98,27 @@ class Metrics
 
     private function getYearMetrics($subjectId, $year, $examId)
     {
-      $this->progress->publish(0.1);
-      $subject = new \Entities\Academic\Subject($this->ada);
+      $this->progress->publish(0.1, 'Fetching pupils...');
+      $subject = new \Entities\Academic\Subject($this->ada, $subjectId);
+      $subject->getStudentsByExam($year, $examId);
 
-      $this->progress->publish(0.25);
-      $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
+      // $this->progress->publish(0.25);
+      // $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
 
-      $this->progress->publish(0.5);
-      $subject->makeMLOProfile();
+      $this->progress->publish(0.5, 'Fetching baseline date...');
+      // $subject->makeMLOProfile();
 
-      $this->progress->publish(0.75);
       $metrics = new \Entities\Metrics\ExamMetrics($examId, $subject->students, $year);
       $subject->metrics = $metrics->metrics;
       $subject->metricWeightings = $metrics->weightings;
 
+      $this->progress->publish(0.8, 'Fetching assessment points...');
+      $wyaps = $subject->getWYAPsByExam($year, $examId);
+
+      foreach($wyaps as &$w) {
+        (new \Entities\Metrics\WYAP($w->id))->results($subject->students);
+      }
+      $subject->wyaps = $wyaps;
       $this->progress->publish(1);
       return $subject;
     }

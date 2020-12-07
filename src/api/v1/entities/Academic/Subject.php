@@ -22,7 +22,7 @@ class Subject
   public $stackedHistory=[];
   public $grades=[];
   public $bands=[];
-  private $sql;
+  private $sql, $adaData;
 
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
   {
@@ -240,6 +240,7 @@ class Subject
     }
     $students = array_values($students);
     $students = sortObjects($students, 'lastName', 'ASC');
+    $this->students = $students;
     return $students;
   }
 

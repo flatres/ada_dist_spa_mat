@@ -50,8 +50,23 @@ class WYAP
     return true;
   }
 
-  public function results () {
+  public function results (array &$studentsToMerge = null) {
     if (!$this->id) return;
+
+    $studentMap = [];
+    $wyapKey = 'wyap_' . $this->id . '_';
+    if ($studentsToMerge) {
+      foreach ($studentsToMerge as &$s) {
+        $key = 's_' . $s->id;
+        $s->{$wyapKey . 'mark'} = null;
+        $s->{$wyapKey . 'pct'} = null;
+        $s->{$wyapKey . 'hasUnderperformed'} = false;
+        $s->{$wyapKey . 'rank'} = null;
+        $s->{$wyapKey . 'comment'} = '';
+        $studentMap[$key] = &$s;
+      }
+    }
+    unset($s);
 
     $data = (new \Entities\Academic\Subject($this->ada, $this->subjectId))->getStudentsByExam($this->year, $this->examId);
     foreach ($data as $s) $students['s_' . $s->id] = $s;
@@ -65,16 +80,31 @@ class WYAP
 
     $allResults = [];
     foreach ($results as &$r) {
+      //try to find in map and update if found
+      $key = 's_' . $r['student_id'];
+      if (isset($studentMap[$key])) {
+        $s = &$studentMap[$key];
+        $s->{$wyapKey . 'mark'} = $r['mark'];
+        $s->{$wyapKey . 'pct'} = $r['percentage'];
+        $s->{$wyapKey . 'hasUnderperformed'} = (bool)$r['hasUnderperformed'];
+        $s->{$wyapKey . 'rank'} = $r['rank'];
+        $s->{$wyapKey . 'comment'} = $r['comment'];
+      }
+
       $student = (new \Entities\People\Student($this->ada, $r['student_id']))->basic();
       if ($student['isDisabled']) continue;
       $r = array_merge($r, $student);
-      if (isset($students['s_' . $student['student_id']])) $r['classCode'] = str_replace(' (FM)', '', $students['s_' . $student['student_id']]->classCode);
+      if (isset($students[$key])) $r['classCode'] = str_replace(' (FM)', '', $students[$key]->classCode);
       $allResults[] = $r;
     }
+
+    // if ($studentsToMerge) { var_dump($studentMap); exit(); }
 
     $statistics = $this->statistics($allResults);
 
     $this->results = $allResults;
+
+    if ($studentsToMerge) $studentsToMerge = array_values($studentMap);
 
     return [
         'results' => $allResults,
@@ -104,7 +134,7 @@ class WYAP
     $this->rankResults();
   }
 
-  private function rankResults() {  
+  private function rankResults() {
     if (!$this->id) return;
 
     $results = $this->results()['results'];
@@ -154,6 +184,10 @@ class WYAP
       'mean'  => round($mean,1),
       'sd'    => round($stdDev,1)
     ];
+  }
+
+  public function getAllStudentResults(string $examId, array &$students)
+  {
 
   }
 
