@@ -56,6 +56,8 @@ class WYAP
     global $userId;
     if (!$this->id) return;
 
+    $this->makeTotals();
+
     $studentMap = [];
     $wyapKey = 'wyap_' . $this->id . '_';
     if ($studentsToMerge) {
@@ -63,6 +65,7 @@ class WYAP
         $key = 's_' . $s->id;
         $s->{$wyapKey . 'mark'} = null;
         $s->{$wyapKey . 'pct'} = null;
+        $s->{$wyapKey . 'hasUsedExtraTime'} = null;
         $s->{$wyapKey . 'hasUnderperformed'} = false;
         $s->{$wyapKey . 'rank'} = null;
         $s->{$wyapKey . 'comment'} = '';
@@ -76,7 +79,7 @@ class WYAP
 
     $results = $this->adaData->select(
       'wyap_results',
-      'id, student_id, mark, percentage, rank, standard_deviation_delta, hasUnderperformed, comment, last_updated',
+      'id, student_id, mark, percentage, rank, standard_deviation_delta, hasUsedExtraTime, hasUnderperformed, comment, last_updated',
       'wyap_id=?',
       [$this->id]
     );
@@ -94,7 +97,7 @@ class WYAP
       foreach ($missing as $m) $this->adaData->insert('wyap_results', 'wyap_id, student_id, exam_id, updated_by_id', [$this->id, $m->id, $this->examId, $userId]);
       $results = $this->adaData->select(
         'wyap_results',
-        'id, student_id, mark, percentage, rank, standard_deviation_delta, hasUnderperformed, comment, last_updated',
+        'id, student_id, mark, percentage, rank, standard_deviation_delta, hasUsedExtraTime, hasUnderperformed, comment, last_updated',
         'wyap_id=?',
         [$this->id]
       );
@@ -109,9 +112,27 @@ class WYAP
         $s = &$studentMap[$key];
         $s->{$wyapKey . 'mark'} = $r['mark'];
         $s->{$wyapKey . 'pct'} = $r['percentage'];
+        $s->{$wyapKey . 'hasUsedExtraTime'} = (bool)$r['hasUsedExtraTime'];
         $s->{$wyapKey . 'hasUnderperformed'} = (bool)$r['hasUnderperformed'];
         $s->{$wyapKey . 'rank'} = $r['rank'];
         $s->{$wyapKey . 'comment'} = $r['comment'];
+
+        // for when this feature is pushed and previuously entered wyaps dont' have totals data
+
+        if (!isset($s->wyap_totals_pct)) {
+          $isLowerSchool = $this->year < 12;
+          $totals = $this->adaData->select(
+            'wyap_totals',
+            'percentage, rank',
+            'student_id=? AND exam_id=? AND is_lower_school=?',
+            [$s->id, $this->examId, $isLowerSchool]
+          );
+          if (isset($totals[0])) {
+            $totals = $totals[0];
+            $s->wyap_totals_rank = $totals['rank'];
+            $s->wyap_totals_pct = $totals['percentage'];
+          }
+        }
       }
 
       $student = (new \Entities\People\Student($this->ada, $r['student_id']))->basic();
@@ -151,20 +172,19 @@ class WYAP
       }
       $this->adaData->update(
         'wyap_results',
-        'mark=?, percentage=?, hasUnderperformed=?, comment=?',
+        'mark=?, percentage=?,hasUsedExtraTime=?, hasUnderperformed=?, comment=?',
         'id=?',
-        [$r['mark'], $r['percentage'], $r['hasUnderperformed'], $r['comment'], $r['id']]);
+        [$r['mark'], $r['percentage'], $r['hasUsedExtraTime'], $r['hasUnderperformed'], $r['comment'], $r['id']]);
     }
     $this->rankResults();
+    $this->makeTotals();
   }
 
   private function rankResults() {
     if (!$this->id) return;
 
     $results = $this->results()['results'];
-    var_dump($results);
     $results = rankArray($results, 'mark', 'rank');
-    var_dump($results);
     foreach ($results as &$r) {
       $this->adaData->update(
         'wyap_results',
@@ -215,7 +235,55 @@ class WYAP
 
   }
 
+  // calculate the overall totals for each students
+  // called when WYAP results are updated
+  private function makeTotals() {
+    $wyaps = (new \Entities\Academic\Subject($this->ada, $this->subjectId))->getWYAPsByExam($this->year, $this->examId);
+    $students = [];
 
+    // collect marks for each student
+    foreach($wyaps as $w) {
+      $results = $this->adaData->select(
+        'wyap_results',
+        'id, student_id, mark',
+        'wyap_id=?',
+        [$w->id]
+      );
+      foreach($results as $r) {
+        $studentId = $r['student_id'];
+        $key = "s_$studentId";
+        if (!isset($students[$key])) $students[$key] = [
+          'id' => $studentId,
+          'marksScored' => 0,
+          'marksAvailable' => 0,
+          'pct' => 0,
+          'rank' => 0,
+          'wyapCount' => 0
+        ];
+        $s = &$students[$key];
+        if (!$r['mark']) continue;
+        if (strlen($r['mark']===0)) continue;
+        $s['marksScored'] += $r['mark'];
+        $s['marksAvailable'] += $w->marks;
+        $s['wyapCount']++;
+      }
+    }
+    $students = array_values($students);
+    unset($s);
+    foreach ($students as &$s) {
+      if ($s['marksAvailable'] > 0) $s['pct'] = round(100 * $s['marksScored'] / $s['marksAvailable'], 1);
+    }
+    $students = rankArray($students, 'pct', 'rank');
 
-
+    unset($s);
+    $isLowerSchool = $this->year < 12 ? 1 : 0;
+    foreach($students as $s) {
+      $this->adaData->delete('wyap_totals', 'student_id=? AND exam_id=? and is_lower_school=?', [$s['id'], $this->examId, $isLowerSchool]);
+      $this->adaData->insert(
+        'wyap_totals',
+        'student_id, exam_id, is_lower_school, total_marks, marks_available, percentage, rank, wyap_count',
+        [$s['id'], $this->examId, $isLowerSchool, $s['marksScored'], $s['marksAvailable'], $s['pct'], $s['rank'], $s['wyapCount']]
+      );
+    }
+  }
 }
