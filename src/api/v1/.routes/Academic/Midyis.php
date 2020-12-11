@@ -71,10 +71,12 @@ class Midyis
 
       for ($row = 8; $row < $highestRow; ++$row) {
         $rowData = [];
-        $lastName = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
-        $firstName = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
-        $score = $worksheet->getCellByColumnAndRow(8, $row)->getValue();
-        $band = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
+        $lastName = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+        $lastName = str_replace(' *', '', $lastName);
+        $firstName = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
+        $firstName = str_replace(' *', '', $firstName);
+        $score = $worksheet->getCellByColumnAndRow(4, $row)->getValue();
+        $band = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
 
         $s = $this->ada->select('stu_details', 'id', 'lastname=? AND firstname=?', [$lastName, $firstName]);
         $studentError = count($s) === 1 ? false : true;
@@ -91,7 +93,7 @@ class Midyis
           'exams' => []
         ];
         if ($student['error']) $errorStudents[] = $student;
-        for ($col = 10; $col < $highestColumnIndex; ++$col) {
+        for ($col = 6; $col < $highestColumnIndex; ++$col) {
           $value = $worksheet->getCellByColumnAndRow($col, $row)->getValue();
           if (strlen($value) > 0) {
             $key = 'c_' . $col;
