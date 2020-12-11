@@ -48,8 +48,8 @@ class Midyis
       $errorSubjects = [];
       $errorStudents = [];
 
-      for ($col = 10; $col < $highestColumnIndex; ++$col) {
-        $cell = $worksheet->getCellByColumnAndRow($col, 7);
+      for ($col = 6; $col < $highestColumnIndex; ++$col) {
+        $cell = $worksheet->getCellByColumnAndRow($col, 1);
         $value = $cell->getValue();
         if (explode('-', $value)[0] == 'A1') continue; //As Level
         $subjectCodes->txtOptionTitle = $value;
@@ -69,7 +69,7 @@ class Midyis
       }
 
 
-      for ($row = 8; $row < $highestRow; ++$row) {
+      for ($row = 2; $row < $highestRow; ++$row) {
         $rowData = [];
         $lastName = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
         $lastName = str_replace(' *', '', $lastName);
