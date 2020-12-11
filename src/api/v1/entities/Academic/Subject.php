@@ -124,9 +124,9 @@ class Subject
       return sortObjects($wyaps, 'created_at');
   }
 
-  public function getStudentsMLOByExam($year, $examId) {
+  public function getStudentsMLOByExam(int $year, int $examId) {
     $students = $this->getStudentsByExam($year, $examId);
-    $this->year = (int)$year;
+    $this->year = $year;
     $maxMLOCount = 0;
     $exam = new \Entities\Academic\SubjectExam($this->sql, $examId);
     foreach($students as &$s) {
@@ -225,7 +225,8 @@ class Subject
     return $gradeStore;
   }
 
-  public function getStudentsByExam($year, $examId) {
+  public function getStudentsByExam(int $year, int $examId) {
+    $this->year = $year;
     $classes = count($this->classes) == 0 ? $this->getClassesByYear($year) : $this->classes;
     $students = [];
     foreach($classes as $c) {

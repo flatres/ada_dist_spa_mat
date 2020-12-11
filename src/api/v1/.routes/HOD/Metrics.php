@@ -105,7 +105,7 @@ class Metrics
       // $this->progress->publish(0.25);
       // $subject->byId($subjectId)->getStudentsMLOByExam($year, $examId);
 
-      $this->progress->publish(0.5, 'Fetching baseline date...');
+      $this->progress->publish(0.5, 'Fetching baseline data...');
       // $subject->makeMLOProfile();
 
       $metrics = new \Entities\Metrics\ExamMetrics($examId, $subject->students, $year);
@@ -118,6 +118,8 @@ class Metrics
       foreach($wyaps as &$w) {
         (new \Entities\Metrics\WYAP($w->id))->results($subject->students);
       }
+
+
       $subject->wyaps = $wyaps;
       $this->progress->publish(1);
       return $subject;
