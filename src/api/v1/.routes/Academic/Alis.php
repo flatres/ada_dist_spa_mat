@@ -79,9 +79,14 @@ class Alis
         $name = explode(', ', $worksheet->getCellByColumnAndRow(2, $row)->getValue());
         $baseline = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
         $dob = explode('/', $worksheet->getCellByColumnAndRow(4, $row)->getValue()); //initially in format dd/mm/yy
-        $dob = '20' . $dob[2] . '-' . $dob[1] . '-' . $dob[0];
 
-        $s = $this->ada->select('stu_details', 'id', 'lastname=? AND firstname=? AND dob = ?', [$name[0], $name[1], $dob]);
+        if (count($dob)===3) {
+            $dob = '20' . $dob[2] . '-' . $dob[1] . '-' . $dob[0];
+            $s = $this->ada->select('stu_details', 'id', 'lastname=? AND firstname=? AND dob = ?', [$name[0], $name[1], $dob]);
+        } else {
+            $s = $this->ada->select('stu_details', 'id', 'lastname=? AND firstname=?', [$name[0], $name[1]]);
+        }
+
         $studentError = count($s) === 1 ? false : true;
 
         $id = $studentError ? null : $s[0]['id'];
