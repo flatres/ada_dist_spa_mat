@@ -70,7 +70,7 @@ class Staff
         // break;
       }
       //1893
-      $this->adaModules->update('covid_answers_staff', 'isHealthy=?, hasAnswered=?', 'user_id=?', [1, 1, 1893]);
+      $this->adaModules->update('covid_answers_staff', 'isHealthy=?, hasAnswered=?, isNotInWork=?', 'user_id=?', [0, 1, 1, 1893]);
 
       return true;
     }
