@@ -13,5 +13,9 @@ $app->group('/academic', function(){
     $this->post('/midyis/upload', '\Academic\Midyis:midyisUploadPost');
     $this->get('/covid', '\Academic\Covid:covidGet');
 
+    $this->get('/ucas/grades', '\Academic\Ucas:ucasGradesGet');
+
+    $this->get('/almanac/history', '\Academic\Almanac:almanacHistoryGet');
+
 })->add("Authenticate");
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);

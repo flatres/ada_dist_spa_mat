@@ -118,7 +118,7 @@ class Subjects
     private function newSubjects($subject)
     {
       $d = $subject['misData'];
-
+      if ($d['code'] === 'FM') $d['code'] = 'FORM';
       if ($d['code'] === 'FM' || $d['name'] === 'ESS') return;
 
       //weirdly Computer Science is in isams as CO but comes out of the exams systems correctly as case
@@ -174,6 +174,7 @@ class Subjects
     private function updateSubjects($subject)
     {
       $d = $subject['misData'];
+      if ($d['code'] === 'FM') $d['code'] = 'FORM';
       if ($d['code'] === 'FM' || $d['name'] === 'ESS') return;
       if ($subject['disabled'] == true)
       {
