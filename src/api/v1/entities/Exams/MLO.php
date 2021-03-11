@@ -13,36 +13,56 @@ class MLO
 
     private $sql;
 
-    public function __construct(\Dependency\Databases\Ada $ada = null)
+    public function __construct(\Dependency\Databases\AdaData $ada = null)
     {
-       $this->sql= $ada ?? new \Dependency\Databases\Ada();
+       $this->sql= $ada ?? new \Dependency\Databases\AdaData();
        return $this;
     }
 
-    public function newMLO($studentId, $mlo, $subjectCode, $teacherId) {
+    public function getActiveSession(int $yearGroup) {
+      $session = $this->sql->select('mlo_sessions', 'id, name, timestamp, yearGroup, isActive', 'yearGroup=? AND isActive=?', [$yearGroup, 1]);
+      if (isset($session[0])) return $session[0];
+      return null;
+    }
 
-      if ($mlo) {
-        $tag = new \Entities\Tags\Tag();
+    public function newMLO(int $sessionId, int $userId, int $studentId, int $examId, $mloCurrent, $mloPotential)
+    {
+      $mlo = $this->sql->select(
+        'mlo',
+        'id',
+        'session_id = ? AND user_id = ? AND student_id = ? AND exam_id = ?',
+        [$sessionId, $userId, $studentId, $examId]
+      );
+      if (isset($mlo[0])) {
+        // update
+        $id = $mlo[0]['id'];
+        $this->sql->update(
+          'mlo',
+          'session_id = ?, user_id = ?, student_id = ?, exam_id = ?, mlo_current = ?, mlo_potential = ?',
+          'id = ?',
+          [$sessionId, $userId, $studentId, $examId, $mloCurrent, $mloPotential, $mlo[0]['id']]
+        );
 
-        // only write new tag if new value if different to old, or the first one.
-        $oldMlo = $tag->value('MLO', $subjectCode, $studentId, $teacherId);
-          if (!$oldMlo || $oldMlo !== $mlo) {
-            $tag->create('MLO', $subjectCode, [
-              'studentId' => $studentId,
-              'value'     => $mlo,
-              'cumulative' => true
-            ]);
-            return true;
-          }
+      } else {
+        // new
+        $this->sql->insert(
+          'mlo',
+          'session_id, user_id, student_id, exam_id, mlo_current, mlo_potential',
+          [$sessionId, $userId, $studentId, $examId, $mloCurrent, $mloPotential]
+        );
       }
-      return false;
+
     }
 
     //fetches the most recent MLO from this subject and teacher
-    public function getSingleMLO($studentId, $subjectCode, $teacherId) {
-      $tag = new \Entities\Tags\Tag();
-      // echo $studentId . $subjectCode, $teacherId . PHP_EOL;
-      return $tag->value('MLO', $subjectCode, $studentId, $teacherId);
+    public function getSingleMLO(int $studentId, int $examId, int $userId) {
+      $mlo = $this->sql->select(
+        'mlo',
+        'session_id, exam_id, student_id, mlo_current, mlo_potential',
+        'student_id = ? AND exam_id = ? AND user_id = ? ORDER BY timestamp DESC',
+        [$studentId, $examId, $userId]
+      );
+      return isset($mlo[0]) ? $mlo[0] : null;
     }
 
     public function getStudentMLO($studentId, $subjectId = null) {

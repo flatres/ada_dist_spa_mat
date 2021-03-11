@@ -17,6 +17,7 @@ class Classes
     {
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
+       $this->adaData = $container->adaData;
        // $this->isams = $container->isams;
        // $this->mcCustom = $container->mcCustom;
        // global $userId;
@@ -46,33 +47,24 @@ class Classes
         // $wyaps = $class;
         return emit($response, $wyaps);
     }
-    public function setMLOGet($request, $response, $args)
-    {
-      $id = $args['id'];
-      global $userId;
-      $class = new \Entities\Academic\iSamsSet($this->isams, $id);
-      $class->getStudents();
-      $MLO = new \Entities\Exams\MLO($this->ada);
-      foreach($class->students as &$student) {
-        $student->mlo = $MLO->getSingleMLO($student->id, $class->subjectCode, $userId);
-      }
-      return emit($response, $class);
-    }
 
-    public function formMLOGet($request, $response, $args)
+    public function MLOGet($request, $response, $args)
     {
-      $id = $args['id'];
+      $examId = $args['examId'];
+      $classId = $args['classId'];
       global $userId;
-      $isEnLit = false;
-      if (strpos($id, '(LIT)') !== false) $isEnLit = true;
-      $id = str_replace('(LIT)','', $id);
-      $class = new \Entities\Academic\iSamsForm($this->isams, $id);
-      if ($isEnLit) $class->subjectCode = 'ENLIT';
-
+      $class = new \Entities\Academic\AdaClass($this->ada, $classId);
+      // $class = new \Entities\Academic\iSamsSet($this->isams, $id);
       $class->getStudents();
-      $MLO = new \Entities\Exams\MLO($this->ada);
+      $class->examId = $examId;
+
+      $MLO = new \Entities\Exams\MLO($this->adaData);
+      $class->session = $MLO->getActiveSession($class->year);
       foreach($class->students as &$student) {
-        $student->mlo = $MLO->getSingleMLO($student->id, $class->subjectCode, $userId);
+        $mlo = $MLO->getSingleMLO($student->id, $examId, $userId);
+        $student->mlo = $mlo;
+        $student->mloCurrent = $mlo['mlo_current'];
+        $student->mloPotential = $mlo['mlo_potential'];
       }
       return emit($response, $class);
     }
@@ -82,9 +74,10 @@ class Classes
       global $userId;
       $class = $request->getParsedBody();
       $students = $class['students'];
+      $session = $class['session'];
       foreach($students as $student) {
-        $MLO = new \Entities\Exams\MLO($this->ada);
-        $MLO->newMLO($student['id'], $student['mlo'], $class['subjectCode'], $userId);
+        $MLO = new \Entities\Exams\MLO($this->adaData);
+        $MLO->newMLO($session['id'], $userId, $student['id'], $class['examId'], $student['mloCurrent'], $student['mloPotential']);
       }
 
       return emit($response, $class);

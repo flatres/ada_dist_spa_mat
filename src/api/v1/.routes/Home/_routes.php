@@ -13,6 +13,7 @@ $app->group('/home', function(){
 
   $this->get('/classes/mlo/form/{id}', '\Home\Classes:formMLOGet');
   $this->get('/classes/mlo/set/{id}', '\Home\Classes:setMLOGet');
+  $this->get('/classes/mlo/{classId}/{examId}', '\Home\Classes:MLOGet');
   $this->post('/classes/mlo', '\Home\Classes:MLOPost');
 
   $this->get('/absences/all', '\Home\Absences:allAbsencesGet');
