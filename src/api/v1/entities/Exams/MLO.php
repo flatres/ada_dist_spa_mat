@@ -79,12 +79,13 @@ class MLO
         $key = "id" . $examId;
         if (!isset($exams[$key])) {
           $exams[$key] = [];
-          $examsInfo[] = new \Entities\Academic\SubjectExam($this->sql, $examId);
+          $examsInfo[] = new \Entities\Academic\SubjectExam(null, $examId);
         }
         if ($m['mlo']) {
+          $grade = $m['mlo']['mlo_current'];
           $exams[$key][] = [
-            'points'  => (new \Entities\Exams\Grade($m['mlo']))->points,
-            'grade'   => $m['mlo']
+            'points'  => (new \Entities\Exams\Grade($grade))->points,
+            'grade'   => $grade
           ];
         }
       }

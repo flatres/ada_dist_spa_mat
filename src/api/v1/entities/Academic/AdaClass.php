@@ -20,6 +20,7 @@ class AdaClass
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
   {
      $this->sql= $ada ?? new \Dependency\Databases\Ada();
+     $this->adaData= new \Dependency\Databases\AdaData();
      if ($id) $this->byId($id);
      return $this;
   }
@@ -30,7 +31,8 @@ class AdaClass
     if (isset($class[0])){
       $class = $class[0];
       $this->misId = $class['misId'];
-      $this->code = str_replace(' (FM)', '', $class['code']);
+      $this->code = str_replace(' (FM)', ' ', $class['code']);
+      // $this->code = $class['code'];
       $this->subjectId = $class['subjectId'];
       $this->year = $class['year'];
       $this->isForm = $class['isForm'] == 1 ? true : false;
@@ -90,13 +92,13 @@ class AdaClass
         foreach($this->teachers as $t){
           $examCode = $e->aliasCode ? $e->aliasCode : $e->examCode;
           if (!isset($mloBank[$e->id . '_' . $t->id])) {
-            $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $examCode, $t->id);
+            $mlo = (new \Entities\Exams\MLO($this->adaData))->getSingleMLO($s->id, $e->id, $t->id);
             $s->examData['mlo'][] = [
               'teacher' => $t,
               'examId'  => $e->id,
               'mlo'     => $mlo
             ];
-            $s->{'mlo' . $mloCount} = $mlo;
+            $s->{'mlo' . $mloCount} = $mlo['mlo_current'];
             $mloCount++;
             $mloBank[$e->id . '_' . $t->id] = true;
           }

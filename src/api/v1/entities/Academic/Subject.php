@@ -63,7 +63,13 @@ class Subject
       $classYear = $d[0]['year'] ?? -1;
       if ($year == $classYear) {
         $class = new \Entities\Academic\AdaClass($this->sql, $c['classId']);
-        $examClasses[$class->code] = $class;
+        if (isset($examClasses[$class->code])) {
+          // must be Further Maths as AdaClass strips (FM) from one of the FM sets,  so combine teachers
+          $examClasses[$class->code]->teachers = array_merge($examClasses[$class->code]->teachers, $class->teachers);
+        } else {
+          $examClasses[$class->code] = $class;
+        }
+        // $examClasses[$class->code] = $class;
       }
     }
 
@@ -135,7 +141,7 @@ class Subject
       $s->getClassesByExam($examId);
       foreach($s->classes as $c){
         foreach($c->teachers as $t){
-          $mlo = (new \Entities\Exams\MLO($this->sql))->getSingleMLO($s->id, $exam->aliasCode ? $exam->aliasCode : $exam->examCode, $t->id);
+          $mlo = (new \Entities\Exams\MLO($this->adaData))->getSingleMLO($s->id, $examId, $t->id);
           $s->examData['mlo'][] = [
             'teacher' => $t,
             'examId'  => $examId,
@@ -158,7 +164,7 @@ class Subject
 
   public function makeMLOProfile($examId = null) {
     $students = &$this->students;
-    $mlo = new \Entities\Exams\MLO($this->sql);
+    $mlo = new \Entities\Exams\MLO($this->adaData);
     foreach ($students as &$s) {
       $exam = $mlo->makeProfile($s, $examId);
       $this->countGrade($this->mloMaxGradeProfile, $exam->mloMax, $s);
