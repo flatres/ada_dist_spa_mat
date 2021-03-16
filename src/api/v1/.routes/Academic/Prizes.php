@@ -92,6 +92,7 @@ class Prizes
         $contacts = $pupil->getContacts();
         $i = 1;
         foreach ($contacts as $c){
+          $prize["ls$i"] = $c['letterSalulation'];
           $prize["email$i"] = $c['email'];
           $i++;
         }
