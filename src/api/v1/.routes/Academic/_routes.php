@@ -6,6 +6,7 @@ use Slim\Http\Response;
 
 $app->group('/academic', function(){
 
+    $this->get('/prizes/cm', '\Academic\Prizes:CMPrizesGet'); //commendation and merit
     $this->get('/prizes', '\Academic\Prizes:prizesGet');
     $this->get('/census', '\Academic\Census:censusGet');
     $this->get('/alis/registration', '\Academic\Alis:alisRegistrationGet');

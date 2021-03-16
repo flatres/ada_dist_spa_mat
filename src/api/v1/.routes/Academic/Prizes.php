@@ -20,7 +20,55 @@ class Prizes
        $this->mcCustom= $container->mcCustom;
     }
 
-// ROUTE -----------------------------------------------------------------------------
+    // ROUTE -----------------------------------------------------------------------------
+    public function CMPrizesGet($request, $response, $args)
+    {
+      $i = 1;
+      $data = ['yo'];
+      // $prizes = $this->isams->select(
+      //   'TblRewardsManagerRewards',
+      //   txt
+      // );
+      $prizes = $this->isams->query(
+        "SELECT txtSchoolID, count(txtSchoolID) as count FROM
+        TblRewardsManagerRewards
+        WHERE txtDate BETWEEN '1 Jan 2021' AND '31 Mar 2021'
+        GROUP BY txtSchoolID
+        ",
+        []
+      );
+      $final = [];
+      foreach($prizes as &$prize){
+        $prize['id'] = $i;
+        $i++;
+        $pupilID = $prize['txtSchoolID'];
+        $count = (int)$prize['count'];
+        $adaPupil = (new \Entities\People\Student($this->ada))->byMISId($pupilID);
+        $pupil = new \Entities\People\iSamsStudent($this->isams, $pupilID);
+
+        if ($pupil->NCYear < 11 && $count < 30) continue;
+        if ($pupil->NCYear == 11 && $count < 25) continue;
+        if ($pupil->NCYear > 11) continue;
+
+        $prize['firstName']= $pupil->firstName;
+        $prize['lastName'] = $pupil->lastName;
+        $prize['pupilEmail']= $adaPupil->email;
+        $prize['NCYear'] = $adaPupil->NCYear;
+        $prize['gender'] = $pupil->gender;
+        $contacts = $pupil->getContacts();
+        $i = 1;
+        foreach ($contacts as $c){
+          $prize["email$i"] = $c['email'];
+          $i++;
+        }
+        $final[] = $prize;
+
+      }
+      return emit($response, $final);
+      // return emit($response, $this->adaModules->select('TABLE', '*'));
+    }
+
+
     public function PrizesGet($request, $response, $args)
     {
       $i = 1;
