@@ -71,7 +71,7 @@ class Staff
       }
       //1893
 
-      $this->adaModules->update('covid_answers_staff', 'isHealthy=?, hasAnswered=?, isNotInWork=?', 'user_id=? AND date=?', [0, 1, 1, 1893, $today]);
+      $this->adaModules->update('covid_answers_staff', 'isHealthy=?, hasAnswered=?, isNotInWork=?', 'user_id=? AND date=?', [1, 1, 0, 1893, $today]);
 
       return true;
     }
