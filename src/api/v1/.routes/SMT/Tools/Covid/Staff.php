@@ -48,7 +48,6 @@ class Staff
     public function sendTodayEmails() {
 
       // if (date('N') == 7) return; //dont run on a Sundays
-
       $status = $this->getStatus();
       if ($status == 0) return false;
 
@@ -65,9 +64,12 @@ class Staff
         }
       }
       foreach($pendingStaff as $s) {
-        $email = new \Utilities\Email\Emails\Covid\CovidStaff($s->email, $s->prename, $s->hash);
+        $addr = $s->email;
+        $addr='flatres@gmail.com';
+        echo "sent \n";
+        $email = new \Utilities\Email\Emails\Covid\CovidStaff($addr, $s->prename, $s->hash);
         $this->adaModules->insert('covid_answers_staff', 'user_id, hash, date', [$s->id, $s->hash, $today]);
-        // break;
+        break;
       }
       //1893
 

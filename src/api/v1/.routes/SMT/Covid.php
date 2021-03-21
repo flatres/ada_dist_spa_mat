@@ -34,7 +34,7 @@ class Covid
         foreach($watchers as $w) {
           $s->watchers[] =  new \Entities\People\User($this->ada, $w['hod_user_id']);
         }
-        $s->watchCount = count($s->watchers); 
+        $s->watchCount = count($s->watchers);
       }
       return emit($response, $staff);
     }

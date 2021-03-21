@@ -66,11 +66,19 @@ class Covid
       $hasAnswered = true;
       $isNotInWork = $res['isNotInWork'] ? 1 : 0;
       $isHealthy = $res['isHealthy'] ? 1 : 0;
+      $hasTakenTest = $res['hasTakenTest'] ? 1 : 0;
+      if ($hasTakenTest === 0) {
+        $hasLoggedTest = null;
+        $testWasNegative = null;
+      } else {
+        $hasLoggedTest = $res['hasLoggedTest'] ? 1 : 0;
+        $testWasNegative = $res['testWasNegative'] ? 1 : 0;
+      }
       $this->adaModules->update(
         'covid_answers_staff',
-        'hasAnswered=?, isHealthy=?, isNotInWork=?',
+        'hasAnswered=?, isHealthy=?, isNotInWork=?, hasTakenTest = ?, hasLoggedTest = ?, testWasNegative = ?',
         'hash=?',
-        [$hasAnswered, $isHealthy, $isNotInWork, $res['hash']]);
+        [$hasAnswered, $isHealthy, $isNotInWork, $hasTakenTest, $hasLoggedTest, $testWasNegative, $res['hash']]);
 
       return emit($response, 'success');
     }
