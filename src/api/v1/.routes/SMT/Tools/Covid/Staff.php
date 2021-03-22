@@ -65,11 +65,11 @@ class Staff
       }
       foreach($pendingStaff as $s) {
         $addr = $s->email;
-        $addr='flatres@gmail.com';
-        echo "sent \n";
+        // $addr='flatres@gmail.com';
+        // echo "sent \n";
         $email = new \Utilities\Email\Emails\Covid\CovidStaff($addr, $s->prename, $s->hash);
         $this->adaModules->insert('covid_answers_staff', 'user_id, hash, date', [$s->id, $s->hash, $today]);
-        break;
+        // break;
       }
       //1893
 
