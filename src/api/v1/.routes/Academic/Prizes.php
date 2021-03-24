@@ -46,8 +46,8 @@ class Prizes
         $adaPupil = (new \Entities\People\Student($this->ada))->byMISId($pupilID);
         $pupil = new \Entities\People\iSamsStudent($this->isams, $pupilID);
 
-        if ($pupil->NCYear < 11 && $count < 30) continue;
-        if ($pupil->NCYear == 11 && $count < 25) continue;
+        if ($pupil->NCYear < 11 && $count < 25) continue;
+        if ($pupil->NCYear == 11 && $count < 30) continue;
         if ($pupil->NCYear > 11) continue;
 
         $prize['firstName']= $pupil->firstName;
