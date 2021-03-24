@@ -39,6 +39,32 @@ class Covid
       return emit($response, $staff);
     }
 
+    public function newStaffTestsGet ($request, $response, $args) {
+      $staff = $this->adaModules->select('covid_answers_staff', 'id, user_id, testWasNegative, timestamp, isLogged', 'hasTakenTest = ? AND isLogged = ? ORDER BY timestamp ASC', [true, 0]);
+      foreach ($staff as &$s) {
+        $user = (new \Entities\People\User())->byId($s['user_id']);
+        $s['name'] = $user->fullName;
+        $s['email'] = $user->email;
+      }
+      return emit($response, $staff);
+    }
+
+    public function archivedStaffTestsGet($request, $response, $args) {
+      $staff = $this->adaModules->select('covid_answers_staff', 'id, user_id, testWasNegative, timestamp, isLogged', 'hasTakenTest = ? AND isLogged = ? ORDER BY timestamp DESC', [true, 1]);
+      foreach ($staff as &$s) {
+        $user = (new \Entities\People\User())->byId($s['user_id']);
+        $s['name'] = $user->fullName;
+        $s['email'] = $user->email;
+      }
+      return emit($response, $staff);
+    }
+
+    public function archivedStaffTestsPut($request, $response, $args) {
+      $id = $args['recordId'];
+      $staff = $this->adaModules->update('covid_answers_staff', 'isLogged=?', 'id=?', [1, $id]);
+      return emit($response, ['id' => (int)$id]);
+    }
+
     public function studentsGet($request, $response, $args)
     {
       $staff = (new \SMT\Tools\Covid\Students())->getAll();

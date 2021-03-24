@@ -14,6 +14,9 @@ $app->group('/smt', function(){
     // $this->get('/covid/house/{id}', '\SMT\Covid:houseStudentsGet');
 
     $this->get('/covid/staff', '\SMT\Covid:staffGet');
+    $this->get('/covid/staff/tests/new', '\SMT\Covid:newStaffTestsGet');
+    $this->get('/covid/staff/tests/archive', '\SMT\Covid:archivedStaffTestsGet');
+    $this->put('/covid/staff/tests/archive/{recordId}', '\SMT\Covid:archivedStaffTestsPut');
     $this->get('/covid/staff/watchers', '\SMT\Covid:staffWatchersGet');
 
     $this->post('/covid/students', '\SMT\Covid:studentEmailsPost');
