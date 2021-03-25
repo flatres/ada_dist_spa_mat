@@ -40,7 +40,7 @@ class Covid
     }
 
     public function newStaffTestsGet ($request, $response, $args) {
-      $staff = $this->adaModules->select('covid_answers_staff', 'id, user_id, testWasNegative, timestamp, isLogged', 'hasTakenTest = ? AND isLogged = ? ORDER BY timestamp ASC', [true, 0]);
+      $staff = $this->adaModules->select('covid_answers_staff', 'id, user_id, testWasNegative, date, isLogged', 'hasTakenTest = ? AND isLogged = ? ORDER BY date ASC', [true, 0]);
       foreach ($staff as &$s) {
         $user = (new \Entities\People\User())->byId($s['user_id']);
         $s['name'] = $user->fullName;
@@ -50,7 +50,7 @@ class Covid
     }
 
     public function archivedStaffTestsGet($request, $response, $args) {
-      $staff = $this->adaModules->select('covid_answers_staff', 'id, user_id, testWasNegative, timestamp, isLogged', 'hasTakenTest = ? AND isLogged = ? ORDER BY timestamp DESC', [true, 1]);
+      $staff = $this->adaModules->select('covid_answers_staff', 'id, user_id, testWasNegative, date, isLogged', 'hasTakenTest = ? AND isLogged = ? ORDER BY date DESC', [true, 1]);
       foreach ($staff as &$s) {
         $user = (new \Entities\People\User())->byId($s['user_id']);
         $s['name'] = $user->fullName;
