@@ -144,8 +144,6 @@ class Metrics
       // $subject->getSets($args['year']);
       $subject->classes = null;
       $subject->students = null;
-      $subject->sql = null;
-      $subject->adaData = null;
       $subject->examId = (int)$examId;
       $this->progress->publish(1);
       return emit($response, $subject);

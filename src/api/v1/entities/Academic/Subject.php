@@ -17,6 +17,7 @@ class Subject
   public $exams=[];
   public $mloMaxGradeProfile=[];
   public $mloMinGradeProfile=[];
+  public $maxMLOCount = 0;
   public $history=[];
   public $bandedHistory = [];
   public $stackedHistory=[];
