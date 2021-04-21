@@ -4,7 +4,7 @@ namespace Entities\Metrics;
 
 class WYAP
 {
-  public $subjectId, $examId, $year, $name, $marks, $created_at;
+  public $subjectId, $examId, $year, $name, $marks, $created_at, $typeId;
   public $results;
   public $missingStudents = [];
   private $ada, $adaData;
@@ -20,7 +20,7 @@ class WYAP
   }
 
   public function byId($id) {
-    $wyap = $this->adaData->select('wyaps', 'id, subjectId, examId, year, name, marks, created_at', 'id=?', [$id]);
+    $wyap = $this->adaData->select('wyaps', 'id, subjectId, examId, year, name, marks, created_at, typeId', 'id=?', [$id]);
     if (!isset($wyap[0])) return $this;
     $wyap = $wyap[0];
     $this->id = $id;
@@ -29,13 +29,14 @@ class WYAP
     $this->year = $wyap['year'];
     $this->name = $wyap['name'];
     $this->marks = $wyap['marks'];
+    $this->typeId = $wyap['typeId'];
     $this->created_at = $wyap['created_at'];
     return $this;
   }
 
-  public function create($subjectId, $examId, $year, $name, $marks) {
+  public function create($subjectId, $examId, $year, $name, $marks, $typeId) {
     global $userId;
-    $this->id = $this->adaData->insert('wyaps', 'subjectId, examId, year, name, marks', [$subjectId, $examId, $year, $name, $marks]);
+    $this->id = $this->adaData->insert('wyaps', 'subjectId, examId, year, name, marks, typeId', [$subjectId, $examId, $year, $name, $marks, $typeId]);
     $students = (new \Entities\Academic\Subject($this->ada, $subjectId))->getStudentsByExam($year, $examId);
     foreach($students as $s) {
       $this->adaData->insert('wyap_results', 'wyap_id, student_id, exam_id, updated_by_id', [$this->id, $s->id, $examId, $userId]);

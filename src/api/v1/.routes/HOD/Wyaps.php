@@ -38,7 +38,7 @@ class Wyaps
       $examId = $args['exam'];
       $data = $request->getParsedBody();
       $wyap = new \Entities\Metrics\WYAP();
-      $wyap->create($subjectId, $examId, $year, $data['name'], $data['marks']);
+      $wyap->create($subjectId, $examId, $year, $data['name'], $data['marks'], $data['typeId']);
       return emit($response, $wyap);
     }
 
