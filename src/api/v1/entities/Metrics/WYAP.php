@@ -4,8 +4,9 @@ namespace Entities\Metrics;
 
 class WYAP
 {
-  public $subjectId, $examId, $year, $name, $marks, $created_at, $typeId;
-  public $results;
+  public $subjectId, $examId, $year, $name, $marks, $created_at, $typeId, $gradeSetId;
+  public $results, $boundaries;
+  public $hasGrades = false;
   public $missingStudents = [];
   private $ada, $adaData;
 
@@ -20,17 +21,21 @@ class WYAP
   }
 
   public function byId($id) {
-    $wyap = $this->adaData->select('wyaps', 'id, subjectId, examId, year, name, marks, created_at, typeId', 'id=?', [$id]);
+    $wyap = $this->adaData->select('wyaps', 'id, subjectId, examId, gradeSetId, year, name, marks, created_at, typeId', 'id=?', [$id]);
     if (!isset($wyap[0])) return $this;
     $wyap = $wyap[0];
     $this->id = $id;
     $this->subjectId = $wyap['subjectId'];
     $this->examId = $wyap['examId'];
+    $this->gradeSetId = $wyap['gradeSetId'];
     $this->year = $wyap['year'];
     $this->name = $wyap['name'];
     $this->marks = $wyap['marks'];
     $this->typeId = $wyap['typeId'];
     $this->created_at = $wyap['created_at'];
+
+    if ($this->gradeSetId) $this->hasGrades = count($this->adaData->select('wyap_grade_boundaries', 'id', 'wyapId=?', [$id])) > 0;
+
     return $this;
   }
 
@@ -48,6 +53,7 @@ class WYAP
   public function delete() {
     if (!$this->id) return;
     $this->adaData->delete('wyaps', 'id=?', [$this->id]);
+    $this->adaData->delete('wyap_grade_boundaries', 'wyapId=?', [$this->id]);
     $this->adaData->delete('wyap_results', 'wyap_id=?', [$this->id]);
     return true;
   }
@@ -65,6 +71,7 @@ class WYAP
       foreach ($studentsToMerge as &$s) {
         $key = 's_' . $s->id;
         $s->{$wyapKey . 'mark'} = null;
+        $s->{$wyapKey . 'grade'} = null;
         $s->{$wyapKey . 'pct'} = null;
         $s->{$wyapKey . 'hasUsedExtraTime'} = null;
         $s->{$wyapKey . 'hasUnderperformed'} = false;
@@ -80,7 +87,7 @@ class WYAP
 
     $results = $this->adaData->select(
       'wyap_results',
-      'id, student_id, mark, percentage, rank, standard_deviation_delta, hasUsedExtraTime, hasUnderperformed, comment, last_updated',
+      'id, student_id, mark, grade, percentage, rank, standard_deviation_delta, hasUsedExtraTime, hasUnderperformed, comment, last_updated',
       'wyap_id=?',
       [$this->id]
     );
@@ -98,7 +105,7 @@ class WYAP
       foreach ($missing as $m) $this->adaData->insert('wyap_results', 'wyap_id, student_id, exam_id, updated_by_id', [$this->id, $m->id, $this->examId, $userId]);
       $results = $this->adaData->select(
         'wyap_results',
-        'id, student_id, mark, percentage, rank, standard_deviation_delta, hasUsedExtraTime, hasUnderperformed, comment, last_updated',
+        'id, student_id, mark, grade, percentage, rank, standard_deviation_delta, hasUsedExtraTime, hasUnderperformed, comment, last_updated',
         'wyap_id=?',
         [$this->id]
       );
@@ -112,6 +119,7 @@ class WYAP
       if (isset($studentMap[$key])) {
         $s = &$studentMap[$key];
         $s->{$wyapKey . 'mark'} = $r['mark'];
+        $s->{$wyapKey . 'grade'} = $r['grade'];
         $s->{$wyapKey . 'pct'} = $r['percentage'];
         $s->{$wyapKey . 'hasUsedExtraTime'} = (bool)$r['hasUsedExtraTime'];
         $s->{$wyapKey . 'hasUnderperformed'} = (bool)$r['hasUnderperformed'];
@@ -179,6 +187,7 @@ class WYAP
     }
     $this->rankResults();
     $this->makeTotals();
+    $this->setGrades();
   }
 
   private function rankResults() {
@@ -236,6 +245,102 @@ class WYAP
 
   }
 
+  public function getBoundaries() {
+    if (!$this->gradeSetId || !$this->id) return [];
+    $gradeSet = new \Entities\Academic\GradeSet($this->gradeSetId);
+
+     $previousThreshold = $this->marks + 1;
+     $gradeCounter = 1;
+     $split = $this->marks / count($gradeSet->grades);
+     $boundaries = $gradeSet->grades;
+     foreach($boundaries as &$b) {
+       $t = $this->adaData->select(
+         'wyap_grade_boundaries',
+         'id, gradeSetGradeId, markThreshold',
+         'wyapId=? AND gradeSetGradeId = ?',
+         [$this->id, $b['id']]
+        );
+       if (isset($t[0])) {
+         $b['lowerThreshold'] = $t[0]['markThreshold'];
+       } else {
+         $b['lowerThreshold'] = round($this->marks - $gradeCounter * $split);
+       }
+       $gradeCounter++;
+       $b['upperThreshold'] = $previousThreshold;
+       // for top grade so that a mark equal to the max possible get the top grade
+       $b['upperThreshold'] == $this->marks ? $this->marks + 1 : $b['upperThreshold'];
+
+       $b['pupils'] = count($this->adaData->select(
+         'wyap_results',
+         'id',
+         'wyap_id=? AND mark >= ? AND mark < ?',
+         [$this->id, $b['lowerThreshold'], $b['upperThreshold']]
+       ));
+       $previousThreshold = $b['lowerThreshold'];
+     }
+     $this->boundaries = $boundaries;
+     return $boundaries;
+  }
+
+  // save boundaries for this wyap and set grades
+  public function saveBoundaries($boundaries) {
+    if (!$this->gradeSetId || !$this->id) return $this;
+    $wyapId = $this->id;
+    $this->adaData->delete('wyap_grade_boundaries', 'wyapId=?', [$wyapId]);
+    foreach($boundaries as $b) {
+      $this->adaData->insert(
+        'wyap_grade_boundaries',
+        'wyapId, gradeSetId, gradeSetGradeId, markThreshold, gradeSetGradePoints',
+        [$wyapId, $this->gradeSetId, $b['id'], $b['lowerThreshold'], $b['points']]
+      );
+    }
+    $this->setGrades();
+    return $this;
+  }
+
+  public function setGrades() {
+    if (!$this->gradeSetId || !$this->id) return $this;
+    $wyapId = $this->id;
+    $boundaries = $this->getBoundaries();
+    foreach($boundaries as $b) {
+      $this->adaData->update(
+        'wyap_results',
+        'grade=?',
+        'wyap_id=? AND mark >= ? AND mark < ?',
+        [$b['grade'], $this->id, $b['lowerThreshold'], $b['upperThreshold']]
+      );
+    }
+    return $this;
+  }
+
+  public function saveGradeSet($gradeSetId) {
+    if (!$this->id) return $this;
+    $wyapId = $this->id;
+    // get current gradeset
+    $previousId = $this->adaData->select('wyaps', 'gradeSetId', 'id=?', [$wyapId])[0]['gradeSetId'];
+
+    if ($gradeSetId !== $previousId) {
+      $this->adaData->delete('wyap_grade_boundaries', 'wyapId=?', [$wyapId]);
+      $this->adaData->update('wyap_results', 'grade=?', 'wyap_id=?', [null, $wyapId]);
+      $this->adaData->update('wyaps', 'gradeSetId=?', 'id=?', [$gradeSetId, $wyapId]);
+      $this->gradeSetId = $gradeSetId;
+    }
+
+    return $this;
+   }
+
+  // returns the grade profile for a provision set on boundaries
+  public function makeProfile(&$boundaries) {
+    if (!$this->id) return $boundaries;
+    foreach ($boundaries as &$b) $b['pupils'] = count($this->adaData->select(
+      'wyap_results',
+      'id',
+      'wyap_id=? AND mark >= ? AND mark < ?',
+      [$this->id, $b['lowerThreshold'], $b['upperThreshold'] == $this->marks ? $this->marks + 1 : $b['upperThreshold']]
+    ));
+    return $boundaries;
+  }
+
   // calculate the overall totals for each students
   // called when WYAP results are updated
   private function makeTotals() {
@@ -287,4 +392,6 @@ class WYAP
       );
     }
   }
+
+
 }

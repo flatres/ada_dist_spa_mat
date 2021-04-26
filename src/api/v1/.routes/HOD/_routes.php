@@ -25,6 +25,12 @@ $app->group('/hod', function(){
     $this->delete('/{subject}/wyaps/{id}', '\HOD\Wyaps:wyapDelete');
     $this->get('/{subject}/wyaps/{id}', '\HOD\Wyaps:wyapsResultsGet');
 
+    $this->get('/{subject}/wyaps/grades/boundaries/{id}', '\HOD\Wyaps:wyapsBoundariesGet');
+    $this->put('/{subject}/wyaps/grades/boundaries/{id}', '\HOD\Wyaps:wyapsBoundariesPut');
+    $this->put('/{subject}/wyaps/grades/boundaries/profile/{id}', '\HOD\Wyaps:wyapsBoundariesProfilePut');
+    $this->get('/{subject}/wyaps/grades/{year}/gradesets', '\HOD\Wyaps:gradeSetsGet');
+    $this->put('/{subject}/wyaps/{id}/gradeset/{gradeSetId}', '\HOD\Wyaps:wyapGradeSetPut');
+
     // meetings
     $this->get('/meetings/{subject}/{year}/{exam}', '\HOD\Meetings:meetingClassesGet');
     $this->get('/meetings/download/{subject}/{year}/{exam}', '\HOD\Meetings:meetingClassesDownloadGet');
