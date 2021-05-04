@@ -253,52 +253,57 @@ class Subject
   }
 
   // TODO: Split this up and perhaps even move all of this stats business into its own class
-  public function makeHistoryProfile($examId, $year)
+  public function makeHistoryProfile($examId, $year, $suppressMLO = false)
   {
       $sql = $this->adaData;
       $history = [];
-      if($this->maxMLOCount > 1) {
-        $mlo = [];
-        $mlo['results'] = $this->mloMaxGradeProfile;
-        $mlo['year'] = "Max MLO";
-        //create data for stacked chart
-        $stacked = [];
-        $stacked['year'] = 'Max MLO';
-        foreach($mlo['results'] as $r){
-          $stacked[$r['grade']] = $r['count'];
-        }
-        $this->stackedHistory[] = $stacked;
-        $history[] = $mlo;
+
+      $suppressMLO = true;
+
+      if (!$suppressMLO) {
+        if($this->maxMLOCount > 1) {
+          $mlo = [];
+          $mlo['results'] = $this->mloMaxGradeProfile;
+          $mlo['year'] = "Max MLO";
+          //create data for stacked chart
+          $stacked = [];
+          $stacked['year'] = 'Max MLO';
+          foreach($mlo['results'] as $r){
+            $stacked[$r['grade']] = $r['count'];
+          }
+          $this->stackedHistory[] = $stacked;
+          $history[] = $mlo;
 
 
-        $mlo = [];
-        $mlo['results'] = $this->mloMinGradeProfile;
-        $mlo['year'] = "Min MLO";
-        $stacked = [];
-        $stacked['year'] = 'Min MLO';
-        foreach($mlo['results'] as $r){
-          $stacked[$r['grade']] = $r['count'];
-        }
-        $this->stackedHistory[] = $stacked;
-        $history[] = $mlo;
+          $mlo = [];
+          $mlo['results'] = $this->mloMinGradeProfile;
+          $mlo['year'] = "Min MLO";
+          $stacked = [];
+          $stacked['year'] = 'Min MLO';
+          foreach($mlo['results'] as $r){
+            $stacked[$r['grade']] = $r['count'];
+          }
+          $this->stackedHistory[] = $stacked;
+          $history[] = $mlo;
 
-      } else {
-        $mlo = [];
-        $mlo['results'] = $this->mloMaxGradeProfile;
-        $mlo['year'] = "MLO";
-        //create data for stacked chart
-        $stacked = [];
-        $stacked['year'] = 'MLO';
-        foreach($mlo['results'] as $r){
-          $stacked[$r['grade']] = $r['count'];
+        } else {
+          $mlo = [];
+          $mlo['results'] = $this->mloMaxGradeProfile;
+          $mlo['year'] = "MLO";
+          //create data for stacked chart
+          $stacked = [];
+          $stacked['year'] = 'MLO';
+          foreach($mlo['results'] as $r){
+            $stacked[$r['grade']] = $r['count'];
+          }
+          $this->stackedHistory[] = $stacked;
+          $history[] = $mlo;
         }
-        $this->stackedHistory[] = $stacked;
-        $history[] = $mlo;
       }
       $sessionHistory = [];
       $stackedHistory = [];
       $multiYearHistory = [];
-      $sessions = $sql->select('exams_sessions', 'id, year', 'id > 0 ORDER BY year DESC', []);
+      $sessions = $sql->select('exams_sessions', 'id, year', 'id > 0 AND year <> 2020 ORDER BY year DESC', []);
       $yearCount = 0;
       foreach($sessions as $s){
         $gcseAvg = 0;
@@ -337,6 +342,7 @@ class Subject
 
           $countLetterGrades = 0;
           $countNumberGrades = 0;
+          $pointsTotal = 0;
 
           foreach($results as $r){
             //get totals. Oh god this code hurts
@@ -344,11 +350,14 @@ class Subject
             $stacked[$g] = $r['count'];
             if (is_numeric($g)) $countNumberGrades += $r['count'];
             if (!is_numeric($g)) $countLetterGrades += $r['count'];
+            $pointsTotal += $year > 11 ? $r['count'] * (new \Exams\Tools\ALevel\Result())->processGrade($g) : $r['count'] * (new \Exams\Tools\GCSE\Result())->processGrade($g);
           }
+          unset($r);
+
+          $avgPoints = count($results) > 0 ? round($pointsTotal / ($countNumberGrades + $countLetterGrades), 2) : 0;
           $stackedHistory[] = $stacked;
 
           //make percentages
-          unset($r);
           foreach($results as &$r){
             $g = $r['grade'];
             $countGrades = is_numeric($g) ? $countNumberGrades : $countLetterGrades;
@@ -357,6 +366,12 @@ class Subject
             }
           }
           unset($r);
+
+          $results[] = [
+            'grade' => 'GPA',
+            'count' => $avgPoints,
+            'pct'   => $avgPoints
+          ];
 
           if ($year > 11) {
             $results[] = [
@@ -409,6 +424,7 @@ class Subject
       $count = 0;
       $avgCount;
       $gcseAvg=0;
+      $gpa = 0;
       $gradeCounts = [];
       $numericYears = 0;
       $letterYears = 0; //takes into account depts that have switch grding systems. Yet another edge case
@@ -421,7 +437,7 @@ class Subject
         foreach($y as $r){
           $g = $r['grade'];
           $key = '_' . $r['grade'];
-          if ($g !== 'GCSE Avg') {
+          if ($g !== 'GCSE Avg' && $g !== 'GPA') {
             if (is_numeric($g) && !$haveCountedYearNumeric) {
               $numericYears++;
               $haveCountedYearNumeric = true;
@@ -442,6 +458,10 @@ class Subject
             if (!is_numeric($g)) $countLetterGrades += $r['count'];
           }
 
+          if ($g === 'GPA'){
+            $gpa += $yearCount * $r['count'];
+          }
+
           if ($hasGCSEAvg && $g === 'GCSE Avg'){  //assume that GCSE avg is last so that counrt works. BOLD!
             $gcseAvg += $yearCount * $r['count']; //rcount is the GCSE avg here
           }
@@ -459,6 +479,13 @@ class Subject
         }
       }
       $gradeCounts = array_values($gradeCounts);
+
+      if ($count > 0) $gpa = round($gpa / $count, 2);
+      $gradeCounts[] = [
+        'grade'  => 'GPA',
+        'count'  => $gpa
+      ];
+
       if ($hasGCSEAvg) {
         if ($count > 0) $gcseAvg = round($gcseAvg / $count, 2);
         $gradeCounts[] = [
@@ -467,7 +494,7 @@ class Subject
         ];
       }
       $result = [
-        'year'  => 'Avg Last 3 Yrs',
+        'year'  => 'Avg 2017-2019',
         'results' => $gradeCounts
       ];
       return [$result];
@@ -495,8 +522,13 @@ class Subject
         $countNumberGrades = 0;
         $countLetterGrades = 0;
         $avgGCSE = 0;
+        $gpa = 0;
         foreach($results as $r) {
           $grade = $r['grade'];
+          if ($grade == 'GPA') {
+            $gpa = $r['count'];
+            continue;
+          }
           if ($grade == 'GCSE Avg') {
             $avgGCSE = $r['count'];
             continue;
@@ -552,6 +584,14 @@ class Subject
             'pct'   => $countGrades == 0 ? 0 : round(100 * $value / $countGrades)
           ];
         }
+
+        $bands[] = [
+          'band'  => 'GPA',
+          'abs'   => $gpa,
+          'pct'   => $gpa
+        ];
+        $this->bands['GPA'] = 'GPA';
+
         if ($this->year > 11) {
           $bands[] = [
             'band'  => 'GCSE Avg',

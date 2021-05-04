@@ -145,6 +145,12 @@ class Mysql {
 
     }
 
+    public function selectFirst($table, $fieldString, $condition = NULL, $binding = NULL, $isCaseInsensitive = FALSE) {
+      $result = $this->select($table, $fieldString, $condition, $binding, $isCaseInsensitive);
+      if (isset($result[0])) return $result[0];
+      return null;
+    }
+
 	 	public function select($table, $fieldString, $condition = NULL, $binding = NULL, $isCaseInsensitive = FALSE){
 
 			$this->reset();

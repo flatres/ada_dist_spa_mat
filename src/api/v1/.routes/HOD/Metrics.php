@@ -86,14 +86,23 @@ class Metrics
       // $subject->makeMLOProfile();
       $subject->makeHistoryProfile($examId, $year);
 
+      // get wyaps, including results
+      $wyaps = (new \Entities\Academic\Subject($this->ada, $subjectId))->getWYAPsByExam($year, $examId);
+
+      foreach($wyaps as &$w) $w->results();
+      unset($w);
+
       $this->progress->publish(0.5, 'Generating spreadsheet...');
       foreach($subject->students as &$s) $s->getHMNote();
-      $sheet = new \HOD\ExamMetricsSpreadsheet($subject);
+      $sheet = new \HOD\ExamMetricsSpreadsheet($subject, $wyaps);
 
       $subject->classes = null;
 
+      $package = $sheet->package;
+      $package['subject'] = $subject;
+      $package['wyaps'] = $wyaps;
       // return emit($response, $subject);
-      return emit($response, $sheet->package);
+      return emit($response, $package);
     }
 
     private function getYearMetrics($subjectId, $year, $examId)
@@ -110,6 +119,7 @@ class Metrics
 
       $metrics = new \Entities\Metrics\ExamMetrics($examId, $subject->students, $year);
       $subject->metrics = $metrics->metrics;
+      $subject->gcseGPA = $metrics->gcseAvg;
       $subject->metricWeightings = $metrics->weightings;
 
       $this->progress->publish(0.8, 'Fetching assessment points...');

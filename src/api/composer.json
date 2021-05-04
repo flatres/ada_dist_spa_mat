@@ -31,6 +31,7 @@
           "Auth\\":"v1/.routes/Auth",
           "Exams\\":"v1/.routes/Exams",
           "HM\\":"v1/.routes/HM",
+          "DHA\\":"v1/.routes/DHA",
           "HOD\\":"v1/.routes/HOD",
           "Covid\\":"v1/.routes/Covid",
           "Subjects\\":"v1/.routes/Subjects",

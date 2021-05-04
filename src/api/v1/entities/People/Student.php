@@ -25,6 +25,7 @@ class Student
     public $hmNote = '';
     public $boardingHouseId, $boardingHouseCode;
     public $isDisabled; //if account is disabled. i.e they have left
+    public $accessArrangements;
 
     public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
     {
@@ -198,5 +199,39 @@ class Student
 
     public function sanitizeNames(){
 
+    }
+
+    public function getAccessArrangements() {
+      $adaData = new \Dependency\Databases\AdaData();
+      $access = $adaData->selectFirst(
+        'exams_access_arrangements',
+        'extraTime, hasProcessor, hasRest, hasTranscript, hasDictionary, hasPrompter, hasReader, hasSeparateInvigilation, hasScribe, hasColourNaming, notes',
+        'student_id=?',
+        [$this->id]);
+
+      if ($access) {
+        $hasAccess = false;
+        foreach($access as $key => &$value) {
+          if ($key === 'extraTime') {
+              $value = $value ? (int)$value : null;
+              if ($value > 0) $hasAccess = true;
+          }
+          if ($key === 'extraTime' || $key === 'notes') continue;
+          $value = intVal($value);
+          $value = (bool)$value;
+          if ($value == true) $hasAccess = true;
+
+        }
+        unset($value);
+        $access['hasAccess'] = $hasAccess;
+        if ($hasAccess) {
+          $this->accessArrangements = $access;
+        }
+      }
+      return $this;
+      // $access = $adaData->select('exams_access_arrangements', '*', 'student_id=?', [$this->id]);
+      // if (isset($access[0])) $access = $access[0];
+      // $this->accessArrangements = $access;
+      // return $access;
     }
 }

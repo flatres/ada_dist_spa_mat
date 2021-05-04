@@ -61,8 +61,10 @@ class Wyaps
       $id = $args['id'];
 
       $wyap = new \Entities\Metrics\WYAP($id);
+      $results = $wyap->results();
+      $results['id'] = $wyap->id;
       // $classes = (new \Entities\Academic\Subject($this->ada, $subjectId))->getStudentsByExam($)
-      return emit($response, $wyap->results());
+      return emit($response, $results);
     }
 
     public function wyapsBoundariesProfilePut($request, $response, $args)

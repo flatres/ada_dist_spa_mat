@@ -9,6 +9,7 @@ class iSamsStudent
   public $houseCode;
   public $contacts = [];
   public $portalUserCodes = [];
+  public $accessArrangements = null;
   // public $subjects = [];
   public $sets=[];
 
@@ -16,7 +17,7 @@ class iSamsStudent
 
   public function __construct(\Dependency\Databases\isams $msSql, string $id = null) //must be cast as string as isams id can start with 0
   {
-    $this->sql= $msSql;
+    $this->sql= $msSql ?? new \Dependency\Databases\isams();
     if($id) $this->byId($id);
   }
 
@@ -213,6 +214,36 @@ class iSamsStudent
     foreach ($forms as $form) {
       $this->sets[] = new \Entities\Academic\iSamsForm($this->sql, $form['id']);
     }
+  }
+
+  public function getAccessArrangements() {
+
+      $access = $this->sql->selectFirst(
+        'TblExamManagerCandidateOptions',
+        'intExtraTime as extraTime, intProcessor as hasProcessor, intRest as hasRest, intTranscript as hasTranscript, intDictionary as hasDictionary, intPrompter as hasPrompter, intReader as hasReader, intSeparateInvigilation as hasSeparateInvigilation, intScribe as hasScribe, intColourNaming as hasColourNaming, txtArrangementNotes as notes',
+        'txtSchoolID=?',
+        [$this->id]);
+
+    if ($access) {
+      $hasAccess = false;
+      foreach($access as $key => &$value) {
+        if ($key === 'extraTime') {
+            $value = $value ? (int)$value : null;
+            if ($value > 0) $hasAccess = true;
+        }
+        if ($key === 'extraTime' || $key === 'notes') continue;
+        $value = intVal($value);
+        $value = (bool)$value;
+        if ($value == true) $hasAccess = true;
+
+      }
+      unset($value);
+      $access['hasAccess'] = $hasAccess;
+      if ($hasAccess) {
+        $this->accessArrangements = $access;
+      }
+    }
+    return $this;
   }
 
   public function getSubjects() {

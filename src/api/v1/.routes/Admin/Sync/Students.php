@@ -19,6 +19,7 @@ class Students
     {
        $this->isams= $container->isams;
        $this->ada = $container->ada;
+       $this->adaData = $container->adaData;
        $this->exgarde = $container->exgarde;
        ini_set('max_execution_time', 3600);
 
@@ -148,6 +149,8 @@ class Students
       $studentObj = new \Entities\People\Student($this->ada, $id);
       $this->exgarde->match($studentObj);
 
+      $this->updateAccessArrangements($studentObj);
+
       $this->newCount++;
     }
 
@@ -196,7 +199,58 @@ class Students
         $studentObj = new \Entities\People\Student($this->ada, $id);
         $this->exgarde->match($studentObj);
 
+        $this->updateAccessArrangements($studentObj);
+
         $this->updatedCount++;
+      }
+    }
+
+    private function updateAccessArrangements(\Entities\People\Student $student) {
+      $isamsStudent = new \Entities\People\iSamsStudent($this->isams, $student->misId);
+      $a = $isamsStudent->getAccessArrangements()->accessArrangements;
+      if (!$a) return;
+      $exists = isset($this->adaData->select('exams_access_arrangements', 'id', 'student_id=?', [$student->id])[0]);
+      if ($exists) {
+        $this->adaData->update(
+          'exams_access_arrangements',
+          'hasAccess=?, extraTime=?, hasProcessor=?, hasRest=?, hasTranscript=?, hasDictionary=?, hasPrompter=?, hasReader=?, hasSeparateInvigilation=?, hasScribe=?, hasColourNaming=?, notes=?',
+          'student_id=?',
+          [
+            $a['hasAccess'],
+            $a['extraTime'],
+            (int)$a['hasProcessor'],
+            (int)$a['hasRest'],
+            (int)$a['hasTranscript'],
+            (int)$a['hasDictionary'],
+            (int)$a['hasPrompter'],
+            (int)$a['hasReader'],
+            (int)$a['hasSeparateInvigilation'],
+            (int)$a['hasScribe'],
+            (int)$a['hasColourNaming'],
+            $a['notes'],
+            $student->id
+          ]
+        );
+      } else {
+        $this->adaData->insert(
+          'exams_access_arrangements',
+          'hasAccess, extraTime, hasProcessor, hasRest, hasTranscript, hasDictionary, hasPrompter, hasReader, hasSeparateInvigilation, hasScribe, hasColourNaming, notes, student_id',
+          [
+            $a['hasAccess'],
+            $a['extraTime'],
+            (int)$a['hasProcessor'],
+            (int)$a['hasRest'],
+            (int)$a['hasTranscript'],
+            (int)$a['hasDictionary'],
+            (int)$a['hasPrompter'],
+            (int)$a['hasReader'],
+            (int)$a['hasSeparateInvigilation'],
+            (int)$a['hasScribe'],
+            (int)$a['hasColourNaming'],
+            $a['notes'],
+            $student->id
+          ]
+        );
       }
     }
 

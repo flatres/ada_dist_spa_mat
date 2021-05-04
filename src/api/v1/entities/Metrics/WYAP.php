@@ -8,6 +8,7 @@ class WYAP
   public $results, $boundaries;
   public $hasGrades = false;
   public $missingStudents = [];
+  public $type, $typeShort;
   private $ada, $adaData;
 
   public function __construct(int $wyapId = null)
@@ -33,6 +34,13 @@ class WYAP
     $this->marks = $wyap['marks'];
     $this->typeId = $wyap['typeId'];
     $this->created_at = $wyap['created_at'];
+
+    //type name
+    $t = $this->adaData->select('wyap_types', 'name, short', 'id=?', [$this->typeId]);
+    if (isset($t[0])) {
+        $this->type = $t[0]['name'];
+        $this->typeShort = $t['0']['short'];
+    }
 
     if ($this->gradeSetId) $this->hasGrades = count($this->adaData->select('wyap_grade_boundaries', 'id', 'wyapId=?', [$id])) > 0;
 

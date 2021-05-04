@@ -248,7 +248,6 @@ class SubjectCodes
 
       if($this->contains('comp') && $this->contains('sci')) return array("CS", 'Computer Science');
       if($this->contains('computing')) return array("CS", 'Computer Science');
-      if($this->contains('science')) return array("SC", "Science");
       if($this->contains('astronomy')) return array("AS", "Astronomy");
 
       if($this->contains('drama')) return array("DR", "Theatre Studies");
@@ -258,7 +257,7 @@ class SubjectCodes
       if($this->contains('re')) return array("RE", "Religious Studies");
       if($this->contains('sport')) return array("PE", "Sport Science");
 
-
+      if($this->contains('science')) return array("SC", "Science");
 
       $this->error = true;
       return array("-", "-");

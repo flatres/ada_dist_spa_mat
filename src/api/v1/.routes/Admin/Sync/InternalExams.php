@@ -57,6 +57,8 @@ class InternalExams
       foreach($papers as $p) {
         if ($i % 5 == 0) $this->progress->publish($i / $count);
         $i++;
+        // no papers found
+        if (!$p) continue;
         $adaData->insert(
           'internal_exams_papers',
           'misId, sessionId, examCode, examId, name, totalMark',
@@ -242,6 +244,10 @@ class InternalExams
         $paper['subjectName'] = $codes->subjectName;
         $paper['subjectCode'] = $codes->subjectCode;
         $paper['examId'] = $this->ada->select('sch_subjects_exams', 'id', 'examCode=?', [$codes->subjectCode])[0]['id'] ?? null;
+        if (!$paper['examId']) {
+          echo 'Subject Code ' . $codes->subjectCode . "(" . $codes->subjectName . ") Not Found PID:" . $paperId . PHP_EOL;
+          return null;
+        }
         $paper['error'] = $codes->error;
         $paper['results'] = $this->getResults($paper['paperCode'], $paper['totalMark']);
         return (object)$paper;
@@ -253,7 +259,7 @@ class InternalExams
     {
       $explode = explode(" ", $s['description']);
       $s['isError'] = true;
-      if (count($explode) !== 2){
+      if (count($explode) < 2){
         $s['year'] = 'error';
         $s['type'] = 'error';
         $s['NCYear'] = 0;
@@ -261,7 +267,7 @@ class InternalExams
       }
       $s['isError'] = false;
       $type = $explode[0];
-      $s['year'] = $explode[1];
+      $s['year'] = (int) filter_var($s['description'], FILTER_SANITIZE_NUMBER_INT);
       switch(strtoupper($type)) {
         case 'CE' :
           $type = 'Common Entrance';
@@ -278,6 +284,14 @@ class InternalExams
         case 'HUNDRED' :
           $type = 'GCSE Mocks';
           $NCYear = 11;
+          break;
+        case 'LOWER' :
+          $type = 'L6 - End of Year';
+          $NCYear = 12;
+          break;
+        case 'UPPER' :
+          $type = 'U6 - Mock';
+          $NCYear = 12;
           break;
         default:
           $type = null;

@@ -40,4 +40,7 @@ $app->group('/hod', function(){
     $this->get('/meetings/schoolscloudfair/{year}', '\HOD\Meetings:meetingsSchoolsCloudFairGet');
     $this->post('/meetings/counts', '\HOD\Meetings:meetingsCountsPost');
 
+    //science
+    $this->get('/science/tags/spreadsheet', '\HOD\Science:tagsSpreadsheetGet');
+
 })->add("Authenticate");

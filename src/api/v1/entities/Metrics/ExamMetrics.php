@@ -6,10 +6,13 @@ class ExamMetrics
 {
   public $students, $examCode;
   public $examId, $exam, $year;
+  public $gcseAvg;
   public $metrics = [
+    'RemoveEOY' => [],
     'GCSEMock'  => [],
     'GCSE' => [],
     'AsLevel' => [],
+    'L6EOY' => [],
     'ALevelMock'  => [],
     'IGDR'  => [],
     'Midyis'  => [],
@@ -17,7 +20,7 @@ class ExamMetrics
   ];
   public $weightings = [];
   public $metricsList = [];
-  private $GCSEMock;
+  private $GCSEMock, $GCSE, $RemoveEOY, $L6EOY;
 
   public function __construct($examId, &$students, $year)
   {
@@ -28,6 +31,8 @@ class ExamMetrics
      $this->examId = $examId;
      $this->year = $year;
      $this->GCSEMock = new \Entities\Exams\Internal\GCSEMock($this->adaData);
+     $this->RemoveEOY = new \Entities\Exams\Internal\RemoveEOY($this->adaData);
+     $this->L6EOY = new \Entities\Exams\Internal\L6EOY($this->adaData);
      $this->GCSE = new \Entities\Exams\External\GCSE($this->adaData, $this->ada);
      $this->AsLevel = new \Entities\Exams\External\AsLevel($this->adaData, $this->ada);
      $this->ALevelMock = new \Entities\Exams\Internal\ALevelMock($this->adaData);
@@ -43,6 +48,8 @@ class ExamMetrics
   {
     foreach($this->students as &$s){
       $this->getGCSEMock($s);
+      $this->getRemoveEOY($s);
+      $this->getL6EOY($s);
       $this->getGCSE($s);
       $this->getAsLevel($s);
       $this->getALevelMock($s);
@@ -54,7 +61,24 @@ class ExamMetrics
     $this->makeInbandGCSEDeltaRank();
     $this->getWeightings();
     $this->moveDataToStudents();
+    $this->makeGCSEAvg();
     return $this->metrics;
+  }
+
+  // calculates the average gcse gpa for this cohort
+  // will return nothing if a lower school set
+  private function makeGCSEAvg() {
+      $avg = 0;
+      $count = 0;
+      foreach($this->students as $s) {
+        $d = $this->adaData->select('exams_gcse_avg', 'gcseAvg', 'misId=?', [$s->misId]);
+        if (isset($d[0])) {
+          $avg += $d[0]['gcseAvg'];
+          $count++;
+        }
+      }
+      if ($count > 0) {$avg = round($avg / $count, 2);}
+      $this->gcseAvg = $avg;
   }
 
   private function getAlis(&$s)
@@ -142,6 +166,48 @@ class ExamMetrics
         'grade' => $gcseMock->grade,
         'percentage'  => $gcseMock->percentage,
         'yearRank'  =>  $gcseMock->rank
+      ];
+    }
+  }
+
+  private function getRemoveEOY(&$s)
+  {
+    $examId = $this->year > 11 ? $this->exam->getGcseExamId($this->examId) : $this->examId;
+    // if ($this->year > 11) return;
+    $exam = $this->RemoveEOY->fetchStudentByExam($s->id, $examId);
+    $s->removeEOYGrade = null;
+    $s->removeEOYPercentage = null;
+    if($exam) {
+      $s->removeEOYGrade = $exam->grade;
+      $s->removeEOYPercentage = $exam->percentage;
+      $this->metrics['RemoveEOY'][] = [
+        'studentId' => $s->id,
+        'mark'  => $exam->mark,
+        'grade' => $exam->grade,
+        'percentage'  => $exam->percentage,
+        'yearRank'  =>  $exam->rank
+      ];
+    }
+  }
+
+  private function getL6EOY(&$s)
+  {
+
+    if ($this->year < 12) return;
+    $examId = $this->examId;
+    // if ($this->year > 11) return;
+    $exam = $this->L6EOY->fetchStudentByExam($s->id, $examId);
+    $s->L6EOYGrade = null;
+    $s->L6EOYPercentage = null;
+    if($exam) {
+      $s->L6EOYGrade = $exam->grade;
+      $s->L6EOYPercentage = $exam->percentage;
+      $this->metrics['L6EOY'][] = [
+        'studentId' => $s->id,
+        'mark'  => $exam->mark,
+        'grade' => $exam->grade,
+        'percentage'  => $exam->percentage,
+        'yearRank'  =>  $exam->rank
       ];
     }
   }
