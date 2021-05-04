@@ -674,9 +674,15 @@ class ExamMetricsSpreadsheet
        $note = '';
        $sheet->getStyle("$col1$r:$col1$r")->applyFromArray($styleArray);
        foreach($access as $key => $a) {
+         if ($key === 'hasAccess') continue;
          $key = str_replace('has', '', $key);
          $key = str_replace('extraTime', 'Extra Time', $key);
-         if ($a) $note .= $key . ': ' . $a . "\n";
+         $logic = $a;
+         if ($a == 1) $logic = 'yes';
+         if ($a == 0) $logic = 'no';
+
+         if ($logic == 'no') continue;
+         if ($a) $note .= $key . ': ' . $logic . "\n";
        }
        $sheet->getComment("$col1$r")->getText()->createTextRun($note);
        $sheet->getComment("$col1$r")->setHeight("300px");
