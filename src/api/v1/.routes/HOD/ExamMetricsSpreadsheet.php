@@ -51,7 +51,7 @@ class ExamMetricsSpreadsheet
     $this->subject = $subject;
     $this->wyaps = $wyaps;
 
-    $filename = "!!!!!DRAFT - DO NOT USE!!!!!" . $subject->code . "_" . $subject->year . '_' . date('d-m-y_H-i-s',time());
+    $filename = $subject->code . "_" . $subject->year . '_' . date('d-m-y_H-i-s',time());
 
     //delete the default sheet
     $sheetIndex = $this->spreadsheet->getIndex($this->spreadsheet->getSheetByName('Worksheet'));
@@ -204,7 +204,8 @@ class ExamMetricsSpreadsheet
     $gcseMockWeight = $subject->year > 11 ? 0 : 1;
     $gpaUpliftWeight = $subject->year > 11 ? 1 : 0;
     $row1 = [$subject->name,'','','','','','','','Weightings:', '', '', ''];
-    $row2 = ['','','','','','','','','','', '', ''];
+    $code = "{$subject->code}/{$subject->id}/{$subject->examId}";
+    $row2 = [$code, '','','','','','','','','', '', ''];
     $row3 = [
       'Name',
       'Class',

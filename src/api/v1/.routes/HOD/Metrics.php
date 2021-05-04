@@ -94,6 +94,10 @@ class Metrics
 
       $this->progress->publish(0.5, 'Generating spreadsheet...');
       foreach($subject->students as &$s) $s->getHMNote();
+
+      $subject->examId = $examId;
+      $subject->year = $year;
+      
       $sheet = new \HOD\ExamMetricsSpreadsheet($subject, $wyaps);
 
       $subject->classes = null;
