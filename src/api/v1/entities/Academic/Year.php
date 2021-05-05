@@ -53,14 +53,14 @@ class Year
     return $this;
   }
 
-  public function getWyaps(bool $withResults = false) {
+  public function getWyaps(bool $withResultsCount = false) {
     if (!$this->id) return $this;
     $this->getSubjects();
     foreach($this->subjects as &$s) {
       foreach($s->exams as &$e) {
         $wyaps = $s->getWYAPsByExam($this->id, $e->id);
-        if ($withResults) {
-          foreach($wyaps as &$w) $w->results();
+        if ($withResultsCount) {
+          foreach($wyaps as &$w) $w->getResultsCount();
         }
         $e->wyaps = $wyaps;
       }

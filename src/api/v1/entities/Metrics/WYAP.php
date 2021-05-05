@@ -5,7 +5,7 @@ namespace Entities\Metrics;
 class WYAP
 {
   public $subjectId, $examId, $year, $name, $marks, $created_at, $typeId, $gradeSetId;
-  public $results, $boundaries;
+  public $results, $boundaries, $resultsCount;
   public $hasGrades = false;
   public $missingStudents = [];
   public $type, $typeShort;
@@ -64,6 +64,12 @@ class WYAP
     $this->adaData->delete('wyap_grade_boundaries', 'wyapId=?', [$this->id]);
     $this->adaData->delete('wyap_results', 'wyap_id=?', [$this->id]);
     return true;
+  }
+
+  public function getResultsCount (){
+    $count =  count($this->adaData->select('wyap_results', 'id', 'wyap_id=? AND mark > 0', [$this->id]));
+    $this->resultsCount = $count;
+    return $count;
   }
 
   // studentsToMerge used when compiling all metrics for a pupil
