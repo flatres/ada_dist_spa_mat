@@ -211,8 +211,8 @@ class ExamMetricsSpreadsheet
       'Sch. #',
       'M/F',
       'FINAL GRADE',
-      'Moderated Evidence Grade',
       '',
+      'Moderated Evidence Grade',
       'Moderated Evidence Total (%)',
       'Primary Percentile',
       'Secondary Percentile',
@@ -518,7 +518,7 @@ class ExamMetricsSpreadsheet
       ]
     ];
     $finalCol = $this->columnLetter($this->dataEndColumn + 10);
-    $sheet->getStyle($finalCol . "3:" . $finalCol . $maxRow)->applyFromArray($styleArray);
+    $sheet->getStyle($finalCol . "2:" . $finalCol . $maxRow)->applyFromArray($styleArray);
 
     $sheet->getStyle('A1:AI3')->applyFromArray($styleArray);
     $sheet->getStyle('A5:A'. $maxRow)->applyFromArray($styleArray);
@@ -538,22 +538,23 @@ class ExamMetricsSpreadsheet
     $sheet->getColumnDimension('Q')->setWidth(10);
 
     $width = 4.5;
-    foreach (range('F','Z') as $col) $sheet->getColumnDimension($col)->setWidth($width);
-    $sheet->getColumnDimension('AA')->setWidth($width);
-    $sheet->getColumnDimension('AB')->setWidth($width);
-    $sheet->getColumnDimension('AC')->setWidth($width);
-    $sheet->getColumnDimension('AD')->setWidth($width);
-    $sheet->getColumnDimension('AE')->setWidth($width);
-    $sheet->getColumnDimension('AF')->setWidth($width);
-    $sheet->getColumnDimension('AG')->setWidth($width);
-    $sheet->getColumnDimension('AH')->setWidth($width);
-    $sheet->getColumnDimension('AI')->setWidth($width);
-    $sheet->getColumnDimension('AJ')->setWidth($width);
-    $sheet->getColumnDimension('AK')->setWidth($width);
-    $sheet->getColumnDimension('AL')->setWidth($width);
-    $sheet->getColumnDimension('AM')->setWidth($width);
-    $sheet->getColumnDimension('AN')->setWidth($width);
-    $sheet->getColumnDimension('AO')->setWidth($width);
+    // foreach (range('F',$this->columnLetter($this->dataEndColumn + 8)) as $col) $sheet->getColumnDimension($col)->setWidth($width);
+    foreach (range(6,$this->dataEndColumn + 8) as $col) $sheet->getColumnDimension($this->columnLetter($col))->setWidth($width);
+    // $sheet->getColumnDimension('AA')->setWidth($width);
+    // $sheet->getColumnDimension('AB')->setWidth($width);
+    // $sheet->getColumnDimension('AC')->setWidth($width);
+    // $sheet->getColumnDimension('AD')->setWidth($width);
+    // $sheet->getColumnDimension('AE')->setWidth($width);
+    // $sheet->getColumnDimension('AF')->setWidth($width);
+    // $sheet->getColumnDimension('AG')->setWidth($width);
+    // $sheet->getColumnDimension('AH')->setWidth($width);
+    // $sheet->getColumnDimension('AI')->setWidth($width);
+    // $sheet->getColumnDimension('AJ')->setWidth($width);
+    // $sheet->getColumnDimension('AK')->setWidth($width);
+    // $sheet->getColumnDimension('AL')->setWidth($width);
+    // $sheet->getColumnDimension('AM')->setWidth($width);
+    // $sheet->getColumnDimension('AN')->setWidth($width);
+    // $sheet->getColumnDimension('AO')->setWidth($width);
 
     $remarkCol = $this->columnLetter($this->dataEndColumn + 10);
     $sheet->getColumnDimension($remarkCol)->setWidth(200);
@@ -582,7 +583,7 @@ class ExamMetricsSpreadsheet
      $styleArray = [];
      $styleArray['fill'] = $this->provisionalFill;
 
-     $sheet->getStyle('F3:F' .$maxRow)->applyFromArray($styleArray);
+     $sheet->getStyle('G3:G' .$maxRow)->applyFromArray($styleArray);
 
 
      //Primary Aggregate
