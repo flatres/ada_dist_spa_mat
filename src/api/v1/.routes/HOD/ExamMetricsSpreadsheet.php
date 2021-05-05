@@ -106,10 +106,9 @@ class ExamMetricsSpreadsheet
       $this->grades = [9, 8, 7, 6, 5, 4, 3, 2, 1, 'U'];
       $this->gradesForCounting = $this->grades;
       $this->gradeBands = ['9', '9-8', '9-7', '9-6', '9-5', '9-4', '9-3', '9-2', '9-1'];
-
       return;
-
     }
+
     $isPreU = substr($subject->bands[0], 0, 1) == 'D' ? true : false;
     $this->isPreU = $isPreU;
     if ($isPreU) {
@@ -351,6 +350,18 @@ class ExamMetricsSpreadsheet
         $startCol = $this->columnLetter($w->startColumn);
         $row[] = "=round(100*{$startCol}{$i} / {$startCol}". '$' . "3, 1)";
         if ($w->hasGrades) $row[] = $s->{"wyap_" . $w->id ."_grade"};
+
+        $comment = $s->{"wyap_" . $w->id ."_comment"};
+        if (strlen($comment) > 0) {
+          $note = 'Comment: ' . $comment;
+          $thisRow = count($sheetData) + 1;
+          $cell = $this->columnLetter($w->startColumn) . $thisRow;
+          $sheet->getComment($cell)->getText()->createTextRun($note);
+          $sheet->getComment($cell)->setHeight("300px");
+          $sheet->getComment($cell)->setWidth("200px");
+        }
+
+
       }
       unset($w);
 
