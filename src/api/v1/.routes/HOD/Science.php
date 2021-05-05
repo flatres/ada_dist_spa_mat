@@ -45,6 +45,7 @@ class Science
         foreach($newWyaps as &$w) $w->name = $e['aliasCode'] . ': ' . $w->name;
         $wyaps = array_merge($wyaps, $newWyaps);
         $tempSubject = $this->getYearMetrics($subId, $year, $eId);
+        $this->progress->publish(0.25, $e['aliasCode'] . " done");
 
       }
       // var_dump($tempSubject); exit();
