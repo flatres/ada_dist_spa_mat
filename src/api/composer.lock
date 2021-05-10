@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "19f099b91e621f11379aa6674e5c810c",
+    "content-hash": "a7873fcf6eebb3a456d21134ccd75ed0",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -397,6 +397,48 @@
                 "html"
             ],
             "time": "2020-06-29T00:56:53+00:00"
+        },
+        {
+            "name": "fpdf/fpdf",
+            "version": "1.83.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/coreydoughty/Fpdf.git",
+                "reference": "9a27abfd0a8e72ef690e94f3d5efc862541a3ff2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/coreydoughty/Fpdf/zipball/9a27abfd0a8e72ef690e94f3d5efc862541a3ff2",
+                "reference": "9a27abfd0a8e72ef690e94f3d5efc862541a3ff2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Fpdf\\": "src/Fpdf"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Corey Doughty",
+                    "email": "corey@doughty.ca"
+                }
+            ],
+            "description": "FPDF Composer Wrapper",
+            "homepage": "https://github.com/coreydoughty/Fpdf",
+            "keywords": [
+                "fpdf",
+                "pdf",
+                "wrapper"
+            ],
+            "time": "2021-04-25T18:41:04+00:00"
         },
         {
             "name": "graham-campbell/result-type",

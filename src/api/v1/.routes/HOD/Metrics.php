@@ -97,7 +97,7 @@ class Metrics
 
       $subject->examId = $examId;
       $subject->year = $year;
-      
+
       $sheet = new \HOD\ExamMetricsSpreadsheet($subject, $wyaps);
 
       $subject->classes = null;
@@ -107,6 +107,48 @@ class Metrics
       $package['wyaps'] = $wyaps;
       // return emit($response, $subject);
       return emit($response, $package);
+    }
+
+    public function pdfByClassGet($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.metrics', 'Generating pdf...');
+
+      $package = $this->makePDFData($args);
+      return emit($response, $package);
+    }
+
+    private function makePDFData ($args) {
+      $pg = $this->progress;
+
+      $subjectId = $args['subject'];
+      $year = $args['year'];
+      $examId = $args['exam'];
+
+      $this->progress->publish(0.25, 'Gathering data...');
+      $subject = $this->getYearMetrics($subjectId, $year, $examId);
+      // $subject->makeMLOProfile();
+      $subject->makeHistoryProfile($examId, $year);
+
+      // get wyaps, including results
+      $wyaps = (new \Entities\Academic\Subject($this->ada, $subjectId))->getWYAPsByExam($year, $examId);
+
+      foreach($wyaps as &$w) $w->results();
+      unset($w);
+
+      $this->progress->publish(0.5, 'Generating spreadsheet...');
+      foreach($subject->students as &$s) $s->getHMNote();
+
+      $subject->examId = $examId;
+      $subject->year = $year;
+
+      $pdf = new \HOD\Tools\WyapPDF($subject, $wyaps);
+
+      $package = [];
+      $package = $pdf->package;
+      $package['subject'] = $subject;
+      $package['wyaps'] = $wyaps;
+      return $package;
     }
 
     private function getYearMetrics($subjectId, $year, $examId)

@@ -18,6 +18,8 @@ $app->group('/hod', function(){
     $this->get('/{subject}/metrics/year/{year}/metrics/{exam}/spreadsheet', '\HOD\Metrics:yearMetricsSpreadSheetGet');
     $this->get('/{subject}/metrics/year/{year}/history/{exam}', '\HOD\Metrics:yearHistoryGet');
 
+    $this->get('/{subject}/metrics/year/{year}/metrics/{exam}/pdf/class', '\HOD\Metrics:pdfByClassGet');
+
     // wyaps
     $this->get('/{subject}/wyaps/{year}/{exam}', '\HOD\Wyaps:wyapsGet');
     $this->post('/{subject}/wyaps/{year}/{exam}', '\HOD\Wyaps:wyapPost');
