@@ -112,7 +112,12 @@ class ExamMetricsSpreadsheet
     $isPreU = substr($subject->bands[0], 0, 1) == 'D' ? true : false;
     $this->isPreU = $subject->isPreU;
     if ($subject->name == 'Italian') $this->isPreU = false; //has gone back to A level
-    if ($subject->name == 'Russian') $this->isPreU = true; 
+    if ($subject->name == 'Russian') $this->isPreU = true;
+    if ($subject->name == 'Spanish') $this->isPreU = true;
+    if ($subject->name == 'French') $this->isPreU = true;
+    if ($subject->name == 'Chinese') $this->isPreU = true;
+    if ($subject->name == 'German') $this->isPreU = true;
+    if ($subject->name == 'History') $this->isPreU = true;
 
     if ($isPreU) {
       $this->grades = ['D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U'];
