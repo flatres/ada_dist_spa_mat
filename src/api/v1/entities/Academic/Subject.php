@@ -23,6 +23,7 @@ class Subject
   public $stackedHistory=[];
   public $grades=[];
   public $bands=[];
+  public $isPreU;
   private $sql, $adaData;
 
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
@@ -514,6 +515,8 @@ class Subject
         if ($g == 'D1' || $g == 'D2' || $g == 'D3' || $g == 'M1' || $g == 'M2' || $g == 'M3') $isPreU = true;
         if ((int)$g == 9 || (int)$g == 8 || (int)$g == 7 || (int)$g == 6 || (int)$g == 5)  $isNumbers = true;
       }
+
+      $this->isPreU = $isPreU;
       // $this->h = $history;
       foreach($history as $h) {
         $results = $h['results'];

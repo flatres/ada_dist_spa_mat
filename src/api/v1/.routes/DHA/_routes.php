@@ -11,4 +11,7 @@ $app->group('/dha', function(){
     $this->get('/access/year/{year}', '\DHA\Access:yearAccessGet');
     $this->get('/wyaps/year/{year}', '\DHA\Wyaps:yearWyapsGet');
 
+    $this->post('/tags/upload/initial', '\DHA\Tags:initialUploadPost');
+    $this->post('/tags/upload/final/{id}/{code}/{year}', '\DHA\Tags:finalUploadPost');
+
 })->add("Authenticate");

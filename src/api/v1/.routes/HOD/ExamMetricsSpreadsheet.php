@@ -110,7 +110,7 @@ class ExamMetricsSpreadsheet
     }
 
     $isPreU = substr($subject->bands[0], 0, 1) == 'D' ? true : false;
-    $this->isPreU = $isPreU;
+    $this->isPreU = $subject->isPreU;
     if ($isPreU) {
       $this->grades = ['D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U'];
       $this->gradeBands = ['D1', 'D1-D2', 'D1-D3', 'D1-M1', 'D1-M2', 'D1-M3', 'D1-P1', 'D1-P2', 'D1-P3', 'U' ];
@@ -157,10 +157,10 @@ class ExamMetricsSpreadsheet
     unset($w);
 
     if ($this->isPreU) {
-      $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 1', 'weight' => 1, 'hasGrades' => false, 'marks' => 100];
-      $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 2', 'weight' => 1, 'hasGrades' => false, 'marks' => 100];
-      $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 3', 'weight' => 1, 'hasGrades' => false, 'marks' => 100];
-      $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 4', 'weight' => 1, 'hasGrades' => false, 'marks' => 100];
+      $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 1', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
+      $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 2', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
+      $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 3', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
+      $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 4', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
     }
 
     $this->primaryWyaps = $wyaps;
@@ -281,10 +281,10 @@ class ExamMetricsSpreadsheet
     $this->dataEndColumn = $column + 1;
     $row3[] = '';
     $row3[] = 'Special Circ.';
-    $row3[] = 'Signature';
+    $row3[] = 'Explanation';
     $row3[] = '';
     $row3[] = 'Access Argmts';
-    $row3[] = 'Signature';
+    // $row3[] = '';
     $row3[] = '';
     $row3[] = 'Signature 1';
     $row3[] = 'Signature 2';
@@ -340,7 +340,14 @@ class ExamMetricsSpreadsheet
         // $row[] = $s->{"wyap_" . $p->id ."_pct"};
         $startCol = $this->columnLetter($w->startColumn);
         $row[] = "=round(100*{$startCol}{$i} / {$startCol}". '$' . "3, 1)";
-        if ($w->hasGrades) $row[] = $s->{"wyap_" . $w->id ."_grade"};
+        if ($w->hasGrades) {
+          if (isset($w->id)) {
+            $row[] = $s->{"wyap_" . $w->id ."_grade"};
+          } else {
+            //must be an ADD blank
+            $row[] = '';
+          }
+        }
       }
       unset($w);
       $row[] = '';
@@ -384,7 +391,7 @@ class ExamMetricsSpreadsheet
 
     $sheet = $this->spreadsheet->getSheetByName('Students');
     $maxRow = count($this->subject->students)+4;
-    $lastCol = $this->columnLetter($column + 6);
+    $lastCol = $this->columnLetter($column + 11);
     $sheet->setAutoFilter('A4:' . $lastCol . $maxRow);
 
     $this->setMainStyle($sheet);
@@ -509,7 +516,7 @@ class ExamMetricsSpreadsheet
         'shrinkToFit' => false
       ]
     ];
-    $finalCol = $this->columnLetter($this->dataEndColumn + 9);
+    $finalCol = $this->columnLetter($this->dataEndColumn + 8);
     $sheet->getStyle("D3:" . $finalCol . "3")->applyFromArray($styleArray);
 
     $styleArray = [
@@ -517,7 +524,7 @@ class ExamMetricsSpreadsheet
           'bold' => true,
       ]
     ];
-    $finalCol = $this->columnLetter($this->dataEndColumn + 10);
+    $finalCol = $this->columnLetter($this->dataEndColumn + 9);
     $sheet->getStyle($finalCol . "2:" . $finalCol . $maxRow)->applyFromArray($styleArray);
 
     $sheet->getStyle('A1:AI3')->applyFromArray($styleArray);
@@ -556,8 +563,8 @@ class ExamMetricsSpreadsheet
     // $sheet->getColumnDimension('AN')->setWidth($width);
     // $sheet->getColumnDimension('AO')->setWidth($width);
 
-    $remarkCol = $this->columnLetter($this->dataEndColumn + 10);
-    $sheet->getColumnDimension($remarkCol)->setWidth(200);
+    $remarkCol = $this->columnLetter($this->dataEndColumn + 9);
+    $sheet->getColumnDimension($remarkCol)->setWidth(50);
 
 
      // borders
@@ -576,7 +583,7 @@ class ExamMetricsSpreadsheet
      $styleArray['fill'] = $this->finalFill;
 
      $sheet->getStyle('E3:E' .$maxRow)->applyFromArray($styleArray);
-     $sheet->getStyle("{$this->columnLetter($this->dataEndColumn + 6)}3:{$this->columnLetter($this->dataEndColumn + 7)}" .$maxRow)->applyFromArray($styleArray);
+     $sheet->getStyle("{$this->columnLetter($this->dataEndColumn + 5)}3:{$this->columnLetter($this->dataEndColumn + 6)}" .$maxRow)->applyFromArray($styleArray);
      // $sheet->getStyle("{$this->columnLetter($this->dataEndColumn + 4)}3:{$this->columnLetter($this->dataEndColumn + 4)}" .$maxRow)->applyFromArray($styleArray);
 
      //provisional grade
@@ -668,7 +675,7 @@ class ExamMetricsSpreadsheet
        ],
      ];
 
-     $sheet->getStyle("{$col1}3:{$col2}" .$maxRow)->applyFromArray($styleArray);
+     $sheet->getStyle("{$col1}3:{$col1}" .$maxRow)->applyFromArray($styleArray);
 
      $styleArray = [];
      $styleArray['fill'] = [
