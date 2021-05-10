@@ -119,7 +119,7 @@ class ExamMetricsSpreadsheet
     if ($subject->name == 'German') $this->isPreU = true;
     if ($subject->name == 'History') $this->isPreU = true;
 
-    if ($isPreU) {
+    if ($this->isPreU) {
       $this->grades = ['D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U'];
       $this->gradeBands = ['D1', 'D1-D2', 'D1-D3', 'D1-M1', 'D1-M2', 'D1-M3', 'D1-P1', 'D1-P2', 'D1-P3', 'U' ];
       $this->gradesForCounting = $this->grades;
