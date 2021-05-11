@@ -113,7 +113,7 @@ class Subject
   // return a list of wyaps (whole year assessment points) taken by this year group (including those taken in previous year)
   public function getWYAPsByExam($year, $examId) {
       $students = $this->getStudentsByExam($year, $examId);
-      $this->exams[] = new \Entities\Academic\SubjectExam($this->sql, $examId);
+      // $this->exams[] = new \Entities\Academic\SubjectExam($this->sql, $examId);
       $wyaps = [];
       // should be able to get all wyaps using the first 50 students
       $count = 0;
