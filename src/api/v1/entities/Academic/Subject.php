@@ -24,6 +24,8 @@ class Subject
   public $grades=[];
   public $bands=[];
   public $isPreU;
+  public $examName = '';
+  public $examCode = '';
   private $sql, $adaData;
 
   public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
@@ -113,7 +115,10 @@ class Subject
   // return a list of wyaps (whole year assessment points) taken by this year group (including those taken in previous year)
   public function getWYAPsByExam($year, $examId) {
       $students = $this->getStudentsByExam($year, $examId);
-      // $this->exams[] = new \Entities\Academic\SubjectExam($this->sql, $examId);
+      $exam = new \Entities\Academic\SubjectExam($this->sql, $examId);
+      $this->examName = $exam->examName;
+      $this->examCode = $exam->examCode;
+
       $wyaps = [];
       // should be able to get all wyaps using the first 50 students
       $count = 0;

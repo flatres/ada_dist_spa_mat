@@ -48,7 +48,7 @@ class WyapPDF
       if ($subject->year > 11 && $this->isPreU) $level = 'Pre-U';
       if ($subject->year > 11 && !$this->isPreU) $level = 'A Level';
 
-      $pdf->Cell(0,10,$subject->exams[0]->examName . " ({$level})", 0, 1, 'L');
+      $pdf->Cell(0,10,$subject->examName . " ({$level})", 0, 1, 'L');
 
       $pdf->SetFont('Times','',17);
       $pdf->Cell(0,10,$s->classCode, 0, 1, 'L');
@@ -126,7 +126,7 @@ class WyapPDF
       // $s->schoolNumber,
 
     $path = 'hod/';
-    $filename = $this->subject->exams[0]->examCode . "_" . $this->subject->year . '_' . date('d-m-y_H-i-s',time()) . '.pdf';
+    $filename = $this->subject->examCode . "_" . $this->subject->year . '_' . date('d-m-y_H-i-s',time()) . '.pdf';
     $filepath = FILESTORE_PATH . "$path$filename";
 
     $pdf->Output("F", $filepath);
