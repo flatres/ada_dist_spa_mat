@@ -36,41 +36,89 @@ class WyapPDF
 
     foreach ($this->subject->students as $s) {
       $pdf->AddPage();
-      $pdf->SetY(25);
-      $pdf->Image('https://www.marlboroughcollege.org/wp-content/uploads/2020/07/wp-staff-feature-logo-969x650.jpg',64,17,80);
+      // $pdf->SetY(25);
+      // $pdf->Image('https://www.marlboroughcollege.org/wp-content/uploads/2020/07/wp-staff-feature-logo-969x650.jpg',64,17,80);
       $pdf->SetFont('Times','B',20);
 
-      $pdf->SetY(75);
-      $pdf->Cell(0,10,$s->displayName, 0, 1, 'C');
-      $pdf->Cell(0,10,$s->schoolNumber, 0, 1, 'C');
+      // $pdf->SetY(75);
+      $pdf->Cell(0,10,$s->displayName . " " . $s->schoolNumber, 0, 1, 'L');
       $pdf->SetFont('Times','',18);
-      $pdf->Cell(0,10,$subject->name, 0, 1, 'C');
+      $level = '';
+      if ($subject->year < 12) $level = 'GCSE';
+      if ($subject->year > 11 && $this->isPreU) $level = 'Pre-U';
+      if ($subject->year > 11 && !$this->isPreU) $level = 'A Level';
 
-      $pdf->SetFont('Times','',16);
-      $pdf->Cell(0,10,$s->classCode, 0, 1, 'C');
+      $pdf->Cell(0,10,$subject->exams[0]->examName . " ({$level})", 0, 1, 'L');
+
+      $pdf->SetFont('Times','',17);
+      $pdf->Cell(0,10,$s->classCode, 0, 1, 'L');
 
       $pdf->SetFont('Times','',13);
 
-      $pdf->Ln();
-      $header = array('Assessment Point', 'Substitution');
+      // $pdf->Ln();
+      $pdf->Cell(0,10,"Give details of the substitution and the reason.", 0, 1, 'R');
+      $header = array('Assessment Point', 'Substitutions or alterations? ');
       $this->table($pdf, $header,$data);
 
       $pdf->Ln();
       $pdf->Ln();
-      $pdf->Cell(0,10,"    ", 0, 1, 'C');
+      $pdf->Cell(0,10,"I confirm that (please tick)", 0, 1, 'L');
+      // $pdf->Ln();
 
-      $text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-      $pdf->MultiCell(0, 8, $text);
-
+      $w1 = 10;
+      $w2 = 190 - $w1;
+      $h = 10;
+      $x=$pdf->GetX();
+      $y=$pdf->GetY();
+      $pdf->Cell($w1,$h," ", 1, 1);
+      $pdf->SetXY($x+ $w1 + 3,$y);
+      // $pdf->Rect($x+$w1,$y,$w2,$h);
+      $text = "I have been told what pieces of work will be used as evidence to inform my grades.";
+      $pdf->MultiCell($w2,5,$text,0,'L');
       $pdf->Ln();
       $pdf->Ln();
 
-      $pdf->SetFont('Times','B',16);
+      $x=$pdf->GetX();
+      $y=$pdf->GetY();
+      $pdf->Cell($w1,$h," ", 1, 1);
+      $pdf->SetXY($x+ $w1 + 3,$y);
+      // $pdf->Rect($x+$w1,$y,$w2,$h);
+      $text = "I confirm that this work is my own and that I have not had any inappropriate support in producing it.";
+      $pdf->MultiCell($w2,5,$text,0,'L');
+      $pdf->Ln();
+      $pdf->Ln();
+
+      $x=$pdf->GetX();
+      $y=$pdf->GetY();
+      $pdf->Cell($w1,$h," ", 1, 1);
+      $pdf->SetXY($x+ $w1 + 3,$y);
+      // $pdf->Rect($x+$w1,$y,$w2,$h);
+      $text = "I confirm that I had appropriate access arrangements in place when I undertook these assessments (e.g. extra time).";
+      $pdf->MultiCell($w2,5,$text,0,'L');
+      $pdf->Ln();
+      $pdf->Ln();
+
+      $x=$pdf->GetX();
+      $y=$pdf->GetY();
+      $pdf->Cell($w1,$h," ", 1, 1);
+      $pdf->SetXY($x+ $w1 + 3,$y);
+      // $pdf->Rect($x+$w1,$y,$w2,$h);
+      $text = "I confirm that I have had the opportunity to raise any concerns about the evidence being used, where for example my evidence was affected by my personal circumstances, such as illness.";
+      $pdf->MultiCell($w2,5,$text,0,'L');
+      $pdf->Ln();
+      $pdf->Ln();
+
+
+
+
+      $pdf->Ln();
+
+      // $pdf->SetFont('Times','B',13);
       $pdf->Cell(0,10,'Signature:    __________________________________________', 0, 1, 'L');
-      $pdf->Ln();
       $pdf->Cell(0,10,'Print Name: __________________________________________', 0, 1, 'L');
+      $pdf->Cell(0,10,'Date:            __________________________________________', 0, 1, 'L');
 
-      break;
+      // break;
 
     }
       // $s->displayName,
@@ -78,7 +126,7 @@ class WyapPDF
       // $s->schoolNumber,
 
     $path = 'hod/';
-    $filename = 'TEST.pdf';
+    $filename = $this->subject->exams[0]->examCode . "_" . $this->subject->year . '_' . date('d-m-y_H-i-s',time()) . '.pdf';
     $filepath = FILESTORE_PATH . "$path$filename";
 
     $pdf->Output("F", $filepath);
@@ -100,16 +148,28 @@ private function table(&$pdf, $header, $data)
     // Header
     $pdf->SetFont('Times','B',13);
     for($i=0;$i<count($header);$i++)
-        $pdf->Cell($w[$i],7,$header[$i],1,0,'L');
+        $pdf->Cell($w[$i],7,$header[$i],1,0,'C');
         $pdf->Ln();
     // Data
-    $pdf->SetFont('Times','',13);
+    $pdf->SetFont('Times','',10);
+    $h = 12;
     foreach($data as $row)
     {
-        $pdf->Cell($w[0],7,$row[0],'LRT');
-        $pdf->Cell($w[1],7,$row[1],'LRT');
+        $max = 50;
+        $postFix = \strlen($row[0]) > $max ? "..." : "";
+        $title = substr($row[0], 0, $max) . $postFix;
+        $pdf->Cell($w[0],$h,$title,'LRT');
+        $pdf->Cell($w[1],$h,$row[1],'LRT');
         $pdf->Ln();
     }
+    $pdf->Cell($w[0],$h,"  ",'LRT');
+    $pdf->Cell($w[1],$h,"  ",'LRT');
+    $pdf->Ln();
+
+    $pdf->Cell($w[0],$h,"  ",'LRT');
+    $pdf->Cell($w[1],$h,"  ",'LRT');
+    $pdf->Ln();
+
     // Closing line
     $pdf->Cell(0,0,'','T');
 }
@@ -153,12 +213,12 @@ private function primaryWyaps() {
   foreach($this->wyaps as &$w) $w->weight = $weight;
   unset($w);
 
-  if ($this->isPreU) {
-    $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 1', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
-    $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 2', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
-    $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 3', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
-    $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 4', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
-  }
+  // if ($this->isPreU) {
+  //   $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 1', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
+  //   $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 2', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
+  //   $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 3', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
+  //   $wyaps[] = (object)['name'=> '', 'shortName' => 'ADD 4', 'weight' => 1, 'hasGrades' => true, 'marks' => 100];
+  // }
 
   $this->primaryWyaps = $wyaps;
   return $this->primaryWyaps;

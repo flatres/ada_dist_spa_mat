@@ -112,13 +112,22 @@ class Metrics
     public function pdfByClassGet($request, $response, $args)
     {
       $auth = $request->getAttribute('auth');
-      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.metrics', 'Generating pdf...');
+      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.metrics', 'Gathering data...');
 
-      $package = $this->makePDFData($args);
+      $package = $this->makePDFData($args, true);
       return emit($response, $package);
     }
 
-    private function makePDFData ($args) {
+    public function pdfByNameGet($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.metrics', 'Gathering data...');
+
+      $package = $this->makePDFData($args, false);
+      return emit($response, $package);
+    }
+
+    private function makePDFData ($args, $byClass = false) {
       $pg = $this->progress;
 
       $subjectId = $args['subject'];
@@ -136,8 +145,14 @@ class Metrics
       foreach($wyaps as &$w) $w->results();
       unset($w);
 
-      $this->progress->publish(0.5, 'Generating spreadsheet...');
+      $this->progress->publish(0.5, 'Generating pdf...');
       foreach($subject->students as &$s) $s->getHMNote();
+
+      sortObjects($subject->students, 'lastName', 'ASC');
+      if ($byClass == true) {
+        foreach($subject->students as &$s) $s->cc = \strtoupper($s->classCode . $s->lastName);
+        sortObjects($subject->students, 'cc', 'ASC');
+      }
 
       $subject->examId = $examId;
       $subject->year = $year;
