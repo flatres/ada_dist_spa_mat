@@ -113,7 +113,7 @@ class SubjectCodes
           $this->console->publish('Is IGCSE = ' . $ans);
           $this->isIGCSE = $isIGCSE;
           $bit = $isIGCSE ? 1 : 0;
-          $ada->insert('exams_modules', 'isIGCSE, moduleID, title, header', [$bit, $this->txtModuleCode, $this->txtOptionTitle, $string]);
+          // $ada->insert('exams_modules', 'isIGCSE, moduleID, title, header', [$bit, $this->txtModuleCode, $this->txtOptionTitle, $string]);
         }
 
       }
@@ -251,7 +251,7 @@ class SubjectCodes
       if($this->contains('astronomy')) return array("AS", "Astronomy");
 
       if($this->contains('drama')) return array("DR", "Theatre Studies");
-      if($this->contains('extended')) return array("EPQ", "Extended Project");
+      if($this->contains('extended') || $this->contains('EPQ')) return array("EPQ", "Extended Project");
       if($this->contains('physical')) return array("PE", "Physical Education");
       if($this->contains('theatre')) return array("DR", "Theatre Studies");
       if($this->contains('re')) return array("RE", "Religious Studies");

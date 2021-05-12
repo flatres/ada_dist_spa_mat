@@ -1304,8 +1304,7 @@ class SpreadsheetRenderer
               $student->txtHouseCode,
               $student->NCYear,
               $student->resultCount,
-              $student->gradeAverage,
-              ''
+              $student->gradeAverage
             ];
       $count = 0;
       $points = 0;

@@ -193,7 +193,12 @@ class SpreadsheetRenderer
 
     $data = array();
     $data[] = $fields;
-    $epq =  $this->statistics->data->subjectResults['EPQ']['EPQ']->results;
+    if (isset($this->statistics->data->subjectResults['EPQ']['EPQ'])) {
+      $epq =  $this->statistics->data->subjectResults['EPQ']['EPQ']->results;
+    }  else {
+      $epq = [];
+    }
+
     usort($epq, array($this, "compareNames"));
 
     foreach($epq as $result){

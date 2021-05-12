@@ -37,8 +37,39 @@ class Tags
       $directory = FILESTORE_PATH . "dha/tags/" . $level;
       $fileName = $examCode . '_' . $examId;
       $filename = moveUploadedFile($directory, $uploadedFile['file'], $fileName);
-
+      $data = [];
       $this->parseSheet($response, $directory . $filename, $data);
+
+      // $subject = $data['subject'];
+      $exam = $data['exam'];
+      $table = $exam->year < 12 ? 'tag_results_gcse' : 'tag_results_alevel';
+
+      $i = 0;
+      $megCount = 0;
+      $tagCount = 0;
+      foreach($data['students'] as $s) {
+        $i++;
+          $this->adaData->delete($table, 'examId=? AND studentId=?', [$exam->id, $s->id]);
+          $this->adaData->insert(
+            $table,
+            'studentId, examId, tag, meg, specialCircumstances, evidenceRemarks, rationale',
+            [
+              $s->id,
+              $exam->id,
+              $s->tag,
+              $s->meg,
+              $s->sc,
+              $s->evidence,
+              $s->rationale
+            ]
+        );
+        if (strlen($s->tag) > 0) $tagCount++;
+        if (strlen($s->meg) > 0) $megCount++;
+      }
+
+      $this->adaData->delete('tag_exams', 'examId=? AND year=?', [$exam->id, $exam->year]);
+      $this->adaData->insert('tag_exams', 'examId, year, hasUploaded, tagCount, megCount', [$examId, $exam->year, 1, $tagCount, $megCount]);
+      $data['count'] = $i;
 
       return emit($response, $data);
 
@@ -76,6 +107,7 @@ class Tags
       $columns = [
         'TAG' => null,
         "MEG" => null,
+        "SC" => null,
         "Evidence" => null,
         "Rationale" => null
       ];
@@ -88,6 +120,8 @@ class Tags
             $columns['TAG'] = $col; break;
           case "MODERATED EVIDENCE GRADE":
             $columns['MEG'] = $col; break;
+          case "EXPLANATION":
+            $columns['SC'] = $col; break;
           case "EVIDENCE REMARKS":
             $columns['Evidence'] = $col; break;
           case "RATIONALE":
@@ -130,14 +164,14 @@ class Tags
           continue;
         }
         $student->tag = $worksheet->getCellByColumnAndRow($columns['TAG'], $row)->getValue();
-        if (!$student->tag) {$studentError = true; $studentErrorMsg .= "Row $row has no Final Grade<br/>";}
+        // if (!$student->tag) {$studentError = true; $studentErrorMsg .= "Row $row has no Final Grade<br/>";}
 
         $student->meg = $worksheet->getCellByColumnAndRow($columns['MEG'], $row)->getValue();
-        if (!$student->meg) {$studentError = true; $studentErrorMsg .= "Row $row has no Mod. Evd. Grade<br/>";}
-
-        $student->evidence = $worksheet->getCellByColumnAndRow($columns['Evidence'], $row)->getValue();
-        $student->rationale = $worksheet->getCellByColumnAndRow($columns['Rationale'], $row)->getValue();
-        if (!$student->rationale) {$studentError = true; $studentErrorMsg .= "Row $row has no Rationale<br/>";}
+        // if (!$student->meg) {$studentError = true; $studentErrorMsg .= "Row $row has no Mod. Evd. Grade<br/>";}
+        $student->sc = $columns['SC'] ? $worksheet->getCellByColumnAndRow($columns['SC'], $row)->getValue() : '';
+        $student->evidence = $columns['Evidence'] ? $worksheet->getCellByColumnAndRow($columns['Evidence'], $row)->getValue() : '';
+        $student->rationale = $columns['Rationale'] ? $worksheet->getCellByColumnAndRow($columns['Rationale'], $row)->getValue() : '';
+        // if (!$student->rationale) {$studentError = true; $studentErrorMsg .= "Row $row has no Rationale<br/>";}
 
       }
 
@@ -161,11 +195,11 @@ class Tags
 
       // var_dump($uploadedFile['file']); return;
       $directory = FILESTORE_PATH . "dha/tags/temp/";
-      $fileName =
       $filename = moveUploadedFile($directory, $uploadedFile['file']);
       $data = [];
+      $this->parseSheet($response, $directory . $filename, $data);
 
-      return $this->parseSheet($response, $directory . $filename, $data);
+      return emit($response, $data);
 
     }
 
