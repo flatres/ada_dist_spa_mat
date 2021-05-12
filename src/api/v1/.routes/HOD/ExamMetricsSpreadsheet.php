@@ -103,7 +103,7 @@ class ExamMetricsSpreadsheet
 
     if ($subject->year < 12) {
 
-      $this->grades = [9, 8, 7, 6, 5, 4, 3, 2, 1, 'U'];
+      $this->grades = [9, 8, 7, 6, 5, 4, 3, 2, 1];
       $this->gradesForCounting = $this->grades;
       $this->gradeBands = ['9', '9-8', '9-7', '9-6', '9-5', '9-4', '9-3', '9-2', '9-1'];
       return;

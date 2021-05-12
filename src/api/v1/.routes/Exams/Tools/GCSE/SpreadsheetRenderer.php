@@ -784,8 +784,10 @@ class SpreadsheetRenderer
     $year = $this->year;
     $lastYear =  $this->year - 1;
     $lastYear2 =  $this->year - 2;
+    $lastYear3 =  $this->year - 3;
+    $lastYear4 =  $this->year - 4;
     //generate array to be placed in spreadsheet
-    $fields = ['Subject', 'Board', 'Entries', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', '%A*', '%A*A','%A*AB', '%Pass', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls'];
+    $fields = ['Subject', 'Board', 'Entries', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', '%A*', '%A*A','%A*AB', '%Pass', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", "Grd Avg ($lastYear3)", "Grd Avg ($lastYear4)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls'];
     $data[] = $fields;
     $data[] = []; //blank row
 
@@ -816,6 +818,8 @@ class SpreadsheetRenderer
                   $sum['gradeAverage'],
                   $sum['historyKeys']['y_' . $lastYear]['gradeAverage'] ?? '',
                   $sum['historyKeys']['y_' . $lastYear2]['gradeAverage'] ?? '',
+                  $sum['historyKeys']['y_' . $lastYear3]['gradeAverage'] ?? '',
+                  $sum['historyKeys']['y_' . $lastYear4]['gradeAverage'] ?? '',
                   $sum['boysCount'],
                   $sum['girlsCount'],
                   $sum['pointsAvgBoys'],
