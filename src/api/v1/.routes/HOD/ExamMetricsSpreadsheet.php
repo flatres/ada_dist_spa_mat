@@ -118,6 +118,9 @@ class ExamMetricsSpreadsheet
     if ($subject->name == 'Chinese') $this->isPreU = true;
     if ($subject->name == 'German') $this->isPreU = true;
     if ($subject->name == 'History') $this->isPreU = true;
+    if ($subject->name == 'English') $this->isPreU = true;
+    if ($subject->name == 'Philosophy') $this->isPreU = true;
+    if ($subject->name == 'Art History') $this->isPreU = true;
 
     if ($this->isPreU) {
       $this->grades = ['D1', 'D2', 'D3', 'M1', 'M2', 'M3', 'P1', 'P2', 'P3', 'U'];
