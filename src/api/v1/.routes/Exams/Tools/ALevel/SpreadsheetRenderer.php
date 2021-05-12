@@ -1081,8 +1081,10 @@ class SpreadsheetRenderer
     $year = $this->year;
     $lastYear =  $this->year - 1;
     $lastYear2 =  $this->year - 2;
+    $lastYear3 =  $this->year - 3;
+    $lastYear4 =  $this->year - 4;
     //generate array to be placed in spreadsheet
-    $fields = ['Subject', 'Board', 'Entries', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', '%A*', '%A*A','%A*AB', '%Pass', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", "UCAS Avg ($lastYear2)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls', 'GCSE Avg', 'GCSE Avg Boys', 'GCSE Avg Girls'];
+    $fields = ['Subject', 'Board', 'Entries', 'A*', 'A', 'B', 'C', 'D', 'E', 'U', '%A*', '%A*A','%A*AB', '%Pass', "Grd Avg ($year)", "Grd Avg ($lastYear)", "Grd Avg ($lastYear2)", "Grd Avg ($lastYear3)", "Grd Avg ($lastYear4)", "UCAS Avg ($year)", "UCAS Avg ($lastYear)", "UCAS Avg ($lastYear2)", '# Boys', '# Girls', 'Grd Avg Boys', 'Grd Avg Girls', 'UCAS Avg Boys', 'UCAS Avg Girls', 'GCSE Avg', 'GCSE Avg Boys', 'GCSE Avg Girls'];
     $data[] = $fields;
     $data[] = []; //blank row
 
@@ -1110,6 +1112,8 @@ class SpreadsheetRenderer
                   $sum['gradeAverage'],
                   $sum['historyKeys']['y_' . $lastYear]['gradeAverage'] ?? '',
                   $sum['historyKeys']['y_' . $lastYear2]['gradeAverage'] ?? '',
+                  $sum['historyKeys']['y_' . $lastYear3]['gradeAverage'] ?? '',
+                  $sum['historyKeys']['y_' . $lastYear4]['gradeAverage'] ?? '',
                   $sum['ucasAverage'],
                   $sum['historyKeys']['y_' . $lastYear]['ucasAverage'] ?? '',
                   $sum['historyKeys']['y_' . $lastYear2]['ucasAverage'] ?? '',
@@ -1143,8 +1147,9 @@ class SpreadsheetRenderer
     //border
     $sheet->getStyle('A3:C' .$count)->applyFromArray($styleArray);
     $sheet->getStyle('K3:N'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('R3:T'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('R3:V'.$count)->applyFromArray($styleArray);
     $sheet->getStyle('W3:X'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('Y3:AE'.$count)->applyFromArray($styleArray);
 
     $styleArray['fill'] = [
       'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
@@ -1159,9 +1164,9 @@ class SpreadsheetRenderer
 
 
     $sheet->getStyle('D3:J'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('O3:Q'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('U3:V'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('Y3:Z'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('O3:S'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('W3:X'.$count)->applyFromArray($styleArray);
+    // $sheet->getStyle('Y3:AE'.$count)->applyFromArray($styleArray);
 
     $count++;
     //make totals and averages
@@ -1245,10 +1250,17 @@ class SpreadsheetRenderer
     foreach (range('A','Z') as $col) {
       $sheet->getColumnDimension($col)->setAutoSize(true);
     }
+    $sheet->getColumnDimension('AA')->setAutoSize(true);
+    $sheet->getColumnDimension('AB')->setAutoSize(true);
+    $sheet->getColumnDimension('AC')->setAutoSize(true);
     // foreach (range('L','Z') as $col) {
     //   $sheet->getColumnDimension($col)->setWidth(4);
     // }
     $sheet->getColumnDimension('AA')->setWidth(4);
+    $sheet->getColumnDimension('AB')->setWidth(4);
+    $sheet->getColumnDimension('AC')->setWidth(4);
+    $sheet->getColumnDimension('AD')->setWidth(4);
+    $sheet->getColumnDimension('AE')->setWidth(4);
 
     $sheet->getRowDimension('3')->setRowHeight(95);
 
@@ -1262,7 +1274,7 @@ class SpreadsheetRenderer
         'shrinkToFit' => true
       ]
     ];
-    $sheet->getStyle('K3:Z3')->applyFromArray($styleArray);
+    $sheet->getStyle('K3:AE3')->applyFromArray($styleArray);
 
     //grade key
     $count = $count + 2;
@@ -1361,8 +1373,8 @@ class SpreadsheetRenderer
     //border
     $sheet->getStyle('A3:C' .$count)->applyFromArray($styleArray);
     $sheet->getStyle('N3:P'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('T3:V'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('Y3:Z'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('V3:X'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('AA3:AG'.$count)->applyFromArray($styleArray);
 
     $styleArray['fill'] = [
       'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_GRADIENT_LINEAR,
@@ -1377,9 +1389,9 @@ class SpreadsheetRenderer
 
 
     $sheet->getStyle('D3:M'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('Q3:S'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('W3:X'.$count)->applyFromArray($styleArray);
-    $sheet->getStyle('AA3:AB'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('Q3:U'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('V3:X'.$count)->applyFromArray($styleArray);
+    $sheet->getStyle('AA3:AG'.$count)->applyFromArray($styleArray);
 
     $count++;
     //make totals and averages
@@ -1468,6 +1480,12 @@ class SpreadsheetRenderer
       $sheet->getColumnDimension($col)->setWidth(4);
     }
     $sheet->getColumnDimension('AA')->setWidth(4);
+    $sheet->getColumnDimension('AB')->setWidth(4);
+    $sheet->getColumnDimension('AC')->setWidth(4);
+    $sheet->getColumnDimension('AD')->setWidth(4);
+    $sheet->getColumnDimension('AE')->setWidth(4);
+    $sheet->getColumnDimension('AF')->setWidth(4);
+    $sheet->getColumnDimension('AG')->setWidth(4);
 
     $sheet->getRowDimension('3')->setRowHeight(95);
 
@@ -1480,7 +1498,7 @@ class SpreadsheetRenderer
         'shrinkToFit' => true
       ]
     ];
-    $sheet->getStyle('Q3:AB3')->applyFromArray($styleArray);
+    $sheet->getStyle('Q3:AG3')->applyFromArray($styleArray);
 
     //grade key
     $count = $count + 2;
