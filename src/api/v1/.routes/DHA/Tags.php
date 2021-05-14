@@ -130,13 +130,13 @@ class Tags
         }
         $e->baseline->exam = null;
         // process tag
-        $tagPointsTotal += $result->processGrade($r['tag']);
+        if ($r['tag']) $tagPointsTotal += $result->processGrade($r['tag']);
         if ($this->year > 11) {
           $tagUcasPointsTotal += $result->ucasPoints;
           $tagPointsTotal = $tagUcasPointsTotal;
         }
         // process meg
-        $megPointsTotal += $result->processGrade($r['meg']);
+        if ($r['tag']) $megPointsTotal += $result->processGrade($r['meg']);
         if ($this->year > 11) {
           $megUcasPointsTotal += $result->ucasPoints;
           $megPointsTotal = $megUcasPointsTotal;
