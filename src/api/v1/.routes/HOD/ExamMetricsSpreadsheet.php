@@ -359,6 +359,17 @@ class ExamMetricsSpreadsheet
             $row[] = '';
           }
         }
+        if (isset($w->id)) {
+          $comment = $s->{"wyap_" . $w->id ."_comment"};
+          if (strlen($comment) > 0) {
+            $note = 'Comment: ' . $comment;
+            $thisRow = count($sheetData) + 1;
+            $cell = $this->columnLetter($w->startColumn) . $thisRow;
+            $sheet->getComment($cell)->getText()->createTextRun($note);
+            $sheet->getComment($cell)->setHeight("300px");
+            $sheet->getComment($cell)->setWidth("200px");
+          }
+        }
       }
       unset($w);
       $row[] = '';

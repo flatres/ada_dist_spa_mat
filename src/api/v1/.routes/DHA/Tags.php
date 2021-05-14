@@ -23,6 +23,12 @@ class Tags
        $this->adaData = $container->adaData;
     }
 
+    public function toggleFlagPut($request, $response, $args) {
+      $flag = $args['flag'];
+      $id = $args['id'];
+      $this->adaData->update('ucas_offers', 'flagged=?', 'studentId=?', [$flag, $id]);
+    }
+
     public function overviewGet($request, $response, $args)
     {
       $year = $args['year'];
@@ -38,12 +44,17 @@ class Tags
           $s->getAccessArrangements();
           $ucas = $this->adaData->select('ucas_offers', '*', 'studentId=?', [$s->id]);
           $s->ucas = isset($ucas[0]) ? $ucas[0] : [];
+          $s->flagged = 0;
           if (isset($s->ucas['offer'])) {
-            $s->ucas['points'] = $this->makePoints($s->ucas['offer']);
             $short = explode(' ', $s->ucas['offer'])[0];
             $short = preg_replace('#\(.*\)#', '', $short);
             $s->ucas['offerShort'] = $short;
+            $s->ucas['points'] = $this->makePoints($short);
+            $s->flagged = $s->ucas['flagged'];
           }
+
+
+
           // if (isset($ucas[0])) $s = (object)\array_merge((array)$s, $ucas[0]);
           $s = (object)\array_merge((array)$s, $this->getPupilResults($s->id));
 
@@ -59,6 +70,38 @@ class Tags
 
     private function makePoints($offer) {
       if (is_numeric($offer)) return $offer;
+      //sanitise
+      $offer = \str_replace('Maths', '', $offer);
+      if (substr_count($offer, '/') > 0) $offer = explode('/', $offer)[0];
+
+      $grades = [
+        'A*' => 0,
+        'A' => 0,
+        'B' => 0,
+        'C' => 0,
+        'D' => 0,
+        'E' => 0,
+        'D1' => 0,
+        'D2' => 0,
+        'D3' => 0,
+        'M1' => 0,
+        'M2' => 0,
+        'M3' => 0,
+        'P1' => 0,
+        'P2' => 0,
+        'P3' => 0
+      ];
+      foreach($grades as $grade => &$count) $count = substr_count($offer, $grade);
+      unset($count);
+      $grades['A'] = $grades['A'] - $grades['A*'];
+      // return $grades;
+      $points = 0;
+      $result = new \Exams\Tools\ALevel\Result();
+      foreach($grades as $grade => $c) {
+        $result->processGrade($grade);
+        $points += $c * $result->ucasPoints;
+      }
+      return $points;
     }
 
     private function getPupilResults($id) {
