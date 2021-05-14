@@ -387,6 +387,10 @@ class ExamMetricsSpreadsheet
       $row[] = $subject->year < 12 ? $s->removeEOYPercentage : $s->L6EOYPercentage;
 
       $row[] = "";
+      $row[] = "";
+      $row[] = "";
+      $row[] = "";
+      // $row[] = $s->accessArrangements;
 
       // $row[] = strlen($s->hmNote) > 1 ? '!' :  '';
 
@@ -527,7 +531,7 @@ class ExamMetricsSpreadsheet
         'shrinkToFit' => false
       ]
     ];
-    $finalCol = $this->columnLetter($this->dataEndColumn + 8);
+    $finalCol = $this->columnLetter($this->dataEndColumn + 7);
     $sheet->getStyle("D3:" . $finalCol . "3")->applyFromArray($styleArray);
 
     $styleArray = [
@@ -535,8 +539,9 @@ class ExamMetricsSpreadsheet
           'bold' => true,
       ]
     ];
+    $evidenceCol = $this->columnLetter($this->dataEndColumn + 8);
     $finalCol = $this->columnLetter($this->dataEndColumn + 9);
-    $sheet->getStyle($finalCol . "2:" . $finalCol . $maxRow)->applyFromArray($styleArray);
+    $sheet->getStyle($evidenceCol . "2:" . $finalCol . '3')->applyFromArray($styleArray);
 
     $sheet->getStyle('A1:AI3')->applyFromArray($styleArray);
     $sheet->getStyle('A5:A'. $maxRow)->applyFromArray($styleArray);
@@ -574,8 +579,10 @@ class ExamMetricsSpreadsheet
     // $sheet->getColumnDimension('AN')->setWidth($width);
     // $sheet->getColumnDimension('AO')->setWidth($width);
 
+    $remarkCol = $this->columnLetter($this->dataEndColumn + 8);
+    $sheet->getColumnDimension($remarkCol)->setWidth(50); // evidence remark column
     $remarkCol = $this->columnLetter($this->dataEndColumn + 9);
-    $sheet->getColumnDimension($remarkCol)->setWidth(50);
+    $sheet->getColumnDimension($remarkCol)->setWidth(50); // rationale remark column
 
 
      // borders
@@ -712,11 +719,18 @@ class ExamMetricsSpreadsheet
          if ($a == 0) $logic = 'no';
 
          if ($logic == 'no') continue;
-         if ($a) $note .= $key . ': ' . $logic . "\n";
+         // if ($a) $note .= $key . ': ' . $logic . "\n";
+         if ($a) $note .= $key . ': ' . $logic . " / ";
        }
-       $sheet->getComment("$col1$r")->getText()->createTextRun($note);
-       $sheet->getComment("$col1$r")->setHeight("300px");
-       $sheet->getComment("$col1$r")->setWidth("200px");
+       $sheetData = [[substr($note, 0, -2), ' ']];
+       $sheet->fromArray(
+           $sheetData,  // The data to set
+           NULL,        // Array values with this value will not be set
+           "$col1$r"         // Top left coordinate of the worksheet range where
+       );
+       // $sheet->getComment("$col1$r")->getText()->createTextRun($note);
+       // $sheet->getComment("$col1$r")->setHeight("300px");
+       // $sheet->getComment("$col1$r")->setWidth("200px");
      }
 
 

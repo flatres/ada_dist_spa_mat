@@ -9,14 +9,16 @@ class Alis
   public $testPrediction;
   public $gcseBaseline;
   public $gcsePrediction;
+  public $baseline, $prediction;
+  private $adaData;
 
   public $band;
   public $exam;
 
-  public function __construct($studentId, $examId = null)
+  public function __construct($studentId, $examId = null, $adaData = null)
   {
      if (!$studentId) return;
-     $this->adaData= new \Dependency\Databases\AdaData();
+     $this->adaData= $adaData ? $adaData : new \Dependency\Databases\AdaData();
      $this->studentId = $studentId;
      if ($examId) {
        $this->examId = $examId;
@@ -39,6 +41,8 @@ class Alis
         if ($p->isFromTest == 0) {
           $this->gcseBaseline = $p->baseline;
           $this->gcsePrediction = $p->prediction;
+          $this->baseline = $p->baseline;
+          $this->prediction = $p->prediction;
         } else {
           $this->testBaseline = $p->baseline;
           $this->testPrediction = $p->prediction;

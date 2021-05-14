@@ -56,18 +56,19 @@ class WyapPDF
       $pdf->SetFont('Times','',13);
 
       // $pdf->Ln();
-      $pdf->Cell(0,10,"Give details of the substitution and the reason.", 0, 1, 'R');
+      $pdf->Cell(0,7,"Give details of the substitution and the reason.", 0, 1, 'R');
       $header = array('Assessment Point', 'Substitutions or alterations? ');
       $this->table($pdf, $header,$data);
-
       $pdf->Ln();
-      $pdf->Ln();
+      $pdf->Cell(0,8,"Pupil Comment:", 0, 1, 'L');
+      $pdf->Cell(0,25,"", 1, 1, 'L');
+      // $pdf->Ln();
       $pdf->Cell(0,10,"I confirm that (please tick)", 0, 1, 'L');
       // $pdf->Ln();
 
       $w1 = 10;
       $w2 = 190 - $w1;
-      $h = 10;
+      $h = 8;
       $x=$pdf->GetX();
       $y=$pdf->GetY();
       $pdf->Cell($w1,$h," ", 1, 1);
@@ -106,12 +107,12 @@ class WyapPDF
       $text = "I confirm that I have had the opportunity to raise any concerns about the evidence being used, where for example my evidence was affected by my personal circumstances, such as illness.";
       $pdf->MultiCell($w2,5,$text,0,'L');
       $pdf->Ln();
-      $pdf->Ln();
-
-
-
-
-      $pdf->Ln();
+      // $pdf->Ln();
+      //
+      //
+      //
+      //
+      // $pdf->Ln();
 
       // $pdf->SetFont('Times','B',13);
       $pdf->Cell(0,10,'Signature:    __________________________________________', 0, 1, 'L');
@@ -152,7 +153,7 @@ private function table(&$pdf, $header, $data)
         $pdf->Ln();
     // Data
     $pdf->SetFont('Times','',10);
-    $h = 12;
+    $h = 9;
     foreach($data as $row)
     {
         $max = 50;

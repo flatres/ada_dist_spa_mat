@@ -13,12 +13,87 @@ class Tags
     protected $container;
     private $console;
     private $channel = 'dha.tags.upload';
+    private $year;
+    private $hasTags = false;
 
     public function __construct(\Slim\Container $container)
     {
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
        $this->adaData = $container->adaData;
+    }
+
+    public function overviewGet($request, $response, $args)
+    {
+      $year = $args['year'];
+      $this->year = $year;
+      $table = $year < 12 ? 'tag_results_gcse' : 'tag_results_alevel';
+
+      $students = [];
+      $results = $this->adaData->select($table, 'count(*) as count, studentId', 'id>0 GROUP BY studentId');
+      foreach($results as $r) {
+        $s = new \Entities\People\Student($this->ada, $r['studentId']);
+        if ($s->NCYear == $year) {
+          $s->getHmNote();
+          $s->getAccessArrangements();
+          $s = (object)\array_merge((array)$s, $this->getPupilResults($s->id));
+
+          $s->baseline = isset($s->exams[0]) ? $s->exams[0]->baseline->baseline : '';
+
+          $students[] = $s;
+        }
+      }
+      $students = sortObjects($students, 'displayName', 'ASC');
+
+      return emit($response, $students);
+    }
+
+    private function getPupilResults($id) {
+      $data = [];
+      $exams = [];
+      $tagPointsTotal = 0;
+      $tagUcasPointsTotal = 0;
+      $megPointsTotal = 0;
+      $megUcasPointsTotal = 0;
+      $sort = 'meg';
+
+      $table = $this->year < 12 ? 'tag_results_gcse' : 'tag_results_alevel';
+      $results = $this->adaData->select($table, 'tag, meg, examId, specialCircumstances, evidenceRemarks, rationale', 'studentId=?', [$id]);
+      foreach($results as $r) {
+        $e = new \Entities\Academic\SubjectExam($this->ada, $r['examId']);
+        $e = (object)\array_merge((array)$e, $r);
+        if ($r['tag']) {$sort = 'tag'; $this->hasTags = true;}
+        if ($this->year < 12) {
+          $result = new \Exams\Tools\GCSE\Result();
+          $e->baseline = new \Entities\Metrics\Midyis($id, $e->id, $this->adaData);
+        } else {
+          $result = new \Exams\Tools\ALevel\Result();
+          $e->baseline = new \Entities\Metrics\Alis($id, $e->id, $this->adaData);
+          if ($e->examCode == 'EPQ') $result->level = 'EPQ';
+        }
+        $e->baseline->exam = null;
+        // process tag
+        $tagPointsTotal += $result->processGrade($r['tag']);
+        if ($this->year > 11) {
+          $tagUcasPointsTotal += $result->ucasPoints;
+          $tagPointsTotal = $tagUcasPointsTotal;
+        }
+        // process meg
+        $megPointsTotal += $result->processGrade($r['meg']);
+        if ($this->year > 11) {
+          $megUcasPointsTotal += $result->ucasPoints;
+          $megPointsTotal = $megUcasPointsTotal;
+        }
+        $exams[] = $e;
+      }
+      $exams = sortObjects($exams, $sort, 'ASC');
+      return [
+        'tagPoints' => $tagPointsTotal,
+        'megPoints' => $megPointsTotal,
+        'tagUCAS' => $tagUcasPointsTotal,
+        'megUCAS' => $megUcasPointsTotal,
+        'exams' => $exams
+      ];
     }
 
     public function finalUploadPost($request, $response, $args)

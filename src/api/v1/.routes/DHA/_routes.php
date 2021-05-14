@@ -16,5 +16,6 @@ $app->group('/dha', function(){
 
     $this->post('/tags/upload/initial', '\DHA\Tags:initialUploadPost');
     $this->post('/tags/upload/final/{id}/{code}/{year}', '\DHA\Tags:finalUploadPost');
+    $this->get('/tags/overview/year/{year}', '\DHA\Tags:overviewGet');
 
 })->add("Authenticate");

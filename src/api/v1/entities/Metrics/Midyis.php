@@ -9,11 +9,12 @@ class Midyis
   public $band;
   public $prediction;
   public $exam;
+  private $adaData;
 
-  public function __construct($studentId, $examId = null)
+  public function __construct($studentId, $examId = null, $adaData = null)
   {
      if (!$studentId) return;
-     $this->adaData= new \Dependency\Databases\AdaData();
+     $this->adaData= $adaData ? $adaData : new \Dependency\Databases\AdaData();
      $this->studentId = $studentId;
      if ($examId) {
        $this->examId = $examId;
