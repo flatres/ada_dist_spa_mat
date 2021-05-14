@@ -98,6 +98,7 @@ class Tags
       $points = 0;
       $result = new \Exams\Tools\ALevel\Result();
       foreach($grades as $grade => $c) {
+        if (!$grade) continue;
         $result->processGrade($grade);
         $points += $c * $result->ucasPoints;
       }
