@@ -19,186 +19,119 @@ class Ucas
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
        $this->adaData = $container->adaData;
-       $this->isams = $container->isams;
+       // $this->isams = $container->isams;
        $this->mcCustom= $container->mcCustom;
+
+    }
+
+    // a very particular format used during the TAG process - CAREFFUL Prob don't use.
+    public function ucasOffersUploadPost($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, $this->channel);
+
+      $uploadedFile = $request->getUploadedFiles();
+
+      // var_dump($uploadedFile['file']); return;
+      $directory = FILESTORE_PATH . "uploads/";
+      $filename = moveUploadedFile($directory, $uploadedFile['file']);
+
+      $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+      $reader->setReadDataOnly(false);
+      $spreadsheet = $reader->load($directory . $filename);
+      $worksheet = $spreadsheet->getActiveSheet();
+      $worksheetTitle     = $worksheet->getTitle();
+      $highestRow         = $worksheet->getHighestRow(); // e.g. 10
+      $highestColumn      = $worksheet->getHighestColumn(); // e.g 'F'
+      $highestColumnIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestColumn);
+
+      $data = [];
+      $subjects = [];
+      $students = [];
+      $subjectCodes = new \Exams\Tools\SubjectCodes();
+      $errorSubjects = [];
+      $errorStudents = [];
+      $data['highestRow'] = $highestRow;
+      $colors = [];
+
+      for ($row = 2; $row < $highestRow; ++$row) {
+        $rowData = [];
+        $lastName = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+        // $color = $worksheet->getStyle('B'. $row)->getFill()->getStartColor()->getRGB();
+        $color = $worksheet->getCellByColumnAndRow(3, $row)->getStyle()->getFill()->getStartColor()->getARGB();
+        // FFC000 - orange 92D050 - green
+        $decision = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
+       if ($color == 'FFC000X' || $color == 'FF92D050' || $decision == 'CF') {
+         // is a highest offer
+         $s= $this->getRow($worksheet, $row);
+         $s->color = $color;
+         if ($s->id) {
+          $students[] = $s;
+        } else {
+          $errorStudents[] = $s;
+        }
+       }
+
+       // $colors[] = $color;
+        if (!isset($colors[$color])) $colors[$color] = $color;
+      }
+      // }
+      $data['colors'] = $colors;
+      $data['students'] = $students;
+
+      foreach($students as $s) {
+        $this->adaData->delete('ucas_offers', 'studentId=?', [$s->id]);
+        $this->adaData->insert(
+          'ucas_offers',
+          'studentId, uni, course, decision, status, offer, details',
+          [
+            $s->id,
+            $s->uni,
+            $s->course,
+            $s->decision,
+            $s->status,
+            $s->offer,
+            $s->details
+          ]);
+      }
+
+      $data['unmatched'] = $errorStudents;
+      return emit($response, $data);
+    }
+
+    private function getRow($worksheet, $row) {
+      $s = (object)[];
+      $s->id = null;
+      $s->row = $row;
+      $s->lastName = str_replace(' - ', '-', $worksheet->getCellByColumnAndRow(1, $row)->getValue());
+      $s->firstName = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
+      $s->house = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
+      $s->uni = $worksheet->getCellByColumnAndRow(4, $row)->getValue();
+      $s->course = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
+      $s->decision = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
+      $s->status = $worksheet->getCellByColumnAndRow(8, $row)->getValue();
+      $s->offer = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
+      $s->details = $worksheet->getCellByColumnAndRow(10, $row)->getValue();
+
+      $firstname = explode(' ', $s->firstName)[0];
+      $bind = [
+        $firstname,
+        $firstname,
+        $s->lastName
+      ];
+      $d = $this->ada->select('stu_details', "id", "(firstname LIKE ? OR prename LIKE ?) AND lastname LIKE ?", $bind);
+      if (count($d) == 1) $s->id = $d[0]['id'];
+      return $s;
 
     }
 
 // ROUTE -----------------------------------------------------------------------------
     public function ucasGradesGet($request, $response, $args)
     {
-      $auth = $request->getAttribute('auth');
-      $this->console = new \Sockets\Console($auth);
-      $sets = [];
-      $year = 12;
 
-      $this->console->publish("Greetings.");
-      $this->console->publish("Fetching L6 set lists");
 
-      //find sets and look up their subject name, making corrections on the way
-      $s = $this->isams->select('TblTeachingManagerSets', 'TblTeachingManagerSetsID as id, intSubject, txtSetCode', 'intYear=?', [$year]);
-      $count = count($s);
-
-      $this->console->publish("$count found");
-
-      if($count === 0) return emit($response, []);
-
-      $this->console->publish("Matching Sets to Subjects");
-
-      foreach ($s as $set) {
-        $subject = $this->isams->select('TblTeachingManagerSubjects', 'TblTeachingManagerSubjectsID as id, txtSubjectName, txtSubjectCode', 'TblTeachingManagerSubjectsID = ?', [$set['intSubject']]);
-        if (!isset($subject[0])) continue;
-        $subject = $subject[0];
-
-        if (!$this->isAcademicSubject($subject['txtSubjectName'], $set['txtSetCode'])) continue;
-
-        $isAlevel = $this->setSubjectToAda($subject);
-
-        if (strpos($set['txtSetCode'], 'Ma/x') !== false || strpos($set['txtSetCode'], 'Ma/y') !== false) {
-          $subject['txtSubjectName'] = 'Further Mathemetics';
-        }
-
-        if ($subject['txtSubjectCode'] == 'EN') $subject['txtSubjectName'] = 'Literature in English';
-        $prefix = $isAlevel ? 'A2;' : 'PREUFC;';
-        $subject['txtSubjectName'] = $prefix . $subject['txtSubjectName'];
-        $sets['id_' . $set['id']] = array_merge($subject, $set);
-        $this->console->publish("Set {$set['txtSetCode']} matched with {$subject['txtSubjectName']}");
-
-      }
-      $this->console->publish("Getting pupil sets and matching subjects");
-
-      //get all year 12 pupils and look them up in set lists. If a new subject, add to their list of subjects
-      $students = $this->isams->select(  'TblPupilManagementPupils',
-                                            'txtSchoolID as id, txtForename, intFamily, intNCYear, txtSurname, txtGender, txtDOB',
-                                            'intNCYear = ? AND intSystemStatus = 1 ORDER BY txtSurname ASC', [$year]);
-      $count = count($students);
-      $this->console->publish("$count found");
-      $this->console->publish("Finding pupil subjects");
-
-      foreach ($students as &$student) {
-        $student['subjects'] = [];
-        $studentSets = $this->isams->select( 'TblTeachingManagerSetLists', 'intSetID', 'txtSchoolID=?', [$student['id']]);
-
-        $this->console->publish($student['txtSurname']);
-        foreach ($studentSets as $set) {
-          if (isset($sets['id_' . $set['intSetID']])) {
-            $foundSet = $sets['id_' . $set['intSetID']];
-            if (!isset($student['subjects'][$foundSet['txtSubjectCode']])) {
-              $student['subjects'][$foundSet['txtSubjectCode']] = $foundSet['txtSubjectName'];
-              //maths and FM under same set code so if in a FM set, also add maths
-              if ($foundSet['txtSubjectName'] == 'A2;Further Mathemetics') {
-                $student['subjects']['MA2'] = 'A2;Mathematics';
-                $this->console->publish('   -- ' . 'Mathematics');
-              }
-              $this->console->publish('   -- ' . $foundSet['txtSubjectName']);
-            }
-          }
-        }
-
-        $adaStudent = new \Entities\People\Student();
-        $adaStudent->byMISId($student['id']);
-        $tag = new \Entities\Tags\Tag();
-        $student['avgGcse'] = $tag->value('Metrics', 'GCSE Avg.', $adaStudent->id);
-
-        // add white space to stop excel displaying it in scientific notation
-        $student['id'] = '' . strval($student['id']) . ' ';
-        $dob = strtotime($student['txtDOB']);
-        $student['txtDOB'] = date('d/m/Y',$dob);
-
-        $student['s1'] = '';
-        $student['s2'] = '';
-        $student['s3'] = '';
-        $student['s4'] = '';
-        $i = 1;
-        foreach ($student['subjects'] as $sub) {
-          $student["s$i"] = $sub;
-          $i++;
-        }
-      }
-
-      $columns = [
-        [
-          'field' => 'txtSurname',
-          'label' => 'Surname'
-        ],
-        [
-          'field' => 'txtForename',
-          'label' => 'Forename'
-        ],
-        [
-          'field' => 'txtDOB',
-          'label' => 'DOB'
-        ],
-        [
-          'field' => 'id',
-          'label' => 'UPN'
-        ],
-        [
-          'field' => 'txtGender',
-          'label' => 'Sex'
-        ],
-        [
-          'field' => 'avgGcse',
-          'label' => 'Avg (I)GCSE'
-        ],
-        [
-          'field' => 's1',
-          'label' => 'Subject1'
-        ],
-        [
-          'field' => 's2',
-          'label' => 'Subject2'
-        ],
-        [
-          'field' => 's3',
-          'label' => 'Subject3'
-        ],
-        [
-          'field' => 's4',
-          'label' => 'Subject4'
-        ]
-      ];
-
-      $settings = [
-        'forceText' => true
-      ];
-      $this->console->publish("Generating Spreadsheet");
-      $sheet = new \Utilities\Spreadsheet\SingleSheet($columns, $students, $settings);
-
-      return emit($response, $sheet->package);
+      return emit($response, []);
       // return emit($response, $this->adaModules->select('TABLE', '*'));
-    }
-
-    private function isAcademicSubject($name, $code){
-
-      switch ($name) {
-        case 'EPQ' :
-        case 'Creative Writing':
-        case 'Learning Support' :
-          return false;
-      }
-
-      if (strpos($code, '/G') !== false) return false; //GCSE Language
-      if (strpos($code, '-Ja') !== false) return false; //GCSE Japanese
-      if (strpos($code, '/DE') !== false) return false; //DELE
-      if (strpos($code, '/DF') !== false) return false; //DELF
-      if (strpos($code, 'Ma/mc') !== false) return false; //Maths in Contect
-      return true;
-
-    }
-
-    private function setSubjectToAda($subject) {
-      $s = $this->adaModules->select('academic_subjects', 'id, isAlevel', 'subjectCode=?', [$subject['txtSubjectCode']]);
-      if (!isset($s[0])){
-        $this->adaModules->insert('academic_subjects', 'id, subjectCode, subjectName', [
-          $subject['id'],
-          $subject['txtSubjectCode'],
-          $subject['txtSubjectName']
-        ]);
-        return true;
-      } else {
-        return $s[0]['isAlevel'] == 1 ? true : false;
-      }
     }
 
 }

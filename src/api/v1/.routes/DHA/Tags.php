@@ -36,6 +36,15 @@ class Tags
         if ($s->NCYear == $year) {
           $s->getHmNote();
           $s->getAccessArrangements();
+          $ucas = $this->adaData->select('ucas_offers', '*', 'studentId=?', [$s->id]);
+          $s->ucas = isset($ucas[0]) ? $ucas[0] : [];
+          if (isset($s->ucas['offer'])) {
+            $s->ucas['points'] = $this->makePoints($s->ucas['offer']);
+            $short = explode(' ', $s->ucas['offer'])[0];
+            $short = preg_replace('#\(.*\)#', '', $short);
+            $s->ucas['offerShort'] = $short;
+          }
+          // if (isset($ucas[0])) $s = (object)\array_merge((array)$s, $ucas[0]);
           $s = (object)\array_merge((array)$s, $this->getPupilResults($s->id));
 
           $s->baseline = isset($s->exams[0]) ? $s->exams[0]->baseline->baseline : '';
@@ -46,6 +55,10 @@ class Tags
       $students = sortObjects($students, 'displayName', 'ASC');
 
       return emit($response, $students);
+    }
+
+    private function makePoints($offer) {
+      if (is_numeric($offer)) return $offer;
     }
 
     private function getPupilResults($id) {

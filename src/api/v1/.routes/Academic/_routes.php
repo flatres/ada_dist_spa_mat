@@ -15,6 +15,7 @@ $app->group('/academic', function(){
     $this->get('/covid', '\Academic\Covid:covidGet');
 
     $this->get('/ucas/grades', '\Academic\Ucas:ucasGradesGet');
+    $this->post('/ucas/offers/upload', '\Academic\Ucas:ucasOffersUploadPost');
 
     $this->get('/almanac/history', '\Academic\Almanac:almanacHistoryGet');
 
