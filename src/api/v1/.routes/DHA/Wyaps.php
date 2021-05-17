@@ -160,6 +160,7 @@ class Wyaps
           $exam = $exams[$key];
         }
         $grade = $r[$gradeField];
+        if (\strlen($grade) == 0) continue;
         $title = \strtoupper($exam['txtOptionTitle']);
         $level = null;
         if (stripos($title, 'EXTENDED') !== false) {
