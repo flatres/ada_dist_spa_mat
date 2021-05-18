@@ -50,7 +50,7 @@ class Ucas
           $short = explode(' ', $s->ucas['offer'])[0];
           $short = preg_replace('#\(.*\)#', '', $short);
           $s->ucas['offerShort'] = $short;
-          $s->ucas['points'] = $this->makePoints($short);
+          $s->ucas['points'] = $this->makePoints($short, $s);
           $s->flagged = $s->ucas['flagged'];
         }
       }
@@ -70,7 +70,7 @@ class Ucas
       return emit($response, $data);
     }
 
-    private function makePoints($offer) {
+    private function makePoints($offer, &$s) {
       if (is_numeric($offer)) return $offer;
       //sanitise
       $offer = \str_replace('Maths', '', $offer);
@@ -96,6 +96,7 @@ class Ucas
       foreach($grades as $grade => &$count) $count = substr_count($offer, $grade);
       unset($count);
       $grades['A'] = $grades['A'] - $grades['A*'];
+      $grades['D'] = $grades['D'] - $grades['D1'] - $grades['D2'] - $grades['D3'];
       // return $grades;
       $points = 0;
       $result = new \Exams\Tools\ALevel\Result();
@@ -105,6 +106,7 @@ class Ucas
         $points += $c * $result->ucasPoints;
         if (isset($this->totalGrades[$grade])) $this->totalGrades[$grade] += $c;
       }
+      $s->ucas['counts'] = $grades;
       $this->pointsCount += $points;
       $this->offerCount++;
       return $points;
