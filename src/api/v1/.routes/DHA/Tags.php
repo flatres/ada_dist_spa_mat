@@ -94,6 +94,7 @@ class Tags
       foreach($grades as $grade => &$count) $count = substr_count($offer, $grade);
       unset($count);
       $grades['A'] = $grades['A'] - $grades['A*'];
+      $grades['D'] = $grades['D'] - $grades['D1'] - $grades['D2'] - $grades['D3'];
       // return $grades;
       $points = 0;
       $result = new \Exams\Tools\ALevel\Result();
