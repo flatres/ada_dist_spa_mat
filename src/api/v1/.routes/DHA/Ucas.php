@@ -53,6 +53,8 @@ class Ucas
           $s->ucas['points'] = $this->makePoints($short, $s);
           $s->flagged = $s->ucas['flagged'];
         }
+        $s = (object)\array_merge((array)$s, $s->ucas);
+        if (isset($s->ucas['counts'])) $s = (object)\array_merge((array)$s, $s->ucas['counts']); 
       }
       $totals = [];
       foreach($this->totalGrades as $key => $g) {
