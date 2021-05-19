@@ -106,6 +106,9 @@ class ExamMetricsSpreadsheet
       $this->grades = [9, 8, 7, 6, 5, 4, 3, 2, 1];
       $this->gradesForCounting = $this->grades;
       $this->gradeBands = ['9', '9-8', '9-7', '9-6', '9-5', '9-4', '9-3', '9-2', '9-1'];
+      if ($subject->name == 'Literature in English') $this->isPreU = true;
+      if ($subject->name == 'Italian') $this->isPreU = true;
+      if ($subject->name == 'History') $this->isPreU = true;
       return;
     }
 

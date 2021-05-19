@@ -61,7 +61,7 @@ class Ucas
         $color = $worksheet->getCellByColumnAndRow(3, $row)->getStyle()->getFill()->getStartColor()->getARGB();
         // FFC000 - orange 92D050 - green
         $decision = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
-       if ($color == 'FFFFC000' || $color == 'FF92D050' || $decision == 'CF') {
+       if ($color == 'FFC000X' || $color == 'FF92D050' || $decision == 'CF') {
          // is a highest offer
          $s= $this->getRow($worksheet, $row);
          $s->color = $color;
