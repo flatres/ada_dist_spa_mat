@@ -127,7 +127,16 @@ class Metrics
       return emit($response, $package);
     }
 
-    private function makePDFData ($args, $byClass = false) {
+    public function pdfBlankGet($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.metrics', 'Gathering data...');
+
+      $package = $this->makePDFData($args, false, true);
+      return emit($response, $package);
+    }
+
+    private function makePDFData ($args, $byClass = false, $blank = false) {
       $pg = $this->progress;
 
       $subjectId = $args['subject'];
@@ -149,9 +158,18 @@ class Metrics
       foreach($subject->students as &$s) $s->getHMNote();
 
       sortObjects($subject->students, 'lastName', 'ASC');
-      if ($byClass == true) {
+      if ($byClass == true && $blank == false) {
         foreach($subject->students as &$s) $s->cc = \strtoupper($s->classCode . $s->lastName);
         sortObjects($subject->students, 'cc', 'ASC');
+      }
+      if ($blank == true) {
+        $student = [
+          'displayName' => 'Name:                                                          ',
+          'classCode' => 'Class: ...............................',
+          'schoolNumber' => 'Sch. #:                   '
+        ];
+        $subject->students = [];
+        $subject->students[] = (object)$student;
       }
 
       $subject->examId = $examId;
