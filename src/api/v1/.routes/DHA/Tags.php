@@ -94,10 +94,12 @@ class Tags
       foreach($grades as $grade => &$count) $count = substr_count($offer, $grade);
       unset($count);
       $grades['A'] = $grades['A'] - $grades['A*'];
+      $grades['D'] = $grades['D'] - $grades['D1'] - $grades['D2'] - $grades['D3'];
       // return $grades;
       $points = 0;
       $result = new \Exams\Tools\ALevel\Result();
       foreach($grades as $grade => $c) {
+        if (!$grade) continue;
         $result->processGrade($grade);
         $points += $c * $result->ucasPoints;
       }
@@ -129,13 +131,13 @@ class Tags
         }
         $e->baseline->exam = null;
         // process tag
-        $tagPointsTotal += $result->processGrade($r['tag']);
+        if ($r['tag']) $tagPointsTotal += $result->processGrade($r['tag']);
         if ($this->year > 11) {
           $tagUcasPointsTotal += $result->ucasPoints;
           $tagPointsTotal = $tagUcasPointsTotal;
         }
         // process meg
-        $megPointsTotal += $result->processGrade($r['meg']);
+        if ($r['tag']) $megPointsTotal += $result->processGrade($r['meg']);
         if ($this->year > 11) {
           $megUcasPointsTotal += $result->ucasPoints;
           $megPointsTotal = $megUcasPointsTotal;

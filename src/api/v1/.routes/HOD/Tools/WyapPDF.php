@@ -21,24 +21,6 @@ class WyapPDF
     $pdf = new FPDF();
     $subject = $this->subject;
 
-    $this->isPreU = $subject->isPreU;
-    if ($subject->year < 12) {
-      if ($subject->examName == 'Literature in English') $this->isPreU = true;
-      if ($subject->examName == 'Italian') $this->isPreU = true;
-      if ($subject->examName == 'History') $this->isPreU = true;
-    } else {
-      if ($subject->examName == 'Italian') $this->isPreU = false; //has gone back to A level
-      if ($subject->examName == 'Russian') $this->isPreU = true;
-      if ($subject->examName == 'Spanish') $this->isPreU = true;
-      if ($subject->examName == 'French') $this->isPreU = true;
-      if ($subject->examName == 'Chinese') $this->isPreU = true;
-      if ($subject->examName == 'German') $this->isPreU = true;
-      if ($subject->examName == 'History') $this->isPreU = true;
-      if ($subject->examName == 'English') $this->isPreU = true;
-      if ($subject->examName == 'Philosophy') $this->isPreU = true;
-      if ($subject->examName == 'Art History') $this->isPreU = true;
-    }
-
     $this->getGrades($subject);
     $primary = $this->primaryWyaps();
     $data = [];

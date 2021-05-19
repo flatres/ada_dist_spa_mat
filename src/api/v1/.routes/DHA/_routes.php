@@ -19,4 +19,6 @@ $app->group('/dha', function(){
     $this->get('/tags/overview/year/{year}', '\DHA\Tags:overviewGet');
     $this->put('/tags/flag/{id}/{flag}', '\DHA\Tags:toggleFlagPut');
 
+    $this->get('/ucas/pupils', '\DHA\Ucas:pupilsGet');
+
 })->add("Authenticate");

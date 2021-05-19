@@ -160,6 +160,7 @@ class Wyaps
           $exam = $exams[$key];
         }
         $grade = $r[$gradeField];
+        if (\strlen($grade) == 0) continue;
         $title = \strtoupper($exam['txtOptionTitle']);
         $level = null;
         if (stripos($title, 'EXTENDED') !== false) {
@@ -202,9 +203,10 @@ class Wyaps
 
       $data = [];
       $data['results'] = $results;
-
-      $statistics = $isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $console) : new \Exams\Tools\ALevel\StatisticsGateway($this->sql, $console, $results) ;
-      $data['statistics'] = $statistics->makeStatistics($session, $results, $this->cache, true);
+      if (count($results) > 0) {
+        $statistics = $isGCSE ? new \Exams\Tools\GCSE\StatisticsGateway($this->sql, $console) : new \Exams\Tools\ALevel\StatisticsGateway($this->sql, $console, $results) ;
+        $data['statistics'] = $statistics->makeStatistics($session, $results, $this->cache, true);
+      }
       // }
 
       return emit($response, $data);

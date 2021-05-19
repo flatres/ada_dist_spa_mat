@@ -223,7 +223,7 @@ class SubjectCodes
       if($this->contains('chinese') || $this->contains('mandarin')) return array("CN", 'Chinese');
       if($this->contains('chinese')) return array("CN", 'Chinese');
 
-      if($this->contains('greek') || $this->contains('classical')) return array("GC", 'Greek');
+      if($this->contains('greek') || $this->contains('classical')) return array("CG", 'Greek');
 
       if($this->contains('french')) return array("FR", "French");
       if($this->contains('japanese')) return array("JA", 'Japanese');

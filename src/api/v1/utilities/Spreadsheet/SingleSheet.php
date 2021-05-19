@@ -96,6 +96,7 @@ class SingleSheet
       $colCount++;
     }
     $sheetData[] = $header;
+    $sheetData[] = [];
     // $sheetData[] = []; //black row for the filter buttons
     foreach ($data as $d) {
       $row = [];
@@ -135,7 +136,7 @@ class SingleSheet
     }
 
     $maxRow = count($data)+2;
-    $sheet->setAutoFilter('A1:' . $maxCol . $maxRow);
+    $sheet->setAutoFilter('A2:' . $maxCol . $maxRow);
 
   }
 
