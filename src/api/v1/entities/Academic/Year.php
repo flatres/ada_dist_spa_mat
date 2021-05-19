@@ -7,7 +7,7 @@ class Year
   public $id;
   public $students = [];
   private $sql, $adaData;
-  public $subjects = [];
+  public $subjects = [], $exams = [];
 
   public function __construct($id = null)
   {
@@ -37,7 +37,7 @@ class Year
     return $hasAccess;
   }
 
-  public function getSubjects() {
+  public function getSubjects(bool $getStudents = false) {
     //first search through all classes in this year and extract subjects
     $classes = $this->sql->select('sch_classes', 'subjectId', 'year=?', [$this->id]);
     $subjects = [];
@@ -46,11 +46,25 @@ class Year
       if (!isset($subjects[$key])) {
         $subject = new \Entities\Academic\Subject($this->sql, $c['subjectId']);
         $subject->getExamsByYear($this->id);
+        if ($getStudents) $subject->getStudentsByYear($this->id);
         $subjects[$key] = $subject;
       }
     }
     $this->subjects = array_values($subjects);
     return $this;
+  }
+
+  public function getExams(bool $getStudents = false) {
+    $this->exams = [];
+    $this->getSubjects($getStudents);
+
+    foreach($this->subjects as $s) {
+      foreach ($s->exams as &$e) {
+        $e->students = $s->students;
+        $this->exams[] = $e;
+      }
+    }
+    return $this->exams;
   }
 
   public function getWyaps(bool $withResultsCount = false) {

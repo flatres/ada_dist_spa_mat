@@ -127,12 +127,13 @@ class SingleSheet
           // 'size' => 18
       ]
     ];
-    $sheet->getStyle('A1:AZ1')->applyFromArray($styleArray);
-    $alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $maxCol = $alphabet[$colCount - 1];
+    $maxCol = columnLetter($colCount);
+    $sheet->getStyle('A1:'.$maxCol.'1')->applyFromArray($styleArray);
+    // $alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-    foreach (range('A',$maxCol) as $col) {
-      $sheet->getColumnDimension($col)->setAutoSize(true);
+
+    foreach (range(1,$colCount) as $col) {
+      $sheet->getColumnDimension(columnLetter($col))->setAutoSize(true);
     }
 
     $maxRow = count($data)+2;

@@ -20,6 +20,11 @@ class Student
      return $this;
   }
 
+  // returns the alis predictions for subjects this pupil does
+  private function getSubjectsAlis() {
+
+  }
+
   public function setAlisFromTest($value){
     $this->update('alisBaselineTest', $value);
     return true;

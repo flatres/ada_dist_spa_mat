@@ -21,4 +21,6 @@ $app->group('/dha', function(){
 
     $this->get('/ucas/pupils', '\DHA\Ucas:pupilsGet');
 
+    $this->get('/baseline/alis/{year}', '\DHA\Baseline:alisGet');
+
 })->add("Authenticate");
