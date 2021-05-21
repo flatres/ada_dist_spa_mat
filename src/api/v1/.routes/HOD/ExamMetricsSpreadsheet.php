@@ -444,7 +444,9 @@ class ExamMetricsSpreadsheet
     $startColumn = $this->columnLetter($wyaps[0]->startColumn);
     $endColumn = $this->columnLetter($wyaps[count($wyaps)-1]->endColumn);
     $sumOfWeights = 'SUMIFS($'.$startColumn.'$1:$'.$endColumn.'$1,'.$startColumn . $i .':'.$endColumn.$i.',">0")';
-    return "=({$weightedSum})/({$sumOfWeights})";
+    // IF(SUMIFS($R$1:$S$1,R5:S5,">0") > 0, (S$1*S5)/(SUMIFS($R$1:$S$1,R5:S5,">0")), 0)
+
+    return "=IF({$sumOfWeights} > 0 , ({$weightedSum})/({$sumOfWeights}), 0)";
   }
 
   private function reset($sheet) {
