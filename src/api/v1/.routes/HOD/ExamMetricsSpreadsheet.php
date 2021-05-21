@@ -941,11 +941,11 @@ class ExamMetricsSpreadsheet
     $thisYear = ['2021 Final'];
     //A level has an extra avg gcse column, which obs isnt a band
     $formula = '=Round(';
-    $prefix = '';
+    $prefix = 'E17 + ';
     $startRow = 17;
     $maxCol = $subject->year < 12 ? count($bands) : count($bands) - 1;
     // -1 TO NOT INCLUDE GPA COLUMN
-    for ($x = 0; $x < $maxCol - 1; $x++) {
+    for ($x = 1; $x < $maxCol; $x++) {
       $row = $startRow + $x;
       $formula .= $prefix . "E" . $row;
       $prefix = '+';
