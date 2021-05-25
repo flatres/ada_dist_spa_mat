@@ -294,7 +294,7 @@ class Tags
       $students = [];
       $studentError = false;
       $studentErrorMsg = '';
-      for ($row = 5; $row <= $highestRow; $row++) {
+      for ($row = 5; $row <= $highestRow; ++$row) {
         $cell = $worksheet->getCellByColumnAndRow(1, $row);
         $name = $cell->getValue();
         $lastName = explode(',', $name)[0];
@@ -325,12 +325,11 @@ class Tags
 
       }
 
-      $data['students'] = $students;
       if($studentError) {
         return emit($response, ['error' => true, 'msg' => $studentErrorMsg]);
       }
 
-
+      $data['students'] = $students;
       $data['exam']->year = $students[0]->NCYear > 11 ? 13 : 11;
 
       return emit($response, $data);
@@ -348,9 +347,9 @@ class Tags
       $directory = FILESTORE_PATH . "dha/tags/temp/";
       $filename = moveUploadedFile($directory, $uploadedFile['file']);
       $data = [];
-      $r = $this->parseSheet($response, $directory . $filename, $data);
+      $this->parseSheet($response, $directory . $filename, $data);
 
-      return $r;
+      return emit($response, $data);
 
     }
 
