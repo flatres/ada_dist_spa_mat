@@ -29,6 +29,12 @@ class Tags
       $this->adaData->update('ucas_offers', 'flagged=?', 'studentId=?', [$flag, $id]);
     }
 
+    public function toggleCheckedPut($request, $response, $args) {
+      $flag = $args['flag'];
+      $id = $args['id'];
+      $this->adaData->update('ucas_offers', 'checked=?', 'studentId=?', [$flag, $id]);
+    }
+
     public function overviewGet($request, $response, $args)
     {
       $year = $args['year'];
@@ -42,18 +48,12 @@ class Tags
         if ($s->NCYear == $year) {
           $s->getHmNote();
           $s->getAccessArrangements();
-          $ucas = $this->adaData->select('ucas_offers', '*', 'studentId=?', [$s->id]);
-          $s->ucas = isset($ucas[0]) ? $ucas[0] : [];
           $s->flagged = 0;
-          if (isset($s->ucas['offer'])) {
-            $short = explode(' ', $s->ucas['offer'])[0];
-            $short = preg_replace('#\(.*\)#', '', $short);
-            $s->ucas['offerShort'] = $short;
-            $s->ucas['points'] = $this->makePoints($short);
-            $s->flagged = $s->ucas['flagged'];
-          }
-
-
+          $s->checked = 0;
+          $s->ucasHigh = $this->getOffer($s->id);
+          $s->ucasLow = $this->getOffer($s->id, false);
+          if (isset($s->ucasHigh['offer'])) $s->flagged = $s->ucasHigh['flagged'];
+          if (isset($s->ucasHigh['offer'])) $s->checked = $s->ucasHigh['checked'];
 
           // if (isset($ucas[0])) $s = (object)\array_merge((array)$s, $ucas[0]);
           $s = (object)\array_merge((array)$s, $this->getPupilResults($s->id));
@@ -66,6 +66,23 @@ class Tags
       $students = sortObjects($students, 'displayName', 'ASC');
 
       return emit($response, $students);
+    }
+
+    private function getOffer($sId, $high = true) {
+      $code = $high ? 'CF' : 'CI';
+      $o = [];
+      $o = $this->adaData->select('ucas_offers', '*', 'studentId=? AND decision=?', [$sId, $code]);
+      if (!isset($o[0]) && $high == true) {
+        $o = $this->adaData->select('ucas_offers', '*', 'studentId=? AND decision=?', [$sId, 'C']);
+      }
+      if (!isset($o[0])) return [];
+      $o = $o[0];
+
+      $o['offer'] = "[${o['grade1']}]";
+      if ($o['grade2']) $o['offer'] .= " [${o['grade2']}]";
+      if ($o['grade3']) $o['offer'] .= " [${o['grade3']}]";
+      if ($o['grade4']) $o['offer'] .= " [${o['grade4']}]";
+      return $o;
     }
 
     private function makePoints($offer) {

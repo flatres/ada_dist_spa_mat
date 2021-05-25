@@ -150,10 +150,19 @@ class ExamMetricsSpreadsheet
 
   private function primaryWyaps() {
     $wyaps = [];
-    $SACount = 1;
+
+    $SATotal = 0;
     foreach($this->wyaps as &$w) {
       if ($w->type == 'Summer Assessment') {
-        $w->shortName = 'SA' . $SACount;
+        $SATotal++;
+      }
+    }
+    unset($w);
+
+    $SACount = 0;
+    foreach($this->wyaps as &$w) {
+      if ($w->type == 'Summer Assessment') {
+        $w->shortName = 'SA' . ($SATotal - $SACount);
         $wyaps[] = $w;
         $SACount++;
       }
@@ -218,7 +227,7 @@ class ExamMetricsSpreadsheet
     $gpaUpliftWeight = $subject->year > 11 ? 1 : 0;
     $row1 = [$subject->examName,'','','','','','','','Weightings:', '', '', ''];
     $code = "{$subject->code}/{$subject->id}/{$subject->examId}";
-    $row2 = [$code, '','','','','','','','','', '', ''];
+    $row2 = [$code, '','','','','','','','','', '', '', ''];
     $row3 = [
       'Name',
       'Class',
@@ -229,12 +238,13 @@ class ExamMetricsSpreadsheet
       'Moderated Evidence Grade',
       'Moderated Evidence Total (%)',
       'Primary Percentile',
+      'Percentile Difference',
       'Secondary Percentile',
       'WYAP Evidence Total (%)',
       ''
     ];
 
-    $column = 13;
+    $column = 14;
     //add primary wyaps
     $primary = $this->primaryWyaps();
     foreach($primary as &$p) {
@@ -315,7 +325,8 @@ class ExamMetricsSpreadsheet
     $i = 5;
     $lastRow = $i+count($subject->students) -1;
     $primaryAggregateRange = 'H$' . $i . ':H$' . $lastRow;
-    $secondaryAggregateRange = 'K$' . $i . ':K$' . $lastRow;
+    // $secondaryAggregateRange = 'K$' . $i . ':K$' . $lastRow;
+    $secondaryAggregateRange = 'L$' . $i . ':L$' . $lastRow;
     foreach ($subject->students as $s) {
 
       $s->getHmNote();
@@ -340,7 +351,8 @@ class ExamMetricsSpreadsheet
         "",
         $this->aggregate($s, $primary, $i),
         "=PERCENTRANK.INC(" . $primaryAggregateRange . ",H{$i})",
-        "=PERCENTRANK.INC(" . $secondaryAggregateRange . ",K{$i})",
+        "=I{$i} - K{$i}",
+        "=PERCENTRANK.INC(" . $secondaryAggregateRange . ",L{$i})",
         $this->aggregate($s, $secondary, $i),
         ""
       ];
@@ -474,6 +486,7 @@ class ExamMetricsSpreadsheet
     if ($this->isPreU) {
       $sheet->getColumnDimension('J')->setVisible(false);
       $sheet->getColumnDimension('K')->setVisible(false);
+      $sheet->getColumnDimension('L')->setVisible(false);
     }
 
     $maxRow = count($this->subject->students)+4;
@@ -640,12 +653,12 @@ class ExamMetricsSpreadsheet
      // Secondary Percentil
      $styleArray = [];
      $styleArray['fill'] = $this->secondary2Fill;
-     $sheet->getStyle('J3:J' . $maxRow)->applyFromArray($styleArray);
+     $sheet->getStyle('K3:K' . $maxRow)->applyFromArray($styleArray);
 
      // secondary Aggregate
      $styleArray = [];
      $styleArray['fill'] = $this->secondary1Fill;
-     $sheet->getStyle('K3:K' . $maxRow)->applyFromArray($styleArray);
+     $sheet->getStyle('L3:L' . $maxRow)->applyFromArray($styleArray);
 
      // L6, Remove Exam
      $col= $this->columnLetter($this->dataEndColumn - 2);

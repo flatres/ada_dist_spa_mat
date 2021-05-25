@@ -1,10 +1,9 @@
 <?php
 use Slim\Http\UploadedFile;
-// parses GUY's fuckwit color coordinated sheet
+// parses the actual spreadsheet sent from UCAS. Can't deal with the offer grades being only present in the description column
 
 /**
  * Description
-
 
 
  * Usage:
@@ -40,7 +39,7 @@ class Ucas
       $directory = FILESTORE_PATH . "uploads/";
       $filename = moveUploadedFile($directory, $uploadedFile['file']);
 
-      $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+      $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
       $reader->setReadDataOnly(false);
       $spreadsheet = $reader->load($directory . $filename);
       $worksheet = $spreadsheet->getActiveSheet();
@@ -64,9 +63,9 @@ class Ucas
         // $color = $worksheet->getStyle('B'. $row)->getFill()->getStartColor()->getRGB();
         $color = $worksheet->getCellByColumnAndRow(3, $row)->getStyle()->getFill()->getStartColor()->getARGB();
         // FFC000 - orange 92D050 - green
-        $decision = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
+        $decision = $worksheet->getCellByColumnAndRow(17, $row)->getValue();
        // if ($color == 'FFFFC000' || $color == 'FF92D050' || $decision == 'CF') {
-       if ($decision == 'CF' || $decision == 'CI' || $color == 'FF92D050') {
+       if ($decision == 'CF' || $decision == 'CI' || $decision == 'U' || $decision == 'C' ) {
          // is a highest offer
          $s= $this->getRow($worksheet, $row);
          $s->color = $color;
@@ -90,17 +89,19 @@ class Ucas
         // $this->adaData->delete('ucas_offers', 'studentId=?', [$s->id]);
         $this->adaData->insert(
           'ucas_offers',
-          'studentId, uni, decision, status, grade1, grade2, grade3, grade4, details, predictions, entryYear',
+          'studentId, choiceRank, uni, uniCode, course, courseCode, decision, status, offer, details, points, predictions, entryYear',
           [
             $s->id,
+            $s->choiceRank,
             $s->uni,
+            $s->uniCode,
+            $s->course,
+            $s->courseCode,
             $s->decision,
             $s->status,
-            $s->grade1,
-            $s->grade2,
-            $s->grade3,
-            $s->grade4,
+            $s->offer,
             $s->details,
+            $s->points,
             $s->predictions,
             $s->entryYear
           ]);
@@ -116,18 +117,19 @@ class Ucas
       $s->row = $row;
       $s->lastName = str_replace(' - ', '-', $worksheet->getCellByColumnAndRow(1, $row)->getValue());
       $s->firstName = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
-      $s->house = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
-      $s->uni = $worksheet->getCellByColumnAndRow(4, $row)->getValue();
-      $s->decision = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
-      $s->status = $worksheet->getCellByColumnAndRow(8, $row)->getValue();
-      $s->grade1 = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
-      $s->grade2 = $worksheet->getCellByColumnAndRow(10, $row)->getValue();
-      $s->grade3 = $worksheet->getCellByColumnAndRow(11, $row)->getValue();
-      $s->grade4 = $worksheet->getCellByColumnAndRow(12, $row)->getValue();
-      $s->details = $worksheet->getCellByColumnAndRow(13, $row)->getValue();
-      $s->predictions = $worksheet->getCellByColumnAndRow(14, $row)->getValue();
-      $s->entryYear = $worksheet->getCellByColumnAndRow(15, $row)->getValue();
-      // $s->points = $this->makePoints($s->offer, $s);
+      $s->house = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
+      $s->choiceRank = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
+      $s->uni = $worksheet->getCellByColumnAndRow(10, $row)->getValue();
+      $s->uniCode = $worksheet->getCellByColumnAndRow(11, $row)->getValue();
+      $s->courseCode = $worksheet->getCellByColumnAndRow(12, $row)->getValue();
+      $s->course = $worksheet->getCellByColumnAndRow(13, $row)->getValue();
+      $s->decision = $worksheet->getCellByColumnAndRow(17, $row)->getValue();
+      $s->status = $worksheet->getCellByColumnAndRow(18, $row)->getValue();
+      $s->offer = $worksheet->getCellByColumnAndRow(19, $row)->getValue();
+      $s->details = $worksheet->getCellByColumnAndRow(20, $row)->getValue();
+      $s->predictions = $worksheet->getCellByColumnAndRow(22, $row)->getValue();
+      $s->entryYear = $worksheet->getCellByColumnAndRow(24, $row)->getValue();
+      $s->points = $this->makePoints($s->offer, $s);
       $firstname = explode(' ', $s->firstName)[0];
       $bind = [
         $firstname,
