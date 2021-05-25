@@ -942,7 +942,7 @@ class ExamMetricsSpreadsheet
     //A level has an extra avg gcse column, which obs isnt a band
     $formula = '=Round(';
     $prefix = $subject->year > 11 && $this->isPreU ? 'E17 + ' : '';
-    $startRow = 17;
+    $startRow = $subject->year > 11 && $this->isPreU ? 17 : 16;
     $maxCol = $subject->year < 12 ? count($bands) : count($bands) - 1;
     // -1 TO NOT INCLUDE GPA COLUMN
     for ($x = 1; $x < $maxCol; $x++) {
