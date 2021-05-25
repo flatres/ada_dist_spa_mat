@@ -225,7 +225,7 @@ class ExamMetricsSpreadsheet
     //first row
     $gcseMockWeight = $subject->year > 11 ? 0 : 1;
     $gpaUpliftWeight = $subject->year > 11 ? 1 : 0;
-    $row1 = [$subject->examName,'','','','','','','','Weightings:', '', '', ''];
+    $row1 = [$subject->examName,'','','','','','','','Weightings:', '', '', '', ''];
     $code = "{$subject->code}/{$subject->id}/{$subject->examId}";
     $row2 = [$code, '','','','','','','','','', '', '', ''];
     $row3 = [
