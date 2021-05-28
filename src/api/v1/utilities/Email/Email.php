@@ -70,7 +70,7 @@ class Email {
 
 					$mail->addCC("git@marlboroughcollege.org");
 					foreach ($this->cc as $ccAddress) {
-						// $mail->addCC($this->debug === true ? $this->userEmail : $ccAddress);
+						$mail->addCC($this->debug === true ? $this->userEmail : $ccAddress);
 					}
 					// Attachments
 					// $mail->addAttachment(dirname(__FILE__). '/img/logo.jpg', 'logo');         // Add attachments

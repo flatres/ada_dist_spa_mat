@@ -14,8 +14,8 @@ class Lists
 
     public function __construct(\Slim\Container $container)
     {
+        $this->container = $container;
        $this->sql= $container->mysql;
-       $this->isams = $container->isams;
 
     }
 
@@ -25,7 +25,7 @@ class Lists
         'id, firstname, lastname',
         'disabled=0 ORDER BY lastname ASC',
         []);
-        
+
       $data = [];
       foreach($students as $s) $data[] = new \Entities\People\Student($this->sql, $s['id']);
       return emit($response, $data);
@@ -48,6 +48,7 @@ class Lists
 
     public function portalNames_GET($request, $response, $args)
     {
+      $this->isams = $this->container->isams;
       $students = $this->sql->select(
         'stu_details',
         'id, firstname, lastname',

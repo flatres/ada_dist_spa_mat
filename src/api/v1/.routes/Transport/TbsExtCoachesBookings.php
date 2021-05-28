@@ -13,7 +13,7 @@ class TbsExtCoachesBookings
     protected $container;
     private $user, $email;
     private $oldCoachId = false;
-    private $debug = true; 
+    private $debug = true;
 
     public function __construct(\Slim\Container $container)
     {
@@ -49,7 +49,7 @@ class TbsExtCoachesBookings
         [$id]);
 
       convertArrayToAdaDatetime($session);
-      return $session[0];
+      return isset($session[0]) ? $session[0] : [];
     }
 
     public function familyBookings($familyId)
@@ -68,6 +68,7 @@ class TbsExtCoachesBookings
       foreach ($data as &$booking) {
         $booking['type'] = 'coaches';
         $booking = $this->makeDisplayValues($booking);
+        $booking['session'] = $this->getSession($booking['sessionId']);
       }
       return $data;
     }
@@ -134,7 +135,7 @@ class TbsExtCoachesBookings
       if ($booking['stopId']){
         $stop = $this->getStop($booking['stopId']);
         $booking['stop'] = $stop['name'];
-        $booking['stopTime'] = $stop['time'];
+        $booking['stopTime'] = tidyTime($stop['time']);
         $booking['cost'] = $stop['cost'];
       }
 
@@ -563,7 +564,7 @@ class TbsExtCoachesBookings
           'date'    => $booking['date'],
           'to'      => $booking['stop'],
           'from'    => $booking['schoolLocation'],
-          'time'   => $booking['schoolTime']
+          'time'   => tidyTime($booking['schoolTime'])
         ];
       } else {
         $fields = [
@@ -571,12 +572,18 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'time'    => $booking['stopTime'],
+          'time'    => tidyTime($booking['stopTime']),
           'from'    => $booking['stop'],
           'to'      => $booking['schoolLocation'],
         ];
       }
       $this->sendEmail($booking['contact']->email, 'MC Coach Booking Received', 'TBS.ReceivedCoach', $fields);
+    }
+
+    private function sanitiseTime($time) {
+      $ex = explode($time);
+      if (count($ex) == 2) return $time;
+      return $ex[0] . ':' . $ex[1];
     }
 
     private function sendCancelledEmail(int $bookingId)
@@ -590,7 +597,7 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'time'=> $booking['stopTime'],
+          'time'=> tidyTime($booking['stopTime']),
           'from'    => $booking['stop'],
           'to'  => $booking['schoolLocation']
         ];
@@ -600,7 +607,7 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'time'=> $booking['schoolTime'],
+          'time'=> tidyTime($booking['schoolTime']),
           'from'    => $booking['schoolLocation'],
           'to'      => $booking['stop']
         ];
@@ -620,7 +627,7 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'time'=> $booking['stopTime'],
+          'time'=> tidyTime($booking['stopTime']),
           'from'    => $booking['stop'],
           'to'  => $booking['schoolLocation']
         ];
@@ -650,7 +657,7 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'time'    => $booking['stopTime'],
+          'time'    => tidyTime($booking['stopTime']),
           'from'    => $booking['stop'],
           'to'      => $booking['schoolLocation'],
           'cost'    => $booking['cost'],
@@ -662,7 +669,7 @@ class TbsExtCoachesBookings
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
-          'time'    => $booking['schoolTime'],
+          'time'    => tidyTime($booking['schoolTime']),
           'from'    => $booking['schoolLocation'],
           'to'      => $booking['stop'],
           'cost'    => $booking['cost'],

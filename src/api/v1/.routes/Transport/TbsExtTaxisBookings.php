@@ -25,7 +25,7 @@ class TbsExtTaxisBookings
 
        global $userId;
        $this->user = new \Entities\People\User($this->ada, $userId);
-       $this->email = $this->user->email;
+       $this->email = 'flatres@gmail.com'; //$this->user->email;
 
     }
 
@@ -144,7 +144,7 @@ class TbsExtTaxisBookings
         [$id]);
 
       convertArrayToAdaDatetime($session);
-      return $session[0];
+      return isset($session[0]) ? $session[0] : [];
     }
 
     private function makeSummaryHTML(array &$company, array $session)
@@ -232,6 +232,7 @@ class TbsExtTaxisBookings
       foreach ($data as &$booking) {
         $booking['type'] = 'taxi';
         $booking = $this->makeDisplayValues($booking);
+        $booking['session'] = $this->getSession($booking['sessionId']);
       }
       return $data;
     }
@@ -509,7 +510,7 @@ class TbsExtTaxisBookings
           //company has changed so create a new taxi for this company and reset email flags
           //first see if this booking's taxi is being shared with anyone else. If not then delete it.
           $bookings = $this->adaModules->select('tbs_taxi_bookings', 'id', 'taxiId=?', [$taxiId]);
-          if (count($bookings) === 1) $this->adaModules->delete('tbs_taxi_taxis', 'id=?', $taxiId);
+          if (count($bookings) === 1) $this->adaModules->delete('tbs_taxi_taxis', 'id=?', [$taxiId]);
 
           //make a new taxi for this booking
           $taxiId = $this->adaModules->insert('tbs_taxi_taxis', 'sessionId, companyId, isReturn', [$sessionId, $companyId, $isReturn] );
@@ -642,7 +643,7 @@ class TbsExtTaxisBookings
       }
 
       $fields = [
-        'name'    => $booking['contact']['firstName'],
+        // 'name'    => $booking['contact']->firstName,
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'date'    => $booking['date'],
@@ -737,16 +738,16 @@ class TbsExtTaxisBookings
       }
       return $names;
     }
-
+    // ajbell
     private function savePassengers(int $bookingId, array $passengers)
     {
         //get current Passengers
         $current = $this->adaModules->select('tbs_taxi_passenger', 'id, studentId', 'bookingId=?', array($bookingId));
-        $currentKeys = array();
-        $ids = array();
+        $currentKeys = [];
+        $ids = [];
         foreach($current as $passenger) {
-          $currentKeys['p_' . $passenger['id']] = true;
-          $ids['p_' . $passenger['id']] = $passenger['id'];
+          $currentKeys['p_' . $passenger['studentId']] = true;
+          $ids['p_' . $passenger['studentId']] = $passenger['studentId'];
         }
         foreach($passengers as $passenger) {
           $id = $passenger['id'];
@@ -792,7 +793,7 @@ class TbsExtTaxisBookings
       $bookingFields['revision'] = $revision;
       $bookingFields['statusId'] = 1;
       $bookingFields['bookingId'] = $bookingId;
-
+      // var_dump($bookingFields); exit();
       $this->adaModules->update(
         'tbs_taxi_bookings',
         'pickupTime=?, note=?, journeyType=?, schoolLocation=?, address=?, airportId=?, flightNumber=?, flightTime=?, stationId=?, trainTime=?, isReturn=?, revision = ?, statusId = ?',
@@ -826,11 +827,11 @@ class TbsExtTaxisBookings
 
     }
 
-    private function sendEmail($to, $subject, $template, $fields)
+    private function sendEmail($to, $subject, $template, $fields, $cc = [], $bcc = [])
     {
       $to = $this->debug === true ? $this->email : $to;
-      $to = 'flatres@gmail.com';
-      $email = new \Utilities\Email\Email($to, $subject);
+      // $to = 'flatres@gmail.com';
+      $email = new \Utilities\Email\Email($to, $subject, 'coaches@marlboroughcollege.org', $cc, $bcc);
       $content = $email->template($template, $fields);
       $res = $email->send($content);
     }
