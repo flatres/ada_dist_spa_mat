@@ -347,9 +347,9 @@ class Tags
       $directory = FILESTORE_PATH . "dha/tags/temp/";
       $filename = moveUploadedFile($directory, $uploadedFile['file']);
       $data = [];
-      $this->parseSheet($response, $directory . $filename, $data);
+      return $this->parseSheet($response, $directory . $filename, $data);
 
-      return emit($response, $data);
+      // return emit($response, $data);
 
     }
 
