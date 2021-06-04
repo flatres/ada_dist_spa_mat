@@ -160,7 +160,7 @@ class Wyaps
           $exam = $exams[$key];
         }
         $grade = $r[$gradeField];
-        
+
         //sanitise
         $grade = str_replace(' ', '', $grade);
 
@@ -173,7 +173,7 @@ class Wyaps
           if (is_numeric($grade)) {
             $level = 'GCSE';
           } else {
-            if ($grade == 'A*' || $grade == 'A' || $grade == 'B' || $grade == 'C' || $grade == 'D' || $grade == 'E') {
+            if ($grade == 'A*' || $grade == 'A' || $grade == 'B' || $grade == 'C' || $grade == 'D' || $grade == 'E' || $grade == 'U') {
               $level = 'A';
             } else {
               $level = 'FC';
