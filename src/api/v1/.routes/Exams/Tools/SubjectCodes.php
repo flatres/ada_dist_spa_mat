@@ -205,7 +205,7 @@ class SubjectCodes
       if($this->contains('math')) return array('MA', 'Mathematics');
 
       if($this->contains('latin')) return array("LA", "Latin");
-      if($this->contains('greek')) return array("CG", "Greek");
+      if($this->contains('greek')) return array("GC", "Greek");
       if($this->contains('classical civilisation')) return array("CL", "Classical Civilisation");
 
       if($this->contains('classic')) return array("CL", "Classics");
