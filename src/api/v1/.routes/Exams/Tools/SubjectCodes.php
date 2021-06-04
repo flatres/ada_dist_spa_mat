@@ -205,7 +205,6 @@ class SubjectCodes
       if($this->contains('math')) return array('MA', 'Mathematics');
 
       if($this->contains('latin')) return array("LA", "Latin");
-      if($this->contains('greek')) return array("GC", "Greek");
       if($this->contains('classical civilisation')) return array("CL", "Classical Civilisation");
 
       if($this->contains('classic')) return array("CL", "Classics");
@@ -223,7 +222,8 @@ class SubjectCodes
       if($this->contains('chinese') || $this->contains('mandarin')) return array("CN", 'Chinese');
       if($this->contains('chinese')) return array("CN", 'Chinese');
 
-      if($this->contains('greek') || $this->contains('classical')) return array("CG", 'Greek');
+      if($this->contains('greek')) return array("GC", "Greek");
+      if($this->contains('greek') && $this->contains('classical')) return array("CG", 'Greek');
 
       if($this->contains('french')) return array("FR", "French");
       if($this->contains('japanese')) return array("JA", 'Japanese');

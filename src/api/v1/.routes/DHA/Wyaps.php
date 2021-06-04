@@ -150,13 +150,19 @@ class Wyaps
           $oldResult = $this->adaData->select('exams_results', 'title, moduleCode', 'NCYear =? AND examId = ? AND sessionId= ?', [$year, $eId, $lastSessionId]);
           if (!isset($oldResult[0])) {
             // echo 'examID: '. $eId . " not found $year $lastSessionId" . PHP_EOL;
-            continue;
+            $exam = $this->ada->select('sch_subjects_exams', 'examName', 'id=?', [$eId]);
+            if (!isset($exam[0])) continue;
+            $exams[$key] = [
+              'txtModuleCode' => 'unknown',
+              'txtOptionTitle' => $exam[0]['examName']
+            ];
+          } else {
+            $oldResult = $oldResult[0];
+            $exams[$key] = [
+              'txtModuleCode' => $oldResult['moduleCode'],
+              'txtOptionTitle' => $oldResult['title']
+            ];
           }
-          $oldResult = $oldResult[0];
-          $exams[$key] = [
-            'txtModuleCode' => $oldResult['moduleCode'],
-            'txtOptionTitle' => $oldResult['title']
-          ];
           $exam = $exams[$key];
         }
         $grade = $r[$gradeField];
