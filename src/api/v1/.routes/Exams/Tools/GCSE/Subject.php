@@ -77,9 +77,9 @@ class Subject
     {
       $this->subjectCode = $result['subjectCode'];
       $this->subjectName = $result['subjectName'];
-      $this->boardName = $result['boardName'];
-      $this->boardDesc = $result['boardDesc'];
-      $this->intUABCode = $result['intUABCode'];
+      $this->boardName = $result['boardName'] ?? '';
+      $this->boardDesc = $result['boardDesc'] ?? '';
+      $this->intUABCode = $result['intUABCode'] ?? '';
       $this->title = $result['txtOptionTitle'];
       $this->unknown = $result['subjectCode'] == '-' ? true : false;
       $this->level = 'GCSE';
