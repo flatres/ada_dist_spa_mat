@@ -160,6 +160,10 @@ class Wyaps
           $exam = $exams[$key];
         }
         $grade = $r[$gradeField];
+        
+        //sanitise
+        $grade = str_replace(' ', '', $grade);
+
         if (\strlen($grade) == 0) continue;
         $title = \strtoupper($exam['txtOptionTitle']);
         $level = null;
