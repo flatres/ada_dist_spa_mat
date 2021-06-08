@@ -54,7 +54,7 @@ class Pupils
       $exams = [];
       $wyaps = $this->adaData->select('wyap_results', 'wyap_id, exam_id, percentage', 'student_id=?', [$studentId]);
       foreach($wyaps as &$w) {
-        $wyap = new \Entities\Metrics\Wyap($w['wyap_id']);
+        $wyap = new \Entities\Metrics\WYAP($w['wyap_id']);
         $w['name'] = $wyap->name;
         $w['type'] = $wyap->type;
         $w['typeShort'] = $wyap->typeShort;
