@@ -59,12 +59,7 @@ class Absences
       $subjects = [];
       $sets = [];
 
-      $absencesRaw = $this->mcCustom->select(
-        'TblAbsenceMiscell',
-        'TblAbsenceMiscellID as id, txtSchoolID as studentId, dteStart as start, dteFinish as finish, txtReason as reason, dteSubmitted as submittedAt ',
-        'dteStart < ? AND dteFinish > ?',
-        [$now, $now]
-      );
+      $absencesRaw = (new \Entities\Misc\Absences())->getMisc()->misc;
       $count = count($absencesRaw);
       $i = 1;
       $absences = [];
@@ -74,8 +69,8 @@ class Absences
         $a['start'] = $start->format('d-m-Y');
         $finish = new \DateTime($a['finish']);
         $a['finish'] = $finish  ->format('d-m-Y');
-        $submittedAt = new \DateTime($a['submittedAt']);
-        $a['submittedAt'] = $submittedAt->format('d-m-Y');
+        // $submittedAt = new \DateTime($a['submittedAt']);
+        // $a['submittedAt'] = $submittedAt->format('d-m-Y');
         $student = new \Entities\People\iSamsStudent($this->isams, $a['studentId']);
         $student->getSets();
         // $a = array_merge($a, (array)$student);

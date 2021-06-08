@@ -16,5 +16,9 @@ $app->group('/aux', function(){
     $this->post('/covid/student', '\Aux\Covid:studentResponsePost');
     $this->post('/covid/staff', '\Aux\Covid:staffResponsePost');
 
+    $this->get('/socs/absences/{apiKey}', '\Aux\SOCS:absencesGet');
+
+    $this->post('/pupils/login', '\Aux\Pupils:loginPost');
+
 });
 // $app->get('/test', '\Auth\TestClass:testGet')->add(new \Authenticate);

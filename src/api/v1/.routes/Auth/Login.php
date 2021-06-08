@@ -87,7 +87,7 @@ class Login
             $userId = $this->sql->select('usr_details', 'id', 'login=?', array($login))[0]['id'];
             $this->log->warning("User Account Locked usr:$login ip:$ip");
             $time = self::LOCKOUT_TIME_MINUTES;
-            $data = $data = [
+            $data = [
               'success' => false,
               'message' => "Too many attempts. Account locked for $time minutes."
             ];
