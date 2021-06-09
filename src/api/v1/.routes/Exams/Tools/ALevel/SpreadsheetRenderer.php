@@ -1541,7 +1541,7 @@ class SpreadsheetRenderer
     $fields = ['Subject', 'Board'];
 
     //choose a random subject to get years availiable
-    foreach($this->statistics->data->subjectResults['A']['CH']->summaryData['history'] as $year) {
+    foreach($this->statistics->data->subjectResults['A']['BI']->summaryData['history'] as $year) {
       $fields[] = $year['year'];
     }
 
