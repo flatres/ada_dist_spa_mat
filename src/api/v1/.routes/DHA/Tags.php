@@ -154,7 +154,7 @@ class Tags
           $tagPointsTotal = $tagUcasPointsTotal;
         }
         // process meg
-        if ($r['tag']) $megPointsTotal += $result->processGrade($r['meg']);
+        if ($r['meg']) $megPointsTotal += $result->processGrade($r['meg']);
         if ($this->year > 11) {
           $megUcasPointsTotal += $result->ucasPoints;
           $megPointsTotal = $megUcasPointsTotal;
