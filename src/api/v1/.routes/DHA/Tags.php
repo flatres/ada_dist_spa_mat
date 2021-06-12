@@ -21,6 +21,7 @@ class Tags
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
        $this->adaData = $container->adaData;
+       $this->isams = $container->isams;
     }
 
     public function toggleFlagPut($request, $response, $args) {
@@ -46,12 +47,14 @@ class Tags
       foreach($results as $r) {
         $s = new \Entities\People\Student($this->ada, $r['studentId']);
         if ($s->NCYear == $year) {
+          $iSamsS = new \Entities\People\iSamsStudent($this->isams, $s->misId);
           $s->getHmNote();
           $s->getAccessArrangements();
           $s->flagged = 0;
           $s->checked = 0;
           $s->ucasHigh = $this->getOffer($s->id);
           $s->ucasLow = $this->getOffer($s->id, false);
+          $s->ethnicity = $iSamsS->ethnicGroup;
           if (isset($s->ucasHigh['offer'])) $s->flagged = $s->ucasHigh['flagged'];
           if (isset($s->ucasHigh['offer'])) $s->checked = $s->ucasHigh['checked'];
 

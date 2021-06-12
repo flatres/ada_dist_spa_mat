@@ -9,6 +9,7 @@ class iSamsStudent
   public $houseCode;
   public $contacts = [];
   public $portalUserCodes = [];
+  public $ethnicGroup = '';
   public $accessArrangements = null;
   // public $subjects = [];
   public $sets=[];
@@ -27,7 +28,7 @@ class iSamsStudent
 
     $d = $this->sql->select(
       'TblPupilManagementPupils',
-      'intNCYear, txtSchoolID, intFamily, txtForename, txtSurname, txtForm, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtEnrolmentHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtMobileNumber',
+      'intNCYear, txtSchoolID, intFamily, txtForename, txtSurname, txtForm, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtEnrolmentHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtMobileNumber, txtEthnicGroup',
       'txtSchoolID=?', [$id]);
 
     if(isset($d[0])){
@@ -41,6 +42,7 @@ class iSamsStudent
       $this->familyId = $d['intFamily'];
       $this->formId = $d['txtForm'];
       $this->mobile = $d['txtMobileNumber'];
+      $this->ethnicGroup = $d['txtEthnicGroup'];
       // $this->familyID = $d['txtFamily'];
       $this->gender = $d['txtGender'];
       $this->dob = $d['txtDOB'];
