@@ -261,6 +261,7 @@ class TbsExtTaxisBookings
           $taxis['i_' . $booking['taxiId']]['count'] += $count;
         }
       }
+      $bookings = $this->checkDuplicates($bookings);
       $data = [
         'bookings'  => $bookings,
         'taxis'     => array_values($taxis)
@@ -285,7 +286,31 @@ class TbsExtTaxisBookings
       foreach ($data as &$booking) {
         $booking = $this->makeDisplayValues($booking);
       }
+      $data = $this->checkDuplicates($data);
       return emit($response, $data);
+    }
+
+    private function checkDuplicates($data) {
+      foreach ($data as &$booking) {
+        $duplicates = [];
+        foreach($data as $duplicate) {
+          if ($duplicate['isReturn'] !== $booking['isReturn']) continue;
+          if ($duplicate['statusId'] === 4 || $booking['statusId'] === 4) continue; //cancelled
+          if ($booking['studentId'] == $duplicate['studentId']) {
+            $duplicates[] = $duplicate['id'];
+            continue;
+          }
+          foreach ($duplicate['passengers'] as $p) {
+            if ($p == $booking['studentId']) {
+              $duplicates[] = $duplicate['id'];
+              continue;
+            }
+          }
+        }
+        $booking['duplicates'] = $duplicates;
+        $booking['duplicateCount'] = count($duplicates) - 1;
+      }
+      return $data;
     }
 
     public function bookingsNewCountGet($request, $response, $args)
@@ -322,8 +347,9 @@ class TbsExtTaxisBookings
       $booking['status'] = $status['s_' . $booking['statusId']];
       $booking['displayName'] = $this->student->displayName($booking['studentId']);
 
-      $booking['house'] = (new \Entities\People\Student($this->ada, $booking['studentId']))->boardingHouse;
-
+      $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $booking['house'] = $student->boardingHouse;
+      $booking['mob'] = (new \Entities\People\iSamsStudent($this->isams, $student->misId))->mobile;
       // contacts
       $booking['contact'] = new \Entities\People\iSamsUser($this->isams, $booking['contactIsamsUserId']);
 
@@ -344,7 +370,7 @@ class TbsExtTaxisBookings
 
       //make display name of user that has actioned changed
       $user = new \Entities\People\User($this->ada, $booking['actionedByUserId']);
-      $booking['actionedBy'] = $user->fullName;
+      $booking['actionedBy'] = $user->login;
 
       $booking['revisions'] = [];
       //get revisions
@@ -356,6 +382,8 @@ class TbsExtTaxisBookings
           'pickupTime'  => $r['pickupTime'],
           'displayFrom' => $r['displayFrom'],
           'displayTo'   => $r['displayTo'],
+          'companyId' => $r['companyId'],
+          'actionedBy' => (new \Entities\People\User($this->ada, $r['actionedByUserId']))->login,
           'recent'      => $flagRecent,
         ];
         $flagRecent = false;
@@ -507,6 +535,7 @@ class TbsExtTaxisBookings
       $oldCompanyId = $this->adaModules->select('tbs_taxi_bookings', 'companyId', 'id=?', [$bookingId])[0]['companyId'];
 
       if ($companyId !== $oldCompanyId) {
+          $this->archiveBooking($bookingId);
           //company has changed so create a new taxi for this company and reset email flags
           //first see if this booking's taxi is being shared with anyone else. If not then delete it.
           $bookings = $this->adaModules->select('tbs_taxi_bookings', 'id', 'taxiId=?', [$taxiId]);
@@ -616,7 +645,7 @@ class TbsExtTaxisBookings
         'passengers'  => $passengerString,
         'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
-      $this->sendEmail($booking['contact']->email, 'MC Taxi Booking Received','TBS.ReceivedTaxi', $fields);
+      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Received','TBS.ReceivedTaxi', $fields);
     }
 
     private function sendCancelledEmail(int $bookingId)
@@ -654,7 +683,7 @@ class TbsExtTaxisBookings
         'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
 
-      $this->sendEmail($booking['contact']->email, 'MC Taxi Booking Cancelled', 'TBS.CancelledTaxi', $fields);
+      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Cancelled', 'TBS.CancelledTaxi', $fields);
 
     }
 
@@ -694,7 +723,7 @@ class TbsExtTaxisBookings
         'passengers'  => $passengerString,
         'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
-      $this->sendEmail($booking['contact']->email, 'MC Taxi Booking Confirmed', 'TBS.ConfirmedTaxi', $fields);
+      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Confirmed', 'TBS.ConfirmedTaxi', $fields);
     }
 
     public function summaryEmailPost($request, $response)
@@ -812,13 +841,15 @@ class TbsExtTaxisBookings
 
       $this->adaModules->insert(
         'tbs_taxi_bookings_archive',
-        'bookingId, studentId, pickupTime, displayFrom, displayTo',
+        'bookingId, studentId, pickupTime, displayFrom, displayTo, companyId, actionedByUserId',
         array(
           $b['id'],
           $b['studentId'],
           $b['pickupTime'],
           $b['displayFrom'],
-          $b['displayTo']
+          $b['displayTo'],
+          $b['companyId'],
+          $b['actionedByUserId']
         )
       );
 
@@ -827,13 +858,53 @@ class TbsExtTaxisBookings
 
     }
 
-    private function sendEmail($to, $subject, $template, $fields, $cc = [], $bcc = [])
+    private function sendEmail($bookingId, $studentId, $to, $subject, $template, $fields, $cc = [], $bcc = [])
     {
       $to = $this->debug === true ? $this->email : $to;
       // $to = 'flatres@gmail.com';
       $email = new \Utilities\Email\Email($to, $subject, 'coaches@marlboroughcollege.org', $cc, $bcc);
       $content = $email->template($template, $fields);
       $res = $email->send($content);
+      $ccString = '';
+      foreach($cc as $c) $ccString .= $c;
+
+      $sessionId = $this->adaModules->select('tbs_taxi_bookings', 'sessionId', 'id=?', [$bookingId])[0]['sessionId'];
+      //log email
+      $this->adaModules->insert(
+        'tbs_emails',
+        'isTaxi, bookingId, studentId, sessionId, email, cc, subject, content',
+        [
+          1,
+          $bookingId,
+          $studentId,
+          $sessionId,
+          $to,
+          $ccString,
+          $subject,
+          $content
+        ]
+      );
+
+    }
+
+    //argument: sessionId
+    public function emailsGet($request, $response, $args)
+    {
+      $sessionId = $args['session'];
+      $emails = $this->adaModules->select(
+        'tbs_emails',
+        'id, isTaxi, bookingId, studentId, sessionId, email, cc, subject, content',
+        'isTaxi = ? AND sessionId = ? ORDER BY timestamp DESC',
+        [
+          1,
+          $sessionId
+        ]
+      );
+      foreach($emails as &$e) {
+        $e['name'] = (new \Entities\People\Student($this->ada, $e['studentId']))->displayName;
+        $e['time'] = convertToAdaDatetime($e['timestamp']);
+      }
+      return emit($response, $emails);
     }
 
     private function publish(int $bookingId) {

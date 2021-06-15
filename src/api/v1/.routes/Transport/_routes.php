@@ -63,7 +63,7 @@ $app->group('/transport', function(){
 
 
 // TAXIS --------------------------------------------------------------------------------------------------------
-
+    $this->get('/taxis/emails/{session}', '\Transport\TbsExtTaxisBookings:emailsGet');
     $this->get('/taxis/bookings/{session}', '\Transport\TbsExtTaxisBookings:allBookingsGet');
     $this->get('/taxis/bookings/{session}/{type}', '\Transport\TbsExtTaxisBookings:bookingsGet');
     $this->get('/taxis/newbookings/{session}', '\Transport\TbsExtTaxisBookings:bookingsNewCountGet');
