@@ -13,7 +13,7 @@ class Student
 
     private $sql;
 
-    public $id, $firstName, $lastName, $email, $boardingHouse, $gender, $displayName;
+    public $id, $firstName, $lastName, $email, $mobile, $boardingHouse, $gender, $displayName;
     public $misFamilyId;
     public $dob;
     public $boardingHouseSafe; //has spaces replaced with _ for use in array keys
@@ -47,6 +47,7 @@ class Student
         'gender'    => $this->gender,
         'dob'       => $this->dob,
         'email'     => $this->email,
+        'mobile'    => $this->mobile,
         'schoolNumber'    => $this->schoolNumber,
         'boarding'  => $this->boardingHouseCode,
         'isDisabled' => $this->isDisabled
@@ -92,7 +93,7 @@ class Student
     {
       $student = $this->sql->select(
         'stu_details',
-        'id, firstname, lastname, prename, email, boardingHouse, boardingHouseId, gender, mis_id, mis_family_id, NCYear, dob, disabled',
+        'id, firstname, lastname, prename, email, mobile, boardingHouse, boardingHouseId, gender, mis_id, mis_family_id, NCYear, dob, disabled',
         'id=?',
         [$id]);
 
@@ -113,6 +114,7 @@ class Student
         $this->misFamilyId = $student['mis_family_id'];
 
         $this->email = $student['email'];
+        $this->mobile = $student['mobile'];
         $this->boardingHouse = $student['boardingHouse'];
         $this->boardingHouseSafe = str_replace(" ", '_', $student['boardingHouse']);
         $this->gender = $student['gender'];

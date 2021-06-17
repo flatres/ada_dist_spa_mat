@@ -53,7 +53,7 @@ class Students
 
       $console->publish('Pulling iSAMS students...');
       $misStudents = $this->isams->select(  'TblPupilManagementPupils',
-                                            'txtSchoolID as id, txtForename, intFamily, intNCYear, txtPreName, txtEmailAddress, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
+                                            'txtSchoolID as id, txtForename, intFamily, intNCYear, txtPreName, txtEmailAddress, txtMobileNumber, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
                                             'intSystemStatus = 1', array());
       $console->publish('Got ' . count($misStudents), 1);
 
@@ -124,7 +124,7 @@ class Students
 
       $id = $this->ada->insert(
         'stu_details',
-        'lastname, firstname, prename, initials, boardingHouse, boardingHouseId, NCYear, email, mis_id, mis_family_id, gender, dob, enrolmentNCYear, EnrolmentSchoolYear',
+        'lastname, firstname, prename, initials, boardingHouse, boardingHouseId, NCYear, email, mobile, mis_id, mis_family_id, gender, dob, enrolmentNCYear, EnrolmentSchoolYear',
         array(
           $d['txtSurname'],
           $d['txtForename'],
@@ -134,6 +134,7 @@ class Students
           $bhId,
           $d['intNCYear'],
           $d['txtEmailAddress'],
+          utf8_encode($d['txtMobileNumber']),
           $d['id'],
           $d['intFamily'],
           $d['txtGender'],
@@ -172,7 +173,7 @@ class Students
 
         $this->ada->update(
           'stu_details',
-          'lastname=?, firstname=?, prename=?, initials=?, boardingHouse=?, boardingHouseId=?, NCYear = ?, email=?, mis_id=?, mis_family_id=?, gender=?, dob=?, enrolmentNCYear=?, enrolmentSchoolYear=?, disabled=?',
+          'lastname=?, firstname=?, prename=?, initials=?, boardingHouse=?, boardingHouseId=?, NCYear = ?, email=?, mobile = ?, mis_id=?, mis_family_id=?, gender=?, dob=?, enrolmentNCYear=?, enrolmentSchoolYear=?, disabled=?',
           'id=?',
           array(
             $d['txtSurname'],
@@ -183,6 +184,7 @@ class Students
             $bhId,
             $d['intNCYear'],
             $d['txtEmailAddress'],
+            utf8_encode($d['txtMobileNumber']),
             $d['id'],
             $d['intFamily'],
             $d['txtGender'],

@@ -681,9 +681,7 @@ class TbsExtCoachesBookings
 
     private function sendEmail($to, $subject, $template, $fields)
     {
-      $to = $this->debug === true ? $this->email : $to;
-      $to = 'flatres@gmail.com';
-      $email = new \Utilities\Email\Email($to, $subject);
+      $email = new \Utilities\Email\Email($to, $subject, 'coaches@marlboroughcollege.org', [], [], $this->debug);
       $content = $email->template($template, $fields);
       $res = $email->send($content);
     }

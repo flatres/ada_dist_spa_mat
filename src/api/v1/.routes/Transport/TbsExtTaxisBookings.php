@@ -25,7 +25,7 @@ class TbsExtTaxisBookings
 
        global $userId;
        $this->user = new \Entities\People\User($this->ada, $userId);
-       $this->email = 'flatres@gmail.com'; //$this->user->email;
+       $this->email = $this->user->email;
 
     }
 
@@ -191,14 +191,14 @@ class TbsExtTaxisBookings
       // 'to'      => $booking['displayTo'],
       // 'passengers'  => $passengerString,
       // 'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
-        $html = "<table class='body-action' align='center' widthx='100%' cellpadding='0' cellspacing='0' style='border-bottom:1px solid black; font-size:12px; color:#000000; widthx:100%;margin-top:20px;margin-bottom:5px;margin-right:auto;margin-left:0;padding-top:0;padding-bottom:15px;padding-right:0;padding-left:0;text-align:left;' >
+        $html = "<table class='body-action' align='center' widthx='100%' cellpadding='4' cellspacing='0' style='border-bottom:1px solid black; font-size:12px; color:#000000; widthx:100%;margin-top:20px;margin-bottom:5px;margin-right:auto;margin-left:0;padding-top:0;padding-bottom:15px;padding-right:0;padding-left:0;text-align:left;' >
                 <tr style='text-align:left; padding:3px; background:{$b['statusColor']}; color: white; '><td style='padding-left:5px; padding-right:5px; text-align:center'>{$b['status']}</td></tr>
-                <tr><td style='xmin-width:100px; text-align:right; padding-right:10px'>Ref #:</td><td>{$b['id']}</td>
-                <td style='xmin-width:100px; text-align:right; padding-right:10px'>Pupil:</td><td>{$b['displayName']}</td></tr>
-                <tr><td style='xmin-width:100px; text-align:right; padding-right:10px'>Time:</td><td>{$b['pickupTime']}</td>
-                <td style='xmin-width:100px; text-align:right; padding-right:10px'>Price:</td><td>£{$b['cost']}</td></tr>
-                <tr><td style='xmin-width:100px; text-align:right; padding-right:10px'>From:</td><td>{$b['displayFrom']}</td>
-                <td style='xmin-width:100px; text-align:right; padding-right:10px'>To:</td><td>{$b['displayTo']}</td></tr>
+                <tr><td style='xmin-width:100px; text-align:right;'>Pupil #: </td><td> {$b['schoolNumber']}</td>
+                <td style='xmin-width:100px; text-align:right;'>Pupil: </td><td>{$b['displayName']}</td></tr>
+                <tr><td style='xmin-width:100px; text-align:right; '>Time: </td><td> {$b['pickupTime']}</td>
+                <td style='xmin-width:100px; text-align:right;'>Mob: </td><td>{$b['mob']}</td></tr>
+                <tr><td style='xmin-width:100px; text-align:right;'>From:</td><td> {$b['displayFrom']}</td>
+                <td style='xmin-width:100px; text-align:right; '>To:</td><td> {$b['displayTo']}</td></tr>
                 </table>
               ";
         if ($b['passengerCount'] > 0) {
@@ -348,6 +348,7 @@ class TbsExtTaxisBookings
       $booking['displayName'] = $this->student->displayName($booking['studentId']);
 
       $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $booking['schoolNumber'] = $student->schoolNumber;
       $booking['house'] = $student->boardingHouse;
       $booking['mob'] = (new \Entities\People\iSamsStudent($this->isams, $student->misId))->mobile;
       // contacts
@@ -355,10 +356,11 @@ class TbsExtTaxisBookings
 
       // taxi company
       $companyId = $booking['companyId'];
-      $d = $this->adaModules->select('tbs_taxi_companies', 'name, phoneNumber', 'id=?', [$companyId]);
+      $d = $this->adaModules->select('tbs_taxi_companies', 'name, email, phoneNumber', 'id=?', [$companyId]);
       if (isset($d[0])) {
         $booking['companyName'] = $d[0]['name'];
         $booking['companyPhoneNumber'] = $d[0]['phoneNumber'];
+        $booking['companyEmail'] = $d[0]['email'];
       }
 
       // dates
@@ -654,8 +656,9 @@ class TbsExtTaxisBookings
       // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
 
       $booking = $this->makeDisplayValues($booking);
-      $passengers = $this->getPassengerNames($bookingId);
-
+      $passengers = $this->getPassengers($bookingId);
+      $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $cc = [$booking['companyEmail'], $student->email];
       $count = count($passengers);
       if ( $count > 0 ) {
         $c = 0;
@@ -664,46 +667,10 @@ class TbsExtTaxisBookings
         foreach($passengers as $p){
           $c++;
           if ($c == $count) $comma = '';
-          $passengerString .= "<span style='margin-right:5px'>{$p}$comma</span>";
-          $comma = ';';
-        }
-      } else {
-        $passengerString = '-';
-      }
-
-      $fields = [
-        // 'name'    => $booking['contact']->firstName,
-        'id'      => $bookingId,
-        'pupil' => $booking['displayName'],
-        'date'    => $booking['date'],
-        'time'    => $booking['pickupTime'],
-        'from'    => $booking['displayFrom'],
-        'to'      => $booking['displayTo'],
-        'passengers'  => $passengerString,
-        'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
-      ];
-
-      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Cancelled', 'TBS.CancelledTaxi', $fields);
-
-    }
-
-    private function sendConfirmedEmail(int $bookingId)
-    {
-      $booking = $this->adaModules->select('tbs_taxi_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
-      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
-
-      $booking = $this->makeDisplayValues($booking);
-      $passengers = $this->getPassengerNames($bookingId);
-
-      $count = count($passengers);
-      if ( $count > 0 ) {
-        $c = 0;
-        $passengerString = '';
-        $comma = ';';
-        foreach($passengers as $p){
-          $c++;
-          if ($c == $count) $comma = '';
-          $passengerString .= "<span style='margin-right:5px'>{$p}$comma</span>";
+          $passengerString .= "<span style='margin-right:5px'>{$p->displayName}$comma</span>";
+          $cc[] = $p->email;
+          $contacts = $this->getContacts($p->id);
+          foreach($contacts as $c) if ($c['portalUserInfo'] && $p->misFamilyId !== $booking['mis_family_id']) $cc[] = $c['email'];
           $comma = ';';
         }
       } else {
@@ -715,6 +682,54 @@ class TbsExtTaxisBookings
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'date'    => $booking['date'],
+        'mob'   => $booking['mob'],
+        'time'    => $booking['pickupTime'],
+        'from'    => $booking['displayFrom'],
+        'to'      => $booking['displayTo'],
+        'passengers'  => $passengerString,
+        'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
+      ];
+
+      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Cancelled', 'TBS.CancelledTaxi', $fields, $cc);
+
+    }
+
+    private function sendConfirmedEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_taxi_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
+
+      $booking = $this->makeDisplayValues($booking);
+      $passengers = $this->getPassengers($bookingId);
+      $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $cc = [$booking['companyEmail'], $student->email];
+      $count = count($passengers);
+      if ( $count > 0 ) {
+        $c = 0;
+        $passengerString = '';
+        $comma = ';';
+        foreach($passengers as $p){
+          $c++;
+          if ($c == $count) $comma = '';
+          $passengerString .= "<span style='margin-right:5px'>{$p->displayName}$comma</span>";
+          $cc[] = $p->email;
+          $contacts = $this->getContacts($p->id);
+          foreach($contacts as $c) if ($c['portalUserInfo'] && $p->misFamilyId !== $booking['mis_family_id']) $cc[] = $c['email'];
+          $comma = ';';
+        }
+      } else {
+        $passengerString = '-';
+      }
+
+
+
+      $fields = [
+        'name'    => $booking['contact']->firstName,
+        'id'      => $bookingId,
+        'pupil' => $booking['displayName'],
+        'schoolNumber' => $student->schoolNumber,
+        'mob'   => $booking['mob'],
+        'date'    => $booking['date'],
         'time'    => $booking['pickupTime'],
         'from'    => $booking['displayFrom'],
         'to'      => $booking['displayTo'],
@@ -723,7 +738,7 @@ class TbsExtTaxisBookings
         'passengers'  => $passengerString,
         'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
-      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Confirmed', 'TBS.ConfirmedTaxi', $fields);
+      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Confirmed', 'TBS.ConfirmedTaxi', $fields, $cc);
     }
 
     public function summaryEmailPost($request, $response)
@@ -731,9 +746,29 @@ class TbsExtTaxisBookings
       $summary = $request->getParsedBody();
 
       $to = $this->debug === true ? $this->email : $summary['email'];
-      $email = new \Utilities\Email\Email($to, 'Marlborough College Bookings');
+      $email = new \Utilities\Email\Email($to, 'Marlborough College Bookings', 'coaches@marlboroughcollege.org', [], ['coaches@marlboroughcollege.org'], $this->debug);
       $content = $summary['html'];
       $email->send($content);
+
+      // $this->adaModules->select('tbs_taxi_bookings', 'sessionId, companyId', 'id=?', [$bookingId])[0]; 
+      // $sessionId = $b['sessionId']; 
+      // $companyId = $b['companyId'];
+      // //log email
+      // $this->adaModules->insert(
+      //   'tbs_emails',
+      //   'isTaxi, bookingId, studentId, sessionId, email, cc, subject, content, companyId',
+      //   [
+      //     1,
+      //     $bookingId,
+      //     $studentId,
+      //     $sessionId,
+      //     $to,
+      //     $ccString,
+      //     $subject,
+      //     $content,
+      //     $companyId
+      //   ]
+      // );
 
       foreach($summary['bookings'] as $booking) {
           $this->adaModules->update('tbs_taxi_bookings', 'sentToCompany=?', 'id=?', [1, $booking['id']]);
@@ -766,6 +801,18 @@ class TbsExtTaxisBookings
         $names[] = $name;
       }
       return $names;
+    }
+
+    private function getPassengers(int $bookingId)
+    {
+      $d = $this->adaModules->select('tbs_taxi_passenger', 'studentId', 'bookingId=?', array($bookingId));
+      $passengers = [];
+      foreach($d as $p){
+        $id = $p['studentId'];
+        $student = new \Entities\People\Student($this->ada, $id);
+        $passengers[] = $student;
+      }
+      return $passengers;
     }
     // ajbell
     private function savePassengers(int $bookingId, array $passengers)
@@ -860,19 +907,19 @@ class TbsExtTaxisBookings
 
     private function sendEmail($bookingId, $studentId, $to, $subject, $template, $fields, $cc = [], $bcc = [])
     {
-      $to = $this->debug === true ? $this->email : $to;
-      // $to = 'flatres@gmail.com';
-      $email = new \Utilities\Email\Email($to, $subject, 'coaches@marlboroughcollege.org', $cc, $bcc);
+      $email = new \Utilities\Email\Email($to, $subject, 'coaches@marlboroughcollege.org', $cc, $bcc, $this->debug);
       $content = $email->template($template, $fields);
       $res = $email->send($content);
       $ccString = '';
-      foreach($cc as $c) $ccString .= $c;
+      foreach($cc as $c) $ccString .= $c . ' ';
 
-      $sessionId = $this->adaModules->select('tbs_taxi_bookings', 'sessionId', 'id=?', [$bookingId])[0]['sessionId'];
+      $this->adaModules->select('tbs_taxi_bookings', 'sessionId, companyId', 'id=?', [$bookingId])[0]; 
+      $sessionId = $b['sessionId']; 
+      $companyId = $b['companyId'];
       //log email
       $this->adaModules->insert(
         'tbs_emails',
-        'isTaxi, bookingId, studentId, sessionId, email, cc, subject, content',
+        'isTaxi, bookingId, studentId, sessionId, email, cc, subject, content, companyId',
         [
           1,
           $bookingId,
@@ -881,7 +928,8 @@ class TbsExtTaxisBookings
           $to,
           $ccString,
           $subject,
-          $content
+          $content,
+          $companyId
         ]
       );
 
@@ -893,7 +941,7 @@ class TbsExtTaxisBookings
       $sessionId = $args['session'];
       $emails = $this->adaModules->select(
         'tbs_emails',
-        'id, isTaxi, bookingId, studentId, sessionId, email, cc, subject, content',
+        'id, isTaxi, bookingId, studentId, sessionId, email, cc, subject, content, timestamp',
         'isTaxi = ? AND sessionId = ? ORDER BY timestamp DESC',
         [
           1,
@@ -903,6 +951,7 @@ class TbsExtTaxisBookings
       foreach($emails as &$e) {
         $e['name'] = (new \Entities\People\Student($this->ada, $e['studentId']))->displayName;
         $e['time'] = convertToAdaDatetime($e['timestamp']);
+        // $e['time'] = $e['timestamp'];
       }
       return emit($response, $emails);
     }

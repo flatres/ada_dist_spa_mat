@@ -18,22 +18,19 @@ class Email {
 		private $debug = false;
 		private $userEmail;
 
-		public function __construct($to = null, $subject = null, $from = 'noreply@marlboroughcollege.org', array $cc = [], array $bcc = [])
+		public function __construct($to = null, $subject = null, $from = 'noreply@marlboroughcollege.org', array $cc = [], array $bcc = [], $debug = false)
 		{
-			$this->to = $to;
+			$this->to = $debug == true ? 'flatres@gmail.com' : $to;
 			$this->subject = $subject;
 			$this->from = $from;
 			$this->cc = $cc;
-			// $this->cc = [
-			// 	'reception@marlboroughcollege.org',
-			// 	'coaches@marlboroughcollege.org'
-			// ];
 			$this->bcc = $bcc;
+			$this->debug  = $debug;
 
 			global $userId;
 			$ada = new \Dependency\Databases\Ada();
 			$this->user = new \Entities\People\User($ada, $userId);
-			$this->userEmail = $this->user->email ? $this->user->email : 'flatres@gmail.com';
+			$this->userEmail = $this->user->email;
 
 		}
 
@@ -64,14 +61,15 @@ class Email {
 					$mail->setFrom($this->from);
 					$mail->addAddress($this->debug === true ? $this->userEmail : $this->to);               // Name is optional
 
-					foreach ($this->bcc as $bccAddress) {
-						$mail->addBCC($this->debug === true ? $this->userEmail : $bccAddress);
+					if (!$this->debug) {
+						foreach ($this->bcc as $bccAddress) {
+							$mail->addBCC($this->debug === true ? $this->userEmail : $bccAddress);
+						}
+						foreach ($this->cc as $ccAddress) {
+							$mail->addCC($this->debug === true ? $this->userEmail : $ccAddress);
+						}
 					}
-
-					$mail->addCC("git@marlboroughcollege.org");
-					foreach ($this->cc as $ccAddress) {
-						$mail->addCC($this->debug === true ? $this->userEmail : $ccAddress);
-					}
+					
 					// Attachments
 					// $mail->addAttachment(dirname(__FILE__). '/img/logo.jpg', 'logo');         // Add attachments
 

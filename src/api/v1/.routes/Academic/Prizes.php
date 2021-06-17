@@ -73,7 +73,7 @@ class Prizes
     {
       $i = 1;
       $data = ['yo'];
-      $prizes = $this->mcCustom->select('TblPrizesPupils', '*', 'dtePrizeAwarded=?', ['2020-05-23']);
+      $prizes = $this->mcCustom->select('TblPrizesPupils', '*', 'dtePrizeAwarded=?', ['2021-07-03']);
       foreach($prizes as &$prize){
         $prize['id'] = $i;
         $i++;
