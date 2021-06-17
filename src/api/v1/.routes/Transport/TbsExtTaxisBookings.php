@@ -330,7 +330,7 @@ class TbsExtTaxisBookings
       $field = $booking['isReturn'] === 1 ? 'displayFrom' : 'displayTo';
       switch($booking['journeyType']) {
         case 'flight':
-          $booking[$field] = $this->getAirport($booking['airportId']) . ' ['. $booking['flightNumber'] .']';
+          $booking[$field] = $this->getAirport($booking['airportId']) . ' [ Flight # '. $booking['flightNumber'] .' @ ' . $booking['flightTime'] . ' ]';
           break;
         case 'train':
           $booking[$field] = $this->getStation($booking['stationId']) . ' ['. $booking['trainTime'] .']';
@@ -434,7 +434,6 @@ class TbsExtTaxisBookings
       $sessionId = $data['sessionId'];
       $pupilId = $data['pupilId'];
       $parentUserId = $data['parentUserId'];
-      // var_dump($data); return;
       $out = $data['out'];
       $ret = $data['ret'];
 
@@ -637,16 +636,17 @@ class TbsExtTaxisBookings
       $passengerString = $this->makePassengerString($passengers);
 
       $fields = [
-        'name'    => $booking['contact']->firstName,
-        'id'      => $bookingId,
-        'pupil' => $booking['displayName'],
-        'date'    => $booking['date'],
-        'time'    => $booking['pickupTime'],
-        'from'    => $booking['displayFrom'],
-        'to'      => $booking['displayTo'],
-        'passengers'  => $passengerString,
-        'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
+        'name'      => $booking['contact']->firstName,
+        'id'        => $bookingId,
+        'pupil'     => $booking['displayName'],
+        'date'      => $booking['date'],
+        'time'      => $booking['pickupTime'],
+        'from'      => $booking['displayFrom'],
+        'to'        => $booking['displayTo'],
+        'passengers'=> $passengerString,
+        'note'      => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
+
       $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Received','TBS.ReceivedTaxi', $fields);
     }
 
@@ -913,7 +913,7 @@ class TbsExtTaxisBookings
       $ccString = '';
       foreach($cc as $c) $ccString .= $c . ' ';
 
-      $this->adaModules->select('tbs_taxi_bookings', 'sessionId, companyId', 'id=?', [$bookingId])[0]; 
+      $b = $this->adaModules->select('tbs_taxi_bookings', 'sessionId, companyId', 'id=?', [$bookingId])[0]; 
       $sessionId = $b['sessionId']; 
       $companyId = $b['companyId'];
       //log email

@@ -128,7 +128,7 @@ class TbsExtCoachesBookings
         $r = $this->adaModules->select('tbs_coaches_stops', 'name, time, cost', 'routeId=? AND isSchoolLocation=?', [$booking['routeId'], 1]);
         if (isset($r[0])) {
           $booking['schoolLocation'] = $r[0]['name'];
-          $booking['schoolTime'] = tidyTime($r[0]['time']);
+          $booking['schoolTime'] = tidyTime($r[0]['time']); 
         }
       }
 
@@ -149,6 +149,11 @@ class TbsExtCoachesBookings
 
       // contacts
       $booking['contact'] = new \Entities\People\iSamsUser($this->isams, $booking['contactIsamsUserId']);
+
+      $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $booking['schoolNumber'] = $student->schoolNumber;
+      $booking['house'] = $student->boardingHouse;
+      $booking['mob'] = (new \Entities\People\iSamsStudent($this->isams, $student->misId))->mobile;
 
       // dates
       $d = $this->adaModules->select('tbs_sessions', 'dateOut, dateRtn', 'id=?', [$booking['sessionId']]);
@@ -290,7 +295,6 @@ class TbsExtCoachesBookings
       $sessionId = $data['sessionId'];
       $pupilId = $data['pupilId'];
       $parentUserId = $data['parentUserId'];
-      // var_dump($data); return;
       $out = $data['out'];
       $ret = $data['ret'];
 
@@ -505,7 +509,7 @@ class TbsExtCoachesBookings
               $checklist['unsupervisedCoaches'][] = $coach['code'];
           }
 
-          if(!$coach['registerSent']) {
+          if(!$coach['registerSent'] && $coach['supervisorId']) {
             $checklist['registers'] = false;
             $checklist['notEmailedCoaches'][] = $coach['code'];
           }
