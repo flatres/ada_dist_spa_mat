@@ -73,6 +73,8 @@ class Bookings
       );
 
       $crud = new \Sockets\CRUD("aux.bookings.coach." . $data['coachUniqueId']);
+      $sessionId = $this->adaModules->select('tbs_coaches_bookings', 'sessionId', 'id=?', [$data['bookingId']])[0]['sessionId'];
+      $session = new \Sockets\CRUD("coaches.register{$sessionId}");
       return emit($response, $data);
     }
 

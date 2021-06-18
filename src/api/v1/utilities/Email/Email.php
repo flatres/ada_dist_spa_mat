@@ -59,14 +59,14 @@ class Email {
 
 					//Recipients
 					$mail->setFrom($this->from);
-					$mail->addAddress($this->debug === true ? $this->userEmail : $this->to);               // Name is optional
+					$mail->addAddress($this->to);               // Name is optional
 
 					if (!$this->debug) {
 						foreach ($this->bcc as $bccAddress) {
-							$mail->addBCC($this->debug === true ? $this->userEmail : $bccAddress);
+							$mail->addBCC($bccAddress);
 						}
 						foreach ($this->cc as $ccAddress) {
-							$mail->addCC($this->debug === true ? $this->userEmail : $ccAddress);
+							$mail->addCC($ccAddress);
 						}
 					}
 					
@@ -80,9 +80,9 @@ class Email {
 					$mail->send();
 
 			} catch (Exception $e) {
-					$res = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-					echo 'err' . $res;
-					var_dump($e);
+					// $res = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+					// echo 'err' . $res;
+					// var_dump($e);
 			}
 
     }

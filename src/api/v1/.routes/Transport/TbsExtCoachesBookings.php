@@ -581,7 +581,7 @@ class TbsExtCoachesBookings
           'to'      => $booking['schoolLocation'],
         ];
       }
-      $this->sendEmail($booking['contact']->email, 'MC Coach Booking Received', 'TBS.ReceivedCoach', $fields);
+      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Received', 'TBS.ReceivedCoach', $fields);
     }
 
     private function sanitiseTime($time) {
@@ -617,7 +617,7 @@ class TbsExtCoachesBookings
         ];
       }
 
-      $this->sendEmail($booking['contact']->email, 'MC Coach Booking Cancelled', 'TBS.CancelledCoach', $fields);
+      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Cancelled', 'TBS.CancelledCoach', $fields);
     }
 
     private function sendDeclinedEmail(int $bookingId)
@@ -647,13 +647,15 @@ class TbsExtCoachesBookings
         ];
       }
 
-      $this->sendEmail($booking['contact']->email, 'MC Coach Booking Declined', 'TBS.DeclinedCoach', $fields);
+      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Declined', 'TBS.DeclinedCoach', $fields);
     }
 
     private function sendConfirmedEmail(int $bookingId)
     {
       $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
       $booking = $this->makeDisplayValues($booking);
+
+      
 
       if ($booking['isReturn'] === 1) {
         $fields = [
@@ -680,14 +682,60 @@ class TbsExtCoachesBookings
           'code'    => $booking['coachCode']
         ];
       }
-      $this->sendEmail($booking['contact']->email, 'MC Coach Booking Confirmed', 'TBS.ConfirmedCoach', $fields);
+      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Confirmed', 'TBS.ConfirmedCoach', $fields);
     }
-
-    private function sendEmail($to, $subject, $template, $fields)
+ 
+    private function sendEmail($bookingId, $to, $subject, $template, $fields, $cc = [], $bcc = [])
     {
+
       $email = new \Utilities\Email\Email($to, $subject, 'coaches@marlboroughcollege.org', [], [], $this->debug);
+      
       $content = $email->template($template, $fields);
       $res = $email->send($content);
+      $ccString = '';
+      foreach($cc as $c) $ccString .= $c . ' ';
+
+      // var_dump($email); exit();
+      $b = $this->adaModules->select('tbs_coaches_bookings', 'studentId, sessionId', 'id=?', [$bookingId])[0]; 
+      $sessionId = $b['sessionId']; 
+      $studentId = $b['studentId']; 
+
+      //log email
+      $this->adaModules->insert(
+        'tbs_emails',
+        'isTaxi, bookingId, studentId, sessionId, email, cc, subject, content',
+        [
+          0,
+          $bookingId,
+          $studentId,
+          $sessionId,
+          $to,
+          $ccString,
+          $subject,
+          $content
+        ]
+      );
+
+    }
+
+    public function emailsGet($request, $response, $args)
+    {
+      $sessionId = $args['session'];
+      $emails = $this->adaModules->select(
+        'tbs_emails',
+        'id, isTaxi, bookingId, studentId, sessionId, email, cc, subject, content, timestamp',
+        'isTaxi = ? AND sessionId = ? ORDER BY timestamp DESC',
+        [
+          0,
+          $sessionId
+        ]
+      );
+      foreach($emails as &$e) {
+        $e['name'] = $e['studentId'] ? (new \Entities\People\Student($this->ada, $e['studentId']))->displayName : '';
+        $e['time'] = convertToAdaDatetime($e['timestamp']);
+        // $e['time'] = $e['timestamp'];
+      }
+      return emit($response, $emails);
     }
 
 }

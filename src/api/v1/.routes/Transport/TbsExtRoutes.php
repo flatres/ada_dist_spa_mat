@@ -21,6 +21,7 @@ class TbsExtRoutes
        global $userId;
        $this->user = new \Entities\People\User($this->ada, $userId);
        $this->email = $this->user->email;
+       $this->debug = true;
 
     }
 
@@ -346,7 +347,32 @@ class TbsExtRoutes
       }
     }
     return emit($response, $sessionId);
- }
+  }
+
+  public function registerGet($request, $response, $args) {
+      $sessionId = $args['sessionId'];
+      $bookings = $this->adaModules->select('tbs_coaches_bookings', 'studentId, stopId, coachId, isReturn, isRegistered', 'sessionId=?', [$sessionId]);
+      $students = [];
+      foreach($bookings as $b) {
+        $b = (object)$b;
+        $key = 's_' . $b->studentId;
+        if (!isset($students[$key])) $students[$key] = new \Entities\People\Student($this->ada, $b->studentId);
+        $students[$key]->cost = 0;
+
+        $coachCode = $this->adaModules->select('tbs_coaches_coaches', 'code', 'id=?', [$b->coachId]);
+        $coachCode = $coachCode ? $coachCode[0]['code'] : '?';
+      
+        $stop = $this->adaModules->select('tbs_coaches_stops', 'name, cost', 'id=?', [$b->stopId])[0];
+        $b->stopName = $stop['name'] . " [$coachCode]";
+        $b->cost = $stop['cost'];
+        $students[$key]->cost += $b->cost;
+
+        $dir = $b->isReturn === 1 ? 'ret' : 'out';
+        $students[$key]->{$dir} = $b;
+      }
+      $students = array_values($students);
+      return emit($response, sortObjects($students, 'displayName', 'ASC'));
+  }
 
  public function copyRoutesPost($request, $response, $args)
  {
@@ -441,17 +467,38 @@ class TbsExtRoutes
 
  private function sendRegisterEmail(int $coachId)
  {
+   
    $coach = $this->adaModules->select('tbs_coaches_coaches', 'code, supervisorId, uniqueId', 'id = ?', [$coachId])[0];
    // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
 
    $supervisor = new \Entities\People\User($this->ada, $coach['supervisorId']);
-   $email = new \Utilities\Email\Email($this->email, 'Coach Register - ' . $coach['code']);
+   $subject = 'Coach Register - ' . $coach['code'];
+   $to = $supervisor->email;
+
+   $email = new \Utilities\Email\Email($to, $subject, 'coaches@marlboroughcollege.org', [], [], $this->debug);
    $coach['url'] = 'https://ada.marlboroughcollege.org/aux/bookings/coach/' . $coach['uniqueId'];
    $coach['supervisorName'] = $supervisor->firstName;
+   
 
    $content = $email->template('TBS.CoachRegister', $coach);
-
+  
    $res = $email->send($content);
+    
+   $routeId = $this->adaModules->select('tbs_coaches_coaches', 'routeId', 'id=?', [$coachId])[0]['routeId'];
+   $sessionId = $this->adaModules->select('tbs_coaches_routes', 'sessionId', 'id=?', [$routeId])[0]['sessionId'];
+   
+   $this->adaModules->insert(
+        'tbs_emails',
+        'isTaxi, sessionId, email, subject, content',
+        [
+          0,
+          $sessionId,
+          $to,
+          $subject,
+          $content
+        ]
+      );
+
  }
 
 

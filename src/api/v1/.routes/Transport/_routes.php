@@ -35,6 +35,7 @@ $app->group('/transport', function(){
     $this->delete('/coaches/bookings/decline/{id}', '\Transport\TbsExtCoachesBookings:bookingDecline');
     $this->put('/coaches/confirm', '\Transport\TbsExtCoachesBookings:coachConfirmPut');
     $this->put('/coaches/assignment', '\Transport\TbsExtCoachesBookings:coachAssigmentPut');
+    $this->get('/coaches/emails/{session}', '\Transport\TbsExtCoachesBookings:emailsGet');
 
     //ROUTES
     $this->get('/coaches/routes/{sessionId}', '\Transport\TbsExtRoutes:routesGet');
@@ -60,6 +61,8 @@ $app->group('/transport', function(){
     $this->delete('/coaches/stop/{id}', '\Transport\TbsExtRoutes:stopDelete');
 
     $this->put('/coaches/coach/stop', '\Transport\TbsExtRoutes:coachStopPut');
+
+    $this->get('/coaches/register/{sessionId}', '\Transport\TbsExtRoutes:registerGet');
 
 
 // TAXIS --------------------------------------------------------------------------------------------------------

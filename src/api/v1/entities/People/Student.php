@@ -13,7 +13,7 @@ class Student
 
     private $sql;
 
-    public $id, $firstName, $lastName, $email, $mobile, $boardingHouse, $gender, $displayName;
+    public $id, $firstName, $lastName, $email, $mobile, $boardingHouse, $house, $gender, $displayName;
     public $misFamilyId;
     public $dob;
     public $boardingHouseSafe; //has spaces replaced with _ for use in array keys
@@ -116,6 +116,7 @@ class Student
         $this->email = $student['email'];
         $this->mobile = $student['mobile'];
         $this->boardingHouse = $student['boardingHouse'];
+        $this->house = $student['boardingHouse'];
         $this->boardingHouseSafe = str_replace(" ", '_', $student['boardingHouse']);
         $this->gender = $student['gender'];
         $this->NCYear = $student['NCYear'];
