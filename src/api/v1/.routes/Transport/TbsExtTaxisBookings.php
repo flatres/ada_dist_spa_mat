@@ -353,6 +353,7 @@ class TbsExtTaxisBookings
       $booking['mob'] = (new \Entities\People\iSamsStudent($this->isams, $student->misId))->mobile;
       // contacts
       $booking['contact'] = new \Entities\People\iSamsUser($this->isams, $booking['contactIsamsUserId']);
+      $booking['actionedByTimestamp'] = convertToAdaDatetime($booking['actionedByTimestamp']);
 
       // taxi company
       $companyId = $booking['companyId'];
@@ -636,7 +637,7 @@ class TbsExtTaxisBookings
       $passengerString = $this->makePassengerString($passengers);
 
       $fields = [
-        'name'      => $booking['contact']->firstName,
+        'name'      => $booking['contact']->letterSalulation,
         'id'        => $bookingId,
         'pupil'     => $booking['displayName'],
         'date'      => $booking['date'],
@@ -678,7 +679,7 @@ class TbsExtTaxisBookings
       }
 
       $fields = [
-        'name'    => $booking['contact']->firstName,
+        'name'    => $booking['contact']->letterSalulation,
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'date'    => $booking['date'],
@@ -724,7 +725,7 @@ class TbsExtTaxisBookings
 
 
       $fields = [
-        'name'    => $booking['contact']->firstName,
+        'name'    => $booking['contact']->letterSalulation,
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'schoolNumber' => $student->schoolNumber,
