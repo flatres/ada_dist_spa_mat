@@ -99,6 +99,7 @@ class TbsExtTaxisBookings
       $c['retCount'] = 0;
 
       $bookings = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND companyId = ? ORDER BY statusId ASC', [$sessionId, $companyId]);
+      $bookings = sortArrays($bookings, 'pickupUnix', 'ASC');
       $c['bookings'] = $bookings;
       foreach ($bookings as &$booking){
         $journey = $booking['isReturn'] ? 'ret' : 'out';
@@ -153,7 +154,7 @@ class TbsExtTaxisBookings
       $email = new \Utilities\Email\Email($this->email, 'Marlborough College Bookings');
 
       if ($company['outCount'] > 0) {
-        $html .= "<h1 width:200px; style='background:grey; margin-left:0px; padding-left:10px;  margin-top:20px;color:white;font-size:14px;text-align:left;font-weight: bold'>Outbound : {$session['dateOut']}</h1>";
+        $html .= "<h1 width:200px; style='background:grey; margin-left:0px; padding-left:10px;  margin-top:20px;color:white;font-size:14px;text-align:left;font-weight: bold'>Outbound</h1>";
         $bookings = $company['out'];
         foreach($bookings as &$outBooking){
           $html .= $this->makeBookingHTML($outBooking);
@@ -161,7 +162,7 @@ class TbsExtTaxisBookings
       }
 
       if ($company['retCount'] > 0) {
-        $html .= "<h1 style='background:grey; margin-left:0px; padding-left:10px;  color: white; margin-top:20px;font-size:14px;text-align:left;font-weight: bold'>Return : {$session['dateRtn']}</h1>";
+        $html .= "<h1 style='background:grey; margin-left:0px; padding-left:10px;  color: white; margin-top:20px;font-size:14px;text-align:left;font-weight: bold'>Return</h1>";
         $bookings = $company['ret'];
         foreach($bookings as &$retBooking){
           $html .= $this->makeBookingHTML($retBooking);
@@ -195,7 +196,7 @@ class TbsExtTaxisBookings
                 <tr style='text-align:left; padding:3px; background:{$b['statusColor']}; color: white; '><td style='padding-left:5px; padding-right:5px; text-align:center'>{$b['status']}</td></tr>
                 <tr><td style='xmin-width:100px; text-align:right;'>Pupil #: </td><td> {$b['schoolNumber']}</td>
                 <td style='xmin-width:100px; text-align:right;'>Pupil: </td><td>{$b['displayName']}</td></tr>
-                <tr><td style='xmin-width:100px; text-align:right; '>Time: </td><td> {$b['pickupTime']}</td>
+                <tr><td style='xmin-width:100px; text-align:right; '>When: </td><td> {$b['pickupDatePretty']}</td>
                 <td style='xmin-width:100px; text-align:right;'>Mob: </td><td>{$b['mob']}</td></tr>
                 <tr><td style='xmin-width:100px; text-align:right;'>From:</td><td> {$b['displayFrom']}</td>
                 <td style='xmin-width:100px; text-align:right; '>To:</td><td> {$b['displayTo']}</td></tr>
@@ -261,6 +262,7 @@ class TbsExtTaxisBookings
           $taxis['i_' . $booking['taxiId']]['count'] += $count;
         }
       }
+      unset($booking);
       $bookings = $this->checkDuplicates($bookings);
       $data = [
         'bookings'  => $bookings,
@@ -286,14 +288,16 @@ class TbsExtTaxisBookings
       foreach ($data as &$booking) {
         $booking = $this->makeDisplayValues($booking);
       }
+      unset($booking);
       $data = $this->checkDuplicates($data);
       return emit($response, $data);
     }
 
     private function checkDuplicates($data) {
+      $data2 = $data;
       foreach ($data as &$booking) {
         $duplicates = [];
-        foreach($data as $duplicate) {
+        foreach($data2 as $duplicate) {
           if ($duplicate['isReturn'] !== $booking['isReturn']) continue;
           if ($duplicate['statusId'] === 4 || $booking['statusId'] === 4) continue; //cancelled
           if ($booking['studentId'] == $duplicate['studentId']) {
@@ -346,6 +350,10 @@ class TbsExtTaxisBookings
       $booking['passengerCount'] = count($booking['passengerIds']);
       $booking['status'] = $status['s_' . $booking['statusId']];
       $booking['displayName'] = $this->student->displayName($booking['studentId']);
+      $booking['pickupUnix'] = strtotime($booking['pickupDate'] . ' ' . $booking['pickupTime']);
+      $booking['pickupDateOnlyPretty'] = convertToAdaPrettyDate($booking['pickupDate']);
+      $booking['pickupDatePretty'] = convertToAdaPrettyDate($booking['pickupDate']) . " - "  . $booking['pickupTime'];
+      $booking['pickupDate'] = convertToAdaDate($booking['pickupDate']);
 
       $student = new \Entities\People\Student($this->ada, $booking['studentId']);
       $booking['schoolNumber'] = $student->schoolNumber;
@@ -382,6 +390,7 @@ class TbsExtTaxisBookings
       foreach($revisions as $r){
         $booking['revisions'][] = [
           'createdAt' => $r['createdAt'],
+          'pickupDate'  => convertToAdaDate($r['pickupDate']),
           'pickupTime'  => $r['pickupTime'],
           'displayFrom' => $r['displayFrom'],
           'displayTo'   => $r['displayTo'],
@@ -583,12 +592,13 @@ class TbsExtTaxisBookings
       $familyId = $student->misFamilyId;
       $id = $this->adaModules->insert(
         'tbs_taxi_bookings',
-        'studentId, mis_family_id, contactIsamsUserId, sessionId, pickupTime, isReturn, note, journeyType, schoolLocation, address, airportId, flightNumber, flightTime, stationId, trainTime',
+        'studentId, mis_family_id, contactIsamsUserId, sessionId, pickupDate, pickupTime, isReturn, note, journeyType, schoolLocation, address, airportId, flightNumber, flightTime, stationId, trainTime',
         array(
           $studentId,
           $familyId,
           $parentUserId,
           $sessionId,
+          convertToMysqlDate($booking['pickupDate']),
           $booking['pickupTime'],
           $isReturn ? 1 : 0,
           $note,
@@ -640,7 +650,7 @@ class TbsExtTaxisBookings
         'name'      => $booking['contact']->letterSalulation,
         'id'        => $bookingId,
         'pupil'     => $booking['displayName'],
-        'date'      => $booking['date'],
+        'date'    => $booking['pickupDateOnlyPretty'],
         'time'      => $booking['pickupTime'],
         'from'      => $booking['displayFrom'],
         'to'        => $booking['displayTo'],
@@ -682,7 +692,7 @@ class TbsExtTaxisBookings
         'name'    => $booking['contact']->letterSalulation,
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
-        'date'    => $booking['date'],
+        'date'    => $booking['pickupDateOnlyPretty'],
         'mob'   => $booking['mob'],
         'time'    => $booking['pickupTime'],
         'from'    => $booking['displayFrom'],
@@ -730,7 +740,7 @@ class TbsExtTaxisBookings
         'pupil' => $booking['displayName'],
         'schoolNumber' => $student->schoolNumber,
         'mob'   => $booking['mob'],
-        'date'    => $booking['date'],
+        'date'    => $booking['pickupDateOnlyPretty'],
         'time'    => $booking['pickupTime'],
         'from'    => $booking['displayFrom'],
         'to'      => $booking['displayTo'],
@@ -852,6 +862,7 @@ class TbsExtTaxisBookings
       $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
 
       $bookingFields = [
+        'pickupDate'    => convertToMysqlDate($booking['pickupDate']),
         'pickupTime'    => $booking['pickupTime'],
         'note'          => $note,
         'journeyType'   => $booking['journeyType'],
@@ -873,7 +884,7 @@ class TbsExtTaxisBookings
       // var_dump($bookingFields); exit();
       $this->adaModules->update(
         'tbs_taxi_bookings',
-        'pickupTime=?, note=?, journeyType=?, schoolLocation=?, address=?, airportId=?, flightNumber=?, flightTime=?, stationId=?, trainTime=?, isReturn=?, revision = ?, statusId = ?',
+        'pickupDate=?, pickupTime=?, note=?, journeyType=?, schoolLocation=?, address=?, airportId=?, flightNumber=?, flightTime=?, stationId=?, trainTime=?, isReturn=?, revision = ?, statusId = ?',
         'id=?',
         array_values($bookingFields)
       );
@@ -889,10 +900,11 @@ class TbsExtTaxisBookings
 
       $this->adaModules->insert(
         'tbs_taxi_bookings_archive',
-        'bookingId, studentId, pickupTime, displayFrom, displayTo, companyId, actionedByUserId',
+        'bookingId, studentId, pickupDate, pickupTime, displayFrom, displayTo, companyId, actionedByUserId',
         array(
           $b['id'],
           $b['studentId'],
+          convertToMysqlDate($b['pickupDate']),
           $b['pickupTime'],
           $b['displayFrom'],
           $b['displayTo'],
