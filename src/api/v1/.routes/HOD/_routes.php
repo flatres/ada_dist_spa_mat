@@ -20,6 +20,7 @@ $app->group('/hod', function(){
 
     $this->get('/{subject}/metrics/year/{year}/metrics/{exam}/pdf/class', '\HOD\Metrics:pdfByClassGet');
     $this->get('/{subject}/metrics/year/{year}/metrics/{exam}/pdf/name', '\HOD\Metrics:pdfByNameGet');
+    $this->get('/{subject}/metrics/year/{year}/metrics/{exam}/pdf/scores', '\HOD\Metrics:pdfScoresGet');
     $this->get('/{subject}/metrics/year/{year}/metrics/{exam}/pdf/blank', '\HOD\Metrics:pdfBlankGet');
 
     // wyaps

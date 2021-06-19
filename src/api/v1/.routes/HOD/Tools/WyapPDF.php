@@ -7,12 +7,13 @@ class WyapPDF
   public $subject, $wyaps;
   public $package;
   public $primaryWyaps, $secondaryWyaps;
-  public $dataEndColumn;
+  public $dataEndColumn, $withScores;
   public $isPreU;
 
-  public function __construct($subject, $wyaps)
+  public function __construct($subject, $wyaps, $withScores = false)
   {
      $this->subject = $subject;
+     $this->withScores = $withScores;
      $this->wyaps = $wyaps;
      $this->generate();
   }
@@ -40,19 +41,35 @@ class WyapPDF
     }
 
     $this->getGrades($subject);
-    $primary = $this->primaryWyaps();
-    $data = [];
-    foreach($primary as $w) {
-      $data[] = [$w->name, ' '];
-    }
-    if (!$this->isPreU) {
-      $secondary = $this->secondaryWyaps();
-      foreach($secondary as $w) {
-        $data[] = [$w->name, ' '];
-      }
-    }
 
     foreach ($this->subject->students as $s) {
+
+      $primary = $this->primaryWyaps();
+      $data = [];
+      foreach($primary as $w) {
+        // var_dump($w);
+        if ($this->withScores) {
+          $result = searchArray($w->results, $s->id, 'student_id');
+          $pct = $result['percentage'];
+          $data[] = [$w->name, $pct, ' '];
+        } else {
+          $data[] = [$w->name, ' '];
+        }
+      }
+      if (!$this->isPreU) {
+        $secondary = $this->secondaryWyaps();
+        foreach($secondary as $w) {
+          if ($this->withScores) {
+            $result = searchArray($w->results, $s->id, 'student_id');
+            $pct = $result['percentage'];
+            $data[] = [$w->name, $pct, ' '];
+          } else {
+            $data[] = [$w->name, ' '];
+          }
+        }
+      }
+
+
       $pdf->AddPage();
       // $pdf->SetY(25);
       // $pdf->Image('https://www.marlboroughcollege.org/wp-content/uploads/2020/07/wp-staff-feature-logo-969x650.jpg',64,17,80);
@@ -75,8 +92,8 @@ class WyapPDF
 
       // $pdf->Ln();
       $pdf->Cell(0,7,"Give details of the substitution and the reason.", 0, 1, 'R');
-      $header = array('Assessment Point', 'Substitutions or alterations? ');
-      $this->table($pdf, $header,$data);
+      $header = $this->withScores ? array('Assessment Point', '%', 'Substitutions or alterations? ') : array('Assessment Point', 'Substitutions or alterations? ');
+      $this->table($pdf, $header, $data);
       $pdf->Ln();
       $pdf->Cell(0,8,"Pupil Comment:", 0, 1, 'L');
       $pdf->Cell(0,25,"", 1, 1, 'L');
@@ -163,7 +180,7 @@ class WyapPDF
 private function table(&$pdf, $header, $data)
 {
     // Column widths
-    $w = array(90,0);
+    $w = $this->withScores ? [90, 10, 0] : [90,0];
     // Header
     $pdf->SetFont('Times','B',13);
     for($i=0;$i<count($header);$i++)
@@ -178,15 +195,22 @@ private function table(&$pdf, $header, $data)
         $postFix = \strlen($row[0]) > $max ? "..." : "";
         $title = substr($row[0], 0, $max) . $postFix;
         $pdf->Cell($w[0],$h,$title,'LRT');
-        $pdf->Cell($w[1],$h,$row[1],'LRT');
+        if ($this->withScores) {
+          $pdf->Cell($w[1],$h,$row[1],'LRT');
+          $pdf->Cell($w[2],$h,$row[2],'LRT');
+        } else {
+          $pdf->Cell($w[1],$h,$row[1],'LRT');
+        }
         $pdf->Ln();
     }
     $pdf->Cell($w[0],$h,"  ",'LRT');
     $pdf->Cell($w[1],$h,"  ",'LRT');
+    if ($this->withScores) $pdf->Cell($w[2],$h,"  ",'LRT');
     $pdf->Ln();
 
     $pdf->Cell($w[0],$h,"  ",'LRT');
     $pdf->Cell($w[1],$h,"  ",'LRT');
+    if ($this->withScores) $pdf->Cell($w[2],$h,"  ",'LRT');
     $pdf->Ln();
 
     // Closing line

@@ -127,6 +127,15 @@ class Metrics
       return emit($response, $package);
     }
 
+    public function pdfScoresGet($request, $response, $args)
+    {
+      $auth = $request->getAttribute('auth');
+      $this->progress = new \Sockets\Progress($auth, 'hod.metrics.metrics', 'Gathering data...');
+
+      $package = $this->makePDFData($args, false, false, true);
+      return emit($response, $package);
+    }
+
     public function pdfBlankGet($request, $response, $args)
     {
       $auth = $request->getAttribute('auth');
@@ -136,7 +145,7 @@ class Metrics
       return emit($response, $package);
     }
 
-    private function makePDFData ($args, $byClass = false, $blank = false) {
+    private function makePDFData ($args, $byClass = false, $blank = false, $includeScores = false) {
       $pg = $this->progress;
 
       $subjectId = $args['subject'];
@@ -175,7 +184,7 @@ class Metrics
       $subject->examId = $examId;
       $subject->year = $year;
 
-      $pdf = new \HOD\Tools\WyapPDF($subject, $wyaps);
+      $pdf = new \HOD\Tools\WyapPDF($subject, $wyaps, $includeScores);
 
       $package = [];
       $package = $pdf->package;
