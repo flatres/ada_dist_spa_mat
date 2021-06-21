@@ -280,7 +280,7 @@ class Results
       $this->console->publish('--Getting Students', 1);
 
       $studentData = $this->sql->select(  'TblPupilManagementPupils',
-                                          'txtSchoolID, txtCandidateNumber, txtCandidateCode, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
+                                          'txtSchoolID, txtCandidateNumber, txtCandidateCode, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtEthnicGroup as ethnicGroup',
                                           'intEnrolmentSchoolYear > ?', [2011]);
 
       foreach($studentData as &$stuData) {

@@ -67,6 +67,7 @@ class Student
     public $hasGCSE = false;
     public $hasIGCSE = false;
     public $adaStudentId = null;
+    public $ethnicGroup;
 
     public function __construct(array $result = null)
     {
@@ -82,6 +83,7 @@ class Student
       $this->isNewSixthForm = $result['isNewSixthForm'];
       $this->txtHouseCode = $result['txtHouseCode'];
       $this->txtDOB = $result['txtDOB'];
+      $this->ethicGroup = $result['ethnicGroup'];
 
       $adaStudent = (new \Entities\People\Student())->byMISId($this->txtSchoolID);
       if ($adaStudent) $this->adaStudentId = $adaStudent->id;
