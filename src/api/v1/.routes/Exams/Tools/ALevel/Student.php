@@ -61,7 +61,7 @@ class Student
     public $ucasAverage = 0;
     public $modules = [];
     public $txtCandidateNumber;
-    public $ethicGroup;
+    public $ethnicGroup;
     public $txtCandidateCode;
     public $USchoolResultCount;
 
@@ -77,7 +77,7 @@ class Student
       $this->isNewSixthForm = $result['isNewSixthForm'];
       $this->txtHouseCode = $result['txtHouseCode'];
       $this->txtDOB = $result['txtDOB'];
-      $this->ethicGroup = $result['ethnicGroup'];
+      $this->ethnicGroup = $result['ethnicGroup'];
       
     }
 

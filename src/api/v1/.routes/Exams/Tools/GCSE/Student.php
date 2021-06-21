@@ -83,7 +83,7 @@ class Student
       $this->isNewSixthForm = $result['isNewSixthForm'];
       $this->txtHouseCode = $result['txtHouseCode'];
       $this->txtDOB = $result['txtDOB'];
-      $this->ethicGroup = $result['ethnicGroup'];
+      $this->ethnicGroup = $result['ethnicGroup'];
 
       $adaStudent = (new \Entities\People\Student())->byMISId($this->txtSchoolID);
       if ($adaStudent) $this->adaStudentId = $adaStudent->id;
