@@ -336,7 +336,7 @@ class Results
           $resultsFileResult = array_merge($resultsFileResult, $this->studentData["s_" . $resultsFileResult['txtSchoolID']]);
         }else{
           $studentData = $this->sql->select(  'TblPupilManagementPupils',
-                                              'txtSchoolID, txtCandidateNumber, txtCandidateCode, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear',
+                                              'txtSchoolID, txtCandidateNumber, txtCandidateCode, txtForename, txtSurname, txtFullName, txtInitials, txtGender, txtDOB, intEnrolmentNCYear, txtBoardingHouse, txtLeavingBoardingHouse, intEnrolmentSchoolYear, txtEthnicGroup as ethnicGroup',
                                               'txtSchoolID=?', array($resultsFileResult['txtSchoolID']));
           //format the data and merge into the result
           if(isset($studentData[0])) {
