@@ -843,6 +843,7 @@ class SpreadsheetRenderer
             $d[] = null;
           }
       }
+      $d[] = $student->ethnicGroup;
       $d[4] = $count;
       $d[5] = $count == 0 ? 0 : round($points / $count, 1);
       $data[] = $d;
