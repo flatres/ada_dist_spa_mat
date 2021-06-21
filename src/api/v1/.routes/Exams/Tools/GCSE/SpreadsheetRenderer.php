@@ -1379,6 +1379,7 @@ class SpreadsheetRenderer
             $g['#9'] + $g['#8'] + $g['#7'] + $g['#6'] + $g['#5'] + $g['#4'] + $g['#3'] + $g['#2'] + $g['#1'] + $g['A*'] + $g['A'] + $g['B'] + $g['C'] + $g['D'] + $g['E'],
         ]);
       }
+      $d[] = $student->ethnicGroup;
       $data[] = $d;
     }
 
