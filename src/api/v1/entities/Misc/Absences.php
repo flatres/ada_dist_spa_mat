@@ -34,7 +34,14 @@ class Absences
       $this->getSani();
       $this->getTrips();
       $this->allFetched = true;
-      return \array_merge($this->misc, $this->trips, $this->extras, $this->sani);
+      $all = \array_merge($this->misc, $this->trips, $this->extras, $this->sani);
+      foreach($all as &$a) {
+        unset($a['id']);
+        $a['start'] = (new \DateTime($a['start']))->format('Y-m-d H:i');
+        $a['finish'] = (new \DateTime($a['finish']))->format('Y-m-d H:i');
+        
+      }
+      return $all;
     }
 
     public function getSani() {
@@ -139,7 +146,7 @@ class Absences
         $extras[] = [
           'studentId' => $l['studentId'],
           'start' => $l['start'],
-          'end' => $date->format('Y-m-d H:i:s'),
+          'finish' => $date->format('Y-m-d H:i:s'),
           'reason' => $reason,
           'type' => $type
         ];
