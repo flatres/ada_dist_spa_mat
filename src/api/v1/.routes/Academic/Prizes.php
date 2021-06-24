@@ -32,7 +32,7 @@ class Prizes
       $prizes = $this->isams->query(
         "SELECT txtSchoolID, count(txtSchoolID) as count FROM
         TblRewardsManagerRewards
-        WHERE txtDate BETWEEN '1 Jan 2021' AND '31 Mar 2021'
+        WHERE txtDate BETWEEN '1 Sep 2020' AND '01 Jul 2021'
         GROUP BY txtSchoolID
         ",
         []
