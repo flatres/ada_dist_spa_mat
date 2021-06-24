@@ -80,7 +80,7 @@ class Prizes
         $pupilID = $prize['txtSchoolID'];
         $prizeID = $prize['intPrizeID'];
         $prizeData = $this->mcCustom->select('TblPrizesPrizes', '*', 'TblPrizesPrizesID=?', array($prizeID));
-        if (isset($prizeData[0]) $prize = array_merge($prize, $prizeData[0]);
+        if (isset($prizeData[0])) $prize = array_merge($prize, $prizeData[0]);
 
         $pupil = new \Entities\People\iSamsStudent($this->isams, $pupilID);
         $adaPupil = (new \Entities\People\Student($this->ada))->byMISId($pupilID);
