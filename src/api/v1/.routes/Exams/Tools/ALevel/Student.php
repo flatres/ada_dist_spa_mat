@@ -77,7 +77,7 @@ class Student
       $this->isNewSixthForm = $result['isNewSixthForm'];
       $this->txtHouseCode = $result['txtHouseCode'];
       $this->txtDOB = $result['txtDOB'];
-      $this->ethnicGroup = $result['ethnicGroup'];
+      $this->ethnicGroup = isset($result['ethnicGroup']) ? $result['ethnicGroup'] : "";
       
     }
 

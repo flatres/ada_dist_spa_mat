@@ -169,7 +169,7 @@ class Student
       if ($subjectId) {
         $classes = $this->getClassesBySubject($subjectId);
       } else {
-        $classes = count($this->classes) === 0 ? $this->getClasses : $this->classes;
+        $classes = count($this->classes) === 0 ? $this->getClasses() : $this->classes;
       }
 
       $mlo = [];
@@ -237,5 +237,12 @@ class Student
       // if (isset($access[0])) $access = $access[0];
       // $this->accessArrangements = $access;
       // return $access;
+    }
+
+    public function getAll() {
+      $this->getAccessArrangements();
+      $this->getHmNote();
+      $this->getClasses();
+      return $this;
     }
 }

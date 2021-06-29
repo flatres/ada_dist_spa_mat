@@ -6,7 +6,7 @@ namespace Entities\People;
 class iSamsUser
 {
   public $id;
-  public $title, $firstName, $lastName, $fullName, $userName, $letterSalulation;
+  public $title, $firstName, $lastName, $fullName, $userName, $letterSalutation;
   public $email, $userCode, $userType, $passwordHash;
 
   private $sql;
@@ -29,7 +29,7 @@ class iSamsUser
       saveToObject($d[0], $this);
     }
 
-    $this->letterSalulation = $this->title . ' ' . $this->lastName;
+    $this->letterSalutation = $this->title . ' ' . $this->lastName;
     return $this;
   }
 

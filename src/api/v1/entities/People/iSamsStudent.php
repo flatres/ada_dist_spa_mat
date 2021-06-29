@@ -100,6 +100,26 @@ class iSamsStudent
     return $this;
   }
 
+  public function getContactByUserCode($userCode) {
+    $this->getContacts();
+    foreach($this->contacts as $c) {
+      $info = $c['portalUserInfo'];
+      if ($info) {
+        if ($info['userCode'] === $userCode) return $c;
+      }
+    }
+  }
+
+  public function getContactByUserId($userId) {
+    $this->getContacts();
+    foreach($this->contacts as $c) {
+      $info = $c['portalUserInfo'];
+      if ($info) {
+        if ($info['userId'] == $userId) return $c;
+      }
+    }
+  }
+
   public function getContacts()
   {
     if (!$this->familyId) return [];
@@ -130,7 +150,7 @@ class iSamsStudent
           'firstName'       => $d['forename1'],
           'lastName'        => $d['surname1'],
           'email'           => $d['email1'],
-          'letterSalulation'=> $d['letterSalutation'],
+          'letterSalutation'=> $d['letterSalutation'],
           'portalUserInfo' => $this->hasPortalAccess($d['email1'])
         ];
       }
@@ -141,7 +161,7 @@ class iSamsStudent
           'firstName'       => $d['forename2'],
           'lastName'        => $d['surname2'],
           'email'           => $d['email2'],
-          'letterSalulation'=> $d['letterSalutation'],
+          'letterSalutation'=> $d['letterSalutation'],
           'portalUserInfo' => $this->hasPortalAccess($d['email2'])
         ];
       }
@@ -168,7 +188,7 @@ class iSamsStudent
             'firstName'       => $d['forename1'],
             'lastName'        => $d['surname1'],
             'email'           => $d['email1'],
-            'letterSalulation'=> $d['letterSalutation'],
+            'letterSalutation'=> $d['letterSalutation'],
             'portalUserInfo' => $this->hasPortalAccess($d['email1'])
           ];
         }
@@ -179,7 +199,7 @@ class iSamsStudent
             'firstName'         => $d['forename2'],
             'lastName'          => $d['surname2'],
             'email'             => $d['email2'],
-            'letterSalulation'  => $d['letterSalutation'],
+            'letterSalutation'  => $d['letterSalutation'],
             'portalUserInfo' => $this->hasPortalAccess($d['email2'])
           ];
         }
@@ -250,6 +270,13 @@ class iSamsStudent
 
   public function getSubjects() {
     $this->getSets();
+  }
+
+  public function getAll() {
+    $this->getSets();
+    $this->getContacts();
+    $this->getAccessArrangements();
+    return $this;
   }
 }
 

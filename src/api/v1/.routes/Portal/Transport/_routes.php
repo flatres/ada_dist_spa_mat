@@ -33,6 +33,7 @@ $app->group('/portal/transport', function(){
 
     //COACHES
     $this->get('/coaches/stops/{sessionId}', '\Transport\TbsExtRoutes:stopsGet');
+    $this->get('/coaches/bookings/{sessionId}/{studentId}', '\Transport\TbsExtCoachesBookings:pupilBookingsGet');
     $this->post('/coaches/bookings', '\Transport\TbsExtCoachesBookings:bookingPost');
     $this->post('/coaches/bookings/selfservice', '\Transport\TbsExtCoachesBookings:bookingSelfServicePost');
     $this->delete('/coaches/bookings/{id}', '\Transport\TbsExtCoachesBookings:bookingDelete');

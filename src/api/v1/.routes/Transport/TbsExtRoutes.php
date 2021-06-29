@@ -71,8 +71,13 @@ class TbsExtRoutes
    }
 
    public function routeDelete($request, $response, $args)
-   {
-       $id = $args['id'];
+   { 
+      $id = $args['id'];
+      $bookings = $this->adaModules->select('tbs_coaches_bookings', 'id', 'routeId=? AND statusId < 4', [$id]);
+      if (isset($bookings[0])) {
+        return emitError($response, 400, 'All bookings on this route must be cancelled before it can be deleted');
+      }
+
        $this->adaModules->delete('tbs_coaches_routes', 'id=?', [$id]);
        $this->adaModules->delete('tbs_coaches_stops', 'routeId=?', [$id]);
        $d = $this->adaModules->select('tbs_coaches_coaches', 'id', 'routeId=?', [$id]);
@@ -263,6 +268,7 @@ class TbsExtRoutes
    if ($isActive === 1 || $isActive === true) {
      $this->adaModules->insert('tbs_coaches_coach_stops', 'coachId, stopId', [$coachId, $stopId]);
    } else {
+     $this->adaModules->update('tbs_coaches_bookings', 'coachId=?, statusId=?', 'coachId=? AND stopId=?', [null, 1, $coachId, $stopId]);
      $this->adaModules->delete('tbs_coaches_coach_stops', 'coachId=? AND stopId=?', [$coachId, $stopId]);
    }
    $this->publishByCoach($coachId);
@@ -305,6 +311,10 @@ class TbsExtRoutes
  public function coachPut($request, $response)
  {
   $data = $request->getParsedBody();
+  $bookings = $this->adaModules->select('tbs_coaches_bookings', 'id', 'coachId=?', [$data['id']]);
+  if (count($bookings) > $data['capacity']) {
+    return emitError($response, 503, 'Capacity can not be less than the number of assigned bookings.');
+  }
   $this->adaModules->update('tbs_coaches_coaches', 'routeId=?, capacity=?, code=?', 'id=?', [
     $data['routeId'],
     $data['capacity'],
@@ -322,7 +332,7 @@ class TbsExtRoutes
      $this->adaModules->delete('tbs_coaches_coaches', 'id=?', [$id]);
      $this->adaModules->delete('tbs_coaches_coach_stops', 'coachId=?', [$id]);
      //un assign any bookings
-     $this->adaModules->update('tbs_coaches_bookings', 'coachId=?', 'coachId=?', [null, $id]);
+     $this->adaModules->update('tbs_coaches_bookings', 'coachId=?, statusId=?', 'coachId=?', [null, 1, $id]);
      $this->publishByCoach($id);
      return emit($response, $id);
  }

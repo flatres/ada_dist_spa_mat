@@ -78,7 +78,8 @@ $app->group('/admin', function(){
     $this->delete('/access/structure/module/page/{id}', '\Admin\Access\Structure:page_DELETE');
     $this->post('/access/structure/module/color', '\Admin\Access\Structure:moduleColor_POST');
 
-
+    $this->get('/school/student/isams/{id}', '\Admin\School\People:isamsStudent_GET');
+    $this->get('/school/student/ada/{id}', '\Admin\School\People:student_GET');
     $this->put('/school/terms', '\Admin\School\Calendar:termsPut');
     $this->get('/logs/access/pages', '\Admin\Logs\Access:accessPages_GET');
 
