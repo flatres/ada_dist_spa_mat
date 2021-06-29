@@ -25,7 +25,7 @@ class User
       $userCode = $args['userCode'];
       $user = new \Entities\People\iSamsUser($this->isams);
       $user->byUserCode($userCode);
-      $contact = (new \Entities\People\isamsStudentContact($this->isams))->byEmail($user->email);
+      $contact = (new \Entities\People\iSamsStudentContact($this->isams))->byEmail($user->email);
       $contact->id = $user->id;
       
       return emit($response, $contact);
