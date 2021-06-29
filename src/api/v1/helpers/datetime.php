@@ -36,6 +36,22 @@ function convertToMysqlDate(&$date){
     //$date now contains 2017-01-01 00:00:00
 
 }
+
+function convertUnixToAdaDatetime(&$unix){
+
+    //create an object of DateTime
+    $date = new DateTime();
+    $date->setTimestamp($unix);
+    //Format the date to the format you need
+    //Y for full year (1993 or 2000 or 2017)
+    //m for month with leading 0 (01-09 and 10-12)
+    //d for date with leading 0 (0-9 and 10 to 31)
+    //H:i:s is optional
+    $date = $date->format('d-m-Y H:i');
+    //$date now contains 2017-01-01 00:00:00
+    return $date;
+}
+
 function convertToAdaDatetime(&$date){
 
     //create an object of DateTime

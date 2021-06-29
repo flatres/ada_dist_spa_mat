@@ -648,7 +648,7 @@ class TbsExtTaxisBookings
       $passengerString = $this->makePassengerString($passengers);
 
       $fields = [
-        'name'      => $booking['contact']->letterSalutation,
+        'name'      => $booking['contact']->letterSalutationSingle,
         'id'        => $bookingId,
         'pupil'     => $booking['displayName'],
         'date'    => $booking['pickupDateOnlyPretty'],
@@ -690,7 +690,7 @@ class TbsExtTaxisBookings
       }
 
       $fields = [
-        'name'    => $booking['contact']->letterSalutation,
+        'name'    => $booking['contact']->letterSalutationSingle,
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'date'    => $booking['pickupDateOnlyPretty'],
@@ -736,7 +736,7 @@ class TbsExtTaxisBookings
 
 
       $fields = [
-        'name'    => $booking['contact']->letterSalutation,
+        'name'    => $booking['contact']->letterSalutationSingle,
         'id'      => $bookingId,
         'pupil' => $booking['displayName'],
         'schoolNumber' => $student->schoolNumber,

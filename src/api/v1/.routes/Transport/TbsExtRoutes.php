@@ -101,6 +101,7 @@ class TbsExtRoutes
    public function stopsGet($request, $response, $args)
    {
        $sessionId = $args['sessionId'];
+       $session = $this->adaModules->select('tbs_sessions', 'dateOut, dateRtn', 'id=?', [$sessionId])[0];
        $allStops = ['out' => [], 'ret' => []];
        $schoolLocation = 'Unknown';
        $schoolTime = '00:00';
@@ -128,7 +129,15 @@ class TbsExtRoutes
           }
           $stop['spacesLeft'] = $spacesLeft;
 
+          $date = $key === 'out' ? $session['dateOut'] : $session['dateRtn'];
+          $stop['departTime'] = $key === 'out' ? $schoolTime : $stop['time'];
+          // closes 1 hr before departure
+          $stop['selfServiceCloses'] = strtotime($date . ' ' . $stop['departTime']) - 60*60;
+          $stop['selfServicesClosesPretty'] = convertUnixToAdaDatetime($stop['selfServiceCloses']);
+          $stop['selfServiceClosed'] = time() > $stop['selfServiceCloses'];
+
           $allStops[$key][$stop['name']] = $stop;
+          
         }
        }
 
@@ -371,7 +380,7 @@ class TbsExtRoutes
 
         $coachCode = $this->adaModules->select('tbs_coaches_coaches', 'code', 'id=?', [$b->coachId]);
         $coachCode = $coachCode ? $coachCode[0]['code'] : '?';
-      
+        $b->coachCode = $coachCode;
         $stop = $this->adaModules->select('tbs_coaches_stops', 'name, cost', 'id=?', [$b->stopId])[0];
         $b->stopName = $stop['name'] . " [$coachCode]";
         $b->cost = $stop['cost'];

@@ -593,7 +593,7 @@ class TbsExtCoachesBookings
 
       if ($booking['isReturn'] == 0) {
         $fields = [
-          'name'    => $booking['contact']->letterSalutation,
+          'name'    => $booking['contact']->letterSalutationSingle,
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
@@ -603,7 +603,7 @@ class TbsExtCoachesBookings
         ];
       } else {
         $fields = [
-          'name'    => $booking['contact']->letterSalutation,
+          'name'    => $booking['contact']->letterSalutationSingle,
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
@@ -628,7 +628,7 @@ class TbsExtCoachesBookings
 
       if ($booking['isReturn'] === 1) {
         $fields = [
-          'name'    => $booking['contact']->letterSalutation,
+          'name'    => $booking['contact']->letterSalutationSingle,
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
@@ -638,7 +638,7 @@ class TbsExtCoachesBookings
         ];
       } else {
         $fields = [
-          'name'    => $booking['contact']->letterSalutation,
+          'name'    => $booking['contact']->letterSalutationSingle,
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
@@ -658,7 +658,7 @@ class TbsExtCoachesBookings
 
       if ($booking['isReturn'] === 1) {
         $fields = [
-          'name'    => $booking['contact']->letterSalutation,
+          'name'    => $booking['contact']->letterSalutationSingle,
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
@@ -668,7 +668,7 @@ class TbsExtCoachesBookings
         ];
       } else {
         $fields = [
-          'name'    => $booking['contact']->letterSalutation,
+          'name'    => $booking['contact']->letterSalutationSingle,
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
@@ -690,7 +690,7 @@ class TbsExtCoachesBookings
 
       if ($booking['isReturn'] === 1) {
         $fields = [
-          'name'    => $booking['contact']->letterSalutation,
+          'name'    => $booking['contact']->letterSalutationSingle,
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],
@@ -702,7 +702,7 @@ class TbsExtCoachesBookings
         ];
       } else {
         $fields = [
-          'name'    => $booking['contact']->letterSalutation,
+          'name'    => $booking['contact']->letterSalutationSingle,
           'id'      => $bookingId,
           'pupil'   => $booking['displayName'],
           'date'    => $booking['date'],

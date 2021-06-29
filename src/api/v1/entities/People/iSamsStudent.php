@@ -151,6 +151,7 @@ class iSamsStudent
           'lastName'        => $d['surname1'],
           'email'           => $d['email1'],
           'letterSalutation'=> $d['letterSalutation'],
+          'letterSalutationSingle'=> $d['title1'] . ' ' . $d['surname1'],
           'portalUserInfo' => $this->hasPortalAccess($d['email1'])
         ];
       }
@@ -162,6 +163,7 @@ class iSamsStudent
           'lastName'        => $d['surname2'],
           'email'           => $d['email2'],
           'letterSalutation'=> $d['letterSalutation'],
+          'letterSalutationSingle'=> $d['title2'] . ' ' . $d['surname2'],
           'portalUserInfo' => $this->hasPortalAccess($d['email2'])
         ];
       }
@@ -189,6 +191,7 @@ class iSamsStudent
             'lastName'        => $d['surname1'],
             'email'           => $d['email1'],
             'letterSalutation'=> $d['letterSalutation'],
+            'letterSalutationSingle'=> $d['title1'] . ' ' . $d['surname1'],
             'portalUserInfo' => $this->hasPortalAccess($d['email1'])
           ];
         }
@@ -200,6 +203,7 @@ class iSamsStudent
             'lastName'          => $d['surname2'],
             'email'             => $d['email2'],
             'letterSalutation'  => $d['letterSalutation'],
+            'letterSalutationSingle'=> $d['title2'] . ' ' . $d['surname2'],
             'portalUserInfo' => $this->hasPortalAccess($d['email2'])
           ];
         }
