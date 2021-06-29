@@ -26,7 +26,7 @@ class Student
     public $boardingHouseId, $boardingHouseCode;
     public $isDisabled; //if account is disabled. i.e they have left
     public $accessArrangements;
-    public  $cc; //temp field that combines class code and last name so that sorting by class works properly
+    public $cc; //temp field that combines class code and last name so that sorting by class works properly
 
     public function __construct(\Dependency\Databases\Ada $ada = null, $id = null)
     {
