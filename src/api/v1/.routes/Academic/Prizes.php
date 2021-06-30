@@ -82,6 +82,14 @@ class Prizes
         $prizeData = $this->mcCustom->select('TblPrizesPrizes', '*', 'TblPrizesPrizesID=?', array($prizeID));
         if (isset($prizeData[0])) $prize = array_merge($prize, $prizeData[0]);
 
+        //get subject
+        $subject = '';
+        if (isset($prize['intDepartment'])) {
+          $subjectData = $this->mcCustom->select('TblPrizesSubjects', 'txtDescription as subject', 'TblPrizesSubjectsID=?', [$prize['intDepartment']]);
+          if (isset($subjectData[0])) $subject = $subjectData[0]['subject'];
+        }
+        $prize['subject'] = $subject;
+
         $pupil = new \Entities\People\iSamsStudent($this->isams, $pupilID);
         $adaPupil = (new \Entities\People\Student($this->ada))->byMISId($pupilID);
         $prize['firstName']= $pupil->firstName;
