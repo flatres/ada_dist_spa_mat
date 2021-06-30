@@ -17,7 +17,9 @@ class Generator {
             'outputType'   => \chillerlan\QRCode\QRCode::OUTPUT_IMAGE_PNG,
             'eccLevel'     => \chillerlan\QRCode\QRCode::ECC_H,
             'scale'        => 5,
-            'imageBase64'  => false
+            'imageBase64'  => false,
+            'imageTransparent' => false
+
         ]);
             return $this;
     }
