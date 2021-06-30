@@ -708,7 +708,8 @@ class TbsExtCoachesBookings
       $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
       $booking = $this->makeDisplayValues($booking);
 
-      $qrPath = (new \Utilities\QRCode\Generator('12345'))->render();
+      $data = $booking['coachId'] . '-' . $booking['studentId'];
+      $qrPath = (new \Utilities\QRCode\Generator($data))->render();
 
       if ($booking['isReturn'] === 1) {
         $fields = [
