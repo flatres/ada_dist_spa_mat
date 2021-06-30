@@ -32,7 +32,8 @@ $app->group('/transport', function(){
     $this->get('/coaches/checklist/{session}', '\Transport\TbsExtCoachesBookings:checklistGet');
     $this->get('/coaches/newbookings/{session}', '\Transport\TbsExtCoachesBookings:bookingsNewCountGet');
     $this->delete('/coaches/bookings/{id}', '\Transport\TbsExtCoachesBookings:bookingDelete');
-    $this->delete('/coaches/bookings/decline/{id}', '\Transport\TbsExtCoachesBookings:bookingDecline');
+    $this->get('/coaches/bookings/decline/{id}', '\Transport\TbsExtCoachesBookings:bookingDeclineEmail');
+    $this->post('/coaches/bookings/decline/{id}', '\Transport\TbsExtCoachesBookings:bookingDecline');
     $this->put('/coaches/confirm', '\Transport\TbsExtCoachesBookings:coachConfirmPut');
     $this->put('/coaches/assignment', '\Transport\TbsExtCoachesBookings:coachAssigmentPut');
     $this->get('/coaches/emails/{session}', '\Transport\TbsExtCoachesBookings:emailsGet');

@@ -270,15 +270,6 @@ class TbsExtCoachesBookings
       return emit($response, []);
     }
 
-    public function bookingDecline($request, $response, $args)
-    {
-      $this->adaModules->update('tbs_coaches_bookings', 'statusId=?', 'id = ?', [5, $args['id']]);
-      $this->publish($args['id']);
-
-      $this->sendDeclinedEmail($args['id']);
-      return emit($response, []);
-    }
-
     //self service booking are done by parents via the portal when the deadline has passed. Only return journeys.
     public function bookingSelfServicePost($request, $response, $args)
     {
@@ -612,7 +603,11 @@ class TbsExtCoachesBookings
           'to'      => $booking['schoolLocation'],
         ];
       }
-      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Received', 'TBS.ReceivedCoach', $fields);
+
+      $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $cc = [$student->email];
+
+      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Received', 'TBS.ReceivedCoach', $fields, $cc);
     }
 
     private function sanitiseTime($time) {
@@ -648,11 +643,15 @@ class TbsExtCoachesBookings
         ];
       }
 
-      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Cancelled', 'TBS.CancelledCoach', $fields);
+      $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $cc = [$student->email];
+
+      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Cancelled', 'TBS.CancelledCoach', $fields, $cc);
     }
 
-    private function sendDeclinedEmail(int $bookingId)
+    public function bookingDeclineEmail($request, $response, $args)
     {
+      $bookingId = $args['id'];
       $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
       $booking = $this->makeDisplayValues($booking);
 
@@ -677,8 +676,31 @@ class TbsExtCoachesBookings
           'to'      => $booking['stop']
         ];
       }
+      $email = new \Utilities\Email\Email();
+      $content = $email->template('TBS.DeclinedCoach', $fields);
+      $data = [
+        'content' => $content
+      ];
 
-      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Declined', 'TBS.DeclinedCoach', $fields);
+      return emit($response, $data);
+    }
+
+    public function bookingDecline($request, $response, $args)
+    {
+      $id = $args['id'];  
+      $data = $request->getParsedBody();
+      $content = $data['content'];
+
+      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$id])[0];
+      $booking = $this->makeDisplayValues($booking);
+
+      $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $cc = [$student->email];
+
+      $this->sendEmail($id, $booking['contact']->email, 'MC Coach Booking Declined', null, null, $cc, [], $content);
+      $this->adaModules->update('tbs_coaches_bookings', 'statusId=?', 'id = ?', [5, $id]);
+      $this->publish($id);
+      return emit($response, []);
     }
 
     private function sendConfirmedEmail(int $bookingId)
@@ -686,7 +708,7 @@ class TbsExtCoachesBookings
       $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
       $booking = $this->makeDisplayValues($booking);
 
-      
+      $qrPath = (new \Utilities\QRCode\Generator('12345'))->render();
 
       if ($booking['isReturn'] === 1) {
         $fields = [
@@ -713,16 +735,24 @@ class TbsExtCoachesBookings
           'code'    => $booking['coachCode']
         ];
       }
-      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Confirmed', 'TBS.ConfirmedCoach', $fields);
+      $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $cc = [$student->email];
+      $images = [
+        [
+        'path' => $qrPath,
+        'cid' => 'qrcode'
+        ]
+      ];
+      $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Confirmed', 'TBS.ConfirmedCoach', $fields, $cc, [], null, $images);
     }
  
-    private function sendEmail($bookingId, $to, $subject, $template, $fields, $cc = [], $bcc = [])
+    private function sendEmail($bookingId, $to, $subject, $template, $fields, $cc = [], $bcc = [], $contentOverride = null, $images = null)
     {
 
       $email = new \Utilities\Email\Email($to, $subject, 'coaches@marlboroughcollege.org', [], [], $this->debug);
       
-      $content = $email->template($template, $fields);
-      $res = $email->send($content);
+      $content = $contentOverride ? $contentOverride : $email->template($template, $fields);
+      $res = $email->send($content, null, $images);
       $ccString = '';
       foreach($cc as $c) $ccString .= $c . ' ';
 

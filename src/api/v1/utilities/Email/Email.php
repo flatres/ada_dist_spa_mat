@@ -20,7 +20,7 @@ class Email {
 
 		public function __construct($to = null, $subject = null, $from = 'noreply@marlboroughcollege.org', array $cc = [], array $bcc = [], $debug = false)
 		{
-			$this->to = $debug == true ? 'flatres@gmail.com' : $to;
+			$this->to = $debug == true ? 'sdf@marlboroughcollege.org' : $to;
 			$this->subject = $subject;
 			$this->from = $from;
 			$this->cc = $cc;
@@ -35,12 +35,16 @@ class Email {
 		}
 
 
-  public function send($htmlcontent, $title = ''){
+  public function send($htmlcontent, $title = '', $images = []){
 
 		  $htmlbody = $this->template('skeleton', array('title' => $title, 'content'=>$htmlcontent, 'year' => date("Y")));
 
 			// Instantiation and passing `true` enables exceptions
 			$mail = new PHPMailer(true);
+
+			foreach ($images as $i) {
+				$mail->AddEmbeddedImage($i['path'], $i['cid']);
+			}
 
 			try {
 				// https://pepipost.com/tutorials/phpmailer-smtp-error-could-not-connect-to-smtp-host/
@@ -90,7 +94,7 @@ class Email {
     //variable = key / value array of replacements to make
     public function template($file, $variables){
 
-				$file = str_replace('.html', '', $file);
+		$file = str_replace('.html', '', $file);
         $path = dirname(__FILE__)."/templates/$file.html";
 
         $myfile = fopen($path, "r") or die();

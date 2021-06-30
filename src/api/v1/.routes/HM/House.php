@@ -22,8 +22,7 @@ class House
 // ROUTE -----------------------------------------------------------------------------
     public function listGet($request, $response, $args)
     {
-
-      $d = $this->ada->select('sch_houses', 'id, name, code', 'id>?', [0]);
+      $d = $this->ada->select('sch_houses', 'id, name, code', 'id>? ORDER BY code ASC', [0]);
       // $all = new \Entities\Houses\All();
       return emit($response, $d);
     }

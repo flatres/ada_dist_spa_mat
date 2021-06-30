@@ -7,6 +7,7 @@
 
  */
 namespace Transport;
+define('ROOT', $_SERVER["ROOT"]);
 
 class TbsExtRoutes
 {
@@ -188,7 +189,7 @@ class TbsExtRoutes
       //COACHES
       $route['coaches'] = $this->adaModules->select(
         'tbs_coaches_coaches',
-        'id, routeId, capacity, code, supervisorId',
+        'id, routeId, capacity, code, supervisorId, uniqueId',
          'routeId = ? ORDER BY id ASC',
          [$id]
        );
@@ -198,6 +199,7 @@ class TbsExtRoutes
 
        $tbsExtCoachesBookings = new \Transport\TbsExtCoachesBookings($this->container);
        foreach($route['coaches'] as &$coach){
+         $coach['url'] = ROOT . 'aux/bookings/coach/' . $coach['uniqueId'];
          // otherwise copies by reference and mucks everything up
          // https://stackoverflow.com/questions/1532618/is-there-a-function-to-make-a-copy-of-a-php-array-to-another
          $coach['stops'] = unserialize(serialize($route['stops']));

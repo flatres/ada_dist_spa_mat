@@ -8,6 +8,9 @@ $app->group('/aux', function(){
 
     $this->get('/bookings/coach/register/{uniqueId}', '\Aux\Bookings:coachGet');
     $this->put('/bookings/coach/register', '\Aux\Bookings:registerPut');
+    $this->get('/bookings/coach/houses/{registerId}', '\Aux\Bookings:housesGet');
+    $this->get('/bookings/coach/students/{registerId}', '\Aux\Bookings:studentsGet');
+
     $this->get('/period/{date}/{time}', '\Admin\School\Calendar:periodGet');
 
     $this->get('/covid/staff/{hash}', '\Aux\Covid:staffDetailsGet');

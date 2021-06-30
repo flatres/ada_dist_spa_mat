@@ -19,6 +19,15 @@ class Bookings
        $this->isams = $container->isams;
     }
 
+    public function housesGet($request, $response, $args) {
+      $id = $args['registerId'];
+      $coach = $this->adaModules->select('tbs_coaches_coaches', 'id', 'uniqueId=?', [$id]);
+      if (!isset($coach[0])) return;
+      $d = $this->ada->select('sch_houses', 'id, name, code', 'id > ? ORDER BY code ASC', [0]);
+      // $all = new \Entities\Houses\All();
+      return emit($response, $d);
+    }
+
     // returns the coach corresponding to the unique ID so that the supervisor can register
     public function coachGet($request, $response, $args)
     {
