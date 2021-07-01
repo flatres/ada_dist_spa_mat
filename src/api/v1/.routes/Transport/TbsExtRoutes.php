@@ -383,7 +383,9 @@ class TbsExtRoutes
         $coachCode = $this->adaModules->select('tbs_coaches_coaches', 'code', 'id=?', [$b->coachId]);
         $coachCode = $coachCode ? $coachCode[0]['code'] : '?';
         $b->coachCode = $coachCode;
-        $stop = $this->adaModules->select('tbs_coaches_stops', 'name, cost', 'id=?', [$b->stopId])[0];
+        $stop = $this->adaModules->select('tbs_coaches_stops', 'name, cost', 'id=?', [$b->stopId]);
+        if (!isset($stop[0])) continue;
+        $stop = $stop[0];
         $b->stopName = $stop['name'] . " [$coachCode]";
         $b->cost = $stop['cost'];
         $students[$key]->cost += $b->cost;
