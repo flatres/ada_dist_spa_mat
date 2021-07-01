@@ -565,7 +565,8 @@ class TbsExtTaxisBookings
         'companyId=?, cost=?, actionedByUserId=?, taxiId=?, sentToCompany=?',
         'id=?',
         [$companyId, $cost, $userId, $taxiId, $sentToCompany, $bookingId]);
-
+      
+      $this->sendEnquiryEmail($bookingId); 
       $this->publish($bookingId);
 
       return emit($response, $data);
@@ -659,7 +660,7 @@ class TbsExtTaxisBookings
         'note'      => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
 
-      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Received','TBS.ReceivedTaxi', $fields);
+      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'Marlborough College Taxi Booking - Received','TBS.ReceivedTaxi', $fields);
     }
 
     private function sendCancelledEmail(int $bookingId)
@@ -702,8 +703,54 @@ class TbsExtTaxisBookings
         'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
 
-      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Cancelled', 'TBS.CancelledTaxi', $fields, $cc);
+      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'Marlborough College Taxi Booking - Cancelled', 'TBS.CancelledTaxi', $fields, $cc);
 
+    }
+
+    private function sendEnquiryEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_taxi_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      // $schoolLocation = $isReturn ? $booking['destination'] : $booking['pickup'];
+
+      $booking = $this->makeDisplayValues($booking);
+      $passengers = $this->getPassengers($bookingId);
+      $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $cc = ['coaches@marlboroughcollege.org'];
+      $count = count($passengers);
+      if ( $count > 0 ) {
+        $c = 0;
+        $passengerString = '';
+        $comma = ';';
+        foreach($passengers as $p){
+          $c++;
+          if ($c == $count) $comma = '';
+          $passengerString .= "<span style='margin-right:5px'>{$p->displayName}$comma</span>";
+          $cc[] = $p->email;
+          $contacts = $this->getContacts($p->id);
+          foreach($contacts as $c) if ($c['portalUserInfo'] && $p->misFamilyId !== $booking['mis_family_id']) $cc[] = $c['email'];
+          $comma = ';';
+        }
+      } else {
+        $passengerString = '-';
+      }
+
+
+
+      $fields = [
+        'name'    => $booking['companyName'],
+        'id'      => $bookingId,
+        'pupil' => $booking['displayName'],
+        'schoolNumber' => $student->schoolNumber,
+        'mob'   => $booking['mob'],
+        'date'    => $booking['pickupDateOnlyPretty'],
+        'time'    => $booking['pickupTime'],
+        'from'    => $booking['displayFrom'],
+        'to'      => $booking['displayTo'],
+        'cost'    => $booking['cost'],
+        'passengers'  => $passengerString,
+        'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
+      ];
+      $this->sendEmail($bookingId, $booking['studentId'], $booking['companyEmail'], 'Marlborough College Booking - Request', 'TBS.EnquiryTaxi', $fields, $cc);
     }
 
     private function sendConfirmedEmail(int $bookingId)
@@ -750,7 +797,7 @@ class TbsExtTaxisBookings
         'passengers'  => $passengerString,
         'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
       ];
-      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'MC Taxi Booking Confirmed', 'TBS.ConfirmedTaxi', $fields, $cc);
+      $this->sendEmail($bookingId, $booking['studentId'], $booking['contact']->email, 'Marlborough College Taxi Booking - Confirmed', 'TBS.ConfirmedTaxi', $fields, $cc);
     }
 
     public function summaryEmailPost($request, $response)

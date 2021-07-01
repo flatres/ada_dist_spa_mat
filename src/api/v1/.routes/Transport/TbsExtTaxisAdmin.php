@@ -22,7 +22,7 @@ class TbsExtTaxisAdmin
 // PICKUP LOCATIONS -----------------------------------------------------------------------------
     public function pickupLocationsGet($request, $response, $args)
     {
-      return emit($response, $this->adaModules->select('tbs_taxi_pickups', '*'));
+      return emit($response, $this->adaModules->select('tbs_taxi_pickups', '*', '1=1 ORDER BY name ASC'));
     }
 
     public function pickupLocationGet($request, $response, $args)
@@ -51,7 +51,7 @@ class TbsExtTaxisAdmin
 // stations -----------------------------------------------------------------------------
     public function stationsGet($request, $response, $args)
     {
-      return emit($response, $this->adaModules->select('tbs_taxi_stations', '*'));
+      return emit($response, $this->adaModules->select('tbs_taxi_stations', '*', '1=1 ORDER BY name ASC'));
     }
 
     public function stationGet($request, $response, $args)
@@ -80,7 +80,7 @@ class TbsExtTaxisAdmin
 // Airports -----------------------------------------------------------------------------
     public function airportsGet($request, $response, $args)
     {
-      return emit($response, $this->adaModules->select('tbs_taxi_airports', '*'));
+      return emit($response, $this->adaModules->select('tbs_taxi_airports', '*', '1=1 ORDER BY name ASC'));
     }
 
     public function airportGet($request, $response, $args)
@@ -109,7 +109,7 @@ class TbsExtTaxisAdmin
 // COMPANIES -----------------------------------------------------------------------------
     public function companiesGet($request, $response, $args)
     {
-      return emit($response, $this->adaModules->select('tbs_taxi_companies', '*'));
+      return emit($response, $this->adaModules->select('tbs_taxi_companies', '*', '1=1 ORDER BY name ASC'));
     }
 
     public function companiesPost($request, $response)
