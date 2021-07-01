@@ -28,6 +28,21 @@ class Bookings
       return emit($response, $d);
     }
 
+    public function studentsGet($request, $response, $args) {
+      $id = $args['registerId'];
+      $coach = $this->adaModules->select('tbs_coaches_coaches', 'id', 'uniqueId=?', [$id]);
+      if (!isset($coach[0])) return;
+
+      $students = $this->ada->select(
+      'stu_details',
+      'id, firstname as firstName, lastname as lastName, boardingHouseId as houseId, NCYear as year',
+      'disabled=0 ORDER BY lastname ASC',
+      []);
+
+      // $all = new \Entities\Houses\All();
+      return emit($response, $students);
+    }
+
     // returns the coach corresponding to the unique ID so that the supervisor can register
     public function coachGet($request, $response, $args)
     {
