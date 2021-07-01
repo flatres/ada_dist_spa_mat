@@ -746,8 +746,52 @@ class TbsExtCoachesBookings
       ];
       $this->sendEmail($bookingId, $booking['contact']->email, 'MC Coach Booking Confirmed', 'TBS.ConfirmedCoach', $fields, $cc, [], null, $images);
     }
+
+    public function sendAdHocConfirmedEmail(int $bookingId)
+    {
+      $booking = $this->adaModules->select('tbs_coaches_bookings', '*', 'id = ? ORDER BY id DESC', [$bookingId])[0];
+      $booking = $this->makeDisplayValues($booking);
+
+      $data = $booking['coachId'] . '-' . $booking['studentId'];
+      $student = new \Entities\People\Student($this->ada, $booking['studentId']);
+      $isamsStudent = (new \Entities\People\iSamsStudent($this->isams))->byAdaId($student->id);
+      $isamsStudent->getContacts();
+      if ($booking['isReturn'] === 1) {
+        $fields = [
+          'name'    => $student->firstName,
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'    => tidyTime($booking['stopTime']),
+          'from'    => $booking['stop'],
+          'to'      => $booking['schoolLocation'],
+          'cost'    => $booking['cost'],
+          'code'    => $booking['coachCode']
+        ];
+      } else {
+        $fields = [
+          'name'    => $student->firstName,
+          'id'      => $bookingId,
+          'pupil'   => $booking['displayName'],
+          'date'    => $booking['date'],
+          'time'    => tidyTime($booking['schoolTime']),
+          'from'    => $booking['schoolLocation'],
+          'to'      => $booking['stop'],
+          'cost'    => $booking['cost'],
+          'code'    => $booking['coachCode']
+        ];
+      }
+      
+      $cc = [];
+      foreach ($isamsStudent->contacts as $c) {
+        if ($c['portalUserInfo']) $cc[] = $c['email'];
+      }
+      $this->sendEmail($bookingId, $student->email, 'MC Coach Booking Confirmed', 'TBS.ConfirmedAdHocCoach', $fields, $cc, []);
+    }
+
+
  
-    private function sendEmail($bookingId, $to, $subject, $template, $fields, $cc = [], $bcc = [], $contentOverride = null, $images = null)
+    private function sendEmail($bookingId, $to, $subject, $template, $fields, $cc = [], $bcc = [], $contentOverride = null, $images = [])
     {
 
       $email = new \Utilities\Email\Email($to, $subject, 'coaches@marlboroughcollege.org', [], [], $this->debug);

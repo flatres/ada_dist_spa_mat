@@ -11,12 +11,15 @@ namespace Aux;
 class Bookings
 {
     protected $container;
+    private $coachBookings;
 
     public function __construct(\Slim\Container $container)
     {
        $this->ada = $container->ada;
        $this->adaModules = $container->adaModules;
        $this->isams = $container->isams;
+
+       $this->coachBookings = new \Transport\TbsExtCoachesBookings($container);
     }
 
     public function housesGet($request, $response, $args) {
@@ -59,7 +62,7 @@ class Bookings
       $register = $this->adaModules->select(
         'tbs_coaches_bookings',
         'id as bookingId, studentId, isRegistered, stopId',
-        'coachId = ? AND (statusId = 2 OR statusId = 3 OR statusId = 6)',
+        'coachId = ? AND (statusId = 2 OR statusId = 3 OR statusId = 6 OR statusId = 8)',
         [$coach['id']]
       );
 
@@ -77,12 +80,24 @@ class Bookings
       });
 
       $coach['register'] = $register;
+      $coach['stops'] = $this->getStops($coach['id']);
       return emit($response, $coach);
+    }
+
+    private function getStops($coachId) {
+      $stops = $this->adaModules->select('tbs_coaches_coach_stops', 'stopId', 'coachId=?', [$coachId]);
+      if (!isset($stops[0])) return [];
+      $data = [];
+      foreach ($stops as $s) {
+        $stop = $this->adaModules->select('tbs_coaches_stops', 'id, name', 'id=?', [$s['stopId']]);
+        if (isset($stop[0])) $data[] = $stop[0];
+      }
+      return sortArrays($data, 'name', 'ASC');
     }
 
     private function getStop($id)
     {
-        return $this->adaModules->select('tbs_coaches_stops', 'name', 'id=?', [$id])[0]['name'] ?? '';
+        return $this->adaModules->select('tbs_coaches_stops', 'id, name', 'id=?', [$id])[0]['name'] ?? '';
     }
 
     public function registerPut($request, $response)
@@ -98,6 +113,45 @@ class Bookings
 
       $crud = new \Sockets\CRUD("aux.bookings.coach." . $data['coachUniqueId']);
       $sessionId = $this->adaModules->select('tbs_coaches_bookings', 'sessionId', 'id=?', [$data['bookingId']])[0]['sessionId'];
+      $session = new \Sockets\CRUD("coaches.register{$sessionId}");
+      return emit($response, $data);
+    }
+
+    public function bookingPost($request, $response)
+    {
+      $data = $request->getParsedBody();
+      $uniqueId = $data['uniqueId'];
+      $routeId = $data['routeId'];
+      $studentId = $data['studentId'];
+      $stopId = $data['stopId'];
+      $coachId = $this->adaModules->select('tbs_coaches_coaches', 'id', 'uniqueId=?', [$uniqueId])[0]['id'];
+
+      $route = $this->adaModules->select('tbs_coaches_routes', 'isReturn, sessionId', 'id=?', [$routeId])[0];
+      $sessionId = $route['sessionId'];
+      $isReturn = $route['isReturn'];
+
+      $student = new \Entities\People\Student($this->ada, $studentId);
+      $misFamilyId = $student->misFamilyId;
+
+      $bookingId = $this->adaModules->insert(
+        'tbs_coaches_bookings', 
+        'studentId, mis_family_id, sessionId, isReturn, statusId, routeId, stopId, coachId, isRegistered',
+        [
+          $studentId,
+          $misFamilyId,
+          $sessionId,
+          $isReturn,
+          8,
+          $routeId,
+          $stopId,
+          $coachId,
+          1
+        ]
+      );
+
+      $this->coachBookings->sendAdHocConfirmedEmail($bookingId);
+
+      $crud = new \Sockets\CRUD("aux.bookings.coach." . $uniqueId);
       $session = new \Sockets\CRUD("coaches.register{$sessionId}");
       return emit($response, $data);
     }

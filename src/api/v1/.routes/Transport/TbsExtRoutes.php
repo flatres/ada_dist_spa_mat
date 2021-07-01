@@ -322,8 +322,8 @@ class TbsExtRoutes
  public function coachPut($request, $response)
  {
   $data = $request->getParsedBody();
-  $bookings = $this->adaModules->select('tbs_coaches_bookings', 'id', 'coachId=?', [$data['id']]);
-  if (count($bookings) > $data['capacity']) {
+  $bookings = $this->adaModules->select('tbs_coaches_bookings', 'id, sessionId', 'coachId=? AND (statusId = 2 OR statusId = 3 OR statusId = 6 OR statusId = 8)', [$data['id']]);
+  if (count($bookings) > (int)$data['capacity']) {
     return emitError($response, 503, 'Capacity can not be less than the number of assigned bookings.');
   }
   $this->adaModules->update('tbs_coaches_coaches', 'routeId=?, capacity=?, code=?', 'id=?', [
@@ -332,6 +332,11 @@ class TbsExtRoutes
     $data['code'],
     $data['id']
   ]);
+
+  if (count($bookings) > 0) {
+    $sessionId = $bookings[0]['sessionId'];
+    $session = new \Sockets\CRUD("coaches.register{$sessionId}");
+  }
 
   $this->publish($data['routeId']);
   return emit($response, $data);
