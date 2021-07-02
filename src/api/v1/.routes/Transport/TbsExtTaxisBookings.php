@@ -98,12 +98,26 @@ class TbsExtTaxisBookings
       $c['outCount'] = 0;
       $c['retCount'] = 0;
 
-      $bookings = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND companyId = ? ORDER BY statusId ASC', [$sessionId, $companyId]);
+      $bookings = $this->adaModules->select('tbs_taxi_bookings', '*', 'sessionId = ? AND companyId = ? ORDER BY taxiId ASC', [$sessionId, $companyId]);
+      foreach ($bookings as &$booking) $booking = $this->makeDisplayValues($booking);
+      unset($booking);
       $bookings = sortArrays($bookings, 'pickupUnix', 'ASC');
+      $taxiNumber = 0;
+      $oldTaxiId = '';
+
       $c['bookings'] = $bookings;
+      
       foreach ($bookings as &$booking){
+
+        $taxiId = $booking['taxiId'];
+        if ($taxiId !== $oldTaxiId) $taxiNumber++;
+        $oldTaxiId = $taxiId;
+        $booking['taxiNumber'] = $taxiNumber;
+
+        $taxis = $this->adaModules->select('tbs_taxi_bookings', 'id', 'sessionId = ? AND companyId = ? AND taxiId=?', [$sessionId, $companyId, $taxiId]);
+        $booking['isShare'] = count($taxis) > 1 ? '(Shared)' : '';
+
         $journey = $booking['isReturn'] ? 'ret' : 'out';
-        $booking = $this->makeDisplayValues($booking);
         $c[$journey . 'Count']++;
         switch ($booking['statusId']){
           case 4:
@@ -115,12 +129,14 @@ class TbsExtTaxisBookings
           case 2:
           case 3:
             if ($booking['sentToCompany'] === 1) {
-              $booking['status'] = 'Confirmed';
+              // $booking['status'] = 'Confirmed';
+              $booking['status'] = '';
               $booking['statusColor'] = 'blue';
               $c[$journey][] = $booking;
               // $c[$journey]['confirmed'][] = $booking;
             } else {
-              $booking['status'] = 'New';
+              // $booking['status'] = 'New';
+              $booking['status'] = '';
               $booking['statusColor'] = 'Green';
               $c[$journey][] = $booking;
               // $c[$journey]['new'][] = $booking;
@@ -193,7 +209,7 @@ class TbsExtTaxisBookings
       // 'passengers'  => $passengerString,
       // 'note'    => strlen($booking['note']) == 0 ? '-' : $booking['note']
         $html = "<table class='body-action' align='center' widthx='100%' cellpadding='4' cellspacing='0' style='border-bottom:1px solid black; font-size:12px; color:#000000; widthx:100%;margin-top:20px;margin-bottom:5px;margin-right:auto;margin-left:0;padding-top:0;padding-bottom:15px;padding-right:0;padding-left:0;text-align:left;' >
-                <tr style='text-align:left; padding:3px; background:{$b['statusColor']}; color: white; '><td style='padding-left:5px; padding-right:5px; text-align:center'>{$b['status']}</td></tr>
+                <tr style='text-align:left; padding:3px; background:{$b['statusColor']}; color: white; '><td>Taxi #{$b['taxiNumber']} {$b['isShare']}</td><td style='padding-left:5px; padding-right:5px; text-align:center'>{$b['status']}</td></tr>
                 <tr><td style='xmin-width:100px; text-align:right;'>Pupil #: </td><td> {$b['schoolNumber']}</td>
                 <td style='xmin-width:100px; text-align:right;'>Pupil: </td><td>{$b['displayName']}</td></tr>
                 <tr><td style='xmin-width:100px; text-align:right; '>When: </td><td> {$b['pickupDatePretty']}</td>
@@ -248,6 +264,7 @@ class TbsExtTaxisBookings
       foreach($taxisRaw as $t) {
         $t['bookings'] = [];
         $t['count'] = 0;
+        $t['pickupUnix'] = '999999999999999';
         $taxis['i_' . $t['id']] = $t;
       }
 
@@ -258,6 +275,7 @@ class TbsExtTaxisBookings
         $booking = $this->makeDisplayValues($booking);
         $count = 1 + count($booking['passengers']);
         if ($booking['taxiId']) {
+          if ($taxis['i_' . $booking['taxiId']]['pickupUnix'] > $booking['pickupUnix']) $taxis['i_' . $booking['taxiId']]['pickupUnix'] = $booking['pickupUnix'];
           $taxis['i_' . $booking['taxiId']]['bookings'][] = $booking;
           $taxis['i_' . $booking['taxiId']]['count'] += $count;
         }
@@ -390,6 +408,7 @@ class TbsExtTaxisBookings
       $flagRecent = true;
       foreach($revisions as $r){
         $booking['revisions'][] = [
+          'id'  => $r['id'],
           'createdAt' => $r['createdAt'],
           'pickupDate'  => convertToAdaDate($r['pickupDate']),
           'pickupTime'  => $r['pickupTime'],
@@ -530,9 +549,10 @@ class TbsExtTaxisBookings
       return emit($response, $booking);
     }
 
-    public function taxiAssigmentPut($request, $response)
+    public function taxiAssigmentPut($request, $response, $args)
     {
       global $userId;
+      $suppressEmail = $args['suppressEmail'] == 1 ? true : false;
       $data = $request->getParsedBody();
 
       $companyId = $data['companyId'];
@@ -547,6 +567,7 @@ class TbsExtTaxisBookings
       $oldCompanyId = $this->adaModules->select('tbs_taxi_bookings', 'companyId', 'id=?', [$bookingId])[0]['companyId'];
 
       if ($companyId !== $oldCompanyId) {
+
           $this->archiveBooking($bookingId);
           //company has changed so create a new taxi for this company and reset email flags
           //first see if this booking's taxi is being shared with anyone else. If not then delete it.
@@ -566,7 +587,7 @@ class TbsExtTaxisBookings
         'id=?',
         [$companyId, $cost, $userId, $taxiId, $sentToCompany, $bookingId]);
       
-      $this->sendEnquiryEmail($bookingId); 
+      if (!$suppressEmail) $this->sendEnquiryEmail($bookingId); 
       $this->publish($bookingId);
 
       return emit($response, $data);

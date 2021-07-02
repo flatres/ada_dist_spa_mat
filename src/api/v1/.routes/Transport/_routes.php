@@ -79,7 +79,7 @@ $app->group('/transport', function(){
     $this->get('/taxis/summary/{sessionId}/{companyId}', '\Transport\TbsExtTaxisBookings:summaryGET');
 
     $this->put('/taxis/bookings', '\Transport\TbsExtTaxisBookings:bookingPut');
-    $this->put('/taxis/assignment', '\Transport\TbsExtTaxisBookings:taxiAssigmentPut');
+    $this->put('/taxis/assignment/{suppressEmail}', '\Transport\TbsExtTaxisBookings:taxiAssigmentPut');
     $this->put('/taxis/confirm', '\Transport\TbsExtTaxisBookings:taxiConfirmPut');
     $this->delete('/taxis/bookings/{id}', '\Transport\TbsExtTaxisBookings:bookingDelete');
 
